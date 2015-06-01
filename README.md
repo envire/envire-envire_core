@@ -2,11 +2,17 @@ envire-core
 =============
 Core part for the Environment Representation library
 
-Core library for the Environment Representation. The goal of this core part is to deal with the representation commonalities among plugins
+Core library for the Environment Representation. The goal of this core part is
+to deal with the representation commonalities among plugins
+
+Environment Representation (EnviRe) technologies are meant to close the gap and
+provide techniques to store, operate and interchange information within a
+robotic system. The application of EnviRe mainly focus to support navigation,
+simulation and operations and simplify the interchange of algorithms among software components.
 
 License
 -------
-dummy-license
+GPL-v2 or later
 
 Installation
 ------------
