@@ -2,10 +2,10 @@
   <description brief="Core part for the Environment Representation library">
   Core library for the Environment Representation. The goal of this core part is to deal with the representation commonalities among plugins
   </description>
-  <author>Javier Hidalgo Carrio, Envire Team/javier.hidalgo_carrio@dfki.de, ric-team8@dfki.de</author>
-  <license></license>
-  <url>http://</url>
-  <logo>http://</logo>
+  <author> Envire Team/ric-team8@dfki.de</author>
+  <maintainer> Javier Hidalgo Carrio/javier.hidalgo_carrio@dfki.de</maintainer>
+  <license>BSD</license>
+  <url>http://rock-robotics.org/</url>
   <depend package="base/cmake" />
   <!--
    To add any dependencies use the depend tag

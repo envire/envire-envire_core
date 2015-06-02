@@ -1,7 +1,4 @@
-rock_library(envire-core
-    SOURCES Dummy.cpp
-    HEADERS Dummy.hpp)
+rock_library(envire_core
+    HEADERS Entity.hpp)
 
-rock_executable(envire-core_bin Main.cpp
-    DEPS envire-core)
 
