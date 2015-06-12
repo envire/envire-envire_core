@@ -27,13 +27,15 @@ namespace envire { namespace core
 
         public:
 
-            /**@brief Example of a Method
+            /**@brief getId
             *
+            * It gets the unique identifier
             *
             * @param[in]
             *
             * @param[out]
             */
+            boost::uuids::uuid& getId() const { return this->uuid; }
 
     };
 }}
