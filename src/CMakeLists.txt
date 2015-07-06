@@ -1,4 +1,6 @@
 rock_library(envire_core
-    HEADERS Entity.hpp)
-
+    HEADERS ItemBase.hpp
+            Item.hpp
+    SOURCES ItemBase.cpp
+    DEPS_PKGCONFIG base-types)
 

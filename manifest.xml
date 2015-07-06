@@ -6,12 +6,7 @@
   <maintainer> Javier Hidalgo Carrio/javier.hidalgo_carrio@dfki.de</maintainer>
   <license>BSD</license>
   <url>http://rock-robotics.org/</url>
+
   <depend package="base/cmake" />
-  <!--
-   To add any dependencies use the depend tag
-  <depend package="dummy-dependency-0" />
-	...
-  <depend package="dummy-dependency-n-1" />
-  <depend package="dummy-dependency-n" />
-  -->
+  <depend package="base/types" />
 </package>
