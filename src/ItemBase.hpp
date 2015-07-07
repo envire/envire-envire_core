@@ -39,7 +39,7 @@ namespace envire { namespace core
     public:
 
         ItemBase();
-        virtual ~ItemBase();
+        virtual ~ItemBase() {}
 
         /**@brief setTime
         *

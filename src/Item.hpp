@@ -36,8 +36,7 @@ namespace envire { namespace core
         * Returns the user data
         *
         */
-        _ItemData& getData() const { return this->user_data; }
-        const _ItemData& getData() const { return this->user_data; }
+        _ItemData& getData() { return this->user_data; }
 
     };
 
