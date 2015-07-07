@@ -2,6 +2,7 @@
 #define __ENVIRE_CORE_ITEM_BASE__
 
 #include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include <base/Time.hpp>
 #include <string>
@@ -68,6 +69,7 @@ namespace envire { namespace core
         *
         */
         const boost::uuids::uuid getID() const { return this->uuid; }
+        const std::string getIDString() const { return boost::uuids::to_string(this->uuid); }
 
         /**@brief setFrame
         *
@@ -88,7 +90,7 @@ namespace envire { namespace core
         * Returns the class name of the item
         *
         */
-        const std::string& getClassName() const { return class_name; }
+        virtual const std::string& getClassName() const { return class_name; }
 
         /**@brief getRefCount
         *
