@@ -106,8 +106,8 @@ namespace envire { namespace core
 
     };
 
-    void intrusive_ptr_add_ref( ItemBase* item ) { item->ref_count++; }
-    void intrusive_ptr_release( ItemBase* item ) { if(!--item->ref_count) delete item; }
+    void intrusive_ptr_add_ref( ItemBase* item );
+    void intrusive_ptr_release( ItemBase* item );
 
 }}
 #endif
