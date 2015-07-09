@@ -6,7 +6,6 @@ using namespace envire::core;
 
 Edge::Edge():uuid(boost::uuids::random_generator()())
 {
-    this->idx=0;
     this->transform.invalidateTransform(); /** Remove all elements form the vector */
 }
 

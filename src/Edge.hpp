@@ -13,7 +13,6 @@ namespace envire { namespace core
     class Edge
     {
     public:
-        int idx;
         base::Time time; /** Timestamp */
         boost::uuids::uuid uuid; /** Unique Identifier */
         base::TransformWithCovariance transform; /** the transformation */
