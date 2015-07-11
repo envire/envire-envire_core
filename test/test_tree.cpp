@@ -1,8 +1,7 @@
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/test/unit_test.hpp>
-#include <boost/graph/graphviz.hpp>
 #include <envire_core/Item.hpp>
-#include <envire_core/Tree.hpp>
+#include <envire_core/TransformTree.hpp>
 
 using namespace envire::core;
 
@@ -79,13 +78,13 @@ make_edge_writer(_Time time, _Transform tf)
 BOOST_AUTO_TEST_CASE(envire_tree_test)
 {
 
-    envire::core::Tree envire_tree;
+    envire::core::TransformTree envire_tree;
 
     /** Create a list of items **/
     std::vector< boost::shared_ptr<envire::core::ItemBase> > items_vector(100);
     boost::shared_ptr<Integer> my_int(new Integer(10));
 
-    /** Fill the list of nodes **/
+    /** Fill the list of items **/
     for (std::vector<boost::shared_ptr<envire::core::ItemBase> >::iterator it = items_vector.begin() ; it != items_vector.end(); ++it)
     {
         /** Pointer to the same object **/
@@ -96,30 +95,50 @@ BOOST_AUTO_TEST_CASE(envire_tree_test)
     std::cout<<"pointer count: "<<items_vector[0].use_count()<<"\n";
 
     /** Add root node **/
-    envire::core::Tree::Graph::vertex_descriptor root = boost::add_vertex(envire_tree.tree);
-    envire_tree.tree[root].setFrame("root");
+    envire::core::Frame root_prop("root");
+    envire::core::TransformTree::vertex_descriptor root = envire_tree.add_vertex(root_prop);
+    //std::cout<<boost::vertex(root, envire_tree.tree);
+   // boost::get(&envire::core::Node::frame_name,envire_tree.tree);
 
     /** Create 10 nodes with its edges **/
     for (register int i=0; i<10; ++i)
     {
-        envire::core::Tree::Graph::vertex_descriptor node = boost::add_vertex(envire_tree.tree);
-        envire::core::Tree::Graph::edge_descriptor edge; bool b;
-        boost::tie(edge, b) = boost::add_edge(node, root, envire_tree.tree);
+        envire::core::Frame node_prop("child_"+std::to_string(i));
+        node_prop.items = items_vector;
+        envire::core::TransformTree::vertex_descriptor node = envire_tree.add_vertex(node_prop);
+        envire::core::Transform tf_prop;
         base::TransformWithCovariance tf;
-        envire_tree.tree[node].setFrame("child_"+std::to_string(i));
-        envire_tree.tree[edge].setTransform(tf);
+        tf_prop.setTransform(tf);
+        envire::core::TransformTree::edge_descriptor edge; bool b;
+        boost::tie(edge, b) = envire_tree.add_edge(node, root, tf_prop);
+        //std::cout<<edge<<"b("<<boost::edge(node, root, envire_tree.tree).second<<")\n";
 
         /** Create 10 nodes with its edges **/
         for (register int j=0; j<10; ++j)
         {
-            envire::core::Tree::Graph::vertex_descriptor another_node = boost::add_vertex(envire_tree.tree);
-            envire::core::Tree::Graph::edge_descriptor edge; bool b;
-            boost::tie(edge, b) = boost::add_edge(another_node, node, envire_tree.tree);
-            envire_tree.tree[another_node].setFrame("grand_child_"+std::to_string(j));
-            envire_tree.tree[edge].setTransform(tf);
-            envire_tree.tree[node].items = items_vector;
+            envire::core::Frame node_prop("grand_child_"+std::to_string(i)+std::to_string(j));
+            node_prop.items = items_vector;
+            envire::core::TransformTree::vertex_descriptor another_node = envire_tree.add_vertex(node_prop);
+            envire::core::Transform tf_prop;
+            base::TransformWithCovariance tf;
+            tf_prop.setTransform(tf);
+            envire::core::TransformTree::edge_descriptor edge; bool b;
+            boost::tie(edge, b) = envire_tree.add_edge(another_node, node, tf_prop);
         }
+
     }
+
+    envire::core::TransformTree::vertex_descriptor node = boost::vertex(1, envire_tree);
+
+    if (node != envire::core::TransformTree::null_vertex())
+    {
+        std::cout << "There are " << envire_tree.num_vertices() << " vertices." << std::endl;
+
+        envire_tree.clear_vertex(node);
+
+        std::cout << "There are " << envire_tree.num_vertices() << " vertices." << std::endl;
+    }
+
 
 //    std::vector<double> distances(num_vertices(envire_tree.tree));
 //    boost::dijkstra_shortest_paths(envire_tree.tree, root,
@@ -132,10 +151,16 @@ BOOST_AUTO_TEST_CASE(envire_tree_test)
 
    // printDependencies(std::cout, envire_tree, boost::get(boost::vertex_index, envire_tree));
 
-        /** Write the dot file */
-    std::ofstream dotfile ("envire_tree_test.dot");
-    boost::write_graphviz (dotfile, envire_tree.tree,
-            make_node_writer(boost::get(&envire::core::Node::uuid, envire_tree.tree), boost::get(&envire::core::Node::frame_name, envire_tree.tree), boost::get(&envire::core::Node::items, envire_tree.tree)),
-            make_edge_writer(boost::get(&envire::core::Edge::time, envire_tree.tree), boost::get(&envire::core::Edge::transform, envire_tree.tree)));
+
+    /** Print graph **/
+//    envire::core::TransformTree::edge_iterator it, end;
+//    for(boost::tie(it, end) = boost::edges(envire_tree); it != end; ++it)
+//    {
+//        std::cout << boost::get(&envire::core::Frame::name, envire_tree)[boost::source(*it, envire_tree)] << " -> "
+//            << boost::get(&envire::core::Frame::name, envire_tree)[boost::target(*it, envire_tree)] << '\n';
+//    }
+//
+//        /** Write the dot file */
+    envire_tree.writeGraphViz("envire_tree_test.dot");
 }
 

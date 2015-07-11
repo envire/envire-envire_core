@@ -1,12 +1,13 @@
 rock_library(envire_core
     HEADERS ItemBase.hpp
             Item.hpp
-            Node.hpp
-            Edge.hpp
-            Tree.hpp
+            Frame.hpp
+            Transform.hpp
+            EnvireGraph.hpp
+            TransformTree.hpp
     SOURCES ItemBase.cpp
-            Node.cpp
-            Edge.cpp
-            Tree.cpp
+            Frame.cpp
+            Transform.cpp
+            TransformTree.cpp
     DEPS_PKGCONFIG base-types class_loader)
 
