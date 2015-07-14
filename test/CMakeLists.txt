@@ -1,4 +1,4 @@
-rock_library(test_envire_plugin
+rock_library(VectorPlugin_envire_plugin
     SOURCES vector_plugin.cpp
     DEPS envire_core
     DEPS_PKGCONFIG class_loader)
