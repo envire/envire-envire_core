@@ -8,10 +8,12 @@ rock_library(envire_core
             SpatialItem.hpp
             BoundingVolume.hpp
             ClassLoader.hpp
+            AlignedBoundingBox.hpp
     SOURCES ItemBase.cpp
             Frame.cpp
             Transform.cpp
             TransformTree.cpp
             ClassLoader.cpp
             BoundingVolume.cpp
+            AlignedBoundingBox.cpp
     DEPS_PKGCONFIG base-types class_loader)

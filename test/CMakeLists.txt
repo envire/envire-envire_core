@@ -7,6 +7,7 @@ rock_library(VectorPlugin_envire_plugin
 rock_testsuite(test_suite suite.cpp
     test_plugins.cpp
     test_tree.cpp
+    test_boundary.cpp
     DEPS envire_core
     DEPS_PKGCONFIG class_loader)
 
