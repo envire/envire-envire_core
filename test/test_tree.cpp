@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(envire_tree_test)
 
     std::cout << "vertices(g) = ";
     boost::tie(vertexIt, vertexEnd) = boost::vertices(envire_tree);
-    for (; vertexIt != vertexEnd; ++vertexIt) 
+    for (; vertexIt != vertexEnd; ++vertexIt)
     {
         std::cout << boost::get(&envire::core::Frame::name, envire_tree)[*vertexIt] <<" ";
     }

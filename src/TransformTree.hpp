@@ -11,12 +11,16 @@
 #ifndef __ENVIRE_CORE_TRANSFORM_TREE__
 #define __ENVIRE_CORE_TRANSFORM_TREE__
 
+/** STD **/
 #include <fstream> // std::ofstream
+#include <unordered_map>
 
+/** Boost **/
 #include <boost/graph/directed_graph.hpp> /** Boost directed graph **/
 #include <boost/graph/graphviz.hpp>
 #include <boost/uuid/uuid.hpp> /** uuid class */
 
+/** Envire **/
 #include <envire_core/Frame.hpp> /** Frames are for the Vertex **/
 #include <envire_core/Transform.hpp> /** Transform are the Edges **/
 
@@ -69,6 +73,13 @@ namespace envire { namespace core
     class TransformTree: public EnvireGraph
     {
 
+    public:
+        typedef std::string Label;
+
+    private:
+
+        std::unordered_map<Label, vertex_descriptor> vertex_map;
+
     /** public class methods **/
     public:
 
@@ -79,10 +90,49 @@ namespace envire { namespace core
 
         /**@brief Add a vertex to the tree
          */
-        vertex_descriptor addVertex(envire::core::Frame &node)
+        inline TransformTree::vertex_descriptor addVertex(const envire::core::Frame &node)
         {
-            return this->add_vertex(node);
+            return this->addVertex(node.name, node);
         }
+
+        /**@brief Add a vertex to the tree
+         */
+        TransformTree::vertex_descriptor addVertex(const Label &label, const envire::core::Frame &node)
+        {
+            vertex_descriptor v;
+
+            /** Check whether there is a vertex with this label **/
+            std::unordered_map<Label, vertex_descriptor>::const_iterator got = this->vertex_map.find(label);
+            if (got == vertex_map.end())
+            {
+                if ((v = this->add_vertex(node)) != TransformTree::null_vertex())
+                {
+                    this->vertex_map.insert({label, v});
+                }
+            }
+            else
+            {
+               v = got->second;
+            }
+
+            return v;
+        }
+
+        /**@brief Get the vertex from a label
+         */
+        TransformTree::vertex_descriptor vertex(const Label label)
+        {
+            std::unordered_map<Label, vertex_descriptor>::const_iterator got = this->vertex_map.find(label);
+            if (got == vertex_map.end())
+            {
+                return TransformTree::null_vertex();
+            }
+            else
+            {
+                return got->second;
+            }
+        }
+
 
         /**@brief Add an Edge to the Tree
          * overload add_edge method
