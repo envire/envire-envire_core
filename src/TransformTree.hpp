@@ -11,18 +11,18 @@
 #ifndef __ENVIRE_CORE_TRANSFORM_TREE__
 #define __ENVIRE_CORE_TRANSFORM_TREE__
 
+#include <fstream> // std::ofstream
 
 #include <boost/graph/directed_graph.hpp> /** Boost directed graph **/
 #include <boost/graph/graphviz.hpp>
 #include <boost/uuid/uuid.hpp> /** uuid class */
 
-#include <envire_core/EnvireGraph.hpp> /** Envire core graph **/
 #include <envire_core/Frame.hpp> /** Frames are for the Vertex **/
 #include <envire_core/Transform.hpp> /** Transform are the Edges **/
 
 namespace envire { namespace core
 {
-    /** Environment information
+    /**@brief Environment information
      */
     struct Environment
     {
@@ -37,6 +37,8 @@ namespace envire { namespace core
         }
     };
 
+    /**@brief Writer for Frame Node
+     */
     template <class _FrameName, class _ID, class _Items>
     inline FrameWriter<_FrameName, _ID, _Items>
     make_node_writer(_FrameName name, _ID id, _Items it)
@@ -45,6 +47,8 @@ namespace envire { namespace core
     }
 
 
+    /**@brief Writer for Frame Node
+     */
     template <class _Time, class _Transform>
     inline TransformWriter<_Time, _Transform>
     make_edge_writer(_Time time, _Transform tf)
@@ -52,25 +56,46 @@ namespace envire { namespace core
         return TransformWriter<_Time, _Transform>(time, tf);
     }
 
+    /** The Envire Graph type **/
+    typedef boost::directed_graph<
+            envire::core::Frame,
+            envire::core::Transform,
+            envire::core::Environment> EnvireGraph;
+
     /**@class Transformation Tree
     *
     * Envire Transformation Tree class
     */
-    class TransformTree: public boost::EnvireGraph<envire::core::Frame,
-                                    envire::core::Transform,
-                                    envire::core::Environment>
+    class TransformTree: public EnvireGraph
     {
 
     /** public class methods **/
     public:
 
         TransformTree(envire::core::Environment const &environment = Environment()):
-             boost::EnvireGraph<envire::core::Frame,
-                                envire::core::Transform,
-                                envire::core::Environment>(environment)
+                        EnvireGraph(environment)
         {
         }
 
+        /**@brief Add a vertex to the tree
+         */
+        vertex_descriptor addVertex(envire::core::Frame &node)
+        {
+            return this->add_vertex(node);
+        }
+
+        /**@brief Add an Edge to the Tree
+         * overload add_edge method
+         */
+        //boost::tie(edge_descriptor, bool) add_edge(envire::core::Frame &node_from,
+        //                                        envire::core::Frame &node_to,
+        //                                        envire::core::Frame &envire::core::Transform)
+        //{
+        //}
+
+        /**@brief Export to GraphViz
+         *
+         */
         void writeGraphViz(const std::string& filename = "")
         {
             std::streambuf * buf;
@@ -78,7 +103,7 @@ namespace envire { namespace core
 
             if(!filename.empty())
             {
-                of.open(filename);
+                of.open(filename.c_str());
                 buf = of.rdbuf();
             }
             else
@@ -94,8 +119,6 @@ namespace envire { namespace core
                //boost::dynamic_properties dp;
                 //dp.property("color", get(&vertex_info::color, g));
         }
-
-
     };
 
 }}

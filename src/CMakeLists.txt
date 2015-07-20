@@ -3,7 +3,6 @@ rock_library(envire_core
             Item.hpp
             Frame.hpp
             Transform.hpp
-            EnvireGraph.hpp
             TransformTree.hpp
             SpatialItem.hpp
             BoundingVolume.hpp

@@ -2,6 +2,7 @@
 #define __ENVIRE_CORE_ENVIRE_GRAPH__
 
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/labeled_graph.hpp>
 #include <boost/graph/properties.hpp>
 #include <boost/pending/property.hpp>
 #include <boost/property_map/transform_value_property_map.hpp>
@@ -10,6 +11,7 @@
 
 namespace boost
 {
+
     struct EnvireGraphTag { };
 
     /**
@@ -42,11 +44,11 @@ namespace boost
         typedef property<vertex_index_t, unsigned, vertex_property_type> internal_vertex_property;
         typedef property<edge_index_t, unsigned, edge_property_type> internal_edge_property;
     public:
-        typedef adjacency_list<
-            vecS, vecS, bidirectionalS,
+        typedef boost::labeled_graph<
+            boost::adjacency_list<
+            listS, listS, bidirectionalS,
             internal_vertex_property, internal_edge_property, GraphProp,
-            listS
-        > graph_type;
+            listS>, std::string> graph_type;
 
     private:
         // storage selectors
@@ -81,17 +83,17 @@ namespace boost
         typedef std::size_t edge_index_type;
 
         EnvireGraph(GraphProp const& p = GraphProp())
-            : m_graph(p), m_num_vertices(0), m_num_edges(0)
+            : m_graph(p), m_num_vertices(0), m_num_edges(0), m_max_vertex_index(0)
             , m_max_edge_index(0)
         { }
 
         EnvireGraph(EnvireGraph const& x)
             : m_graph(x), m_num_vertices(x.m_num_vertices), m_num_edges(x.m_num_edges)
-            , m_max_edge_index(x.m_max_edge_index)
+            , m_max_vertex_index(x.m_max_vertex_index), m_max_edge_index(x.m_max_edge_index)
         { }
 
         EnvireGraph(vertices_size_type n, GraphProp const& p = GraphProp())
-            : m_graph(n, p), m_num_vertices(n), m_num_edges(0)
+            : m_graph(n, p), m_num_vertices(n), m_num_edges(0), m_max_vertex_index(n)
             , m_max_edge_index(0)
         { renumber_vertex_indices(); }
 
@@ -102,7 +104,7 @@ namespace boost
                        edges_size_type m = 0,
                        GraphProp const& p = GraphProp())
             : m_graph(f, l, n, m, p), m_num_vertices(n), m_num_edges(0)
-            , m_max_edge_index(0)
+            , m_max_vertex_index(n), m_max_edge_index(0)
         {
             // Unfortunately, we have to renumber the entire graph.
             renumber_indices();
@@ -117,6 +119,7 @@ namespace boost
                 m_graph = g.m_graph;
                 m_num_vertices = g.m_num_vertices;
                 m_num_edges = g.m_num_edges;
+                m_max_vertex_index = g.m_max_vertex_index;
                 m_max_edge_index = g.m_max_edge_index;
             }
             return *this;
@@ -134,15 +137,20 @@ namespace boost
         { return m_num_vertices; }
 
 
+    private:
+        // This helper function manages the attribution of vertex indices.
+        vertex_descriptor make_index(vertex_descriptor v) {
+            boost::put(vertex_index, m_graph, v, m_max_vertex_index);
+            m_num_vertices++;
+            m_max_vertex_index++;
+            return v;
+        }
     public:
         vertex_descriptor add_vertex()
         { return make_index(boost::add_vertex(m_graph)); }
 
         vertex_descriptor add_vertex(vertex_property_type const& p)
-        {
-            m_num_vertices++;
-            return boost::add_vertex(internal_vertex_property(0u, p), m_graph);
-        }
+        { return make_index(boost::add_vertex(internal_vertex_property(0u, p), m_graph)); }
 
         void clear_vertex(vertex_descriptor v)
         {
@@ -209,11 +217,15 @@ namespace boost
             --m_num_edges;
         }
 
+        vertex_index_type max_vertex_index() const
+        { return m_max_vertex_index; }
+
         void
         renumber_vertex_indices()
         {
             vertex_iterator i, end;
             boost::tie(i, end) = vertices(m_graph);
+            m_max_vertex_index = renumber_vertex_indices(i, end, 0);
         }
 
         void
@@ -224,6 +236,7 @@ namespace boost
 
             // remove the offending vertex and renumber everything after
             remove_vertex(*i);
+            m_max_vertex_index = renumber_vertex_indices(j, end, n);
         }
 
         edge_index_type
@@ -284,6 +297,7 @@ namespace boost
         void clear()
         {
             m_graph.clear();
+            m_num_vertices = m_max_vertex_index = 0;
             m_num_edges = m_max_edge_index = 0;
         }
 
@@ -291,6 +305,7 @@ namespace boost
         {
             m_graph.swap(g.m_graph);
             std::swap(m_num_vertices, g.m_num_vertices);
+            std::swap(m_max_vertex_index, g.m_max_vertex_index);
             std::swap(m_num_edges, g.m_num_edges);
             std::swap(m_max_edge_index, g.m_max_edge_index);
         }
@@ -325,6 +340,7 @@ namespace boost
         graph_type m_graph;
         vertices_size_type m_num_vertices;
         edges_size_type m_num_edges;
+        vertex_index_type m_max_vertex_index;
         edge_index_type m_max_edge_index;
     };
 

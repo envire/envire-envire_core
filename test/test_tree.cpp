@@ -96,16 +96,16 @@ BOOST_AUTO_TEST_CASE(envire_tree_test)
 
     /** Add root node **/
     envire::core::Frame root_prop("root");
-    envire::core::TransformTree::vertex_descriptor root = envire_tree.add_vertex(root_prop);
+    envire::core::TransformTree::vertex_descriptor root = envire_tree.addVertex(root_prop);
     //std::cout<<boost::vertex(root, envire_tree.tree);
-   // boost::get(&envire::core::Node::frame_name,envire_tree.tree);
+    //boost::get(&envire::core::Node::frame_name,envire_tree.tree);
 
     /** Create 10 nodes with its edges **/
     for (register int i=0; i<10; ++i)
     {
         envire::core::Frame node_prop("child_"+std::to_string(i));
         node_prop.items = items_vector;
-        envire::core::TransformTree::vertex_descriptor node = envire_tree.add_vertex(node_prop);
+        envire::core::TransformTree::vertex_descriptor node = envire_tree.addVertex(node_prop);
         envire::core::Transform tf_prop;
         base::TransformWithCovariance tf;
         tf_prop.setTransform(tf);
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(envire_tree_test)
         {
             envire::core::Frame node_prop("grand_child_"+std::to_string(i)+std::to_string(j));
             node_prop.items = items_vector;
-            envire::core::TransformTree::vertex_descriptor another_node = envire_tree.add_vertex(node_prop);
+            envire::core::TransformTree::vertex_descriptor another_node = envire_tree.addVertex(node_prop);
             envire::core::Transform tf_prop;
             base::TransformWithCovariance tf;
             tf_prop.setTransform(tf);
@@ -133,10 +133,12 @@ BOOST_AUTO_TEST_CASE(envire_tree_test)
     if (node != envire::core::TransformTree::null_vertex())
     {
         std::cout << "There are " << envire_tree.num_vertices() << " vertices." << std::endl;
+        std::cout << "There are " << envire_tree.num_edges() << " edges." << std::endl;
 
         envire_tree.clear_vertex(node);
 
         std::cout << "There are " << envire_tree.num_vertices() << " vertices." << std::endl;
+        std::cout << "There are " << envire_tree.num_edges() << " edges." << std::endl;
     }
 
 
@@ -152,15 +154,26 @@ BOOST_AUTO_TEST_CASE(envire_tree_test)
    // printDependencies(std::cout, envire_tree, boost::get(boost::vertex_index, envire_tree));
 
 
-    /** Print graph **/
-//    envire::core::TransformTree::edge_iterator it, end;
-//    for(boost::tie(it, end) = boost::edges(envire_tree); it != end; ++it)
-//    {
-//        std::cout << boost::get(&envire::core::Frame::name, envire_tree)[boost::source(*it, envire_tree)] << " -> "
-//            << boost::get(&envire::core::Frame::name, envire_tree)[boost::target(*it, envire_tree)] << '\n';
-//    }
-//
-//        /** Write the dot file */
+    /** Print graph by edges **/
+    envire::core::TransformTree::edge_iterator it, end;
+    for(boost::tie(it, end) = boost::edges(envire_tree); it != end; ++it)
+    {
+        std::cout << boost::get(&envire::core::Frame::name, envire_tree)[boost::source(*it, envire_tree)] << " -> "
+            << boost::get(&envire::core::Frame::name, envire_tree)[boost::target(*it, envire_tree)] << '\n';
+    }
+
+    /** Print graph by vertex **/
+    envire::core::TransformTree::vertex_iterator vertexIt, vertexEnd;
+
+    std::cout << "vertices(g) = ";
+    boost::tie(vertexIt, vertexEnd) = boost::vertices(envire_tree);
+    for (; vertexIt != vertexEnd; ++vertexIt) 
+    {
+        std::cout << boost::get(&envire::core::Frame::name, envire_tree)[*vertexIt] <<" ";
+    }
+    std::cout << std::endl;
+
+    /** Write the dot file */
     envire_tree.writeGraphViz("envire_tree_test.dot");
 }
 
