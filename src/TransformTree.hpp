@@ -113,6 +113,15 @@ namespace envire { namespace core
             return this->add_vertex(node.name, node);
         }
 
+        /**@brief Add a vertex to the tree
+         */
+        inline TransformTree::vertex_descriptor addVertex(const VertexLabel &node_label,
+                                                        const envire::core::Frame &node)
+        {
+            return this->add_vertex(node_label, node);
+        }
+
+
         /**@brief Remove a vertex to the tree
          *
          * This method remove the vertex searching by label
