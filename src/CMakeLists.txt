@@ -4,6 +4,7 @@ rock_library(envire_core
             Frame.hpp
             Transform.hpp
             TransformTree.hpp
+            GraphViz.hpp
             SpatialItem.hpp
             BoundingVolume.hpp
             ClassLoader.hpp

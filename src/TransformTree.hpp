@@ -11,16 +11,12 @@
 #ifndef __ENVIRE_CORE_TRANSFORM_TREE__
 #define __ENVIRE_CORE_TRANSFORM_TREE__
 
-/** STD **/
 #include <fstream> // std::ofstream
-#include <unordered_map>
 
-/** Boost **/
 #include <boost/graph/directed_graph.hpp> /** Boost directed graph **/
-#include <boost/graph/graphviz.hpp>
+#include <boost/graph/labeled_graph.hpp> /** Boost directed graph **/
 #include <boost/uuid/uuid.hpp> /** uuid class */
 
-/** Envire **/
 #include <envire_core/Frame.hpp> /** Frames are for the Vertex **/
 #include <envire_core/Transform.hpp> /** Transform are the Edges **/
 
@@ -41,137 +37,184 @@ namespace envire { namespace core
         }
     };
 
-    /**@brief Writer for Frame Node
+    /**@brief Frame Property Tag
+     * boost access tag for the Frame property
      */
-    template <class _FrameName, class _ID, class _Items>
-    inline FrameWriter<_FrameName, _ID, _Items>
-    make_node_writer(_FrameName name, _ID id, _Items it)
+    struct FramePropertyTag
     {
-        return FrameWriter<_FrameName, _ID, _Items>(name, id, it);
-    }
+        typedef boost::vertex_property_tag kind;
+        static  std::size_t const num;
+    };
 
+    //std::size_t const FramePropertyTag::num = (std::size_t) &FramePropertyTag::num;
+    typedef boost::property <FramePropertyTag, envire::core::Frame>  FrameProperty;
 
-    /**@brief Writer for Frame Node
+    /**@brief Transform Property Tag
+     * boost access tag for the Transform property
      */
-    template <class _Time, class _Transform>
-    inline TransformWriter<_Time, _Transform>
-    make_edge_writer(_Time time, _Transform tf)
+    struct TransformPropertyTag
     {
-        return TransformWriter<_Time, _Transform>(time, tf);
-    }
+        typedef boost::edge_property_tag kind;
+        static  std::size_t const num;
+    };
 
-    /** The Envire Graph type **/
+    //std::size_t const TransformPropertyTag::num = (std::size_t) &TransformPropertyTag::num;
+    typedef boost::property <TransformPropertyTag, envire::core::Transform>  TransformProperty;
+
+    /**@brief The Envire Graph type 
+    *
+    * The basic class for the Envire Graph
+    *
+    */
     typedef boost::directed_graph<
-            envire::core::Frame,
-            envire::core::Transform,
-            envire::core::Environment> EnvireGraph;
+        FrameProperty,
+        TransformProperty,
+        envire::core::Environment> EnvireGraph;
+
+    /**@brief generic label
+     * use to accessing vertex in labeled graphs
+     * */
+    typedef std::string VertexLabel;
+
+    /**@brief Labeled version of the Envire Graph
+     */
+    typedef boost::labeled_graph< EnvireGraph, VertexLabel> LabeledEnvireGraph;
 
     /**@class Transformation Tree
     *
     * Envire Transformation Tree class
     */
-    class TransformTree: public EnvireGraph
+    class TransformTree: public LabeledEnvireGraph
     {
-
     public:
-        typedef std::string Label;
-
-    private:
-
-        std::unordered_map<Label, vertex_descriptor> vertex_map;
+        typedef typename boost::property_map <LabeledEnvireGraph, FramePropertyTag>::type FrameMap;
+        typedef typename boost::property_map <LabeledEnvireGraph, TransformPropertyTag>::type TransformMap;
 
     /** public class methods **/
     public:
 
         TransformTree(envire::core::Environment const &environment = Environment()):
-                        EnvireGraph(environment)
+                        LabeledEnvireGraph (environment)
         {
+        }
+
+        /**@brief Add a vertex to the tree
+         */
+        inline TransformTree::vertex_descriptor addVertex(const VertexLabel &node_label)
+        {
+            envire::core::Frame node(node_label);
+            return this->add_vertex(node_label, node);
         }
 
         /**@brief Add a vertex to the tree
          */
         inline TransformTree::vertex_descriptor addVertex(const envire::core::Frame &node)
         {
-            return this->addVertex(node.name, node);
+            return this->add_vertex(node.name, node);
         }
 
-        /**@brief Add a vertex to the tree
+        /**@brief Remove a vertex to the tree
+         *
+         * This method remove the vertex searching by label
+         * Note: it does not remove the edges, and create artificial vertices/nodes
          */
-        TransformTree::vertex_descriptor addVertex(const Label &label, const envire::core::Frame &node)
+        inline void removeVertexOnly(const VertexLabel &node_label)
         {
-            vertex_descriptor v;
-
-            /** Check whether there is a vertex with this label **/
-            std::unordered_map<Label, vertex_descriptor>::const_iterator got = this->vertex_map.find(label);
-            if (got == vertex_map.end())
-            {
-                if ((v = this->add_vertex(node)) != TransformTree::null_vertex())
-                {
-                    this->vertex_map.insert({label, v});
-                }
-            }
-            else
-            {
-               v = got->second;
-            }
-
-            return v;
+            return this->remove_vertex(node_label);
         }
 
-        /**@brief Get the vertex from a label
+        /**@brief Remove a vertex to the tree
+         *
+         * This method remove the vertex searching by label and
+         * its associated edges.
          */
-        TransformTree::vertex_descriptor vertex(const Label label)
+        inline void removeVertex(const VertexLabel &node_label)
         {
-            std::unordered_map<Label, vertex_descriptor>::const_iterator got = this->vertex_map.find(label);
-            if (got == vertex_map.end())
-            {
-                return TransformTree::null_vertex();
-            }
-            else
-            {
-                return got->second;
-            }
+            /** First remove the associated edges to teh vertex **/
+            boost::clear_vertex_by_label(node_label, *this);
+            return boost::remove_vertex(node_label, *this);
         }
-
 
         /**@brief Add an Edge to the Tree
-         * overload add_edge method
+         * Add an edge using the labels
          */
-        //boost::tie(edge_descriptor, bool) add_edge(envire::core::Frame &node_from,
-        //                                        envire::core::Frame &node_to,
-        //                                        envire::core::Frame &envire::core::Transform)
-        //{
-        //}
-
-        /**@brief Export to GraphViz
-         *
-         */
-        void writeGraphViz(const std::string& filename = "")
+        inline std::pair<TransformTree::edge_descriptor, bool>
+            addEdge(const VertexLabel &node_from,
+                    const VertexLabel &node_to,
+                    const envire::core::Transform &tf)
         {
-            std::streambuf * buf;
-            std::ofstream of;
+            /* Don't allow parallel edges **/
+            std::pair<envire::core::TransformTree::edge_descriptor, bool> edge_pair =
+                boost::edge_by_label(node_from, node_to, *this);
 
-            if(!filename.empty())
+            /** Update the edge in case it already exist **/
+            if (edge_pair.second)
             {
-                of.open(filename.c_str());
-                buf = of.rdbuf();
+                boost::put(TransformPropertyTag(), *this, edge_pair.first, tf);
             }
             else
             {
-                buf = std::cout.rdbuf();
+                edge_pair =  boost::add_edge_by_label(node_from, node_to, tf, *this);
             }
-
-            std::ostream out(buf);
-            boost::write_graphviz (out, (*this),
-                    make_node_writer(boost::get(&envire::core::Frame::name, (*this)), boost::get(&envire::core::Frame::uuid, (*this)), boost::get(&envire::core::Frame::items, (*this))),
-                    make_edge_writer(boost::get(&envire::core::Transform::time, (*this)), boost::get(&envire::core::Transform::transform, (*this))));
-
-               //boost::dynamic_properties dp;
-                //dp.property("color", get(&vertex_info::color, g));
+            return edge_pair;
         }
+
+        /**@brief Remove an Edge from the Tree
+         * Remove an edge using the labels.
+         * In case destructive is true, the associated
+         * vertex are also remove ONLY in case they do not
+         * have other connexions.
+         */
+        inline void removeEdge(const VertexLabel &node_from,
+                    const VertexLabel &node_to,
+                    const bool destructive = false)
+        {
+            boost::remove_edge_by_label(node_from, node_to, *this);
+
+            if (destructive == true)
+            {
+                /** Get the vertex descriptor **/
+                envire::core::TransformTree::vertex_descriptor v_from =
+                    boost::vertex_by_label(node_from, *this);
+
+                /** Check in edges of node_from **/
+                TransformTree::degree_size_type in_v_from =
+                    boost::in_degree(v_from, *this);
+
+                /** Check out edges of node_from **/
+                TransformTree::degree_size_type out_v_from =
+                    boost::out_degree(v_from, *this);
+
+                if (in_v_from + out_v_from == 0)
+                {
+                    this->remove_vertex(node_from);
+                }
+
+                /** Get the vertex descriptor **/
+                envire::core::TransformTree::vertex_descriptor v_to =
+                    boost::vertex_by_label(node_to, *this);
+
+                /** Check in edges of node_to **/
+                TransformTree::degree_size_type in_v_to =
+                    boost::in_degree(v_to, *this);
+
+                /** Check out edges of node_to **/
+                TransformTree::degree_size_type out_v_to =
+                    boost::out_degree(v_to, *this);
+
+                if (in_v_to + out_v_to == 0)
+                {
+                    this->remove_vertex(node_to);
+                }
+            }
+            return;
+        }
+
+        /**@brief clear
+         *
+         * Remove all of the edges and vertices from the graph.
+         */
+        inline void clear(){ return this->graph().clear(); }
     };
-
 }}
-
-
 #endif

@@ -41,25 +41,5 @@ namespace envire { namespace core
         const std::string& getName() const { return this->name; }
 
    };
-
-    /** Frame Graph Viz property writer for boost graphs **/
-    template <class _FrameName, class _ID, class _Items>
-    class FrameWriter
-    {
-    public:
-        FrameWriter(_FrameName name, _ID id, _Items it) :name(name), id(id), it(it){}
-        template <class _Vertex>
-        void operator()(std::ostream &out, const _Vertex& n) const
-        {
-            out << "[shape=record, label=\"<f0> " << name[n] <<
-                "|<f1>" << it[n].size()<<"\""
-                <<",style=filled,fillcolor=lightblue]";
-        }
-
-    private:
-        _FrameName name;
-        _ID id;
-        _Items it;
-    };
 }}
 #endif

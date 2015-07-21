@@ -2,6 +2,8 @@
 #include <boost/test/unit_test.hpp>
 #include <envire_core/Item.hpp>
 #include <envire_core/TransformTree.hpp>
+#include <envire_core/GraphViz.hpp>
+
 
 using namespace envire::core;
 
@@ -110,7 +112,7 @@ BOOST_AUTO_TEST_CASE(envire_tree_test)
         base::TransformWithCovariance tf;
         tf_prop.setTransform(tf);
         envire::core::TransformTree::edge_descriptor edge; bool b;
-        boost::tie(edge, b) = envire_tree.add_edge(node, root, tf_prop);
+        boost::tie(edge, b) = boost::add_edge(node, root, tf_prop, envire_tree);
         //std::cout<<edge<<"b("<<boost::edge(node, root, envire_tree.tree).second<<")\n";
 
         /** Create 10 nodes with its edges **/
@@ -123,22 +125,22 @@ BOOST_AUTO_TEST_CASE(envire_tree_test)
             base::TransformWithCovariance tf;
             tf_prop.setTransform(tf);
             envire::core::TransformTree::edge_descriptor edge; bool b;
-            boost::tie(edge, b) = envire_tree.add_edge(another_node, node, tf_prop);
+            boost::tie(edge, b) = boost::add_edge(another_node, node, tf_prop, envire_tree);
         }
 
     }
 
-    envire::core::TransformTree::vertex_descriptor node = boost::vertex(1, envire_tree);
+    envire::core::TransformTree::vertex_descriptor node = boost::vertex_by_label("child_0", envire_tree);
 
     if (node != envire::core::TransformTree::null_vertex())
     {
-        std::cout << "There are " << envire_tree.num_vertices() << " vertices." << std::endl;
-        std::cout << "There are " << envire_tree.num_edges() << " edges." << std::endl;
+        std::cout << "There are " << boost::num_vertices(envire_tree) << " vertices." << std::endl;
+        std::cout << "There are " << boost::num_edges(envire_tree) << " edges." << std::endl;
 
-        envire_tree.clear_vertex(node);
+        boost::clear_vertex(node, envire_tree);
 
-        std::cout << "There are " << envire_tree.num_vertices() << " vertices." << std::endl;
-        std::cout << "There are " << envire_tree.num_edges() << " edges." << std::endl;
+        std::cout << "There are " << boost::num_vertices(envire_tree) << " vertices." << std::endl;
+        std::cout << "There are " << boost::num_edges(envire_tree) << " edges." << std::endl;
     }
 
 
@@ -158,8 +160,8 @@ BOOST_AUTO_TEST_CASE(envire_tree_test)
     envire::core::TransformTree::edge_iterator it, end;
     for(boost::tie(it, end) = boost::edges(envire_tree); it != end; ++it)
     {
-        std::cout << boost::get(&envire::core::Frame::name, envire_tree)[boost::source(*it, envire_tree)] << " -> "
-            << boost::get(&envire::core::Frame::name, envire_tree)[boost::target(*it, envire_tree)] << '\n';
+        std::cout << boost::get(FramePropertyTag(), envire_tree)[boost::source(*it, envire_tree)].name << " -> "
+            << boost::get(FramePropertyTag(), envire_tree)[boost::target(*it, envire_tree)].name << '\n';
     }
 
     /** Print graph by vertex **/
@@ -169,11 +171,120 @@ BOOST_AUTO_TEST_CASE(envire_tree_test)
     boost::tie(vertexIt, vertexEnd) = boost::vertices(envire_tree);
     for (; vertexIt != vertexEnd; ++vertexIt)
     {
-        std::cout << boost::get(&envire::core::Frame::name, envire_tree)[*vertexIt] <<" ";
+        std::cout << boost::get(FramePropertyTag(), envire_tree)[*vertexIt].name <<" ";
     }
     std::cout << std::endl;
 
-    /** Write the dot file */
-    envire_tree.writeGraphViz("envire_tree_test.dot");
+
+    /** Add edges by label **/
+    for (register int j=0; j<10; ++j)
+    {
+        envire::core::Transform tf_prop;
+        envire_tree.addEdge("grand_child_0"+std::to_string(j), "root", tf_prop);
+    }
+
+    envire::core::Transform tf_prop;
+    envire_tree.addEdge("child_0", "root", tf_prop);
+
+    std::pair<envire::core::TransformTree::edge_descriptor, bool> edge_pair = boost::edge_by_label("child_0", "root", envire_tree);
+    std::cout<<"get edge return: "<<edge_pair.second<<"\n";
+
+    /** update the edge child_0 -> root **/
+    tf_prop.time = base::Time::now();
+    base::TransformWithCovariance tf;
+    tf_prop.setTransform(tf);
+
+    envire_tree.addEdge("child_0", "root", tf_prop);
+
+    std::cout << "There are " << boost::num_vertices(envire_tree) << " vertices." << std::endl;
+    std::cout << "There are " << boost::num_edges(envire_tree) << " edges." << std::endl;
+
+    envire_tree.removeVertex("grand_child_00");
+
+    std::cout << "There are " << boost::num_vertices(envire_tree) << " vertices." << std::endl;
+    std::cout << "There are " << boost::num_edges(envire_tree) << " edges." << std::endl;
+
+    std::cout<<"****************\n";
+
+    std::cout << "There are " << boost::num_vertices(envire_tree) << " vertices." << std::endl;
+    std::cout << "There are " << boost::num_edges(envire_tree) << " edges." << std::endl;
+
+    envire_tree.removeEdge("grand_child_01", "root", true);
+
+    std::cout << "There are " << boost::num_vertices(envire_tree) << " vertices." << std::endl;
+    std::cout << "There are " << boost::num_edges(envire_tree) << " edges." << std::endl;
+
+
+    /** Graph Viz export **/
+    GraphViz gviz;
+
+    gviz.write(envire_tree.graph(), "envire_tree_test.dot");
+
+    envire_tree.clear();
 }
 
+//vertex property:-->
+class NodeInfo 
+{
+    public:
+        std::string name; /** Frame name */
+        boost::uuids::uuid uuid; /** Unique Identifier */
+        std::vector< boost::shared_ptr<ItemBase> > items; /** List of items in the node */
+};   //actual bundled property
+
+class EdgeInfo
+{
+    public:
+        base::Time time; /** Timestamp */
+        base::TransformWithCovariance transform; /** the transformation */
+};   //actual bundled property
+
+
+struct NodeInfoPropertyTag {               // tag and kind  (as in boost documentation)
+  typedef boost::vertex_property_tag kind;
+  static  std::size_t const num;
+};
+
+std::size_t const NodeInfoPropertyTag::num = (std::size_t) &NodeInfoPropertyTag::num;
+
+struct EdgeInfoPropertyTag {               // tag and kind  (as in boost documentation)
+  typedef boost::edge_property_tag kind;
+  static  std::size_t const num;
+};
+
+std::size_t const EdgeInfoPropertyTag::num = (std::size_t) &EdgeInfoPropertyTag::num;
+
+
+BOOST_AUTO_TEST_CASE(property_test)
+{
+
+    //typedef the Vertex Property
+    typedef boost::property <NodeInfoPropertyTag, NodeInfo>  NodeProperty;
+
+    //Similar fashion for Edge Property --> some property for each edge of graph.
+    typedef boost::property <EdgeInfoPropertyTag, EdgeInfo>  EdgeProperty;
+
+    typedef boost::adjacency_list <boost::vecS, boost::vecS, boost::undirectedS, NodeProperty, EdgeProperty, boost::no_property, boost::listS> Graph_t;
+
+    Graph_t  g;
+    typedef boost::graph_traits<Graph_t>::vertex_descriptor   vd_t;
+    typedef boost::graph_traits<Graph_t>::edge_descriptor ed_t;
+
+    NodeInfo   ninfo1, ninfo2;   //put some values in ninfo
+    ninfo1.name = "node_v";
+    vd_t  v = boost::add_vertex (ninfo1, g);   //add a vertex in G with property ninfo1
+    vd_t  u = boost::add_vertex (ninfo2, g);   //add a vertex in G with property ninfo2
+
+    //Edge Map and Node Map
+    typedef typename boost::property_map <Graph_t, EdgeInfoPropertyTag>::type  EdgeMap;
+    typedef typename boost::property_map <Graph_t, NodeInfoPropertyTag>::type  NodeMap;
+
+    //edge e --> get
+    NodeInfo  ninfo_v = boost::get (NodeInfoPropertyTag(), g,  v);
+    std::cout<<"ninfo_v.name: "<<ninfo_v.name<<"\n";
+    ninfo_v.name = "4321";
+    boost::put(NodeInfoPropertyTag(), g, u, ninfo_v);
+    NodeInfo  ninfo_u = boost::get (NodeInfoPropertyTag(), g,  u);
+    std::cout<<"ninfo_u.name: "<<ninfo_u.name<<"\n";
+    ninfo_u.name = "hola";
+}
