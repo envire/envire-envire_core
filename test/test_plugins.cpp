@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_CASE(vector_plugin_test)
 
     // load library
     std::string path_plugin(env_p);
-    path_plugin += "/libtest_envire_plugin.so";
+    path_plugin += "/libVectorPlugin_envire_plugin.so";
     class_loader::ClassLoader loader(path_plugin, false);
 
     // check available classes

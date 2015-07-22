@@ -11,3 +11,8 @@ rock_testsuite(test_suite suite.cpp
     DEPS envire_core
     DEPS_PKGCONFIG class_loader)
 
+rock_testsuite(test_dummy suite.cpp
+    test_dummy_graph.cpp
+    test_property_tag.cpp)
+
+
