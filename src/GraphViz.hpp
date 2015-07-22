@@ -3,8 +3,8 @@
 
 #include <fstream> // std::ofstream
 
-#include <boost/graph/graphviz.hpp>
 #include <envire_core/TransformTree.hpp>
+#include <boost/graph/graphviz.hpp>
 
 
 namespace envire { namespace core
@@ -67,7 +67,7 @@ namespace envire { namespace core
 
 
     /**@class GraphViz
-     * Class to print EnvireGraphs in Graph Viz
+     * Class to print TransformGraphs in Graph Viz
      * */
     class GraphViz
     {
@@ -105,7 +105,7 @@ namespace envire { namespace core
         /**@brief Export to GraphViz
          *
          */
-        void write(const EnvireGraph &graph, const std::string& filename = "")
+        void write(const TransformGraph &graph, const std::string& filename = "")
         {
             std::streambuf * buf;
             std::ofstream of;

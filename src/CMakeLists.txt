@@ -4,15 +4,13 @@ rock_library(envire_core
             Frame.hpp
             Transform.hpp
             TransformTree.hpp
+            LabeledTransformTree.hpp
             GraphViz.hpp
             SpatialItem.hpp
             BoundingVolume.hpp
             ClassLoader.hpp
             AlignedBoundingBox.hpp
     SOURCES ItemBase.cpp
-            Frame.cpp
-            Transform.cpp
-            TransformTree.cpp
             ClassLoader.cpp
             BoundingVolume.cpp
             AlignedBoundingBox.cpp

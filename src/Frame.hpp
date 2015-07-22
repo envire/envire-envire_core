@@ -2,6 +2,7 @@
 #define __ENVIRE_CORE_FRAME__
 
 #include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include <string>
@@ -22,9 +23,9 @@ namespace envire { namespace core
         std::vector< boost::shared_ptr<ItemBase> > items; /** List of items in the node */
 
     public:
-        Frame();
-        Frame(const std::string &name);
-        ~Frame();
+        Frame():name("envire::core::noname"), uuid(boost::uuids::random_generator()()){};
+        Frame(const std::string &_name):name(_name),uuid(boost::uuids::random_generator()()){};
+        ~Frame(){ this->items.clear(); };
 
         /**@brief setFrame
         *

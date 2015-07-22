@@ -16,10 +16,14 @@ namespace envire { namespace core
         base::TransformWithCovariance transform; /** the transformation */
 
     public:
-        Transform();
-        Transform(const base::Time &_time):time(_time){};
+        Transform() { this->transform.invalidateTransform(); };
+        Transform(const base::Time &_time):time(_time)
+        { this->transform.invalidateTransform(); };
 
-        void setTransform(const base::TransformWithCovariance& tf);
+        void setTransform(const base::TransformWithCovariance& tf)
+        {
+            this->transform = tf;
+        }
 
     };
 
