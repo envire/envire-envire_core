@@ -35,13 +35,19 @@ namespace envire { namespace core
         typedef typename boost::property_map <LabeledTransformGraph, FramePropertyTag>::type FrameMap;
         typedef typename boost::property_map <LabeledTransformGraph, TransformPropertyTag>::type TransformMap;
 
-    /** public class methods **/
     public:
 
         LabeledTransformTree(envire::core::Environment const &environment = Environment()):
                         LabeledTransformGraph (environment)
         {
         }
+
+
+        /***************************************************
+         * Methods Naming convention
+         * Overloading boost methods uses delimited separated
+         * words, new methods use Camel Case separated words
+         ***************************************************/
 
         /**@brief Add a vertex to the tree
         */
@@ -73,24 +79,6 @@ namespace envire { namespace core
             return this->add_vertex(node.name, node);
         }
 
-        /**@brief Add a vertex to the tree
-         */
-        inline LabeledTransformTree::vertex_descriptor addVertex(const VertexLabel &node_label,
-                                                        const envire::core::Frame &node)
-        {
-            return this->add_vertex(node_label, node);
-        }
-
-
-        /**@brief Remove a vertex to the tree
-         *
-         * This method remove the vertex searching by label
-         * Note: it does not remove the edges, and create artificial vertices/nodes
-         */
-        inline void removeVertexOnly(const VertexLabel &node_label)
-        {
-            return this->remove_vertex(node_label);
-        }
 
         /**@brief getVertex
          *
@@ -123,17 +111,18 @@ namespace envire { namespace core
         /**@brief Remove a vertex to the tree
          *
          * This method remove the vertex searching by label and
-         * its associated edges.
+         * its associated edges. If you want to only remove
+         * the vertex use the boost remove_vertex method
          */
         inline void removeVertex(const VertexLabel &node_label)
         {
             /** First remove the associated edges to the vertex **/
             boost::clear_vertex_by_label(node_label, *this);
-            return boost::remove_vertex(node_label, *this);
+            return this->remove_vertex(node_label);
         }
 
         inline std::pair<out_edge_iterator,out_edge_iterator>
-        outEdges(const LabeledTransformTree::vertex_descriptor &node)
+        out_edges(const LabeledTransformTree::vertex_descriptor &node)
         {
             return boost::out_edges(node, *this);
         }
