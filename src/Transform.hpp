@@ -17,6 +17,7 @@ namespace envire { namespace core
 
     public:
         Transform();
+        Transform(const base::Time &_time):time(_time){};
 
         void setTransform(const base::TransformWithCovariance& tf);
 
