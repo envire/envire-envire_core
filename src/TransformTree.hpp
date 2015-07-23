@@ -29,7 +29,6 @@ namespace envire { namespace core
         static  std::size_t const num;
     };
 
-    std::size_t const FramePropertyTag::num = (std::size_t) &FramePropertyTag::num;
     typedef boost::property <FramePropertyTag, envire::core::Frame>  FrameProperty;
 
     /**@brief Transform Property Tag
@@ -41,7 +40,6 @@ namespace envire { namespace core
         static  std::size_t const num;
     };
 
-    std::size_t const TransformPropertyTag::num = (std::size_t) &TransformPropertyTag::num;
     typedef boost::property <TransformPropertyTag, envire::core::Transform>  TransformProperty;
 
     /**@brief The Transform Graph type
@@ -95,6 +93,14 @@ namespace envire { namespace core
             return boost::vertex(i, *this);
         }
 
+        /**@brief Get all vertices
+         */
+        inline std::pair<TransformTree::vertex_iterator, TransformTree::vertex_iterator>
+        vertices()
+        {
+            return boost::vertices(*this);
+        }
+
 
         /** EDGES METHODS **/
 
@@ -132,20 +138,15 @@ namespace envire { namespace core
         }
 
 
-        /** PROPERTIES METHODS **/
-        inline std::pair<TransformTree::vertex_iterator, TransformTree::vertex_iterator>
-        vertices()
-        {
-            return boost::vertices(*this);
-        }
-
+        /**@brief Get all edges
+         */
         inline std::pair<TransformTree::edge_iterator, TransformTree::edge_iterator>
         edges()
         {
             return boost::edges(*this);
         }
 
-        /**@brief source
+        /**@brief source of an edge
          *
          * Get source vertex descriptor for edge descriptor
          * */
@@ -154,7 +155,7 @@ namespace envire { namespace core
             return boost::source(it_node, *this);
         }
 
-        /**@brief target
+        /**@brief target of an edge
          *
          * Get target vertex descriptor for edge descriptor
          * */
@@ -162,6 +163,8 @@ namespace envire { namespace core
         {
             return boost::target(it_node, *this);
         }
+
+        /** PROPERTIES METHODS **/
 
         /**@brief get Frame
          *

@@ -78,28 +78,30 @@ make_edge_writer(_Time time, _Transform tf)
     return EdgeWriter<_Time, _Transform>(time, tf);
 }
 
+std::size_t const FramePropertyTag::num = (std::size_t) &FramePropertyTag::num;
+std::size_t const TransformPropertyTag::num = (std::size_t) &TransformPropertyTag::num;
+
 BOOST_AUTO_TEST_CASE(envire_tree_test)
 {
 
     envire::core::LabeledTransformTree envire_tree;
 
     /** Create a list of items **/
-    std::vector< boost::shared_ptr<envire::core::ItemBase> > items_vector(100);
-    boost::shared_ptr<Integer> my_int(new Integer(10));
+    std::vector< boost::intrusive_ptr<envire::core::ItemBase> > items_vector(100);
+    boost::intrusive_ptr<Integer> my_int(new Integer(10));
 
     /** Fill the list of items **/
-    for (std::vector<boost::shared_ptr<envire::core::ItemBase> >::iterator it = items_vector.begin() ; it != items_vector.end(); ++it)
+    for (std::vector<boost::intrusive_ptr<envire::core::ItemBase> >::iterator it = items_vector.begin() ; it != items_vector.end(); ++it)
     {
         /** Pointer to the same object **/
         *it = my_int;
         //std::cout<<"pointer count: "<<(*it).use_count()<<"\n";
     }
     my_int.reset();
-    std::cout<<"pointer count: "<<items_vector[0].use_count()<<"\n";
 
     /** Add root node **/
     envire::core::Frame root_prop("root");
-    envire::core::LabeledTransformTree::vertex_descriptor root = envire_tree.addVertex(root_prop);
+    envire::core::LabeledTransformTree::vertex_descriptor root = envire_tree.add_vertex(root_prop);
     //std::cout<<boost::vertex(root, envire_tree.tree);
     //boost::get(&envire::core::Node::frame_name,envire_tree.tree);
 
@@ -108,7 +110,7 @@ BOOST_AUTO_TEST_CASE(envire_tree_test)
     {
         envire::core::Frame node_prop("child_"+std::to_string(i));
         node_prop.items = items_vector;
-        envire::core::LabeledTransformTree::vertex_descriptor node = envire_tree.addVertex(node_prop);
+        envire::core::LabeledTransformTree::vertex_descriptor node = envire_tree.add_vertex(node_prop);
         envire::core::Transform tf_prop;
         base::TransformWithCovariance tf;
         tf_prop.setTransform(tf);
@@ -121,7 +123,7 @@ BOOST_AUTO_TEST_CASE(envire_tree_test)
         {
             envire::core::Frame node_prop("grand_child_"+std::to_string(i)+std::to_string(j));
             node_prop.items = items_vector;
-            envire::core::LabeledTransformTree::vertex_descriptor another_node = envire_tree.addVertex(node_prop);
+            envire::core::LabeledTransformTree::vertex_descriptor another_node = envire_tree.add_vertex(node_prop);
             envire::core::Transform tf_prop;
             base::TransformWithCovariance tf;
             tf_prop.setTransform(tf);
@@ -181,11 +183,11 @@ BOOST_AUTO_TEST_CASE(envire_tree_test)
     for (register int j=0; j<10; ++j)
     {
         envire::core::Transform tf_prop;
-        envire_tree.addEdge("grand_child_0"+std::to_string(j), "root", tf_prop);
+        envire_tree.add_edge("grand_child_0"+std::to_string(j), "root", tf_prop);
     }
 
     envire::core::Transform tf_prop;
-    envire_tree.addEdge("child_0", "root", tf_prop);
+    envire_tree.add_edge("child_0", "root", tf_prop);
 
     std::pair<envire::core::LabeledTransformTree::edge_descriptor, bool> edge_pair = boost::edge_by_label("child_0", "root", envire_tree);
     std::cout<<"get edge return: "<<edge_pair.second<<"\n";
@@ -195,12 +197,12 @@ BOOST_AUTO_TEST_CASE(envire_tree_test)
     base::TransformWithCovariance tf;
     tf_prop.setTransform(tf);
 
-    envire_tree.addEdge("child_0", "root", tf_prop);
+    envire_tree.add_edge("child_0", "root", tf_prop);
 
     std::cout << "There are " << boost::num_vertices(envire_tree) << " vertices." << std::endl;
     std::cout << "There are " << boost::num_edges(envire_tree) << " edges." << std::endl;
 
-    envire_tree.removeVertex("grand_child_00");
+    envire_tree.remove_vertex("grand_child_00");
 
     std::cout << "There are " << boost::num_vertices(envire_tree) << " vertices." << std::endl;
     std::cout << "There are " << boost::num_edges(envire_tree) << " edges." << std::endl;
@@ -210,7 +212,7 @@ BOOST_AUTO_TEST_CASE(envire_tree_test)
     std::cout << "There are " << boost::num_vertices(envire_tree) << " vertices." << std::endl;
     std::cout << "There are " << boost::num_edges(envire_tree) << " edges." << std::endl;
 
-    envire_tree.removeEdge("grand_child_01", "root", true);
+    envire_tree.remove_edge("grand_child_01", "root", true);
 
     std::cout << "There are " << boost::num_vertices(envire_tree) << " vertices." << std::endl;
     std::cout << "There are " << boost::num_edges(envire_tree) << " edges." << std::endl;

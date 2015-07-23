@@ -49,65 +49,31 @@ namespace envire { namespace core
          * words, new methods use Camel Case separated words
          ***************************************************/
 
-        /** ADD VERTEX METHODS **/
+        /** VERTEX METHODS **/
 
         /**@brief Add a vertex to the tree
          */
-        inline LabeledTransformTree::vertex_descriptor addVertex(const VertexLabel &node_label)
+        inline LabeledTransformTree::vertex_descriptor add_vertex(const VertexLabel &node_label)
         {
             envire::core::Frame node(node_label);
-            return this->add_vertex(node_label, node);
+            return LabeledTransformGraph::add_vertex(node_label, node);
         }
 
         /**@brief Add a vertex to the tree
          */
-        inline LabeledTransformTree::vertex_descriptor addVertex(const envire::core::Frame &node)
+        inline LabeledTransformTree::vertex_descriptor add_vertex(const envire::core::Frame &node)
         {
-            return this->add_vertex(node.name, node);
+            return LabeledTransformGraph::add_vertex(node.name, node);
         }
-
-        /**@brief Add a vertex to the tree
-        */
-        inline envire::core::Frame getProperty(const LabeledTransformTree::vertex_descriptor node)
-        {
-            return boost::get(FramePropertyTag(), *this, node);
-        }
-
-        /**@brief Add a vertex to the tree
-        */
-        inline envire::core::Transform getProperty(const LabeledTransformTree::edge_descriptor edge)
-        {
-            return boost::get(TransformPropertyTag(), *this, edge);
-        }
-
 
         /**@brief getVertex
          *
          * Get a vertex descriptor for the vertex/node label
          * */
-        inline LabeledTransformTree::vertex_descriptor getVertex(const VertexLabel &node_label)
+        inline LabeledTransformTree::vertex_descriptor vertex(const VertexLabel &node_label)
         {
             return boost::vertex_by_label(node_label, *this);
         }
-
-        /**@brief source
-         *
-         * Get source vertex descriptor for edge descriptor
-         * */
-        inline LabeledTransformTree::vertex_descriptor source(const LabeledTransformTree::edge_descriptor it_node)
-        {
-            return boost::source(it_node, *this);
-        }
-
-        /**@brief target
-         *
-         * Get target vertex descriptor for edge descriptor
-         * */
-        inline LabeledTransformTree::vertex_descriptor target(const LabeledTransformTree::edge_descriptor it_node)
-        {
-            return boost::target(it_node, *this);
-        }
-
 
         /**@brief Remove a vertex to the tree
          *
@@ -115,25 +81,22 @@ namespace envire { namespace core
          * its associated edges. If you want to only remove
          * the vertex use the boost remove_vertex method
          */
-        inline void removeVertex(const VertexLabel &node_label)
+        inline void remove_vertex(const VertexLabel &node_label)
         {
             /** First remove the associated edges to the vertex **/
             boost::clear_vertex_by_label(node_label, *this);
-            return this->remove_vertex(node_label);
+            return LabeledTransformGraph::remove_vertex(node_label);
         }
 
-        inline std::pair<out_edge_iterator,out_edge_iterator>
-        out_edges(const LabeledTransformTree::vertex_descriptor &node)
-        {
-            return boost::out_edges(node, *this);
-        }
+
+        /** EDGES METHODS **/
 
         /**@brief Add an Edge to the Tree
          * Add an edge using the labels
          */
         inline std::pair<LabeledTransformTree::edge_descriptor, bool>
-        addEdge(const VertexLabel &node_from,
-                    const VertexLabel &node_to,
+        add_edge(const VertexLabel node_from,
+                    const VertexLabel node_to,
                     const envire::core::Transform &tf)
         {
             /* Don't allow parallel edges **/
@@ -158,7 +121,7 @@ namespace envire { namespace core
          * vertex are also remove ONLY in case they do not
          * have other connexions.
          */
-        inline void removeEdge(const VertexLabel &node_from,
+        inline void remove_edge(const VertexLabel &node_from,
                     const VertexLabel &node_to,
                     const bool destructive = false)
         {
@@ -170,7 +133,7 @@ namespace envire { namespace core
             envire::core::LabeledTransformTree::vertex_descriptor v_to =
                 boost::vertex_by_label(node_to, *this);
 
-            return this->removeEdge(v_from, v_to, destructive);
+            return this->remove_edge(v_from, v_to, destructive);
         }
 
         /**@brief Remove an Edge from the Tree
@@ -179,7 +142,7 @@ namespace envire { namespace core
          * vertex are also remove ONLY in case they do not
          * have other connexions.
          */
-        inline void removeEdge(const LabeledTransformTree::vertex_descriptor node_from,
+        inline void remove_edge(const LabeledTransformTree::vertex_descriptor node_from,
                     const LabeledTransformTree::vertex_descriptor node_to,
                     const bool destructive = false)
         {
@@ -224,7 +187,48 @@ namespace envire { namespace core
             return;
         }
 
+        /**@brief source
+         *
+         * Get source vertex descriptor for edge descriptor
+         * */
+        inline LabeledTransformTree::vertex_descriptor source(const LabeledTransformTree::edge_descriptor it_node)
+        {
+            return boost::source(it_node, *this);
+        }
 
+        /**@brief target
+         *
+         * Get target vertex descriptor for edge descriptor
+         * */
+        inline LabeledTransformTree::vertex_descriptor target(const LabeledTransformTree::edge_descriptor it_node)
+        {
+            return boost::target(it_node, *this);
+        }
+
+        inline std::pair<out_edge_iterator,out_edge_iterator>
+        out_edges(const LabeledTransformTree::vertex_descriptor &node)
+        {
+            return boost::out_edges(node, *this);
+        }
+
+        /** PROPERTIES METHODS **/
+
+        /**@brief Add a vertex to the tree
+        */
+        inline envire::core::Frame getFrame(const LabeledTransformTree::vertex_descriptor node)
+        {
+            return boost::get(FramePropertyTag(), *this, node);
+        }
+
+        /**@brief Add a vertex to the tree
+        */
+        inline envire::core::Transform getFrame(const LabeledTransformTree::edge_descriptor edge)
+        {
+            return boost::get(TransformPropertyTag(), *this, edge);
+        }
+
+
+        /** GENERAL PURPOSE METHODS **/
 
         /**@brief clear
          *
