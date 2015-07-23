@@ -3,7 +3,7 @@
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
-#include <boost/shared_ptr.hpp>
+#include <boost/intrusive_ptr.hpp>
 #include <vector>
 #include <string>
 
@@ -20,7 +20,7 @@ namespace envire { namespace core
     public:
         std::string name; /** Frame name */
         boost::uuids::uuid uuid; /** Unique Identifier */
-        std::vector< boost::shared_ptr<ItemBase> > items; /** List of items in the node */
+        std::vector< boost::intrusive_ptr<ItemBase> > items; /** List of items in the node */
 
     public:
         Frame():name("envire::core::noname"), uuid(boost::uuids::random_generator()()){};
