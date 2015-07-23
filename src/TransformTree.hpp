@@ -64,13 +64,37 @@ namespace envire { namespace core
         typedef typename boost::property_map <TransformGraph, FramePropertyTag>::type FrameMap;
         typedef typename boost::property_map <TransformGraph, TransformPropertyTag>::type TransformMap;
 
-    /** public class methods **/
     public:
 
         TransformTree(envire::core::Environment const &environment = Environment()):
                         TransformGraph (environment)
         {
         }
+
+        /***************************************************
+         * Methods Naming convention
+         * Overloading boost methods uses delimited separated
+         * words, new methods use Camel Case separated words
+         ***************************************************/
+
+        /** ADD VERTEX METHODS **/
+
+        /** REMOVE VERTEX METHODS **/
+
+        /** ADD EDGES METHODS **/
+
+        /** REMOVE EDGES METHODS **/
+
+        /** GET PROPERTIES METHODS **/
+        inline std::pair<TransformTree::vertex_iterator, TransformTree::vertex_iterator>
+        vertices()
+        {
+            return boost::vertices(*this);
+        }
+
+        /** SET PROPERTIES METHODS **/
+
+        /** GET PARENT AND CHILD METHODS **/
 
 
     };

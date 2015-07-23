@@ -49,20 +49,7 @@ namespace envire { namespace core
          * words, new methods use Camel Case separated words
          ***************************************************/
 
-        /**@brief Add a vertex to the tree
-        */
-        inline envire::core::Frame getProperty(const LabeledTransformTree::vertex_descriptor node)
-        {
-            return boost::get(FramePropertyTag(), *this, node);
-        }
-
-        /**@brief Add a vertex to the tree
-        */
-        inline envire::core::Transform getProperty(const LabeledTransformTree::edge_descriptor edge)
-        {
-            return boost::get(TransformPropertyTag(), *this, edge);
-        }
-
+        /** ADD VERTEX METHODS **/
 
         /**@brief Add a vertex to the tree
          */
@@ -77,6 +64,20 @@ namespace envire { namespace core
         inline LabeledTransformTree::vertex_descriptor addVertex(const envire::core::Frame &node)
         {
             return this->add_vertex(node.name, node);
+        }
+
+        /**@brief Add a vertex to the tree
+        */
+        inline envire::core::Frame getProperty(const LabeledTransformTree::vertex_descriptor node)
+        {
+            return boost::get(FramePropertyTag(), *this, node);
+        }
+
+        /**@brief Add a vertex to the tree
+        */
+        inline envire::core::Transform getProperty(const LabeledTransformTree::edge_descriptor edge)
+        {
+            return boost::get(TransformPropertyTag(), *this, edge);
         }
 
 
