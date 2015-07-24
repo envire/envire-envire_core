@@ -3,6 +3,7 @@ rock_library(envire_core
             Item.hpp
             Frame.hpp
             Transform.hpp
+            Environment.hpp
             TransformTree.hpp
             LabeledTransformTree.hpp
             GraphViz.hpp

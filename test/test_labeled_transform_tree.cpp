@@ -1,4 +1,3 @@
-#include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/test/unit_test.hpp>
 
@@ -8,222 +7,302 @@
 
 using namespace envire::core;
 
-class Integer: public envire::core::ItemBase
-{
-    public:
-        int number;
-
-    public:
-        Integer(const int n):number(n){};
-};
-
-template < typename _Graph, typename _VertexNameMap > void
-printDependencies(std::ostream & out, const _Graph & g,
-                   _VertexNameMap name_map)
-{
-  typename boost::graph_traits < _Graph >::edge_iterator ei, ei_end;
-  for (boost::tie(ei, ei_end) = edges(g); ei != ei_end; ++ei)
-    out << boost::get(name_map, boost::source(*ei, g)) << " -$>$ "
-      << boost::get(name_map, boost::target(*ei, g)) << std::endl;
-}
-
-/** Property writer for Nodes **/
-template <class _ID, class _FrameName, class _Items>
-class NodeWriter
-{
-    public:
-        NodeWriter(_ID id, _FrameName name, _Items it) : id(id), name(name), it(it){}
-        template <class _Node>
-        void operator()(std::ostream &out, const _Node& n) const
-        {
-            out << "[shape=record, label=\"<f0> " << name[n] <<
-                "|<f1>" << it[n].size()<<"\"]";
-        }
-
-    private:
-        _ID id;
-        _FrameName name;
-        _Items it;
-};
-
-template <class _ID, class _FrameName, class _Items>
-inline NodeWriter<_ID, _FrameName, _Items>
-make_node_writer(_ID id, _FrameName name, _Items it)
-{
-    return NodeWriter<_ID, _FrameName, _Items>(id, name, it);
-}
-
-/** Property writer for Edges **/
-template <class _Time, class _Transform>
-class EdgeWriter {
-    public:
-        EdgeWriter(_Time time, _Transform tf) : time(time), tf(tf){}
-        template <class _Edge>
-        void operator()(std::ostream &out, const _Edge& e) const
-        {
-            out << "[label=\"" << time[e].toString(base::Time::Resolution::Seconds) <<
-                boost::format("\\nt: (%.1f %.1f %.1f)\\nr: (%.1f %.1f %.1f)") % tf[e].translation.x() % tf[e].translation.y() % tf[e].translation.z()
-                % tf[e].orientation.axis()[0] % tf[e].orientation.axis()[1] % tf[e].orientation.axis()[2]
-		        << "\""
-                << ",shape=ellipse,style=filled,fillcolor=lightblue]";
-        }
-    private:
-        _Time time;
-        _Transform tf;
-};
-template <class _Time, class _Transform>
-inline EdgeWriter<_Time, _Transform>
-make_edge_writer(_Time time, _Transform tf)
-{
-    return EdgeWriter<_Time, _Transform>(time, tf);
-}
-
 std::size_t const FramePropertyTag::num = (std::size_t) &FramePropertyTag::num;
 std::size_t const TransformPropertyTag::num = (std::size_t) &TransformPropertyTag::num;
 
-BOOST_AUTO_TEST_CASE(envire_tree_test)
+BOOST_AUTO_TEST_CASE(add_and_remove_vertex_labeled_tree_test)
 {
 
-    envire::core::LabeledTransformTree envire_tree;
+    unsigned int max_vertices = 100;
 
-    /** Create a list of items **/
-    std::vector< boost::intrusive_ptr<envire::core::ItemBase> > items_vector(100);
-    boost::intrusive_ptr<Integer> my_int(new Integer(10));
-
-    /** Fill the list of items **/
-    for (std::vector<boost::intrusive_ptr<envire::core::ItemBase> >::iterator it = items_vector.begin() ; it != items_vector.end(); ++it)
-    {
-        /** Pointer to the same object **/
-        *it = my_int;
-        //std::cout<<"pointer count: "<<(*it).use_count()<<"\n";
-    }
-    my_int.reset();
+    BOOST_TEST_MESSAGE("ADD VERTEX TEST...");
+    envire::core::LabeledTransformTree labeled_tree;
 
     /** Add root node **/
     envire::core::Frame root_prop("root");
-    envire::core::LabeledTransformTree::vertex_descriptor root = envire_tree.add_vertex(root_prop);
-    //std::cout<<boost::vertex(root, envire_tree.tree);
-    //boost::get(&envire::core::Node::frame_name,envire_tree.tree);
+    envire::core::LabeledTransformTree::vertex_descriptor root = labeled_tree.add_vertex(root_prop);
 
-    /** Create 10 nodes with its edges **/
-    for (register int i=0; i<10; ++i)
+    register unsigned int i = 0;
+    for (i = 0; i<max_vertices-1; ++i)
+    {
+        envire::core::Frame frame("frame_"+std::to_string(i));
+        envire::core::TransformTree::vertex_descriptor v1 = labeled_tree.add_vertex(frame);
+    }
+
+    BOOST_CHECK(labeled_tree.num_vertices() == max_vertices);
+    BOOST_TEST_MESSAGE("DONE\n");
+
+    BOOST_TEST_MESSAGE("REMOVE VERTEX TEST...");
+    envire::core::TransformTree::vertex_iterator vi, vi_end, next;
+    boost::tie(vi, vi_end) = labeled_tree.vertices();
+    for (next = vi; vi != vi_end; vi = next)
+    {
+        ++next;
+        labeled_tree.remove_vertex(*vi);
+    }
+
+    BOOST_CHECK(labeled_tree.num_vertices() == 0);
+    BOOST_TEST_MESSAGE("DONE\n");
+}
+
+
+BOOST_AUTO_TEST_CASE(add_and_remove_edge_labeled_tree_test)
+{
+
+    unsigned int max_vertices = 10;
+
+    class Vector: public envire::core::Item<Eigen::Vector3d>
+    {
+    };
+
+    envire::core::LabeledTransformTree labeled_tree;
+    unsigned int vector_size = 100;
+    unsigned int magic_number = 42;
+
+    /** Create a list of items **/
+    std::vector< boost::intrusive_ptr<envire::core::ItemBase> > items_vector(vector_size);
+    boost::intrusive_ptr<Vector> my_vector(new Vector());
+    my_vector->setData(magic_number * Eigen::Vector3d::Ones());
+
+    for (std::vector<boost::intrusive_ptr<envire::core::ItemBase> >::iterator it = items_vector.begin() ; it != items_vector.end(); ++it)
+    {
+        /** Pointer to the same object **/
+        *it = my_vector;
+    }
+
+    BOOST_TEST_MESSAGE("ADD EDGE TEST...");
+
+    /** Add root node **/
+    envire::core::Frame root_prop("root");
+    envire::core::LabeledTransformTree::vertex_descriptor root = labeled_tree.add_vertex(root_prop);
+
+    /** Create max_vertices nodes with its edges **/
+    for (register unsigned int i=0; i<max_vertices; ++i)
     {
         envire::core::Frame node_prop("child_"+std::to_string(i));
         node_prop.items = items_vector;
-        envire::core::LabeledTransformTree::vertex_descriptor node = envire_tree.add_vertex(node_prop);
+        envire::core::LabeledTransformTree::vertex_descriptor node = labeled_tree.add_vertex(node_prop);
         envire::core::Transform tf_prop;
         base::TransformWithCovariance tf;
         tf_prop.setTransform(tf);
         envire::core::LabeledTransformTree::edge_descriptor edge; bool b;
-        boost::tie(edge, b) = boost::add_edge(node, root, tf_prop, envire_tree);
-        //std::cout<<edge<<"b("<<boost::edge(node, root, envire_tree.tree).second<<")\n";
+        boost::tie(edge, b) = boost::add_edge(node, root, tf_prop, labeled_tree);
+        //std::cout<<edge<<"b("<<boost::edge(node, root, labeled_tree.labeled_tree).second<<")\n";
 
-        /** Create 10 nodes with its edges **/
-        for (register int j=0; j<10; ++j)
+        /** Create max_vertices nodes with its edges **/
+        for (register unsigned int j=0; j<max_vertices; ++j)
         {
             envire::core::Frame node_prop("grand_child_"+std::to_string(i)+std::to_string(j));
             node_prop.items = items_vector;
-            envire::core::LabeledTransformTree::vertex_descriptor another_node = envire_tree.add_vertex(node_prop);
+            envire::core::LabeledTransformTree::vertex_descriptor another_node = labeled_tree.add_vertex(node_prop);
             envire::core::Transform tf_prop;
             base::TransformWithCovariance tf;
             tf_prop.setTransform(tf);
             envire::core::LabeledTransformTree::edge_descriptor edge; bool b;
-            boost::tie(edge, b) = boost::add_edge(another_node, node, tf_prop, envire_tree);
+            boost::tie(edge, b) = boost::add_edge(another_node, node, tf_prop, labeled_tree);
         }
 
     }
+    //std::cout<<"labeled tree.num_vertices(): "<<labeled_tree.num_vertices()<<"\n";
+    //std::cout<<"labeled tree.num_edges(): "<<labeled_tree.num_edges()<<"\n";
+    BOOST_CHECK(labeled_tree.num_vertices() == (max_vertices*max_vertices) + max_vertices+1);
+    BOOST_CHECK(labeled_tree.num_edges() == (max_vertices*max_vertices) + max_vertices);
 
-    envire::core::LabeledTransformTree::vertex_descriptor node = boost::vertex_by_label("child_0", envire_tree);
+    BOOST_TEST_MESSAGE("DONE\n");
+    BOOST_TEST_MESSAGE("GRAPHVIZ TEST...");
 
-    if (node != envire::core::LabeledTransformTree::null_vertex())
+    BOOST_TEST_MESSAGE("REMOVE EDGES TEST...");
+    envire::core::TransformTree::edge_iterator ei, ei_end, next;
+    boost::tie(ei, ei_end) = labeled_tree.edges();
+    bool destructive = true;
+    for (next = ei; ei != ei_end; ei = next)
     {
-        std::cout << "There are " << boost::num_vertices(envire_tree) << " vertices." << std::endl;
-        std::cout << "There are " << boost::num_edges(envire_tree) << " edges." << std::endl;
+        ++next;
+        labeled_tree.remove_edge(*ei, destructive);
+    }
+    BOOST_CHECK(labeled_tree.num_edges() == 0);
+    if (destructive)
+        BOOST_CHECK(labeled_tree.num_vertices() == 0);
+    else
+        BOOST_CHECK(labeled_tree.num_vertices() == (max_vertices*max_vertices) + max_vertices+1);
 
-        boost::clear_vertex(node, envire_tree);
+    BOOST_TEST_MESSAGE("DONE\n");
+}
 
-        std::cout << "There are " << boost::num_vertices(envire_tree) << " vertices." << std::endl;
-        std::cout << "There are " << boost::num_edges(envire_tree) << " edges." << std::endl;
+BOOST_AUTO_TEST_CASE(property_and_grahviz_labeled_tree_test)
+{
+    unsigned int max_vertices = 10;
+
+    class Vector: public envire::core::Item<Eigen::Vector3d>
+    {
+    };
+
+    envire::core::LabeledTransformTree labeled_tree;
+    unsigned int vector_size = 100;
+    unsigned int magic_number = 42;
+
+    /** Create a list of items **/
+    std::vector< boost::intrusive_ptr<envire::core::ItemBase> > items_vector(vector_size);
+    boost::intrusive_ptr<Vector> my_vector(new Vector());
+    my_vector->setData(magic_number * Eigen::Vector3d::Ones());
+
+    for (std::vector<boost::intrusive_ptr<envire::core::ItemBase> >::iterator it = items_vector.begin() ; it != items_vector.end(); ++it)
+    {
+        /** Pointer to the same object **/
+        *it = my_vector;
     }
 
+    /** Add root node **/
+    envire::core::Frame root_prop("root");
+    envire::core::LabeledTransformTree::vertex_descriptor root = labeled_tree.add_vertex(root_prop);
 
-//    std::vector<double> distances(num_vertices(envire_tree.tree));
-//    boost::dijkstra_shortest_paths(envire_tree.tree, root,
-//      boost::weight_map(boost::get(&envire::core::Edge::idx, envire_tree.tree))
-//      .distance_map(boost::make_iterator_property_map(distances.begin(),
-//                                               boost::get(boost::vertex_index, envire_tree.tree))));
-
-    //property accessors
-//    boost::property_map<envire::core::Tree::Graph, int>::type edgeIdx = boost::get(&envire::core::Edge::idx, envire_tree);
-
-   // printDependencies(std::cout, envire_tree, boost::get(boost::vertex_index, envire_tree));
-
-
-    /** Print graph by edges **/
-    envire::core::LabeledTransformTree::edge_iterator it, end;
-    for(boost::tie(it, end) = boost::edges(envire_tree); it != end; ++it)
+    base::Time now = base::Time::now();
+    /** Create max_vertices nodes with its edges **/
+    for (register unsigned int i=0; i<max_vertices; ++i)
     {
-        std::cout << boost::get(FramePropertyTag(), envire_tree)[boost::source(*it, envire_tree)].name << " -> "
-            << boost::get(FramePropertyTag(), envire_tree)[boost::target(*it, envire_tree)].name << '\n';
+        envire::core::Frame node_prop("child_"+std::to_string(i));
+        node_prop.items = items_vector;
+        envire::core::LabeledTransformTree::vertex_descriptor node = labeled_tree.add_vertex(node_prop);
+        envire::core::Transform tf_prop(now);
+        base::TransformWithCovariance tf(Eigen::AngleAxisd::Identity(), static_cast<base::Position>(my_vector->getData()));
+        tf_prop.setTransform(tf);
+        envire::core::LabeledTransformTree::edge_descriptor edge; bool b;
+        boost::tie(edge, b) = labeled_tree.add_edge(node, root, tf_prop);
+        //std::cout<<edge<<"b("<<boost::edge(node, root, labeled_tree.labeled_tree).second<<")\n";
+
+        /** Create max_vertices nodes with its edges **/
+        for (register unsigned int j=0; j<max_vertices; ++j)
+        {
+            envire::core::Frame node_prop("grand_child_"+std::to_string(i)+std::to_string(j));
+            node_prop.items = items_vector;
+            envire::core::LabeledTransformTree::vertex_descriptor another_node = labeled_tree.add_vertex(node_prop);
+            envire::core::LabeledTransformTree::edge_descriptor edge; bool b;
+            boost::tie(edge, b) = labeled_tree.add_edge(another_node, node, tf_prop);
+        }
     }
 
-    /** Print graph by vertex **/
-    envire::core::LabeledTransformTree::vertex_iterator vertexIt, vertexEnd;
-
-    std::cout << "vertices(g) = ";
-    boost::tie(vertexIt, vertexEnd) = boost::vertices(envire_tree);
-    for (; vertexIt != vertexEnd; ++vertexIt)
+    BOOST_TEST_MESSAGE("FRAME PROPERTY TEST...");
+    for (register unsigned int i = 0; i<max_vertices; ++i)
     {
-        std::cout << boost::get(FramePropertyTag(), envire_tree)[*vertexIt].name <<" ";
+        envire::core::LabeledTransformTree::vertex_descriptor vd = labeled_tree.vertex("child_"+std::to_string(i));
+        envire::core::Frame frame = labeled_tree.getFrame(vd);
+        BOOST_CHECK(frame.name == "child_"+std::to_string(i));
+        BOOST_CHECK(frame.items.size() == vector_size);
+        for (std::vector< boost::intrusive_ptr<envire::core::ItemBase> >::const_iterator it = frame.items.begin();
+                it != frame.items.end(); ++it)
+        {
+            BOOST_CHECK(*it == my_vector);
+            Vector* pvector = dynamic_cast< Vector* >(it->get());
+            BOOST_CHECK(pvector->getData() == magic_number * Eigen::Vector3d::Ones());
+        }
     }
-    std::cout << std::endl;
+    BOOST_TEST_MESSAGE("DONE\n");
 
-
-    /** Add edges by label **/
-    for (register int j=0; j<10; ++j)
+    BOOST_TEST_MESSAGE("TRANSFORM PROPERTY TEST...");
+    envire::core::TransformTree::edge_iterator it, end;
+    for(boost::tie(it, end) = labeled_tree.edges(); it != end; ++it)
     {
-        envire::core::Transform tf_prop;
-        envire_tree.add_edge("grand_child_0"+std::to_string(j), "root", tf_prop);
+        envire::core::Transform transform = boost::get(envire::core::TransformPropertyTag(), labeled_tree, *it);
+        BOOST_CHECK(transform.time == now);
+        BOOST_CHECK(transform.transform.translation == my_vector->getData());
     }
+    BOOST_TEST_MESSAGE("DONE\n");
 
-    envire::core::Transform tf_prop;
-    envire_tree.add_edge("child_0", "root", tf_prop);
+    BOOST_TEST_MESSAGE("GRAPHVIZ TEST...");
+    envire::core::GraphViz gviz;
 
-    std::pair<envire::core::LabeledTransformTree::edge_descriptor, bool> edge_pair = boost::edge_by_label("child_0", "root", envire_tree);
-    std::cout<<"get edge return: "<<edge_pair.second<<"\n";
+    gviz.write(labeled_tree.graph(), "graphviz_boost_test_labeled_transform_tree.dot");
 
-    /** update the edge child_0 -> root **/
-    tf_prop.time = base::Time::now();
-    base::TransformWithCovariance tf;
-    tf_prop.setTransform(tf);
-
-    envire_tree.add_edge("child_0", "root", tf_prop);
-
-    std::cout << "There are " << boost::num_vertices(envire_tree) << " vertices." << std::endl;
-    std::cout << "There are " << boost::num_edges(envire_tree) << " edges." << std::endl;
-
-    envire_tree.remove_vertex("grand_child_00");
-
-    std::cout << "There are " << boost::num_vertices(envire_tree) << " vertices." << std::endl;
-    std::cout << "There are " << boost::num_edges(envire_tree) << " edges." << std::endl;
-
-    std::cout<<"****************\n";
-
-    std::cout << "There are " << boost::num_vertices(envire_tree) << " vertices." << std::endl;
-    std::cout << "There are " << boost::num_edges(envire_tree) << " edges." << std::endl;
-
-    envire_tree.remove_edge("grand_child_01", "root", true);
-
-    std::cout << "There are " << boost::num_vertices(envire_tree) << " vertices." << std::endl;
-    std::cout << "There are " << boost::num_edges(envire_tree) << " edges." << std::endl;
-
-
-    /** Graph Viz export **/
-    GraphViz gviz;
-
-    gviz.write(envire_tree.graph(), "envire_tree_test.dot");
-
-    envire_tree.clear();
+    labeled_tree.clear();
+    BOOST_TEST_MESSAGE("DONE\n");
 }
 
 
+BOOST_AUTO_TEST_CASE(add_and_updating_edges_labeled_tree_test)
+{
+    unsigned int max_vertices = 10;
+
+    class Vector: public envire::core::Item<Eigen::Vector3d>
+    {
+    };
+
+    envire::core::LabeledTransformTree labeled_tree;
+
+    unsigned int vector_size = 100;
+    unsigned int magic_number = 42;
+
+    /** Create a list of items **/
+    std::vector< boost::intrusive_ptr<envire::core::ItemBase> > items_vector(vector_size);
+    boost::intrusive_ptr<Vector> my_vector(new Vector());
+    my_vector->setData(magic_number * Eigen::Vector3d::Ones());
+
+    for (std::vector<boost::intrusive_ptr<envire::core::ItemBase> >::iterator it = items_vector.begin() ; it != items_vector.end(); ++it)
+    {
+        /** Pointer to the same object **/
+        *it = my_vector;
+    }
+
+    /** Add root node **/
+    envire::core::Frame root_prop("root");
+    root_prop.items = items_vector;
+    envire::core::LabeledTransformTree::vertex_descriptor root = labeled_tree.add_vertex(root_prop);
+
+    /** Create max_vertices nodes with its edges **/
+    for (register unsigned int i=0; i<max_vertices; ++i)
+    {
+        envire::core::Frame node_prop("child_"+std::to_string(i));
+        node_prop.items = items_vector;
+        envire::core::LabeledTransformTree::vertex_descriptor node = labeled_tree.add_vertex(node_prop);
+    }
+
+    /** Add edges by label **/
+    base::Time now = base::Time::now();
+    for (register unsigned int j=0; j<max_vertices; ++j)
+    {
+        envire::core::Transform tf_prop(now);
+        base::TransformWithCovariance tf(Eigen::AngleAxisd::Identity(), static_cast<base::Position>(my_vector->getData()));
+        tf_prop.setTransform(tf);
+        labeled_tree.add_edge("child_"+std::to_string(j), "root", tf_prop);
+    }
+
+    BOOST_TEST_MESSAGE("UPDATING AN EXISTING TRANSFORM PROPERTY TEST...");
+    std::pair<envire::core::LabeledTransformTree::edge_descriptor, bool> edge_pair = boost::edge_by_label("child_0", "root", labeled_tree);
+    BOOST_CHECK(edge_pair.second == true);
+    envire::core::Transform got_tf = labeled_tree.getTransform(edge_pair.first);
+    BOOST_CHECK(got_tf.time == now);
+
+    /* Modify the property of an existing edge **/
+    base::Time after = base::Time::now();
+    envire::core::Transform tf_prop(after);
+    labeled_tree.add_edge("child_0", "root", tf_prop);
+
+    edge_pair = boost::edge_by_label("child_0", "root", labeled_tree);
+    BOOST_CHECK(edge_pair.second == true);
+    got_tf = labeled_tree.getTransform(edge_pair.first);
+    BOOST_CHECK(got_tf.time == after);
+    BOOST_TEST_MESSAGE("DONE\n");
+}
+
+
+//BOOST_AUTO_TEST_CASE(print_labeled_tree_test)
+//{
+//    /** Print graph by edges **/
+//    envire::core::LabeledTransformTree::edge_iterator it, end;
+//    for(boost::tie(it, end) = boost::edges(labeled_tree); it != end; ++it)
+//    {
+//        std::cout << boost::get(FramePropertyTag(), labeled_tree)[boost::source(*it, labeled_tree)].name << " -> "
+//            << boost::get(FramePropertyTag(), labeled_tree)[boost::target(*it, labeled_tree)].name << '\n';
+//    }
+//
+//    /** Print graph by vertex **/
+//    envire::core::LabeledTransformTree::vertex_iterator vertexIt, vertexEnd;
+//
+//    std::cout << "vertices(g) = ";
+//    boost::tie(vertexIt, vertexEnd) = boost::vertices(labeled_tree);
+//    for (; vertexIt != vertexEnd; ++vertexIt)
+//    {
+//        std::cout << boost::get(FramePropertyTag(), labeled_tree)[*vertexIt].name <<" ";
+//    }
+//    std::cout << std::endl;
+//}
+//

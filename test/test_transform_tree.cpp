@@ -5,10 +5,11 @@
 #include <envire_core/Item.hpp>
 #include <envire_core/GraphViz.hpp>
 
-unsigned int max_vertices = 100;
 
 BOOST_AUTO_TEST_CASE(add_and_remove_vertex_test)
 {
+    unsigned int max_vertices = 100;
+
     BOOST_TEST_MESSAGE("ADD VERTEX TEST...");
     envire::core::TransformTree tree;
 
@@ -37,6 +38,8 @@ BOOST_AUTO_TEST_CASE(add_and_remove_vertex_test)
 
 BOOST_AUTO_TEST_CASE(add_and_remove_edge_test)
 {
+
+    unsigned int max_vertices = 100;
 
     BOOST_TEST_MESSAGE("ADD EDGES TEST...");
     envire::core::TransformTree tree;
@@ -82,6 +85,8 @@ BOOST_AUTO_TEST_CASE(add_and_remove_edge_test)
 
 BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
 {
+
+    unsigned int max_vertices = 100;
 
     class Vector: public envire::core::Item<Eigen::Vector3d>
     {
@@ -153,7 +158,7 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
     BOOST_TEST_MESSAGE("GRAPHVIZ TEST...");
     envire::core::GraphViz gviz;
 
-    gviz.write(tree, "graph_viz_boost_test_transform_tree.dot");
+    gviz.write(tree, "graphviz_boost_test_transform_tree.dot");
 
     tree.clear();
     BOOST_TEST_MESSAGE("DONE\n");

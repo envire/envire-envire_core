@@ -52,3 +52,27 @@ BOOST_AUTO_TEST_CASE(dummy_graph_test)
     std::cout<<"lu0: "<<lu0<<"\n";
 
 }
+
+//#include <boost/graph/dijkstra_shortest_paths.hpp>
+//    std::vector<double> distances(num_vertices(envire_tree.tree));
+//    boost::dijkstra_shortest_paths(envire_tree.tree, root,
+//      boost::weight_map(boost::get(&envire::core::Edge::idx, envire_tree.tree))
+//      .distance_map(boost::make_iterator_property_map(distances.begin(),
+//                                               boost::get(boost::vertex_index, envire_tree.tree))));
+
+    //property accessors
+//    boost::property_map<envire::core::Tree::Graph, int>::type edgeIdx = boost::get(&envire::core::Edge::idx, envire_tree);
+
+   // printDependencies(std::cout, envire_tree, boost::get(boost::vertex_index, envire_tree));
+
+
+template < typename _Graph, typename _VertexNameMap > void
+printDependencies(std::ostream & out, const _Graph & g,
+                   _VertexNameMap name_map)
+{
+  typename boost::graph_traits < _Graph >::edge_iterator ei, ei_end;
+  for (boost::tie(ei, ei_end) = edges(g); ei != ei_end; ++ei)
+    out << boost::get(name_map, boost::source(*ei, g)) << " -$>$ "
+      << boost::get(name_map, boost::target(*ei, g)) << std::endl;
+}
+
