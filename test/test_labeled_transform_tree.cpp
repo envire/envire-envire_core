@@ -1,5 +1,6 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/test/unit_test.hpp>
+#include <boost/lexical_cast.hpp> /** to string conversion when using < C++11 */
 
 #include <envire_core/LabeledTransformTree.hpp>
 #include <envire_core/Item.hpp>
@@ -22,7 +23,7 @@ BOOST_AUTO_TEST_CASE(add_and_remove_vertex_labeled_tree_test)
     register unsigned int i = 0;
     for (i = 0; i<max_vertices-1; ++i)
     {
-        envire::core::Frame frame("frame_"+std::to_string(i));
+        envire::core::Frame frame("frame_"+boost::lexical_cast<std::string>(i));
         envire::core::TransformTree::vertex_descriptor v1 = labeled_tree.add_vertex(frame);
     }
 
@@ -42,15 +43,14 @@ BOOST_AUTO_TEST_CASE(add_and_remove_vertex_labeled_tree_test)
     BOOST_TEST_MESSAGE("DONE\n");
 }
 
+ class Vector: public envire::core::Item<Eigen::Vector3d>
+{
+};
 
 BOOST_AUTO_TEST_CASE(add_and_remove_edge_labeled_tree_test)
 {
 
     unsigned int max_vertices = 10;
-
-    class Vector: public envire::core::Item<Eigen::Vector3d>
-    {
-    };
 
     envire::core::LabeledTransformTree labeled_tree;
     unsigned int vector_size = 100;
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(add_and_remove_edge_labeled_tree_test)
     /** Create max_vertices nodes with its edges **/
     for (register unsigned int i=0; i<max_vertices; ++i)
     {
-        envire::core::Frame node_prop("child_"+std::to_string(i));
+        envire::core::Frame node_prop("child_"+boost::lexical_cast<std::string>(i));
         node_prop.items = items_vector;
         envire::core::LabeledTransformTree::vertex_descriptor node = labeled_tree.add_vertex(node_prop);
         envire::core::Transform tf_prop;
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(add_and_remove_edge_labeled_tree_test)
         /** Create max_vertices nodes with its edges **/
         for (register unsigned int j=0; j<max_vertices; ++j)
         {
-            envire::core::Frame node_prop("grand_child_"+std::to_string(i)+std::to_string(j));
+            envire::core::Frame node_prop("grand_child_"+boost::lexical_cast<std::string>(i)+boost::lexical_cast<std::string>(j));
             node_prop.items = items_vector;
             envire::core::LabeledTransformTree::vertex_descriptor another_node = labeled_tree.add_vertex(node_prop);
             envire::core::Transform tf_prop;
@@ -130,10 +130,6 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_labeled_tree_test)
 {
     unsigned int max_vertices = 10;
 
-    class Vector: public envire::core::Item<Eigen::Vector3d>
-    {
-    };
-
     envire::core::LabeledTransformTree labeled_tree;
     unsigned int vector_size = 100;
     unsigned int magic_number = 42;
@@ -157,7 +153,7 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_labeled_tree_test)
     /** Create max_vertices nodes with its edges **/
     for (register unsigned int i=0; i<max_vertices; ++i)
     {
-        envire::core::Frame node_prop("child_"+std::to_string(i));
+        envire::core::Frame node_prop("child_"+boost::lexical_cast<std::string>(i));
         node_prop.items = items_vector;
         envire::core::LabeledTransformTree::vertex_descriptor node = labeled_tree.add_vertex(node_prop);
         envire::core::Transform tf_prop(now);
@@ -170,7 +166,7 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_labeled_tree_test)
         /** Create max_vertices nodes with its edges **/
         for (register unsigned int j=0; j<max_vertices; ++j)
         {
-            envire::core::Frame node_prop("grand_child_"+std::to_string(i)+std::to_string(j));
+            envire::core::Frame node_prop("grand_child_"+boost::lexical_cast<std::string>(i)+boost::lexical_cast<std::string>(j));
             node_prop.items = items_vector;
             envire::core::LabeledTransformTree::vertex_descriptor another_node = labeled_tree.add_vertex(node_prop);
             envire::core::LabeledTransformTree::edge_descriptor edge; bool b;
@@ -181,9 +177,9 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_labeled_tree_test)
     BOOST_TEST_MESSAGE("FRAME PROPERTY TEST...");
     for (register unsigned int i = 0; i<max_vertices; ++i)
     {
-        envire::core::LabeledTransformTree::vertex_descriptor vd = labeled_tree.vertex("child_"+std::to_string(i));
+        envire::core::LabeledTransformTree::vertex_descriptor vd = labeled_tree.vertex("child_"+boost::lexical_cast<std::string>(i));
         envire::core::Frame frame = labeled_tree.getFrame(vd);
-        BOOST_CHECK(frame.name == "child_"+std::to_string(i));
+        BOOST_CHECK(frame.name == "child_"+boost::lexical_cast<std::string>(i));
         BOOST_CHECK(frame.items.size() == vector_size);
         for (std::vector< boost::intrusive_ptr<envire::core::ItemBase> >::const_iterator it = frame.items.begin();
                 it != frame.items.end(); ++it)
@@ -219,10 +215,6 @@ BOOST_AUTO_TEST_CASE(add_and_updating_edges_labeled_tree_test)
 {
     unsigned int max_vertices = 10;
 
-    class Vector: public envire::core::Item<Eigen::Vector3d>
-    {
-    };
-
     envire::core::LabeledTransformTree labeled_tree;
 
     unsigned int vector_size = 100;
@@ -247,7 +239,7 @@ BOOST_AUTO_TEST_CASE(add_and_updating_edges_labeled_tree_test)
     /** Create max_vertices nodes with its edges **/
     for (register unsigned int i=0; i<max_vertices; ++i)
     {
-        envire::core::Frame node_prop("child_"+std::to_string(i));
+        envire::core::Frame node_prop("child_"+boost::lexical_cast<std::string>(i));
         node_prop.items = items_vector;
         envire::core::LabeledTransformTree::vertex_descriptor node = labeled_tree.add_vertex(node_prop);
     }
@@ -259,7 +251,7 @@ BOOST_AUTO_TEST_CASE(add_and_updating_edges_labeled_tree_test)
         envire::core::Transform tf_prop(now);
         base::TransformWithCovariance tf(Eigen::AngleAxisd::Identity(), static_cast<base::Position>(my_vector->getData()));
         tf_prop.setTransform(tf);
-        labeled_tree.add_edge("child_"+std::to_string(j), "root", tf_prop);
+        labeled_tree.add_edge("child_"+boost::lexical_cast<std::string>(j), "root", tf_prop);
     }
 
     BOOST_TEST_MESSAGE("UPDATING AN EXISTING TRANSFORM PROPERTY TEST...");

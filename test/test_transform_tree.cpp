@@ -1,5 +1,6 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/test/unit_test.hpp>
+#include <boost/lexical_cast.hpp> /** to string conversion when using < C++11 */
 
 #include <envire_core/TransformTree.hpp>
 #include <envire_core/Item.hpp>
@@ -16,7 +17,7 @@ BOOST_AUTO_TEST_CASE(add_and_remove_vertex_test)
     register unsigned int i = 0;
     for (i = 0; i<max_vertices; ++i)
     {
-        envire::core::Frame frame("frame_"+std::to_string(i));
+        envire::core::Frame frame("frame_"+boost::lexical_cast<std::string>(i));
         envire::core::TransformTree::vertex_descriptor v1 = tree.add_vertex(frame);
     }
 
@@ -47,7 +48,7 @@ BOOST_AUTO_TEST_CASE(add_and_remove_edge_test)
     register unsigned int i = 0;
     for (i = 0; i<max_vertices; ++i)
     {
-        envire::core::Frame frame("frame_"+std::to_string(i));
+        envire::core::Frame frame("frame_"+boost::lexical_cast<std::string>(i));
         envire::core::TransformTree::vertex_descriptor v1 = tree.add_vertex(frame);
     }
 
@@ -83,14 +84,14 @@ BOOST_AUTO_TEST_CASE(add_and_remove_edge_test)
     BOOST_TEST_MESSAGE("DONE\n");
 }
 
+class Vector: public envire::core::Item<Eigen::Vector3d>
+{
+};
+
 BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
 {
 
     unsigned int max_vertices = 100;
-
-    class Vector: public envire::core::Item<Eigen::Vector3d>
-    {
-    };
 
     envire::core::TransformTree tree;
     unsigned int vector_size = 100;
@@ -110,7 +111,7 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
     register unsigned int i = 0;
     for (i = 0; i<max_vertices; ++i)
     {
-        envire::core::Frame frame("frame_"+std::to_string(i));
+        envire::core::Frame frame("frame_"+boost::lexical_cast<std::string>(i));
         frame.items = items_vector;
         envire::core::TransformTree::vertex_descriptor v1 = tree.add_vertex(frame);
     }
@@ -119,7 +120,7 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
     for (i = 0; i<max_vertices; ++i)
     {
         envire::core::Frame frame = tree.getFrame(tree.vertex(i));
-        BOOST_CHECK(frame.name == "frame_"+std::to_string(i));
+        BOOST_CHECK(frame.name == "frame_"+boost::lexical_cast<std::string>(i));
         BOOST_CHECK(frame.items.size() == vector_size);
         for (std::vector< boost::intrusive_ptr<envire::core::ItemBase> >::const_iterator it = frame.items.begin();
                 it != frame.items.end(); ++it)
