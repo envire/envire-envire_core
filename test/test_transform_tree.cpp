@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
     envire::core::TransformTree::edge_iterator it, end;
     for(boost::tie(it, end) = tree.edges(); it != end; ++it)
     {
-        envire::core::Transform transform = boost::get(envire::core::TransformPropertyTag(), tree, *it);
+        envire::core::Transform transform = boost::get(&envire::core::TransformProperty::transform, tree, *it);
         BOOST_CHECK(transform.time == now);
         BOOST_CHECK(transform.transform.translation == my_vector->getData());
     }
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
 
     gviz.write(tree, "graphviz_boost_test_transform_tree.dot");
 
-    tree.clear();
+    //tree.clear();
     BOOST_TEST_MESSAGE("DONE\n");
 }
 

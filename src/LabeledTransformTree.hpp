@@ -31,9 +31,6 @@ namespace envire { namespace core
     */
     class LabeledTransformTree: public LabeledTransformGraph
     {
-    public:
-        typedef typename boost::property_map <LabeledTransformGraph, FramePropertyTag>::type FrameMap;
-        typedef typename boost::property_map <LabeledTransformGraph, TransformPropertyTag>::type TransformMap;
 
     public:
 
@@ -55,15 +52,19 @@ namespace envire { namespace core
          */
         inline LabeledTransformTree::vertex_descriptor add_vertex(const VertexLabel &node_label)
         {
+            FrameProperty node_prop;
             envire::core::Frame node(node_label);
-            return LabeledTransformGraph::add_vertex(node_label, node);
+            node_prop.frame = node;
+            return LabeledTransformGraph::add_vertex(node_label, node_prop);
         }
 
         /**@brief Add a vertex to the tree
          */
         inline LabeledTransformTree::vertex_descriptor add_vertex(const envire::core::Frame &node)
         {
-            return LabeledTransformGraph::add_vertex(node.name, node);
+            FrameProperty node_prop;
+            node_prop.frame = node;
+            return LabeledTransformGraph::add_vertex(node.name, node_prop);
         }
 
         /**@brief getVertex
@@ -132,11 +133,13 @@ namespace envire { namespace core
             /** Update the edge in case it already exist **/
             if (edge_pair.second)
             {
-                boost::put(TransformPropertyTag(), *this, edge_pair.first, tf);
+                boost::put(&TransformProperty::transform, *this, edge_pair.first, tf);
             }
             else
             {
-                edge_pair =  boost::add_edge_by_label(node_from, node_to, tf, *this);
+                TransformProperty tf_prop;
+                tf_prop.transform = tf;
+                edge_pair =  boost::add_edge_by_label(node_from, node_to, tf_prop, *this);
             }
             return edge_pair;
         }
@@ -156,11 +159,13 @@ namespace envire { namespace core
             /** Update the edge in case it already exist **/
             if (edge_pair.second)
             {
-                boost::put(TransformPropertyTag(), *this, edge_pair.first, tf);
+                boost::put(&TransformProperty::transform, *this, edge_pair.first, tf);
             }
             else
             {
-                edge_pair =  boost::add_edge(node_from, node_to, tf, *this);
+                TransformProperty tf_prop;
+                tf_prop.transform = tf;
+                edge_pair =  boost::add_edge(node_from, node_to, tf_prop, *this);
             }
             return edge_pair;
         }
@@ -325,14 +330,14 @@ namespace envire { namespace core
         */
         inline envire::core::Frame getFrame(const TransformTree::vertex_descriptor vd)
         {
-            return boost::get(FramePropertyTag(), *this, vd);
+            return boost::get(&FrameProperty::frame, *this, vd);
         }
 
         /**@brief Add a vertex to the tree
         */
         inline envire::core::Transform getTransform(const LabeledTransformTree::edge_descriptor ed)
         {
-            return boost::get(TransformPropertyTag(), *this, ed);
+            return boost::get(&TransformProperty::transform, *this, ed);
         }
 
 

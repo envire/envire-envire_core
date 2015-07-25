@@ -7,9 +7,6 @@
 
 using namespace envire::core;
 
-std::size_t const FramePropertyTag::num = (std::size_t) &FramePropertyTag::num;
-std::size_t const TransformPropertyTag::num = (std::size_t) &TransformPropertyTag::num;
-
 BOOST_AUTO_TEST_CASE(add_and_remove_vertex_labeled_tree_test)
 {
 
@@ -86,7 +83,7 @@ BOOST_AUTO_TEST_CASE(add_and_remove_edge_labeled_tree_test)
         base::TransformWithCovariance tf;
         tf_prop.setTransform(tf);
         envire::core::LabeledTransformTree::edge_descriptor edge; bool b;
-        boost::tie(edge, b) = boost::add_edge(node, root, tf_prop, labeled_tree);
+        boost::tie(edge, b) = labeled_tree.add_edge(node, root, tf_prop);
         //std::cout<<edge<<"b("<<boost::edge(node, root, labeled_tree.labeled_tree).second<<")\n";
 
         /** Create max_vertices nodes with its edges **/
@@ -99,7 +96,7 @@ BOOST_AUTO_TEST_CASE(add_and_remove_edge_labeled_tree_test)
             base::TransformWithCovariance tf;
             tf_prop.setTransform(tf);
             envire::core::LabeledTransformTree::edge_descriptor edge; bool b;
-            boost::tie(edge, b) = boost::add_edge(another_node, node, tf_prop, labeled_tree);
+            boost::tie(edge, b) = labeled_tree.add_edge(another_node, node, tf_prop);
         }
 
     }
@@ -202,7 +199,7 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_labeled_tree_test)
     envire::core::TransformTree::edge_iterator it, end;
     for(boost::tie(it, end) = labeled_tree.edges(); it != end; ++it)
     {
-        envire::core::Transform transform = boost::get(envire::core::TransformPropertyTag(), labeled_tree, *it);
+        envire::core::Transform transform = boost::get(&TransformProperty::transform, labeled_tree, *it);
         BOOST_CHECK(transform.time == now);
         BOOST_CHECK(transform.transform.translation == my_vector->getData());
     }

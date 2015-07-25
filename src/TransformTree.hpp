@@ -20,27 +20,21 @@
 
 namespace envire { namespace core
 {
-    /**@brief Frame Property Tag
+    /**@brief Frame Property
      * boost access tag for the Frame property
      */
-    struct FramePropertyTag
+    struct FrameProperty
     {
-        typedef boost::vertex_property_tag kind;
-        static  std::size_t const num;
+        Frame frame;
     };
 
-    typedef boost::property <FramePropertyTag, envire::core::Frame>  FrameProperty;
-
-    /**@brief Transform Property Tag
+    /**@brief Transform Property
      * boost access tag for the Transform property
      */
-    struct TransformPropertyTag
+    struct TransformProperty
     {
-        typedef boost::edge_property_tag kind;
-        static  std::size_t const num;
+        Transform transform;
     };
-
-    typedef boost::property <TransformPropertyTag, envire::core::Transform>  TransformProperty;
 
     /**@brief The Transform Graph type
     *
@@ -58,9 +52,6 @@ namespace envire { namespace core
     */
     class TransformTree: public TransformGraph
     {
-    public:
-        typedef typename boost::property_map <TransformGraph, FramePropertyTag>::type FrameMap;
-        typedef typename boost::property_map <TransformGraph, TransformPropertyTag>::type TransformMap;
 
     public:
 
@@ -80,9 +71,11 @@ namespace envire { namespace core
 
         /**@brief Add a vertex
          */
-        inline TransformTree::vertex_descriptor add_vertex(const FrameProperty &frame)
+        inline TransformTree::vertex_descriptor add_vertex(const envire::core::Frame &frame)
         {
-            TransformTree::vertex_descriptor v = boost::add_vertex(frame, *this);
+            FrameProperty node_prop;
+            node_prop.frame = frame;
+            TransformTree::vertex_descriptor v = boost::add_vertex(node_prop, *this);
             return v;
         }
 
@@ -119,7 +112,7 @@ namespace envire { namespace core
             /** Update the edge in case it already exists **/
             if (edge_pair.second)
             {
-                boost::put(TransformPropertyTag(), *this, edge_pair.first, tf);
+                boost::put(&TransformProperty::transform, *this, edge_pair.first, tf);
             }
             else
             {
@@ -127,7 +120,9 @@ namespace envire { namespace core
                // if (boost::in_degree(node_to, *this) == 0)
                // {
                     /** Add the new edge **/
-                    edge_pair =  boost::add_edge(node_from, node_to, tf, *this);
+                    TransformProperty tf_prop;
+                    tf_prop.transform = tf;
+                    edge_pair =  boost::add_edge(node_from, node_to, tf_prop, *this);
                // }
                // else
                // {
@@ -172,7 +167,7 @@ namespace envire { namespace core
          * */
         envire::core::Frame getFrame(const TransformTree::vertex_descriptor vd)
         {
-            return boost::get(FramePropertyTag(), *this, vd);
+            return boost::get(&FrameProperty::frame, *this, vd);
         }
 
         /**@brief get Frame
@@ -181,7 +176,7 @@ namespace envire { namespace core
          * */
         envire::core::Frame getFrame(const TransformTree::vertex_iterator vi)
         {
-            return boost::get(FramePropertyTag(), *this, *vi);
+            return boost::get(&FrameProperty::frame, *this, *vi);
         }
 
         /**@brief get Transform
@@ -190,7 +185,7 @@ namespace envire { namespace core
          * */
         envire::core::Transform getTransform(const TransformTree::edge_descriptor ed)
         {
-            return boost::get(TransformPropertyTag(), *this, ed);
+            return boost::get(&TransformProperty::transform, *this, ed);
         }
 
         /**@brief get Transform
@@ -199,7 +194,7 @@ namespace envire { namespace core
          * */
         envire::core::Transform getTransform(const TransformTree::edge_iterator ei)
         {
-            return boost::get(TransformPropertyTag(), *this, *ei);
+            return boost::get(&TransformProperty::transform, *this, *ei);
         }
     };
 }}

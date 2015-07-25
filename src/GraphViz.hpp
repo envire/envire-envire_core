@@ -17,17 +17,17 @@ namespace envire { namespace core
     class FrameWriter
     {
     public:
-        FrameWriter(_Frame frame){}
+        FrameWriter(_Frame _f):f(_f){}
         template <class _Vertex>
         void operator()(std::ostream &out, const _Vertex& n) const
         {
-            out << "[shape=record, label=\"<f0> " << frame[n].name <<
-                "|<f1>" << frame[n].items.size()<<"\""
+            out << "[shape=record, label=\"<f0> " << f[n].name <<
+                "|<f1>" << f[n].items.size()<<"\""
                 <<",style=filled,fillcolor=lightblue]";
         }
 
     private:
-        _Frame frame;
+        _Frame f;
 
     };
 
@@ -38,7 +38,7 @@ namespace envire { namespace core
     class TransformWriter
     {
     public:
-        TransformWriter(_Transform tf){}
+        TransformWriter(_Transform _tf):tf(_tf){}
         template <class _Edge>
         void operator()(std::ostream &out, const _Edge& e) const
         {
@@ -123,8 +123,8 @@ namespace envire { namespace core
             /** Print graph **/
             std::ostream out(buf);
             boost::write_graphviz (out, graph,
-                    make_node_writer(boost::get(FramePropertyTag(), graph)),
-                    make_edge_writer(boost::get(TransformPropertyTag(), graph)),
+                    make_node_writer(boost::get(&FrameProperty::frame, graph)),
+                    make_edge_writer(boost::get(&TransformProperty::transform, graph)),
                     make_graph_writer());
         }
     };
