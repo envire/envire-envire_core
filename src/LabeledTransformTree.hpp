@@ -67,6 +67,17 @@ namespace envire { namespace core
             return LabeledTransformGraph::add_vertex(node.name, node_prop);
         }
 
+
+        /**@brief Insert a vertex to the tree
+         */
+        inline std::pair<LabeledTransformTree::vertex_descriptor, bool> insert_vertex(const envire::core::Frame &node)
+        {
+            FrameProperty node_prop;
+            node_prop.frame = node;
+            return LabeledTransformGraph::insert_vertex(node.name, node_prop);
+        }
+
+
         /**@brief getVertex
          *
          * Get a vertex descriptor for the vertex/node label
@@ -84,6 +95,7 @@ namespace envire { namespace core
             return boost::vertices(*this);
         }
 
+
         /**@brief Remove a vertex to the tree
          *
          * This method remove the vertex searching by label and
@@ -97,23 +109,14 @@ namespace envire { namespace core
             return LabeledTransformGraph::remove_vertex(node_label);
         }
 
-        /**@brief Remove a vertex to the tree
-         *
-         * This method remove the vertex from the iterator and
-         * its associated edges. If you want to only remove
-         * the vertex use the boost remove_vertex method
-         */
-        inline void remove_vertex(const LabeledTransformTree::vertex_descriptor vd)
-        {
-            /** First remove the associated edges to the vertex **/
-            boost::clear_vertex(vd, *this);
-            return boost::remove_vertex(vd, this->graph());
-        }
-
-
         inline LabeledTransformTree::vertices_size_type num_vertices()
         {
             return  boost::num_vertices(*this);
+        }
+
+        inline LabeledTransformTree::degree_size_type degree(const LabeledTransformTree::vertex_descriptor vd)
+        {
+            return boost::degree(vd, *this);
         }
 
         /** EDGES METHODS **/
@@ -189,24 +192,20 @@ namespace envire { namespace core
 
             if (destructive)
             {
-                LabeledTransformTree::degree_size_type in_edges_svd =
-                    boost::in_degree(svd, *this);
+               // LabeledTransformTree::degree_size_type edges_svd =
+               //     boost::degree(svd, *this);
 
-                LabeledTransformTree::degree_size_type out_edges_svd = 
-                    boost::out_degree(svd, *this);
-
-                if ((in_edges_svd+out_edges_svd) == 0)
+                //std::cout<<"[TREE] svd edges: "<<edges_svd<<"\n";
+                if(boost::degree(svd, *this) == 0)
                 {
                     boost::remove_vertex(svd, this->graph());
                 }
 
-                LabeledTransformTree::degree_size_type in_edges_tvd =
-                    boost::in_degree(tvd, *this);
+                //LabeledTransformTree::degree_size_type edges_tvd =
+                //    boost::degree(tvd, *this);
 
-                LabeledTransformTree::degree_size_type out_edges_tvd =
-                    boost::out_degree(tvd, *this);
-
-                if ((in_edges_tvd+out_edges_tvd) == 0)
+                //std::cout<<"[TREE] tvd edges: "<<edges_tvd<<"\n";
+                if(boost::degree(tvd, *this) == 0)
                 {
                     boost::remove_vertex(tvd, this->graph());
                 }
@@ -247,38 +246,14 @@ namespace envire { namespace core
         {
             boost::remove_edge(node_from, node_to, *this);
 
-            std::cout<<"[TREE] Edge removed\n";
-
             if (destructive == true)
             {
-                std::cout<<"[TREE] Destructive\n";
-
-                /** Check in edges of node_from **/
-                LabeledTransformTree::degree_size_type in_node_from =
-                    boost::in_degree(node_from, *this);
-
-                /** Check out edges of node_from **/
-                LabeledTransformTree::degree_size_type out_node_from =
-                    boost::out_degree(node_from, *this);
-
-                std::cout<<"[TREE] node from in+ out edges: "<<in_node_from+out_node_from<<"\n";
-
-                if (in_node_from + out_node_from == 0)
+                if (boost::degree(node_from, *this) == 0)
                 {
                     boost::remove_vertex(node_from, this->graph());
                 }
 
-                /** Check in edges of node_to **/
-                LabeledTransformTree::degree_size_type in_node_to =
-                    boost::in_degree(node_to, *this);
-
-                /** Check out edges of node_to **/
-                LabeledTransformTree::degree_size_type out_node_to =
-                    boost::out_degree(node_to, *this);
-
-                std::cout<<"[TREE] node to in+ out edges: "<<in_node_to+out_node_to<<"\n";
-
-                if (in_node_to + out_node_to == 0)
+                if (boost::in_degree(node_to, *this) == 0)
                 {
                     boost::remove_vertex(node_to, this->graph());
                 }
@@ -310,6 +285,12 @@ namespace envire { namespace core
         inline LabeledTransformTree::vertex_descriptor target(const LabeledTransformTree::edge_descriptor it_node)
         {
             return boost::target(it_node, *this);
+        }
+
+        inline std::pair<in_edge_iterator,in_edge_iterator>
+        in_edges(const LabeledTransformTree::vertex_descriptor &node)
+        {
+            return boost::in_edges(node, *this);
         }
 
         inline std::pair<out_edge_iterator,out_edge_iterator>

@@ -61,7 +61,8 @@ namespace envire { namespace core
         GraphPropWriter(){}
         void operator()(std::ostream &out) const
         {
-            out<< "graph[rankdir=LR,splines=ortho];\n";
+            //out<< "graph[rankdir=LR,splines=ortho];\n";
+            out<< "graph[size=\"88,136\", ranksep=3.0, nodesep=2.0, fontname=\"Helvetica\", fontsize=8];\n";
         }
     };
 

@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(add_and_remove_vertex_labeled_tree_test)
     for (next = vi; vi != vi_end; vi = next)
     {
         ++next;
-        labeled_tree.remove_vertex(*vi);
+        labeled_tree.remove_vertex(labeled_tree.getFrame(*vi).name);
     }
 
     BOOST_CHECK(labeled_tree.num_vertices() == 0);
