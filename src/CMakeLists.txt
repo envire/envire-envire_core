@@ -7,13 +7,15 @@ rock_library(envire_core
             TransformTree.hpp
             LabeledTransformTree.hpp
             GraphViz.hpp
-            #SpatialItem.hpp
-            #BoundingVolume.hpp
-            #ClassLoader.hpp
-            #AlignedBoundingBox.hpp
+            SpatialItem.hpp
+            BoundingVolume.hpp
+            ClassLoader.hpp
+            AlignedBoundingBox.hpp
+            DummyItem.hpp
     SOURCES ItemBase.cpp
-            #ClassLoader.cpp
-            #BoundingVolume.cpp
-            #AlignedBoundingBox.cpp
+            ClassLoader.cpp
+            BoundingVolume.cpp
+            AlignedBoundingBox.cpp
+            DummyItem.cpp
     DEPS_CMAKE Boost
-    DEPS_PKGCONFIG base-types)
+    DEPS_PKGCONFIG base-types class_loader)
