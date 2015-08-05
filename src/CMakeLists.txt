@@ -11,8 +11,10 @@ rock_library(envire_core
             BoundingVolume.hpp
             ClassLoader.hpp
             AlignedBoundingBox.hpp
+            DummyItem.hpp
     SOURCES ItemBase.cpp
             ClassLoader.cpp
             BoundingVolume.cpp
             AlignedBoundingBox.cpp
+            DummyItem.cpp
     DEPS_PKGCONFIG base-types class_loader)

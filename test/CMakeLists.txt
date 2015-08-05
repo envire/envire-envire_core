@@ -9,6 +9,7 @@ rock_testsuite(test_suite suite.cpp
     test_transform_tree.cpp
     test_labeled_transform_tree.cpp
     test_boundary.cpp
+    test_dummy_item.cpp
     DEPS envire_core
     DEPS_PKGCONFIG class_loader)
 
