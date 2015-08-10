@@ -8,7 +8,6 @@ rock_testsuite(test_suite suite.cpp
     test_plugins.cpp
     test_transform_tree.cpp
     test_labeled_transform_tree.cpp
-    DEPS envire_core)
     test_boundary.cpp
     test_dummy_item.cpp
     DEPS_CMAKE Boost
