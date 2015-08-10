@@ -58,7 +58,7 @@ namespace envire{
         // base class fails on instantiation.
         //
         // To test uncomment the next line:
-        //DummyClass(int);
+        DummyClass(const int& id){};
         void welcome();
     };
     // Inheritance from a template fitting the DummyClass type
@@ -66,6 +66,8 @@ namespace envire{
       //protected:
       //  envire::core::DummyClass user_data;
       public: 
+        template <typename Ts>                                                      
+          DummyItem(Ts&& args) : Item<DummyClass> (std::forward<Ts>(args)){}
         // Overriding the constructor like this is not possible.
         //DummyItem() : Item() {
         //  user_data = DummyClass(1);

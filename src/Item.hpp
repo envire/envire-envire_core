@@ -3,6 +3,7 @@
 
 #include <envire_core/ItemBase.hpp>
 #include <class_loader/class_loader.h>
+#include <utility>                                                              
 
 /**
  * ** Envire marcos **
@@ -75,6 +76,12 @@ namespace envire { namespace core
         {
             user_data_ptr = &user_data;
         };
+
+        template <typename Ts>
+        Item(Ts&& args) : user_data(std::forward<Ts>(args))
+        {
+            user_data_ptr = &user_data;
+        }; 
 
         /**@brief setData
         *
