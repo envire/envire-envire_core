@@ -53,13 +53,15 @@ namespace envire{
     class DummyClass 
     {
       public: 
+        int id;
         // TEST:
         // If the constructor of the allocated class requires an argument the
         // base class fails on instantiation.
         //
         // To test uncomment the next line:
-        DummyClass(const int& id){};
+        DummyClass(const int& id);
         void welcome();
+        int getId();
     };
     // Inheritance from a template fitting the DummyClass type
     class DummyItem : public Item<DummyClass> {
