@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(contructor_various_parameters_forwarding)
     std::cout << "TEST: Constructor With Various Parameters Forwarding Test" << std::endl;
     int id = 1;
     static const int arr[] = {0,10,10};
-    std::vector<double> vector(arr, arr + sizeof(arr) / sizeof(arr[0]) );
+    std::vector<double> vector(arr, std::end(arr) );
     DummyItem item(id, vector);
     DummyClass dummy_object = item.getData();
     assert(id==dummy_object.getId());
