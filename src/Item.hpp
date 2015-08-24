@@ -77,8 +77,8 @@ namespace envire { namespace core
             user_data_ptr = &user_data;
         };
 
-        template <typename Ts>
-        Item(Ts&& args) : user_data(std::forward<Ts>(args))
+        template <typename... Ts>
+        Item(Ts&&... args) : user_data(std::forward<Ts>(args)...)
         {
             user_data_ptr = &user_data;
         }; 
