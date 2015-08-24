@@ -54,22 +54,21 @@ namespace envire{
     {
       public: 
         int id;
-        // TEST:
-        // If the constructor of the allocated class requires an argument the
-        // base class fails on instantiation.
-        //
-        // To test uncomment the next line:
-        DummyClass(const int& id);
+        std::vector<double> myVector;
+        DummyClass();
+        DummyClass(const int& number);
+        DummyClass(const int& number, const std::vector<double>& vector);
         void welcome();
         int getId();
+        std::vector<double> getMyVector();
     };
     // Inheritance from a template fitting the DummyClass type
     class DummyItem : public Item<DummyClass> {
       //protected:
       //  envire::core::DummyClass user_data;
       public: 
-        template <typename Ts>                                                      
-          DummyItem(Ts&& args) : Item<DummyClass> (std::forward<Ts>(args)){}
+        template <typename... Ts>                                                      
+          DummyItem(Ts&&... args) : Item<DummyClass> (std::forward<Ts>(args)...){}
         // Overriding the constructor like this is not possible.
         //DummyItem() : Item() {
         //  user_data = DummyClass(1);
