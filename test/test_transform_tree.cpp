@@ -84,6 +84,28 @@ BOOST_AUTO_TEST_CASE(add_and_remove_edge_test)
     BOOST_TEST_MESSAGE("DONE\n");
 }
 
+BOOST_AUTO_TEST_CASE(add_an_item)
+{
+    // Instantiate a tree and vertex
+    using namespace envire::core;
+    TransformTree tree;
+    Frame frame("Example frame");
+    TransformTree::vertex_descriptor v1 = tree.add_vertex(frame);
+    // Add an item to the frame of the vertex
+    boost::intrusive_ptr<ItemBase> itemB = new(Item<std::string>);
+    boost::intrusive_ptr<Item<std::string>> item(new(Item<std::string>));
+    item -> setData("Contents of the Item");
+    itemB = item;
+    // Include the item in the vector of the frame (with a vector)
+    unsigned int vectorSize = 1;
+    std::vector< boost::intrusive_ptr<ItemBase>> itemPVector(vectorSize);
+    itemPVector[0] = itemB;
+    frame.items = itemPVector;
+    // Visualize results
+    envire::core::GraphViz gviz;
+    gviz.write(tree, "graphviz_boost_test_add_an_item.dot");
+}
+
 class Vector: public envire::core::Item<Eigen::Vector3d>
 {
 };
