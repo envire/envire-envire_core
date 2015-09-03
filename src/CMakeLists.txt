@@ -12,6 +12,7 @@ rock_library(envire_core
             ClassLoader.hpp
             AlignedBoundingBox.hpp
             DummyItem.hpp
+            RandomGenerator.hpp
     SOURCES ItemBase.cpp
             ClassLoader.cpp
             BoundingVolume.cpp
