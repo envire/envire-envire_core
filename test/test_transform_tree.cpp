@@ -7,6 +7,17 @@
 #include <envire_core/GraphViz.hpp>
 
 
+BOOST_AUTO_TEST_CASE(ensure_root_node_existence)
+{
+  BOOST_TEST_MESSAGE("ENSURE ROOT NODE EXISTENCE TEST...");
+  envire::core::TransformTree tree;
+  BOOST_CHECK(tree.num_vertices() == 1);
+
+  tree.getFrame(tree.getRootNode());
+  BOOST_CHECK(tree.getFrame(tree.getRootNode()).name.compare("root") == 0);
+}
+
+
 BOOST_AUTO_TEST_CASE(add_and_remove_vertex_test)
 {
     unsigned int max_vertices = 100;
@@ -21,19 +32,21 @@ BOOST_AUTO_TEST_CASE(add_and_remove_vertex_test)
         envire::core::TransformTree::vertex_descriptor v1 = tree.add_vertex(frame);
     }
 
-    BOOST_CHECK(tree.num_vertices() == i);
+    //i+1 because the root vertex exists as well
+    BOOST_CHECK(tree.num_vertices() == i + 1);
     BOOST_TEST_MESSAGE("DONE\n");
 
     BOOST_TEST_MESSAGE("REMOVE VERTEX TEST...");
     envire::core::TransformTree::vertex_iterator vi, vi_end, next;
     boost::tie(vi, vi_end) = tree.vertices();
+    ++vi;//skip the root node
     for (next = vi; vi != vi_end; vi = next)
     {
         ++next;
         tree.remove_vertex(*vi);
     }
 
-    BOOST_CHECK(tree.num_vertices() == 0);
+    BOOST_CHECK(tree.num_vertices() == 1);
     BOOST_TEST_MESSAGE("DONE\n");
 }
 
@@ -68,7 +81,7 @@ BOOST_AUTO_TEST_CASE(add_and_remove_edge_test)
         }
     }
 
-    BOOST_CHECK(tree.num_edges() == max_vertices - 1);
+    BOOST_CHECK(tree.num_edges() == tree.num_vertices() - 1);
     BOOST_TEST_MESSAGE("DONE\n");
 
     BOOST_TEST_MESSAGE("REMOVE EDGES TEST...");
@@ -92,10 +105,10 @@ BOOST_AUTO_TEST_CASE(add_an_item)
     Frame frame("Example frame");
     TransformTree::vertex_descriptor v1 = tree.add_vertex(frame);
     // Add an item to the frame of the vertex
-    boost::intrusive_ptr<ItemBase> itemB = new(Item<std::string>);
-    boost::intrusive_ptr<Item<std::string>> item(new(Item<std::string>));
-    item -> setData("Contents of the Item");
-    itemB = item;
+    boost::intrusive_ptr<Item<std::string>> item(new Item<std::string>());
+    item->setData("Contents of the Item");
+    boost::intrusive_ptr<ItemBase> itemB(item);
+
     // Include the item in the vector of the frame (with a vector)
     unsigned int vectorSize = 1;
     std::vector< boost::intrusive_ptr<ItemBase>> itemPVector(vectorSize);
@@ -130,8 +143,7 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
         *it = my_vector;
     }
 
-    register unsigned int i = 0;
-    for (i = 0; i<max_vertices; ++i)
+    for (unsigned int i = 1; i<max_vertices; ++i)
     {
         envire::core::Frame frame("frame_"+boost::lexical_cast<std::string>(i));
         frame.items = items_vector;
@@ -139,7 +151,7 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
     }
 
     BOOST_TEST_MESSAGE("FRAME PROPERTY TEST...");
-    for (i = 0; i<max_vertices; ++i)
+    for (unsigned int i = 1; i < max_vertices; ++i)
     {
         envire::core::Frame frame = tree.getFrame(tree.vertex(i));
         BOOST_CHECK(frame.name == "frame_"+boost::lexical_cast<std::string>(i));

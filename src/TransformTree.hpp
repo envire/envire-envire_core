@@ -17,6 +17,7 @@
 #include <envire_core/Frame.hpp> /** Frames are for the Vertex **/
 #include <envire_core/Transform.hpp> /** Transform are the Edges **/
 #include <envire_core/Environment.hpp> /** Environment is the tree property **/
+#include <assert.h>
 
 namespace envire { namespace core
 {
@@ -58,6 +59,9 @@ namespace envire { namespace core
         TransformTree(envire::core::Environment const &environment = Environment()):
                         TransformGraph (environment)
         {
+          //Since this is a tree we need a root vertex.
+          //By convention the first vertex in the list is the root vertex
+          add_vertex(envire::core::Frame("root"));
         }
 
         /***************************************************
@@ -81,7 +85,7 @@ namespace envire { namespace core
 
         /**@brief Get a vertex
         */
-        inline TransformTree::vertex_descriptor vertex(const TransformTree::vertices_size_type i)
+        inline TransformTree::vertex_descriptor vertex(const TransformTree::vertices_size_type i) const
         {
             return boost::vertex(i, *this);
         }
@@ -165,7 +169,7 @@ namespace envire { namespace core
          *
          * Frame associated to a node
          * */
-        envire::core::Frame getFrame(const TransformTree::vertex_descriptor vd)
+        envire::core::Frame getFrame(const TransformTree::vertex_descriptor& vd)
         {
             return boost::get(&FrameProperty::frame, *this, vd);
         }
@@ -183,7 +187,7 @@ namespace envire { namespace core
          *
          * Transform associated to an edge
          * */
-        envire::core::Transform getTransform(const TransformTree::edge_descriptor ed)
+        envire::core::Transform getTransform(const TransformTree::edge_descriptor& ed)
         {
             return boost::get(&TransformProperty::transform, *this, ed);
         }
@@ -195,6 +199,16 @@ namespace envire { namespace core
         envire::core::Transform getTransform(const TransformTree::edge_iterator ei)
         {
             return boost::get(&TransformProperty::transform, *this, *ei);
+        }
+
+        /**@return the root node of the tree.
+         * @warning Do NOT remove the root node from the tree.
+         */
+        TransformTree::vertex_descriptor getRootNode() const
+        {
+            //by convention the root node is the first vertex in the graph
+            assert(num_vertices() > 0);
+            return vertex(0);
         }
     };
 }}
