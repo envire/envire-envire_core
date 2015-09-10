@@ -165,40 +165,44 @@ namespace envire { namespace core
 
         /** PROPERTIES METHODS **/
 
-        /**@brief get Frame
-         *
-         * Frame associated to a node
-         * */
-        envire::core::Frame getFrame(const TransformTree::vertex_descriptor& vd)
+        /** @return a reference to the frame that is attached to the specified vertex.**/
+        envire::core::Frame& getFrame(const TransformTree::vertex_descriptor& vd)
         {
-            return boost::get(&FrameProperty::frame, *this, vd);
+          return (*this)[vd].frame;
         }
 
-        /**@brief get Frame
-         *
-         * Frame associated to a node
-         * */
-        envire::core::Frame getFrame(const TransformTree::vertex_iterator vi)
+        /** @return a reference to the frame that is attached to the specified vertex.**/
+        envire::core::Frame& getFrame(const TransformTree::vertex_iterator vi)
         {
-            return boost::get(&FrameProperty::frame, *this, *vi);
+          return getFrame(*vi);
         }
 
         /**@brief get Transform
          *
          * Transform associated to an edge
          * */
-        envire::core::Transform getTransform(const TransformTree::edge_descriptor& ed)
+        envire::core::Transform& getTransform(const TransformTree::edge_descriptor& ed)
         {
-            return boost::get(&TransformProperty::transform, *this, ed);
+            return (*this)[ed].transform;
         }
 
         /**@brief get Transform
          *
          * Transform associated to an edge
          * */
-        envire::core::Transform getTransform(const TransformTree::edge_iterator ei)
+        envire::core::Transform& getTransform(const TransformTree::edge_iterator ei)
         {
-            return boost::get(&TransformProperty::transform, *this, *ei);
+            return getTransform(*ei);
+        }
+
+        /**@brief sets the transform property of the specified edge to the
+         *        specified value.
+         * @param ei The edge whose transform property should be modified
+         * @param tf The new transform value
+         */
+        void setTransform(TransformTree::edge_iterator ei, const Transform& tf)
+        {
+          boost::put(&TransformProperty::transform, *this, *ei, tf);
         }
 
         /**@return the root node of the tree.
