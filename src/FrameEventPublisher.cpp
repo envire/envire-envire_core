@@ -5,10 +5,6 @@
  *      Author: aboeckmann
  */
 #include "FrameEventPublisher.hpp"
-#include "FrameEvent.hpp"
-#include "FrameEventSubscriber.hpp"
-
-#include <cassert>
 #include <algorithm>
 
 using namespace envire::core;
@@ -29,31 +25,12 @@ void FrameEventPublisher::unsubscribe(FrameEventSubscriber* subscriber)
     }
 }
 
-void FrameEventPublisher::notify(const FrameEvent& event) const
+void FrameEventPublisher::notify(const FrameEvent& e) const
 {
-    for(FrameEventSubscriber* sub : subscribers)
+    for(FrameEventSubscriber* s : subscribers)
     {
-        sub->notifyFrameEvent(event);
+      s->notifyFrameEvent(e);
     }
-}
-
-void FrameEventPublisher::frameAdded(const FrameAddedEventArgs& args) const
-{
-    FrameEvent e(args);
-    notify(e);
-
-}
-
-void FrameEventPublisher::frameModified(const FrameModifedEventArgs& args) const
-{
-  FrameEvent e(args);
-  notify(e);
-}
-
-void FrameEventPublisher::frameRemoved(const FrameRemovedEventArgs& args) const
-{
-  FrameEvent e(args);
-  notify(e);
 }
 
 

@@ -20,9 +20,16 @@ namespace envire { namespace core
                           const Transform& tf) : addedVertex(added),
                                                  parentVertex(parent),
                                                  transform(tf){}
+
       vertex_descriptor addedVertex; /**<The vertex containing the newly added frame */
       vertex_descriptor parentVertex; /**<The parent vertex of the newly added vertex */
       Transform transform; /**<Transformation between parent and newly added frame */
+    };
+
+    struct RootFrameAddedEventArgs
+    {
+      RootFrameAddedEventArgs(vertex_descriptor rootVertex) : rootVertex(rootVertex) {}
+      vertex_descriptor rootVertex; /**<The vertex containing the newly added root frame */
     };
 
     struct FrameModifedEventArgs

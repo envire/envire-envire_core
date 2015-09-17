@@ -12,9 +12,8 @@
 
 namespace envire { namespace core
 {
-    struct FrameAddedEventArgs;
-    struct FrameModifedEventArgs;
-    struct FrameRemovedEventArgs;
+    class FrameAddedEvent;
+
     /**
      * A FrameEventSubscriber that parses the event and calls different methods
      * based on the event's content.
@@ -27,9 +26,9 @@ namespace envire { namespace core
         virtual void notifyFrameEvent(const FrameEvent& event);
 
     protected:
-        virtual void frameAdded(const FrameAddedEventArgs& args){}
-        virtual void frameModified(const FrameModifedEventArgs& args){}
-        virtual void frameRemoved(const FrameRemovedEventArgs& args){}
+        virtual void frameAdded(const FrameAddedEvent& e){}
+       // virtual void frameModified(const FrameModifedEventArgs& args){}
+      //  virtual void frameRemoved(const FrameRemovedEventArgs& args){}
     };
 }}
 #endif /* SRC_FRAMEVENTDISPATCHER_HPP_ */

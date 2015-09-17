@@ -17,6 +17,8 @@
 
 #include "FrameEventPublisher.hpp"
 #include "TransformTreeTypes.hpp"
+#include "FrameAddedEvent.hpp"
+#include "FrameRootAddedEvent.hpp"
 
 namespace envire { namespace core
 {
@@ -49,12 +51,22 @@ namespace envire { namespace core
         vertex_descriptor addFrame(const envire::core::Frame &frame,
             vertex_descriptor parent, const envire::core::Transform &tf)
         {
+            vertex_descriptor newNode = add_vertex(frame);
+            edge_descriptor newEdge;
+            bool edgeAdded = false;
+            boost::tie(newEdge, edgeAdded) = add_edge(parent, newNode, tf);
+            assert(edgeAdded);
+            notify(FrameAddedEvent(parent, newNode, tf));
+            return newNode;
+        }
+
+        /**Adds @param frame to the tree without connecting it to any existing
+         * frame. This method can be used to add new root nodes to the tree. */
+        vertex_descriptor addRootFrame(const envire::core::Frame &frame)
+        {
           vertex_descriptor newNode = add_vertex(frame);
-          edge_descriptor newEdge;
-          bool edgeAdded = false;
-          boost::tie(newEdge, edgeAdded) = add_edge(parent, newNode, tf);
-          assert(edgeAdded);
-          frameAdded(FrameAddedEventArgs(newNode, parent, tf));
+          notify(FrameRootAddedEvent(newNode));
+          return newNode;
         }
 
 

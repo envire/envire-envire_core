@@ -5,6 +5,7 @@ rock_library(envire_core
             Transform.hpp
             Environment.hpp
             TransformTree.hpp
+            TransformTreeTypes.hpp
             LabeledTransformTree.hpp
             GraphViz.hpp
             SpatialItem.hpp
@@ -14,7 +15,8 @@ rock_library(envire_core
             DummyItem.hpp
             RandomGenerator.hpp
             FrameEvent.hpp
-            FrameEventArgs.hpp
+            FrameAddedEvent.hpp
+            FrameRootAddedEvent.hpp
             FrameEventSubscriber.hpp
             FrameEventPublisher.hpp
     SOURCES ItemBase.cpp

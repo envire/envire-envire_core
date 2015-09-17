@@ -10,10 +10,12 @@
 #define FRAME_EVENT_PUBLISHER_HPP
 #include <vector>
 #include "FrameEventArgs.hpp"
+#include "FrameEventSubscriber.hpp"
+#include "FrameEvent.hpp"
+#include <cassert>
 
 namespace envire { namespace core
 {
-    class FrameEventSubscriber;
     class FrameEvent;
 
     /**
@@ -31,21 +33,14 @@ namespace envire { namespace core
         void unsubscribe(FrameEventSubscriber* subscriber);
 
     protected:
-        /**Send a frame-added event to all subscribers */
-        void frameAdded(const FrameAddedEventArgs& args) const;
-        /**Send a frame-modifed event to all subscribers */
-        void frameModified(const FrameModifedEventArgs& args) const;
-        /**Send a frame-removed event to all subscribers */
-        void frameRemoved(const FrameRemovedEventArgs& args) const;
+        /**Notify all subscribers about a certain frame event */
+        void notify(const FrameEvent& e) const;
 
         //there is no use in creating an instance of the publisher
         //on its own.
         FrameEventPublisher() {}
         ~FrameEventPublisher() {}
 
-    private:
-        /**Sends the specified event to all subscribers */
-        void notify(const FrameEvent& event) const;
     };
 }}
 

@@ -6,6 +6,7 @@
  */
 #include "FramEventDispatcher.hpp"
 #include "FrameEvent.hpp"
+#include "FrameAddedEvent.hpp"
 #include <cassert>
 
 using namespace envire::core;
@@ -15,13 +16,13 @@ void FrameEventDispatcher::notifyFrameEvent(const FrameEvent& event)
     switch(event.type)
     {
     case FrameEvent::FRAME_ADDED:
-        frameAdded(event.addedArgs);
+        frameAdded(dynamic_cast<const FrameAddedEvent&>(event));
         break;
     case FrameEvent::FRAME_MODIFIED:
-      frameModified(event.modifedArgs);
+      assert(false);
         break;
     case FrameEvent::FRAME_REMOVED:
-      frameRemoved(event.removedArgs);
+      assert(false);
         break;
     default:
         assert(false);//you forgot to add an event type

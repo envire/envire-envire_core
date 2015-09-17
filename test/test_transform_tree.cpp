@@ -2,10 +2,19 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/lexical_cast.hpp> /** to string conversion when using < C++11 */
 
+#include <envire_core/TransformTreeTypes.hpp>
 #include <envire_core/TransformTree.hpp>
 #include <envire_core/Item.hpp>
 #include <envire_core/GraphViz.hpp>
 
+using namespace envire::core;
+
+BOOST_AUTO_TEST_CASE(add_frame_test)
+{
+  TransformTree tree;
+  Frame root("Root");
+  tree.addRootFrame(root);
+}
 
 BOOST_AUTO_TEST_CASE(ensure_root_node_existence)
 {
