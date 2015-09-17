@@ -14,16 +14,7 @@ BOOST_AUTO_TEST_CASE(add_frame_test)
   TransformTree tree;
   Frame root("Root");
   tree.addRootFrame(root);
-}
 
-BOOST_AUTO_TEST_CASE(ensure_root_node_existence)
-{
-  BOOST_TEST_MESSAGE("ENSURE ROOT NODE EXISTENCE TEST...");
-  envire::core::TransformTree tree;
-  BOOST_CHECK(tree.num_vertices() == 1);
-
-  tree.getFrame(tree.getRootNode());
-  BOOST_CHECK(tree.getFrame(tree.getRootNode()).name.compare("root") == 0);
 }
 
 
@@ -41,21 +32,19 @@ BOOST_AUTO_TEST_CASE(add_and_remove_vertex_test)
         envire::core::TransformTree::vertex_descriptor v1 = tree.add_vertex(frame);
     }
 
-    //i+1 because the root vertex exists as well
-    BOOST_CHECK(tree.num_vertices() == i + 1);
+    BOOST_CHECK(tree.num_vertices() == i);
     BOOST_TEST_MESSAGE("DONE\n");
 
     BOOST_TEST_MESSAGE("REMOVE VERTEX TEST...");
     envire::core::TransformTree::vertex_iterator vi, vi_end, next;
     boost::tie(vi, vi_end) = tree.vertices();
-    ++vi;//skip the root node
     for (next = vi; vi != vi_end; vi = next)
     {
         ++next;
         tree.remove_vertex(*vi);
     }
 
-    BOOST_CHECK(tree.num_vertices() == 1);
+    BOOST_CHECK(tree.num_vertices() == 0);
     BOOST_TEST_MESSAGE("DONE\n");
 }
 

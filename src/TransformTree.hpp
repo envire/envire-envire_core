@@ -34,11 +34,7 @@ namespace envire { namespace core
 
         TransformTree(envire::core::Environment const &environment = Environment()):
                         TransformGraph (environment)
-        {
-          //Since this is a tree we need a root vertex.
-          //By convention the first vertex in the list is the root vertex
-          add_vertex(envire::core::Frame("root"));
-        }
+        {}
 
         /***************************************************
          * Methods Naming convention
@@ -208,16 +204,6 @@ namespace envire { namespace core
         void setTransform(TransformTree::edge_iterator ei, const Transform& tf)
         {
           boost::put(&TransformProperty::transform, *this, *ei, tf);
-        }
-
-        /**@return the root node of the tree.
-         * @warning Do NOT remove the root node from the tree.
-         */
-        TransformTree::vertex_descriptor getRootNode() const
-        {
-            //by convention the root node is the first vertex in the graph
-            assert(num_vertices() > 0);
-            return vertex(0);
         }
     };
 }}
