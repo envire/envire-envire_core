@@ -13,10 +13,16 @@ rock_library(envire_core
             AlignedBoundingBox.hpp
             DummyItem.hpp
             RandomGenerator.hpp
+            FrameEvent.hpp
+            FrameEventArgs.hpp
+            FrameEventSubscriber.hpp
+            FrameEventPublisher.hpp
     SOURCES ItemBase.cpp
             ClassLoader.cpp
             BoundingVolume.cpp
             AlignedBoundingBox.cpp
             DummyItem.cpp
+            FrameEventPublisher.cpp
+            FramEventDispatcher.cpp            
     DEPS_CMAKE Boost
     DEPS_PKGCONFIG base-types class_loader)

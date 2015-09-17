@@ -11,47 +11,21 @@
 #ifndef __ENVIRE_CORE_TRANSFORM_TREE__
 #define __ENVIRE_CORE_TRANSFORM_TREE__
 
-#include <boost/graph/directed_graph.hpp> /** Boost directed graph **/
-#include <boost/uuid/uuid.hpp> /** uuid class */
 
-#include <envire_core/Frame.hpp> /** Frames are for the Vertex **/
-#include <envire_core/Transform.hpp> /** Transform are the Edges **/
-#include <envire_core/Environment.hpp> /** Environment is the tree property **/
-#include <assert.h>
+#include <boost/uuid/uuid.hpp> /** uuid class */
+#include <cassert>
+
+#include "FrameEventPublisher.hpp"
+#include "TransformTreeTypes.hpp"
 
 namespace envire { namespace core
 {
-    /**@brief Frame Property
-     * boost access tag for the Frame property
-     */
-    struct FrameProperty
-    {
-        Frame frame;
-    };
-
-    /**@brief Transform Property
-     * boost access tag for the Transform property
-     */
-    struct TransformProperty
-    {
-        Transform transform;
-    };
-
-    /**@brief The Transform Graph type
-    *
-    * The basic class for the Transform Graph
-    *
-    */
-    typedef boost::directed_graph<
-        FrameProperty,
-        TransformProperty,
-        envire::core::Environment> TransformGraph;
 
     /**@class Transformation Tree
     *
     * Transformation Tree class
     */
-    class TransformTree: public TransformGraph
+    class TransformTree : public TransformGraph, public FrameEventPublisher
     {
 
     public:
@@ -70,12 +44,26 @@ namespace envire { namespace core
          * words, new methods use Camel Case separated words
          ***************************************************/
 
+
+        /**Adds @param frame below @param parent to the tree */
+        vertex_descriptor addFrame(const envire::core::Frame &frame,
+            vertex_descriptor parent, const envire::core::Transform &tf)
+        {
+          vertex_descriptor newNode = add_vertex(frame);
+          edge_descriptor newEdge;
+          bool edgeAdded = false;
+          boost::tie(newEdge, edgeAdded) = add_edge(parent, newNode, tf);
+          assert(edgeAdded);
+          frameAdded(FrameAddedEventArgs(newNode, parent, tf));
+        }
+
+
         /** VERTEX METHODS **/
 
 
         /**@brief Add a vertex
          */
-        inline TransformTree::vertex_descriptor add_vertex(const envire::core::Frame &frame)
+        TransformTree::vertex_descriptor add_vertex(const envire::core::Frame &frame)
         {
             FrameProperty node_prop;
             node_prop.frame = frame;
@@ -85,14 +73,14 @@ namespace envire { namespace core
 
         /**@brief Get a vertex
         */
-        inline TransformTree::vertex_descriptor vertex(const TransformTree::vertices_size_type i) const
+        TransformTree::vertex_descriptor vertex(const TransformTree::vertices_size_type i) const
         {
             return boost::vertex(i, *this);
         }
 
         /**@brief Get all vertices
          */
-        inline std::pair<TransformTree::vertex_iterator, TransformTree::vertex_iterator>
+        std::pair<TransformTree::vertex_iterator, TransformTree::vertex_iterator>
         vertices()
         {
             return boost::vertices(*this);
@@ -102,9 +90,13 @@ namespace envire { namespace core
         /** EDGES METHODS **/
 
         /**@brief Add an Edge
-         * Add an edge between two vertex
+         * Add an edge between two vertices.
+         * @return an edge descriptor pointing to the new edge and a boolean.
+         *         The boolean is false if the edge already existed.
+         *         In that case no new edge was added, instead the existing
+         *         edge was updated.
          */
-        inline std::pair<TransformTree::edge_descriptor, bool>
+        std::pair<TransformTree::edge_descriptor, bool>
         add_edge(const TransformTree::vertex_descriptor node_from,
                     const TransformTree::vertex_descriptor node_to,
                     const envire::core::Transform &tf = envire::core::Transform())
@@ -112,11 +104,12 @@ namespace envire { namespace core
             /* Don't allow parallel edges **/
             std::pair<envire::core::TransformTree::edge_descriptor, bool> edge_pair =
                 boost::edge(node_from, node_to, *this);
-
+            //second is true if the edge exists
             /** Update the edge in case it already exists **/
             if (edge_pair.second)
             {
                 boost::put(&TransformProperty::transform, *this, edge_pair.first, tf);
+                edge_pair.second = false;//to comply with the interface of add_edge
             }
             else
             {
@@ -139,7 +132,7 @@ namespace envire { namespace core
 
         /**@brief Get all edges
          */
-        inline std::pair<TransformTree::edge_iterator, TransformTree::edge_iterator>
+        std::pair<TransformTree::edge_iterator, TransformTree::edge_iterator>
         edges()
         {
             return boost::edges(*this);
@@ -149,7 +142,7 @@ namespace envire { namespace core
          *
          * Get source vertex descriptor for edge descriptor
          * */
-        inline TransformTree::vertex_descriptor source(const TransformTree::edge_descriptor it_node)
+        TransformTree::vertex_descriptor source(const TransformTree::edge_descriptor it_node)
         {
             return boost::source(it_node, *this);
         }
@@ -158,7 +151,7 @@ namespace envire { namespace core
          *
          * Get target vertex descriptor for edge descriptor
          * */
-        inline TransformTree::vertex_descriptor target(const TransformTree::edge_descriptor it_node)
+        TransformTree::vertex_descriptor target(const TransformTree::edge_descriptor it_node)
         {
             return boost::target(it_node, *this);
         }
