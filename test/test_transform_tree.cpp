@@ -90,17 +90,15 @@ BOOST_AUTO_TEST_CASE(add_an_item)
     using namespace envire::core;
     TransformTree tree;
     Frame frame("Example frame");
-    TransformTree::vertex_descriptor v1 = tree.add_vertex(frame);
     // Add an item to the frame of the vertex
     boost::intrusive_ptr<ItemBase> itemB = new(Item<std::string>);
     boost::intrusive_ptr<Item<std::string>> item(new(Item<std::string>));
     item -> setData("Contents of the Item");
     itemB = item;
     // Include the item in the vector of the frame (with a vector)
-    unsigned int vectorSize = 1;
-    std::vector< boost::intrusive_ptr<ItemBase>> itemPVector(vectorSize);
-    itemPVector[0] = itemB;
-    frame.items = itemPVector;
+    frame.items.push_back(itemB);
+    TransformTree::vertex_descriptor v1 = tree.add_vertex(frame);
+
     // Visualize results
     envire::core::GraphViz gviz;
     gviz.write(tree, "graphviz_boost_test_add_an_item.dot");
@@ -161,7 +159,7 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
     {
         envire::core::TransformTree::edge_descriptor edge; bool b;
         envire::core::Transform tf_prop(now);
-        base::TransformWithCovariance tf(Eigen::AngleAxisd::Identity(), static_cast<base::Position>(my_vector->getData()));
+        base::TransformWithCovariance tf(static_cast<base::Position>(my_vector->getData()), Eigen::Quaterniond::Identity());
         tf_prop.setTransform(tf);
         envire::core::TransformTree::vertex_descriptor node_to = tree.vertex(iv);
         boost::tie(edge, b) = tree.add_edge(root, node_to, tf_prop);

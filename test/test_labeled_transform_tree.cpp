@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_labeled_tree_test)
         node_prop.items = items_vector;
         envire::core::LabeledTransformTree::vertex_descriptor node = labeled_tree.add_vertex(node_prop);
         envire::core::Transform tf_prop(now);
-        base::TransformWithCovariance tf(Eigen::AngleAxisd::Identity(), static_cast<base::Position>(my_vector->getData()));
+        base::TransformWithCovariance tf(static_cast<base::Position>(my_vector->getData()), Eigen::Quaterniond::Identity());
         tf_prop.setTransform(tf);
         envire::core::LabeledTransformTree::edge_descriptor edge; bool b;
         boost::tie(edge, b) = labeled_tree.add_edge(node, root, tf_prop);
@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE(add_and_updating_edges_labeled_tree_test)
     for (register unsigned int j=0; j<max_vertices; ++j)
     {
         envire::core::Transform tf_prop(now);
-        base::TransformWithCovariance tf(Eigen::AngleAxisd::Identity(), static_cast<base::Position>(my_vector->getData()));
+        base::TransformWithCovariance tf(static_cast<base::Position>(my_vector->getData()), Eigen::Quaterniond::Identity());
         tf_prop.setTransform(tf);
         labeled_tree.add_edge("child_"+boost::lexical_cast<std::string>(j), "root", tf_prop);
     }

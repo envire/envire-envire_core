@@ -53,8 +53,8 @@ namespace envire { namespace core
         void operator()(std::ostream &out, const _Edge& e) const
         {
             out << "[label=\"" << tf[e].time.toString(::base::Time::Seconds) <<
-                boost::format("\\nt: (%.1f %.1f %.1f)\\nr: (%.1f %.1f %.1f)") % tf[e].transform.translation.x() % tf[e].transform.translation.y() % tf[e].transform.translation.z()
-                % tf[e].transform.orientation.axis()[0] % tf[e].transform.orientation.axis()[1] % tf[e].transform.orientation.axis()[2]
+                boost::format("\\nt: (%.1f %.1f %.1f)\\nr: (%.1f %.1f %.1f %.1f)") % tf[e].transform.translation.x() % tf[e].transform.translation.y() % tf[e].transform.translation.z()
+                % tf[e].transform.orientation.w() % tf[e].transform.orientation.x() % tf[e].transform.orientation.y() % tf[e].transform.orientation.z()
                 << "\""
                 << ",shape=ellipse,color=red,style=filled,fillcolor=lightcoral]";
         }

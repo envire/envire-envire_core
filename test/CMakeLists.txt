@@ -18,8 +18,8 @@ rock_testsuite(test_dummy suite.cpp
     test_dummy_graph.cpp
     test_property_tag.cpp)
 
-rock_testsuite(test_parameter_forwarding suite.cpp
-    test_dummy_item.cpp
-    DEPS_CMAKE Boost
-    DEPS envire_core)
+#rock_testsuite(test_parameter_forwarding suite.cpp
+#    test_dummy_item.cpp
+#    DEPS_CMAKE Boost
+#    DEPS envire_core)
 
