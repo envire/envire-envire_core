@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(add_and_remove_vertex_test)
     BOOST_TEST_MESSAGE("ADD VERTEX TEST...");
     envire::core::TransformTree tree;
 
-    register unsigned int i = 0;
+    unsigned int i = 0;
     for (i = 0; i<max_vertices; ++i)
     {
         envire::core::Frame frame("frame_"+boost::lexical_cast<std::string>(i));
@@ -127,11 +127,11 @@ BOOST_AUTO_TEST_CASE(add_and_remove_edge_test)
     BOOST_TEST_MESSAGE("ADD EDGES TEST...");
     envire::core::TransformTree tree;
 
-    register unsigned int i = 0;
+    unsigned int i = 0;
     for (i = 0; i<max_vertices; ++i)
     {
         envire::core::Frame frame("frame_"+boost::lexical_cast<std::string>(i));
-        envire::core::vertex_descriptor v1 = tree.add_vertex(frame);
+        tree.add_vertex(frame);
     }
 
     /** get root node **/
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(add_an_item)
     using namespace envire::core;
     TransformTree tree;
     Frame frame("Example frame");
-    vertex_descriptor v1 = tree.add_vertex(frame);
+    tree.add_vertex(frame);
     // Add an item to the frame of the vertex
     boost::intrusive_ptr<Item<std::string>> item(new Item<std::string>());
     item->setData("Contents of the Item");
@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
     {
         envire::core::Frame frame("frame_"+boost::lexical_cast<std::string>(i));
         frame.items = items_vector;
-        envire::core::vertex_descriptor v1 = tree.add_vertex(frame);
+        tree.add_vertex(frame);
     }
 
     BOOST_TEST_MESSAGE("FRAME PROPERTY TEST...");
