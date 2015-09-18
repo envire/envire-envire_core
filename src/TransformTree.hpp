@@ -15,10 +15,10 @@
 #include <boost/uuid/uuid.hpp>
 #include <cassert>
 
-#include "FrameEventPublisher.hpp"
+#include "events/FrameEventPublisher.hpp"
 #include "TransformTreeTypes.hpp"
-#include "FrameAddedEvent.hpp"
-#include "FrameRootAddedEvent.hpp"
+#include "events/FrameAddedEvent.hpp"
+#include "events/FrameRootAddedEvent.hpp"
 
 namespace envire { namespace core
 {
@@ -50,7 +50,9 @@ namespace envire { namespace core
          ***************************************************/
 
 
-        /**Adds @param frame below @param parent to the tree */
+        /**Adds @param frame below @param parent to the tree.
+         *
+         * Causes an FrameAddedEvent. */
         vertex_descriptor addFrame(const envire::core::Frame &frame,
             vertex_descriptor parent, const envire::core::Transform &tf)
         {
@@ -64,7 +66,9 @@ namespace envire { namespace core
         }
 
         /**Adds @param frame to the tree without connecting it to any existing
-         * frame. This method can be used to add new root nodes to the tree. */
+         * frame. This method can be used to add new root nodes to the tree.
+         *
+         * Causes a FrameRootAddedEvent*/
         vertex_descriptor addRootFrame(const envire::core::Frame &frame)
         {
           vertex_descriptor newNode = add_vertex(frame);

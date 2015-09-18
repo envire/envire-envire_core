@@ -8,11 +8,15 @@
 #ifndef SRC_FRAMEADDEDEVENT_HPP_
 #define SRC_FRAMEADDEDEVENT_HPP_
 #include "FrameEvent.hpp"
-#include "TransformTreeTypes.hpp"
-#include "Transform.hpp"
+#include <envire_core/TransformTreeTypes.hpp>
+#include <envire_core/Transform.hpp>
 
 namespace envire { namespace core
 {
+    /**
+     * A frame-added event is caused whenever a new frame has been added
+     * to the tree.
+     */
     class FrameAddedEvent : public FrameEvent
     {
     public:
