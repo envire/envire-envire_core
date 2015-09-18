@@ -2,8 +2,6 @@
 #ifndef __FRAME_EVENT_SUBSCRIBER_HPP__
 #define __FRAME_EVENT_SUBSCRIBER_HPP__
 
-#include "FrameEventArgs.hpp"
-
 namespace envire { namespace core
 {
     class FrameEvent;

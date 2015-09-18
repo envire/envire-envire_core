@@ -9,7 +9,6 @@
 #ifndef FRAME_EVENT_PUBLISHER_HPP
 #define FRAME_EVENT_PUBLISHER_HPP
 #include <vector>
-#include "FrameEventArgs.hpp"
 #include "FrameEventSubscriber.hpp"
 #include "FrameEvent.hpp"
 #include <cassert>

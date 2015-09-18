@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(add_and_remove_vertex_test)
     for (i = 0; i<max_vertices; ++i)
     {
         envire::core::Frame frame("frame_"+boost::lexical_cast<std::string>(i));
-        envire::core::vertex_descriptor v1 = tree.add_vertex(frame);
+        tree.add_vertex(frame);
     }
 
     BOOST_CHECK(tree.num_vertices() == i);
