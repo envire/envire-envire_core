@@ -19,7 +19,7 @@ namespace envire { namespace core
       FrameRootAddedEvent(const vertex_descriptor& added) :
             FrameEvent(FrameEvent::ROOT_FRAME_ADDED), addedVertex(added) {}
 
-        vertex_descriptor addedVertex;/**<The vertex that contains the newly added frame */
+      vertex_descriptor addedVertex;/**<The vertex that contains the newly added frame */
     };
 }}
 #endif

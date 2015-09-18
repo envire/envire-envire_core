@@ -18,6 +18,7 @@ rock_library(envire_core
             FrameAddedEvent.hpp
             FrameRootAddedEvent.hpp
             FrameEventSubscriber.hpp
+            FrameEventDispatcher.hpp
             FrameEventPublisher.hpp
     SOURCES ItemBase.cpp
             ClassLoader.cpp
@@ -25,6 +26,6 @@ rock_library(envire_core
             AlignedBoundingBox.cpp
             DummyItem.cpp
             FrameEventPublisher.cpp
-            FramEventDispatcher.cpp            
+            FrameEventDispatcher.cpp            
     DEPS_CMAKE Boost
     DEPS_PKGCONFIG base-types class_loader)

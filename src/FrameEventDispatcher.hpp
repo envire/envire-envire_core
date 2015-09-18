@@ -5,14 +5,15 @@
  *      Author: aboeckmann
  */
 
-#ifndef SRC_FRAMEVENTDISPATCHER_HPP_
-#define SRC_FRAMEVENTDISPATCHER_HPP_
+#ifndef SRC_FRAMEEVENTDISPATCHER_HPP_
+#define SRC_FRAMEEVENTDISPATCHER_HPP_
 #include "FrameEventSubscriber.hpp"
 
 
 namespace envire { namespace core
 {
     class FrameAddedEvent;
+    class FrameRootAddedEvent;
 
     /**
      * A FrameEventSubscriber that parses the event and calls different methods
@@ -27,8 +28,9 @@ namespace envire { namespace core
 
     protected:
         virtual void frameAdded(const FrameAddedEvent& e){}
+        virtual void frameRootAdded(const FrameRootAddedEvent& e) {}
        // virtual void frameModified(const FrameModifedEventArgs& args){}
       //  virtual void frameRemoved(const FrameRemovedEventArgs& args){}
     };
 }}
-#endif /* SRC_FRAMEVENTDISPATCHER_HPP_ */
+#endif /* SRC_FRAMEEVENTDISPATCHER_HPP_ */

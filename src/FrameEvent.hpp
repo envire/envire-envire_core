@@ -20,7 +20,7 @@ namespace envire { namespace core
         FrameEvent(const Type type) : type(type) {}
         virtual ~FrameEvent() {}
 
-        const Type type;
+        Type type;
     };
 }}
 

@@ -6,16 +6,89 @@
 #include <envire_core/TransformTree.hpp>
 #include <envire_core/Item.hpp>
 #include <envire_core/GraphViz.hpp>
+#include <envire_core/FrameEventDispatcher.hpp>
+#include <envire_core/FrameRootAddedEvent.hpp>
 
 using namespace envire::core;
 
-BOOST_AUTO_TEST_CASE(add_frame_test)
+BOOST_AUTO_TEST_CASE(add_root_Frame_test)
 {
   TransformTree tree;
   Frame root("Root");
-  tree.addRootFrame(root);
-
+  BOOST_CHECK(tree.num_vertices() == 0);
+  BOOST_CHECK(tree.num_edges() == 0);
+  vertex_descriptor v = tree.addRootFrame(root);
+  const Frame& frame2 = tree.getFrame(v);
+  BOOST_CHECK(root.uuid == frame2.uuid);
+  BOOST_CHECK(tree.num_vertices() == 1);
+  BOOST_CHECK(tree.num_edges() == 0);
 }
+
+class Dispatcher : public FrameEventDispatcher {
+public:
+    boost::optional<FrameAddedEvent> frameAddedEvent;
+    boost::optional<FrameRootAddedEvent> frameRootAddedEvent;
+    int callCount = 0;
+
+    virtual void frameAdded(const FrameAddedEvent& e)
+    {
+      ++callCount;
+      frameAddedEvent = e;
+    }
+    virtual void frameRootAdded(const FrameRootAddedEvent& e)
+    {
+      ++callCount;
+      frameRootAddedEvent = e;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(root_frame_event_test)
+{
+    Dispatcher d;
+    TransformTree tree;
+    tree.subscribe(&d);
+    Frame root("Root");
+    vertex_descriptor v = tree.addRootFrame(root);
+    BOOST_CHECK(d.frameRootAddedEvent.is_initialized());//i.e. the event handler was called
+    BOOST_CHECK(d.callCount == 1);
+    BOOST_CHECK(d.frameRootAddedEvent->addedVertex == v);
+}
+
+BOOST_AUTO_TEST_CASE(frame_add_event_test)
+{
+    Dispatcher d;
+    TransformTree tree;
+    tree.subscribe(&d);
+    Frame root("Root");
+    vertex_descriptor rootVertex = tree.addRootFrame(root);
+
+    Frame child("child");
+    Frame childchild("childchild");
+
+    Transform tf;
+    tf.transform.translation.x() = 42;
+
+    BOOST_CHECK(!d.frameAddedEvent.is_initialized());
+    BOOST_CHECK(d.callCount == 1);
+    vertex_descriptor childVertex = tree.addFrame(child, rootVertex, tf);
+    BOOST_CHECK(d.frameAddedEvent.is_initialized());
+    BOOST_CHECK(d.callCount == 2);
+    BOOST_CHECK(d.frameAddedEvent->parent == rootVertex);
+    BOOST_CHECK(d.frameAddedEvent->addedVertex == childVertex);
+    BOOST_CHECK(d.frameAddedEvent->transform.transform.translation.x() == 42);
+
+    d.frameAddedEvent.reset();
+    BOOST_CHECK(!d.frameAddedEvent.is_initialized());
+    Transform tf2;
+    tf2.transform.translation.x() = 84;
+    vertex_descriptor childChildVertex = tree.addFrame(childchild, childVertex, tf2);
+    BOOST_CHECK(d.frameAddedEvent.is_initialized());
+    BOOST_CHECK(d.callCount == 3);
+    BOOST_CHECK(d.frameAddedEvent->parent == childVertex);
+    BOOST_CHECK(d.frameAddedEvent->addedVertex == childChildVertex);
+    BOOST_CHECK(d.frameAddedEvent->transform.transform.translation.x() == 84);
+}
+
 
 
 BOOST_AUTO_TEST_CASE(add_and_remove_vertex_test)
@@ -141,7 +214,7 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
         *it = my_vector;
     }
 
-    for (unsigned int i = 1; i<max_vertices; ++i)
+    for (unsigned int i = 0; i<max_vertices; ++i)
     {
         envire::core::Frame frame("frame_"+boost::lexical_cast<std::string>(i));
         frame.items = items_vector;
@@ -149,7 +222,7 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
     }
 
     BOOST_TEST_MESSAGE("FRAME PROPERTY TEST...");
-    for (unsigned int i = 1; i < max_vertices; ++i)
+    for (unsigned int i = 0; i < max_vertices; ++i)
     {
         envire::core::Frame frame = tree.getFrame(tree.vertex(i));
         BOOST_CHECK(frame.name == "frame_"+boost::lexical_cast<std::string>(i));
