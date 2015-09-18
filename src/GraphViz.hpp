@@ -138,6 +138,11 @@ namespace envire { namespace core
                     make_edge_writer(boost::get(&TransformProperty::transform, graph)),
                     make_graph_writer());
         }
+
+        void write(const TransformTree &tree, const std::string& filename = "")
+        {
+            write(tree, filename);
+        }
     };
 }}
 #endif

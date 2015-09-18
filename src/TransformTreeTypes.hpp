@@ -49,6 +49,10 @@ namespace envire { namespace core
 
     typedef TransformGraph::vertex_descriptor vertex_descriptor;
     typedef TransformGraph::edge_descriptor edge_descriptor;
+    typedef TransformGraph::edge_iterator edge_iterator;
+    typedef TransformGraph::vertex_iterator vertex_iterator;
+    typedef TransformGraph::vertices_size_type vertices_size_type;
+    typedef TransformGraph::edges_size_type edges_size_type;
     //TODO add the others if this works
 
 }}

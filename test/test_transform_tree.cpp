@@ -89,8 +89,6 @@ BOOST_AUTO_TEST_CASE(frame_add_event_test)
     BOOST_CHECK(d.frameAddedEvent->transform.transform.translation.x() == 84);
 }
 
-
-
 BOOST_AUTO_TEST_CASE(add_and_remove_vertex_test)
 {
     unsigned int max_vertices = 100;
@@ -102,14 +100,14 @@ BOOST_AUTO_TEST_CASE(add_and_remove_vertex_test)
     for (i = 0; i<max_vertices; ++i)
     {
         envire::core::Frame frame("frame_"+boost::lexical_cast<std::string>(i));
-        envire::core::TransformTree::vertex_descriptor v1 = tree.add_vertex(frame);
+        envire::core::vertex_descriptor v1 = tree.add_vertex(frame);
     }
 
     BOOST_CHECK(tree.num_vertices() == i);
     BOOST_TEST_MESSAGE("DONE\n");
 
     BOOST_TEST_MESSAGE("REMOVE VERTEX TEST...");
-    envire::core::TransformTree::vertex_iterator vi, vi_end, next;
+    envire::core::vertex_iterator vi, vi_end, next;
     boost::tie(vi, vi_end) = tree.vertices();
     for (next = vi; vi != vi_end; vi = next)
     {
@@ -133,15 +131,15 @@ BOOST_AUTO_TEST_CASE(add_and_remove_edge_test)
     for (i = 0; i<max_vertices; ++i)
     {
         envire::core::Frame frame("frame_"+boost::lexical_cast<std::string>(i));
-        envire::core::TransformTree::vertex_descriptor v1 = tree.add_vertex(frame);
+        envire::core::vertex_descriptor v1 = tree.add_vertex(frame);
     }
 
     /** get root node **/
-    envire::core::TransformTree::vertex_descriptor root = tree.vertex(0);
-    for (envire::core::TransformTree::vertices_size_type iv = 1; iv < tree.num_vertices(); ++iv)
+    envire::core::vertex_descriptor root = tree.vertex(0);
+    for (envire::core::vertices_size_type iv = 1; iv < tree.num_vertices(); ++iv)
     {
-        envire::core::TransformTree::edge_descriptor edge; bool b;
-        envire::core::TransformTree::vertex_descriptor node_to = tree.vertex(iv);
+        envire::core::edge_descriptor edge; bool b;
+        envire::core::vertex_descriptor node_to = tree.vertex(iv);
         try
         {
             boost::tie(edge, b) = tree.add_edge(root, node_to);
@@ -156,7 +154,7 @@ BOOST_AUTO_TEST_CASE(add_and_remove_edge_test)
     BOOST_TEST_MESSAGE("DONE\n");
 
     BOOST_TEST_MESSAGE("REMOVE EDGES TEST...");
-    envire::core::TransformTree::edge_iterator ei, ei_end, next;
+    envire::core::edge_iterator ei, ei_end, next;
     boost::tie(ei, ei_end) = tree.edges();
     for (next = ei; ei != ei_end; ei = next)
     {
@@ -174,7 +172,7 @@ BOOST_AUTO_TEST_CASE(add_an_item)
     using namespace envire::core;
     TransformTree tree;
     Frame frame("Example frame");
-    TransformTree::vertex_descriptor v1 = tree.add_vertex(frame);
+    vertex_descriptor v1 = tree.add_vertex(frame);
     // Add an item to the frame of the vertex
     boost::intrusive_ptr<Item<std::string>> item(new Item<std::string>());
     item->setData("Contents of the Item");
@@ -218,7 +216,7 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
     {
         envire::core::Frame frame("frame_"+boost::lexical_cast<std::string>(i));
         frame.items = items_vector;
-        envire::core::TransformTree::vertex_descriptor v1 = tree.add_vertex(frame);
+        envire::core::vertex_descriptor v1 = tree.add_vertex(frame);
     }
 
     BOOST_TEST_MESSAGE("FRAME PROPERTY TEST...");
@@ -239,23 +237,24 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
 
     /** get root node and create edges **/
     base::Time now = base::Time::now();
-    envire::core::TransformTree::vertex_descriptor root = tree.vertex(0);
-    for (envire::core::TransformTree::vertices_size_type iv = 1; iv < tree.num_vertices(); ++iv)
+    envire::core::vertex_descriptor root = tree.vertex(0);
+    for (envire::core::vertices_size_type iv = 1; iv < tree.num_vertices(); ++iv)
     {
-        envire::core::TransformTree::edge_descriptor edge; bool b;
+        envire::core::edge_descriptor edge; bool b;
         envire::core::Transform tf_prop(now);
         base::TransformWithCovariance tf(Eigen::AngleAxisd::Identity(), static_cast<base::Position>(my_vector->getData()));
         tf_prop.setTransform(tf);
-        envire::core::TransformTree::vertex_descriptor node_to = tree.vertex(iv);
+        envire::core::vertex_descriptor node_to = tree.vertex(iv);
         boost::tie(edge, b) = tree.add_edge(root, node_to, tf_prop);
         BOOST_CHECK(b == true);
     }
 
     BOOST_TEST_MESSAGE("TRANSFORM PROPERTY TEST...");
-    envire::core::TransformTree::edge_iterator it, end;
+    envire::core::edge_iterator it, end;
     for(boost::tie(it, end) = tree.edges(); it != end; ++it)
     {
-        envire::core::Transform transform = boost::get(&envire::core::TransformProperty::transform, tree, *it);
+
+        const Transform& transform = tree.getTransform(it);
         BOOST_CHECK(transform.time == now);
         BOOST_CHECK(transform.transform.translation == my_vector->getData());
     }

@@ -24,14 +24,14 @@ BOOST_AUTO_TEST_CASE(add_and_remove_vertex_labeled_tree_test)
     for (i = 0; i<max_vertices-1; ++i)
     {
         envire::core::Frame frame("frame_"+boost::lexical_cast<std::string>(i));
-        envire::core::TransformTree::vertex_descriptor v1 = labeled_tree.add_vertex(frame);
+        envire::core::LabeledTransformTree::vertex_descriptor v1 = labeled_tree.add_vertex(frame);
     }
 
     BOOST_CHECK(labeled_tree.num_vertices() == max_vertices);
     BOOST_TEST_MESSAGE("DONE\n");
 
     BOOST_TEST_MESSAGE("REMOVE VERTEX TEST...");
-    envire::core::TransformTree::vertex_iterator vi, vi_end, next;
+    envire::core::LabeledTransformTree::vertex_iterator vi, vi_end, next;
     boost::tie(vi, vi_end) = labeled_tree.vertices();
     for (next = vi; vi != vi_end; vi = next)
     {
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(add_and_remove_edge_labeled_tree_test)
     BOOST_TEST_MESSAGE("GRAPHVIZ TEST...");
 
     BOOST_TEST_MESSAGE("REMOVE EDGES TEST...");
-    envire::core::TransformTree::edge_iterator ei, ei_end, next;
+    envire::core::LabeledTransformTree::edge_iterator ei, ei_end, next;
     boost::tie(ei, ei_end) = labeled_tree.edges();
     bool destructive = true;
     for (next = ei; ei != ei_end; ei = next)
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_labeled_tree_test)
     BOOST_TEST_MESSAGE("DONE\n");
 
     BOOST_TEST_MESSAGE("TRANSFORM PROPERTY TEST...");
-    envire::core::TransformTree::edge_iterator it, end;
+    envire::core::LabeledTransformTree::edge_iterator it, end;
     for(boost::tie(it, end) = labeled_tree.edges(); it != end; ++it)
     {
         envire::core::Transform transform = boost::get(&TransformProperty::transform, labeled_tree, *it);

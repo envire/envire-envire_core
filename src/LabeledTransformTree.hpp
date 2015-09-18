@@ -152,7 +152,7 @@ namespace envire { namespace core
          */
         inline std::pair<LabeledTransformTree::edge_descriptor, bool>
         add_edge(const LabeledTransformTree::vertex_descriptor node_from,
-                    const TransformTree::vertex_descriptor node_to,
+                    const LabeledTransformTree::vertex_descriptor node_to,
                     const envire::core::Transform &tf = envire::core::Transform())
         {
             /* Don't allow parallel edges **/
@@ -309,7 +309,7 @@ namespace envire { namespace core
 
         /**@brief Add a vertex to the tree
         */
-        inline envire::core::Frame getFrame(const TransformTree::vertex_descriptor vd)
+        inline envire::core::Frame getFrame(const LabeledTransformTree::vertex_descriptor vd)
         {
             return boost::get(&FrameProperty::frame, *this, vd);
         }
