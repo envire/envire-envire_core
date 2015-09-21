@@ -16,6 +16,9 @@ namespace envire { namespace core
             FRAME_REMOVED,
             VERTEX_ADDED,
             VERTEX_REMOVED,
+            TRANSFORMATION_ADDED,
+            TRANSFORMATION_REMOVED,
+            TRANSFORMATION_MODIFIED
         };
         TreeEvent(const Type type) : type(type) {}
         virtual ~TreeEvent() {}

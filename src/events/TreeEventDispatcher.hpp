@@ -7,6 +7,9 @@ namespace envire { namespace core
     class FrameAddedEvent;
     class VertexAddedEvent;
     class VertexRemovedEvent;
+    class TransformAddedEvent;
+    class TransformRemovedEvent;
+    class TransformModifiedEvent;
 
     /**
      * A TreeEventSubscriber that parses the event and calls different methods
@@ -25,5 +28,8 @@ namespace envire { namespace core
       //  virtual void frameRemoved(const FrameRemovedEventArgs& args){}
         virtual void vertexAdded(const VertexAddedEvent& e) {}
         virtual void vertexRemoved(const VertexRemovedEvent& e) {}
+        virtual void transformAdded(const TransformAddedEvent& e) {}
+        virtual void transformRemoved(const TransformRemovedEvent& e) {}
+        virtual void transformModified(const TransformModifiedEvent& e) {}
     };
 }}

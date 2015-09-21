@@ -20,6 +20,9 @@
 #include "events/TreeEventPublisher.hpp"
 #include "events/VertexAddedEvent.hpp"
 #include "events/VertexRemovedEvent.hpp"
+#include "events/TransformAddedEvent.hpp"
+#include "events/TransformRemovedEvent.hpp"
+#include "events/TransformModifiedEvent.hpp"
 
 namespace envire { namespace core
 {
@@ -171,7 +174,8 @@ namespace envire { namespace core
             TransformGraph::remove_vertex(*vi);
         }
 
-        /**@brief Get a vertex
+        /**@brief Returns the i'th vertex.
+         * @note indices might be invalidated if the tree changes.
         */
         vertex_descriptor vertex(const vertices_size_type i) const
         {
@@ -191,6 +195,9 @@ namespace envire { namespace core
 
         /**@brief Add an Edge
          * Add an edge between two vertices.
+         *
+         * Causes TransformAddedEvent or TransformModifiedEvent.
+         *
          * @return an edge descriptor pointing to the new edge and a boolean.
          *         The boolean is false if the edge already existed.
          *         In that case no new edge was added, instead the existing
@@ -208,8 +215,11 @@ namespace envire { namespace core
             /** Update the edge in case it already exists **/
             if (edge_pair.second)
             {
+                const Transform oldTransform = getTransform(edge_pair.first);
                 boost::put(&TransformProperty::transform, *this, edge_pair.first, tf);
                 edge_pair.second = false;//to comply with the interface of add_edge
+                notify(TransformModifiedEvent(node_from, node_to, edge_pair.first,
+                                              oldTransform, tf));
             }
             else
             {
@@ -220,6 +230,7 @@ namespace envire { namespace core
                     TransformProperty tf_prop;
                     tf_prop.transform = tf;
                     edge_pair =  boost::add_edge(node_from, node_to, tf_prop, *this);
+                    notify(TransformAddedEvent(node_from, node_to, edge_pair.first, tf));
                // }
                // else
                // {
@@ -231,7 +242,9 @@ namespace envire { namespace core
 
         void remove_edge(edge_descriptor e)
         {
+            TransformRemovedEvent event(source(e), target(e), getTransform(e));
             TransformGraph::remove_edge(e);
+            notify(event);
         }
 
         vertices_size_type num_vertices() const

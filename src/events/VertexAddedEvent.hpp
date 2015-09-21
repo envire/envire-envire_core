@@ -1,6 +1,5 @@
 #pragma once
 #include <envire_core/TransformTreeTypes.hpp>
-#include <envire_core/Transform.hpp>
 #include "TreeEvent.hpp"
 
 namespace envire { namespace core

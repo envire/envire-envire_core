@@ -16,6 +16,9 @@ public:
     boost::optional<FrameAddedEvent> frameAddedEvent;
     boost::optional<VertexAddedEvent> vertexAddedEvent;
     boost::optional<VertexRemovedEvent> vertexRemovedEvent;
+    boost::optional<TransformAddedEvent> transformAddedEvent;
+    boost::optional<TransformModifiedEvent> transformModifiedEvent;
+    boost::optional<TransformRemovedEvent> transformRemovedEvent;
     int callCount = 0;
 
     virtual void frameAdded(const FrameAddedEvent& e)
@@ -35,7 +38,68 @@ public:
       ++callCount;
       vertexRemovedEvent = e;
     }
+
+    virtual void transformAdded(const TransformAddedEvent& e)
+    {
+      ++callCount;
+      transformAddedEvent = e;
+    }
+
+    virtual void transformModified(const TransformModifiedEvent& e)
+    {
+      ++callCount;
+      transformModifiedEvent = e;
+    }
+
+    virtual void transformRemoved(const TransformRemovedEvent& e)
+    {
+      ++callCount;
+      transformRemovedEvent = e;
+    }
 };
+
+BOOST_AUTO_TEST_CASE(add_remove_transform_event_test)
+{
+  TransformTree tree;
+  Frame f1("f1");
+  Frame f2("f2");
+  vertex_descriptor v1 = tree.add_vertex(f1);
+  vertex_descriptor v2 = tree.add_vertex(f2);
+
+  Dispatcher d;
+  tree.subscribe(&d);
+  //add edge
+  Transform tf;
+  tf.transform.translation.x() = 42;
+  edge_descriptor edge;
+  bool added = false;
+  boost::tie(edge, added) = tree.add_edge(v1, v2, tf);
+  BOOST_CHECK(added);
+  BOOST_CHECK(d.callCount == 1);
+  BOOST_CHECK(d.transformAddedEvent->edge == edge);
+  BOOST_CHECK(d.transformAddedEvent->from == v1);
+  BOOST_CHECK(d.transformAddedEvent->to == v2);
+  BOOST_CHECK(d.transformAddedEvent->transform.transform.translation.x() == 42);
+
+  //use add_edge to modify existing edge
+  added = true;
+  tf.transform.translation.x() = 44;
+  boost::tie(edge, added) = tree.add_edge(v1, v2, tf);
+  BOOST_CHECK(d.callCount == 2);
+  BOOST_CHECK(d.transformModifiedEvent->edge == edge);
+  BOOST_CHECK(d.transformModifiedEvent->from == v1);
+  BOOST_CHECK(d.transformModifiedEvent->to == v2);
+  BOOST_CHECK(d.transformModifiedEvent->oldTransform.transform.translation.x() == 42);
+  BOOST_CHECK(d.transformModifiedEvent->newTransform.transform.translation.x() == 44);
+
+  //remove the edge
+  tree.remove_edge(edge);
+  BOOST_CHECK(d.callCount == 3);
+  BOOST_CHECK(d.transformRemovedEvent->from == v1);
+  BOOST_CHECK(d.transformRemovedEvent->to == v2);
+  BOOST_CHECK(d.transformRemovedEvent->transform.transform.translation.x() == 44);
+
+}
 
 
 BOOST_AUTO_TEST_CASE(add_remove_vertex_event_test)
