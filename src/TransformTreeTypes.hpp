@@ -16,7 +16,10 @@
 #include "Transform.hpp" /** Transform are the Edges **/
 #include "Environment.hpp" /** Environment is the tree property **/
 
-#include <boost/graph/directed_graph.hpp> /** Boost directed graph **/
+#include <boost/graph/directed_graph.hpp>
+#include <boost/graph/labeled_graph.hpp>
+#include <string>
+
 namespace envire { namespace core
 {
 
@@ -47,13 +50,15 @@ namespace envire { namespace core
         TransformProperty,
         envire::core::Environment> TransformGraph;
 
-    typedef TransformGraph::vertex_descriptor vertex_descriptor;
-    typedef TransformGraph::edge_descriptor edge_descriptor;
-    typedef TransformGraph::edge_iterator edge_iterator;
-    typedef TransformGraph::vertex_iterator vertex_iterator;
-    typedef TransformGraph::vertices_size_type vertices_size_type;
-    typedef TransformGraph::edges_size_type edges_size_type;
-    typedef TransformGraph::degree_size_type degree_size_type;
+    typedef boost::labeled_graph< TransformGraph, std::string> LabeledTransformGraph;
+
+    typedef LabeledTransformGraph::vertex_descriptor vertex_descriptor;
+    typedef LabeledTransformGraph::edge_descriptor edge_descriptor;
+    typedef LabeledTransformGraph::edge_iterator edge_iterator;
+    typedef LabeledTransformGraph::vertex_iterator vertex_iterator;
+    typedef LabeledTransformGraph::vertices_size_type vertices_size_type;
+    typedef LabeledTransformGraph::edges_size_type edges_size_type;
+    typedef LabeledTransformGraph::degree_size_type degree_size_type;
     //TODO add the others if this works
 
 }}

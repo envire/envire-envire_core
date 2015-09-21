@@ -219,11 +219,12 @@ BOOST_AUTO_TEST_CASE(add_and_remove_edge_test)
     }
 
     /** get root node **/
-    envire::core::vertex_descriptor root = tree.vertex(0);
+    envire::core::vertex_descriptor root = tree.vertex("frame_0");
     for (envire::core::vertices_size_type iv = 1; iv < tree.num_vertices(); ++iv)
     {
         envire::core::edge_descriptor edge; bool b;
-        envire::core::vertex_descriptor node_to = tree.vertex(iv);
+        const std::string label = "frame_"+boost::lexical_cast<std::string>(iv);
+        envire::core::vertex_descriptor node_to = tree.vertex(label);
         try
         {
             boost::tie(edge, b) = tree.add_edge(root, node_to);
@@ -306,7 +307,8 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
     BOOST_TEST_MESSAGE("FRAME PROPERTY TEST...");
     for (unsigned int i = 0; i < max_vertices; ++i)
     {
-        envire::core::Frame frame = tree.getFrame(tree.vertex(i));
+        const std::string label = "frame_"+boost::lexical_cast<std::string>(i);
+        envire::core::Frame frame = tree.getFrame(tree.vertex(label));
         BOOST_CHECK(frame.name == "frame_"+boost::lexical_cast<std::string>(i));
         BOOST_CHECK(frame.items.size() == vector_size);
         for (std::vector< boost::intrusive_ptr<envire::core::ItemBase> >::const_iterator it = frame.items.begin();
@@ -321,14 +323,15 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
 
     /** get root node and create edges **/
     base::Time now = base::Time::now();
-    envire::core::vertex_descriptor root = tree.vertex(0);
+    envire::core::vertex_descriptor root = tree.vertex("frame_0");
     for (envire::core::vertices_size_type iv = 1; iv < tree.num_vertices(); ++iv)
     {
         envire::core::edge_descriptor edge; bool b;
         envire::core::Transform tf_prop(now);
         base::TransformWithCovariance tf(Eigen::AngleAxisd::Identity(), static_cast<base::Position>(my_vector->getData()));
         tf_prop.setTransform(tf);
-        envire::core::vertex_descriptor node_to = tree.vertex(iv);
+        const std::string label = "frame_"+boost::lexical_cast<std::string>(iv);
+        envire::core::vertex_descriptor node_to = tree.vertex(label);
         boost::tie(edge, b) = tree.add_edge(root, node_to, tf_prop);
         BOOST_CHECK(b == true);
     }

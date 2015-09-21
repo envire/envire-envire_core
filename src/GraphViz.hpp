@@ -141,7 +141,7 @@ namespace envire { namespace core
 
         void write(const TransformTree &tree, const std::string& filename = "")
         {
-            write(dynamic_cast<const TransformGraph&>(tree), filename);
+            write(dynamic_cast<const TransformGraph&>(tree.graph()), filename);
         }
     };
 }}

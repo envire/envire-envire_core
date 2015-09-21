@@ -35,7 +35,7 @@ namespace envire { namespace core
      *       the vertices and edges.
      *       This is done to ensure that
     */
-    class TransformTree : protected TransformGraph, public TreeEventPublisher
+    class TransformTree : protected LabeledTransformGraph, public TreeEventPublisher
     {
         //GraphViz has been implemented for TransformGraph.
         //As it only reads and does no manipulation it is ok to let it know
@@ -44,7 +44,7 @@ namespace envire { namespace core
     public:
 
         TransformTree(envire::core::Environment const &environment = Environment()):
-                        TransformGraph (environment)
+          LabeledTransformGraph (environment)
         {}
 
         /***************************************************
@@ -56,8 +56,11 @@ namespace envire { namespace core
 
         /**Adds @param frame below @param parent to the tree.
          *
-         * Causes an FrameAddedEvent.
-         * Does not cause VertexAdded or EdgeAdded events. */
+         * Causes a FrameAddedEvent.
+         * Does not cause VertexAdded or EdgeAdded events.
+         *
+         * @note the name of the frame must be unique.
+         *  */
         vertex_descriptor addFrame(const envire::core::Frame &frame,
             vertex_descriptor parent, const envire::core::Transform &tf)
         {
@@ -105,7 +108,9 @@ namespace envire { namespace core
         /** @return a reference to the frame that is attached to the specified vertex.**/
         const envire::core::Frame& getFrame(const vertex_descriptor& vd)
         {
-          return (*this)[vd].frame;
+          //for some reason the operator[](vertex_descriptor) is hidden in
+          //labeled_graph. But it is available in TransformGraph.
+          return graph()[vd].frame;
         }
 
         /**@brief get Transform
@@ -122,7 +127,7 @@ namespace envire { namespace core
 
         /**@brief sets the transform property of the specified edge to the
          *        specified value.
-         * @param ei The edge whose transform property should be modified
+         * @param ed The edge whose transform property should be modified
          * @param tf The new transform value
          */
         void setTransform(edge_descriptor ed, const Transform& tf)
@@ -137,12 +142,14 @@ namespace envire { namespace core
         /**@brief Add a vertex
          *
          * causes a VertexAddedEvent
+         *
+         * @note the frame's name must be unique.
          */
         vertex_descriptor add_vertex(const envire::core::Frame &frame)
         {
             FrameProperty node_prop;
             node_prop.frame = frame;
-            vertex_descriptor v = boost::add_vertex(node_prop, *this);
+            vertex_descriptor v = LabeledTransformGraph::add_vertex(frame.name, node_prop);
             notify(VertexAddedEvent(v));
             return v;
         }
@@ -157,16 +164,8 @@ namespace envire { namespace core
         void remove_vertex(vertex_descriptor v)
         {
             assert(degree(v) <= 0);
-            TransformGraph::remove_vertex(v);
+            graph().remove_vertex(v);
             notify(VertexRemovedEvent());
-        }
-
-        /**@brief Returns the i'th vertex.
-         * @note indices might be invalidated if the tree changes.
-        */
-        vertex_descriptor vertex(const vertices_size_type i) const
-        {
-            return boost::vertex(i, *this);
         }
 
         /**@brief Get all vertices
@@ -230,18 +229,18 @@ namespace envire { namespace core
         void remove_edge(edge_descriptor e)
         {
             TransformRemovedEvent event(source(e), target(e), getTransform(e));
-            TransformGraph::remove_edge(e);
+            boost::remove_edge(e, *this);
             notify(event);
         }
 
         vertices_size_type num_vertices() const
         {
-            return TransformGraph::num_vertices();
+            return boost::num_vertices(*this);
         }
 
         edges_size_type num_edges() const
         {
-            return TransformGraph::num_edges();
+            return boost::num_edges(*this);
         }
 
         /**@return the total number of edges connected to @param v.
@@ -249,7 +248,13 @@ namespace envire { namespace core
          */
         degree_size_type degree(const vertex_descriptor v) const
         {
-          return boost::degree(v, *this);
+            return boost::degree(v, *this);
+        }
+
+        /**@return the vertex identified by @param label */
+        vertex_descriptor vertex(const std::string& label) const
+        {
+            return LabeledTransformGraph::vertex(label);
         }
     };
 }}
