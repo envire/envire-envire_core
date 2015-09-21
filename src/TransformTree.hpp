@@ -103,33 +103,21 @@ namespace envire { namespace core
         /** PROPERTIES METHODS **/
 
         /** @return a reference to the frame that is attached to the specified vertex.**/
-        envire::core::Frame& getFrame(const vertex_descriptor& vd)
+        const envire::core::Frame& getFrame(const vertex_descriptor& vd)
         {
           return (*this)[vd].frame;
         }
 
-        /** @return a reference to the frame that is attached to the specified vertex.**/
-        envire::core::Frame& getFrame(const vertex_iterator vi)
-        {
-          return getFrame(*vi);
-        }
-
         /**@brief get Transform
          *
-         * Transform associated to an edge
+         * Transform associated to an edge.
+         * @note you are not allowed to change the transform directly because
+         *       that would circumvent the event system.
+         *       Use setTransform to change the value of a transform
          * */
-        envire::core::Transform& getTransform(const edge_descriptor& ed)
+        const envire::core::Transform& getTransform(const edge_descriptor& ed)
         {
             return (*this)[ed].transform;
-        }
-
-        /**@brief get Transform
-         *
-         * Transform associated to an edge
-         * */
-        envire::core::Transform& getTransform(const edge_iterator ei)
-        {
-            return getTransform(*ei);
         }
 
         /**@brief sets the transform property of the specified edge to the
@@ -137,9 +125,13 @@ namespace envire { namespace core
          * @param ei The edge whose transform property should be modified
          * @param tf The new transform value
          */
-        void setTransform(edge_iterator ei, const Transform& tf)
+        void setTransform(edge_descriptor ed, const Transform& tf)
         {
-          boost::put(&TransformProperty::transform, *this, *ei, tf);
+            const Transform oldTransform = getTransform(ed);
+            const vertex_descriptor from = source(ed);
+            const vertex_descriptor to = target(ed);
+            boost::put(&TransformProperty::transform, *this, ed, tf);
+            notify(TransformModifiedEvent(from, to, ed, oldTransform, tf));
         }
 
         /**@brief Add a vertex

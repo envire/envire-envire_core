@@ -316,7 +316,7 @@ BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
     for(boost::tie(it, end) = tree.edges(); it != end; ++it)
     {
 
-        const Transform& transform = tree.getTransform(it);
+        const Transform& transform = tree.getTransform(*it);
         BOOST_CHECK(transform.time == now);
         BOOST_CHECK(transform.transform.translation == my_vector->getData());
     }
