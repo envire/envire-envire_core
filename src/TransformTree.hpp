@@ -161,11 +161,6 @@ namespace envire { namespace core
             notify(VertexRemovedEvent());
         }
 
-        void remove_vertex(vertex_iterator vi)
-        {
-            TransformGraph::remove_vertex(*vi);
-        }
-
         /**@brief Returns the i'th vertex.
          * @note indices might be invalidated if the tree changes.
         */

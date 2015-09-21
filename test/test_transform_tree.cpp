@@ -23,97 +23,119 @@ public:
 
     virtual void frameAdded(const FrameAddedEvent& e)
     {
-      ++callCount;
-      frameAddedEvent = e;
+        ++callCount;
+        frameAddedEvent = e;
     }
 
     virtual void vertexAdded(const VertexAddedEvent& e)
     {
-      ++callCount;
-      vertexAddedEvent = e;
+        ++callCount;
+        vertexAddedEvent = e;
     }
 
     virtual void vertexRemoved(const VertexRemovedEvent& e)
     {
-      ++callCount;
-      vertexRemovedEvent = e;
+        ++callCount;
+        vertexRemovedEvent = e;
     }
 
     virtual void transformAdded(const TransformAddedEvent& e)
     {
-      ++callCount;
-      transformAddedEvent = e;
+        ++callCount;
+        transformAddedEvent = e;
     }
 
     virtual void transformModified(const TransformModifiedEvent& e)
     {
-      ++callCount;
-      transformModifiedEvent = e;
+        ++callCount;
+        transformModifiedEvent = e;
     }
 
     virtual void transformRemoved(const TransformRemovedEvent& e)
     {
-      ++callCount;
-      transformRemovedEvent = e;
+        ++callCount;
+        transformRemovedEvent = e;
     }
 };
 
+BOOST_AUTO_TEST_CASE(modify_transform_event_test)
+{
+    TransformTree tree;
+    Frame f1("f1");
+    Frame f2("f2");
+    vertex_descriptor v1 = tree.add_vertex(f1);
+    vertex_descriptor v2 = tree.add_vertex(f2);
+    Transform tf;
+    tf.transform.translation.x() = 42;
+    bool added = false;
+    edge_descriptor edge;
+    boost::tie(edge, added) = tree.add_edge(v1, v2, tf);
+    Dispatcher d;
+    tree.subscribe(&d);
+    tf.transform.translation.x() = 44;
+    tree.setTransform(edge, tf);
+    BOOST_CHECK(d.callCount == 1);
+    BOOST_CHECK(d.transformModifiedEvent->newTransform.transform.translation.x() == 44);
+    BOOST_CHECK(d.transformModifiedEvent->oldTransform.transform.translation.x() == 42);
+    BOOST_CHECK(d.transformModifiedEvent->edge == edge);
+}
+
 BOOST_AUTO_TEST_CASE(add_remove_transform_event_test)
 {
-  TransformTree tree;
-  Frame f1("f1");
-  Frame f2("f2");
-  vertex_descriptor v1 = tree.add_vertex(f1);
-  vertex_descriptor v2 = tree.add_vertex(f2);
+    TransformTree tree;
+    Frame f1("f1");
+    Frame f2("f2");
+    vertex_descriptor v1 = tree.add_vertex(f1);
+    vertex_descriptor v2 = tree.add_vertex(f2);
 
-  Dispatcher d;
-  tree.subscribe(&d);
-  //add edge
-  Transform tf;
-  tf.transform.translation.x() = 42;
-  edge_descriptor edge;
-  bool added = false;
-  boost::tie(edge, added) = tree.add_edge(v1, v2, tf);
-  BOOST_CHECK(added);
-  BOOST_CHECK(d.callCount == 1);
-  BOOST_CHECK(d.transformAddedEvent->edge == edge);
-  BOOST_CHECK(d.transformAddedEvent->from == v1);
-  BOOST_CHECK(d.transformAddedEvent->to == v2);
-  BOOST_CHECK(d.transformAddedEvent->transform.transform.translation.x() == 42);
+    Dispatcher d;
+    tree.subscribe(&d);
+    //add edge
+    Transform tf;
+    tf.transform.translation.x() = 42;
+    edge_descriptor edge;
+    bool added = false;
+    boost::tie(edge, added) = tree.add_edge(v1, v2, tf);
+    BOOST_CHECK(added);
+    BOOST_CHECK(d.callCount == 1);
+    BOOST_CHECK(d.transformAddedEvent->edge == edge);
+    BOOST_CHECK(d.transformAddedEvent->from == v1);
+    BOOST_CHECK(d.transformAddedEvent->to == v2);
+    BOOST_CHECK(d.transformAddedEvent->transform.transform.translation.x() == 42);
 
-  //use add_edge to modify existing edge
-  added = true;
-  tf.transform.translation.x() = 44;
-  boost::tie(edge, added) = tree.add_edge(v1, v2, tf);
-  BOOST_CHECK(d.callCount == 2);
-  BOOST_CHECK(d.transformModifiedEvent->edge == edge);
-  BOOST_CHECK(d.transformModifiedEvent->from == v1);
-  BOOST_CHECK(d.transformModifiedEvent->to == v2);
-  BOOST_CHECK(d.transformModifiedEvent->oldTransform.transform.translation.x() == 42);
-  BOOST_CHECK(d.transformModifiedEvent->newTransform.transform.translation.x() == 44);
+    //use add_edge to modify existing edge
+    added = true;
+    tf.transform.translation.x() = 44;
+    boost::tie(edge, added) = tree.add_edge(v1, v2, tf);
+    BOOST_CHECK(d.callCount == 2);
+    BOOST_CHECK(d.transformModifiedEvent->edge == edge);
+    BOOST_CHECK(d.transformModifiedEvent->from == v1);
+    BOOST_CHECK(d.transformModifiedEvent->to == v2);
+    BOOST_CHECK(d.transformModifiedEvent->oldTransform.transform.translation.x() == 42);
+    BOOST_CHECK(d.transformModifiedEvent->newTransform.transform.translation.x() == 44);
 
-  //remove the edge
-  tree.remove_edge(edge);
-  BOOST_CHECK(d.callCount == 3);
-  BOOST_CHECK(d.transformRemovedEvent->from == v1);
-  BOOST_CHECK(d.transformRemovedEvent->to == v2);
-  BOOST_CHECK(d.transformRemovedEvent->transform.transform.translation.x() == 44);
+    //remove the edge
+    tree.remove_edge(edge);
+    BOOST_CHECK(d.callCount == 3);
+    BOOST_CHECK(d.transformRemovedEvent->from == v1);
+    BOOST_CHECK(d.transformRemovedEvent->to == v2);
+    BOOST_CHECK(d.transformRemovedEvent->transform.transform.translation.x() == 44);
 
 }
 
 
 BOOST_AUTO_TEST_CASE(add_remove_vertex_event_test)
 {
-  Dispatcher d;
-  TransformTree tree;
-  tree.subscribe(&d);
-  Frame root("Root");
-  vertex_descriptor rootVertex = tree.add_vertex(root);
-  BOOST_CHECK(d.callCount == 1);
-  BOOST_CHECK(d.vertexAddedEvent->addedVertex == rootVertex);
-  tree.remove_vertex(rootVertex);
-  BOOST_CHECK(d.callCount == 2);
-  BOOST_CHECK(d.vertexRemovedEvent.is_initialized());
+    Dispatcher d;
+    TransformTree tree;
+    tree.subscribe(&d);
+    Frame root("Root");
+    vertex_descriptor rootVertex = tree.add_vertex(root);
+    BOOST_CHECK(d.callCount == 1);
+    BOOST_CHECK(d.vertexAddedEvent->addedVertex == rootVertex);
+    tree.remove_vertex(rootVertex);
+    BOOST_CHECK(d.callCount == 2);
+    BOOST_CHECK(d.vertexRemovedEvent.is_initialized());
 }
 
 BOOST_AUTO_TEST_CASE(frame_add_event_test)
