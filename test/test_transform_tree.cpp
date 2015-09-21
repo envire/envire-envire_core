@@ -7,27 +7,15 @@
 #include <envire_core/Item.hpp>
 #include <envire_core/GraphViz.hpp>
 #include <envire_core/events/TreeEventDispatcher.hpp>
-#include <envire_core/events/FrameRootAddedEvent.hpp>
 
 using namespace envire::core;
 
-BOOST_AUTO_TEST_CASE(add_root_Frame_test)
-{
-  TransformTree tree;
-  Frame root("Root");
-  BOOST_CHECK(tree.num_vertices() == 0);
-  BOOST_CHECK(tree.num_edges() == 0);
-  vertex_descriptor v = tree.addRootFrame(root);
-  const Frame& frame2 = tree.getFrame(v);
-  BOOST_CHECK(root.uuid == frame2.uuid);
-  BOOST_CHECK(tree.num_vertices() == 1);
-  BOOST_CHECK(tree.num_edges() == 0);
-}
 
 class Dispatcher : public TreeEventDispatcher {
 public:
     boost::optional<FrameAddedEvent> frameAddedEvent;
-    boost::optional<FrameRootAddedEvent> frameRootAddedEvent;
+    boost::optional<VertexAddedEvent> vertexAddedEvent;
+    boost::optional<VertexRemovedEvent> vertexRemovedEvent;
     int callCount = 0;
 
     virtual void frameAdded(const FrameAddedEvent& e)
@@ -35,23 +23,33 @@ public:
       ++callCount;
       frameAddedEvent = e;
     }
-    virtual void frameRootAdded(const FrameRootAddedEvent& e)
+
+    virtual void vertexAdded(const VertexAddedEvent& e)
     {
       ++callCount;
-      frameRootAddedEvent = e;
+      vertexAddedEvent = e;
+    }
+
+    virtual void vertexRemoved(const VertexRemovedEvent& e)
+    {
+      ++callCount;
+      vertexRemovedEvent = e;
     }
 };
 
-BOOST_AUTO_TEST_CASE(root_frame_event_test)
+
+BOOST_AUTO_TEST_CASE(add_remove_vertex_event_test)
 {
-    Dispatcher d;
-    TransformTree tree;
-    tree.subscribe(&d);
-    Frame root("Root");
-    vertex_descriptor v = tree.addRootFrame(root);
-    BOOST_CHECK(d.frameRootAddedEvent.is_initialized());//i.e. the event handler was called
-    BOOST_CHECK(d.callCount == 1);
-    BOOST_CHECK(d.frameRootAddedEvent->addedVertex == v);
+  Dispatcher d;
+  TransformTree tree;
+  tree.subscribe(&d);
+  Frame root("Root");
+  vertex_descriptor rootVertex = tree.add_vertex(root);
+  BOOST_CHECK(d.callCount == 1);
+  BOOST_CHECK(d.vertexAddedEvent->addedVertex == rootVertex);
+  tree.remove_vertex(rootVertex);
+  BOOST_CHECK(d.callCount == 2);
+  BOOST_CHECK(d.vertexRemovedEvent.is_initialized());
 }
 
 BOOST_AUTO_TEST_CASE(frame_add_event_test)
@@ -60,7 +58,7 @@ BOOST_AUTO_TEST_CASE(frame_add_event_test)
     TransformTree tree;
     tree.subscribe(&d);
     Frame root("Root");
-    vertex_descriptor rootVertex = tree.addRootFrame(root);
+    vertex_descriptor rootVertex = tree.add_vertex(root);
 
     Frame child("child");
     Frame childchild("childchild");

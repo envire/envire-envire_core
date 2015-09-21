@@ -1,12 +1,4 @@
-/*
- * FrameAddedEvent.hpp
- *
- *  Created on: Sep 17, 2015
- *      Author: aboeckmann
- */
-
-#ifndef SRC_FRAMEADDEDEVENT_HPP_
-#define SRC_FRAMEADDEDEVENT_HPP_
+#pragma once
 #include <envire_core/TransformTreeTypes.hpp>
 #include <envire_core/Transform.hpp>
 #include "TreeEvent.hpp"
@@ -31,4 +23,3 @@ namespace envire { namespace core
         Transform transform;/**<The transform between parent and newly added vertex */
     };
 }}
-#endif /* SRC_FRAMEADDEDEVENT_HPP_ */

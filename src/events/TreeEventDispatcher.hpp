@@ -1,12 +1,12 @@
-#ifndef SRC_FRAMEEVENTDISPATCHER_HPP_
-#define SRC_FRAMEEVENTDISPATCHER_HPP_
+#pragma once
 #include "TreeEventSubscriber.hpp"
 
 
 namespace envire { namespace core
 {
     class FrameAddedEvent;
-    class FrameRootAddedEvent;
+    class VertexAddedEvent;
+    class VertexRemovedEvent;
 
     /**
      * A TreeEventSubscriber that parses the event and calls different methods
@@ -21,9 +21,9 @@ namespace envire { namespace core
 
     protected:
         virtual void frameAdded(const FrameAddedEvent& e){}
-        virtual void frameRootAdded(const FrameRootAddedEvent& e) {}
        // virtual void frameModified(const FrameModifedEventArgs& args){}
       //  virtual void frameRemoved(const FrameRemovedEventArgs& args){}
+        virtual void vertexAdded(const VertexAddedEvent& e) {}
+        virtual void vertexRemoved(const VertexRemovedEvent& e) {}
     };
 }}
-#endif /* SRC_FRAMEEVENTDISPATCHER_HPP_ */

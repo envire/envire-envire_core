@@ -17,8 +17,9 @@
 
 #include "TransformTreeTypes.hpp"
 #include "events/FrameAddedEvent.hpp"
-#include "events/FrameRootAddedEvent.hpp"
 #include "events/TreeEventPublisher.hpp"
+#include "events/VertexAddedEvent.hpp"
+#include "events/VertexRemovedEvent.hpp"
 
 namespace envire { namespace core
 {
@@ -52,28 +53,22 @@ namespace envire { namespace core
 
         /**Adds @param frame below @param parent to the tree.
          *
-         * Causes an FrameAddedEvent. */
+         * Causes an FrameAddedEvent.
+         * Does not cause VertexAdded or EdgeAdded events. */
         vertex_descriptor addFrame(const envire::core::Frame &frame,
             vertex_descriptor parent, const envire::core::Transform &tf)
         {
+            disableEvents();//otherwise add_vertex and add_edge will cause events
+
             vertex_descriptor newNode = add_vertex(frame);
             edge_descriptor newEdge;
             bool edgeAdded = false;
             boost::tie(newEdge, edgeAdded) = add_edge(parent, newNode, tf);
             assert(edgeAdded);
+
+            enableEvents();
             notify(FrameAddedEvent(parent, newNode, tf));
             return newNode;
-        }
-
-        /**Adds @param frame to the tree without connecting it to any existing
-         * frame. This method can be used to add new root nodes to the tree.
-         *
-         * Causes a FrameRootAddedEvent*/
-        vertex_descriptor addRootFrame(const envire::core::Frame &frame)
-        {
-          vertex_descriptor newNode = add_vertex(frame);
-          notify(FrameRootAddedEvent(newNode));
-          return newNode;
         }
 
         /**@brief Get all edges
@@ -145,18 +140,30 @@ namespace envire { namespace core
         }
 
         /**@brief Add a vertex
+         *
+         * causes a VertexAddedEvent
          */
         vertex_descriptor add_vertex(const envire::core::Frame &frame)
         {
             FrameProperty node_prop;
             node_prop.frame = frame;
             vertex_descriptor v = boost::add_vertex(node_prop, *this);
+            notify(VertexAddedEvent(v));
             return v;
         }
 
+        /**Removes a vertex from the tree.
+         * A vertex can only be removed if there are no edges to
+         * and from the vertex. Removing a vertex that still has edges
+         * attached will result in undefined behavior.
+         *
+         * If you want to remove a vertex and all corresponding edges
+         * you should consider removeFrame() */
         void remove_vertex(vertex_descriptor v)
         {
+            assert(degree(v) <= 0);
             TransformGraph::remove_vertex(v);
+            notify(VertexRemovedEvent());
         }
 
         void remove_vertex(vertex_iterator vi)
@@ -237,8 +244,13 @@ namespace envire { namespace core
             return TransformGraph::num_edges();
         }
 
-
-
+        /**@return the total number of edges connected to @param v.
+         *         I.e. the sum of the in and out edges.
+         */
+        degree_size_type degree(const vertex_descriptor v) const
+        {
+          return boost::degree(v, *this);
+        }
     };
 }}
 #endif

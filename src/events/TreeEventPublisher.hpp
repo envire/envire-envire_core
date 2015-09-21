@@ -6,8 +6,6 @@
  */
 
 #pragma once
-#ifndef FRAME_EVENT_PUBLISHER_HPP
-#define FRAME_EVENT_PUBLISHER_HPP
 #include <vector>
 #include <cassert>
 #include "TreeEvent.hpp"
@@ -25,6 +23,7 @@ namespace envire { namespace core
     {
     private:
       std::vector<TreeEventSubscriber*> subscribers;
+      bool eventsEnabled = true;/**<If false notify() has no effect */
 
     public:
         /**Subscribes the @param handler to all events by this event source */
@@ -35,6 +34,10 @@ namespace envire { namespace core
         /**Notify all subscribers about a certain frame event */
         void notify(const TreeEvent& e) const;
 
+        /**Disables all events. I.e. notify() will have no effect*/
+        void disableEvents();
+        void enableEvents();
+
         //there is no use in creating an instance of the publisher
         //on its own.
         TreeEventPublisher() {}
@@ -43,4 +46,3 @@ namespace envire { namespace core
     };
 }}
 
-#endif

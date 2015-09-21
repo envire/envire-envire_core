@@ -1,5 +1,4 @@
-#ifndef __FRAME_EVENT_HPP__
-#define __FRAME_EVENT_HPP__
+#pragma once
 
 namespace envire { namespace core
 {
@@ -13,10 +12,10 @@ namespace envire { namespace core
         enum Type
         {
             FRAME_ADDED,
-            ROOT_FRAME_ADDED,
             FRAME_MODIFIED,
             FRAME_REMOVED,
-            VERTEX_ADDED
+            VERTEX_ADDED,
+            VERTEX_REMOVED,
         };
         TreeEvent(const Type type) : type(type) {}
         virtual ~TreeEvent() {}
@@ -24,5 +23,3 @@ namespace envire { namespace core
         Type type;
     };
 }}
-
-#endif

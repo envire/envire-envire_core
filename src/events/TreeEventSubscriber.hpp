@@ -1,6 +1,4 @@
 #pragma once
-#ifndef __FRAME_EVENT_SUBSCRIBER_HPP__
-#define __FRAME_EVENT_SUBSCRIBER_HPP__
 
 namespace envire { namespace core
 {
@@ -18,4 +16,3 @@ namespace envire { namespace core
         virtual ~TreeEventSubscriber() {}
     };
 }}
-#endif
