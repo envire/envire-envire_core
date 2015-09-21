@@ -27,10 +27,22 @@ void TreeEventPublisher::unsubscribe(TreeEventSubscriber* subscriber)
 
 void TreeEventPublisher::notify(const TreeEvent& e) const
 {
-    for(TreeEventSubscriber* s : subscribers)
+    if(eventsEnabled)
     {
-      s->notifyTreeEvent(e);
+        for(TreeEventSubscriber* s : subscribers)
+        {
+          s->notifyTreeEvent(e);
+        }
     }
+}
+
+void TreeEventPublisher::disableEvents()
+{
+    eventsEnabled = false;
+}
+void TreeEventPublisher::enableEvents()
+{
+    eventsEnabled = true;
 }
 
 
