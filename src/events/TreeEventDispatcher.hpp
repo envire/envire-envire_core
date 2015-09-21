@@ -1,13 +1,6 @@
-/*
- * FramEventDispatcher.hpp
- *
- *  Created on: Sep 16, 2015
- *      Author: aboeckmann
- */
-
 #ifndef SRC_FRAMEEVENTDISPATCHER_HPP_
 #define SRC_FRAMEEVENTDISPATCHER_HPP_
-#include "FrameEventSubscriber.hpp"
+#include "TreeEventSubscriber.hpp"
 
 
 namespace envire { namespace core
@@ -16,15 +9,15 @@ namespace envire { namespace core
     class FrameRootAddedEvent;
 
     /**
-     * A FrameEventSubscriber that parses the event and calls different methods
+     * A TreeEventSubscriber that parses the event and calls different methods
      * based on the event's content.
      *
      * You should override the methods, that you are interested in.
      */
-    class FrameEventDispatcher : public FrameEventSubscriber
+    class TreeEventDispatcher : public TreeEventSubscriber
     {
     public:
-        virtual void notifyFrameEvent(const FrameEvent& event);
+        virtual void notifyTreeEvent(const TreeEvent& event);
 
     protected:
         virtual void frameAdded(const FrameAddedEvent& e){}

@@ -1,21 +1,21 @@
 /*
- * FrameEventPublisher.cpp
+ * TreeEventPublisher.cpp
  *
  *  Created on: Sep 16, 2015
  *      Author: aboeckmann
  */
-#include "FrameEventPublisher.hpp"
 #include <algorithm>
+#include "TreeEventPublisher.hpp"
 
 using namespace envire::core;
 
-void FrameEventPublisher::subscribe(FrameEventSubscriber* subscriber)
+void TreeEventPublisher::subscribe(TreeEventSubscriber* subscriber)
 {
     assert(nullptr != subscriber);
     subscribers.push_back(subscriber);
 }
 
-void FrameEventPublisher::unsubscribe(FrameEventSubscriber* subscriber)
+void TreeEventPublisher::unsubscribe(TreeEventSubscriber* subscriber)
 {
     assert(nullptr != subscriber);
     auto pos = std::find(subscribers.begin(), subscribers.end(), subscriber);
@@ -25,11 +25,11 @@ void FrameEventPublisher::unsubscribe(FrameEventSubscriber* subscriber)
     }
 }
 
-void FrameEventPublisher::notify(const FrameEvent& e) const
+void TreeEventPublisher::notify(const TreeEvent& e) const
 {
-    for(FrameEventSubscriber* s : subscribers)
+    for(TreeEventSubscriber* s : subscribers)
     {
-      s->notifyFrameEvent(e);
+      s->notifyTreeEvent(e);
     }
 }
 

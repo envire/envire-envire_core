@@ -1,31 +1,26 @@
-/*
- * FramEventDispatcher.cpp
- *
- *  Created on: Sep 16, 2015
- *      Author: aboeckmann
- */
-#include "FrameEvent.hpp"
+#include "TreeEventDispatcher.hpp"
 #include "FrameAddedEvent.hpp"
 #include "FrameRootAddedEvent.hpp"
+#include "TreeEvent.hpp"
+
 #include <cassert>
-#include "FrameEventDispatcher.hpp"
 
 using namespace envire::core;
 
-void FrameEventDispatcher::notifyFrameEvent(const FrameEvent& event)
+void TreeEventDispatcher::notifyTreeEvent(const TreeEvent& event)
 {
     switch(event.type)
     {
-    case FrameEvent::FRAME_ADDED:
+    case TreeEvent::FRAME_ADDED:
         frameAdded(dynamic_cast<const FrameAddedEvent&>(event));
         break;
-    case FrameEvent::ROOT_FRAME_ADDED:
+    case TreeEvent::ROOT_FRAME_ADDED:
         frameRootAdded(dynamic_cast<const FrameRootAddedEvent&>(event));
         break;
-    case FrameEvent::FRAME_MODIFIED:
+    case TreeEvent::FRAME_MODIFIED:
       assert(false);
         break;
-    case FrameEvent::FRAME_REMOVED:
+    case TreeEvent::FRAME_REMOVED:
       assert(false);
         break;
     default:

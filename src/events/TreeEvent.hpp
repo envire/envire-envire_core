@@ -6,7 +6,7 @@ namespace envire { namespace core
     
     /** TODO comment
      */
-    class FrameEvent
+    class TreeEvent
     {
     public:
         //all possible events
@@ -15,10 +15,11 @@ namespace envire { namespace core
             FRAME_ADDED,
             ROOT_FRAME_ADDED,
             FRAME_MODIFIED,
-            FRAME_REMOVED
+            FRAME_REMOVED,
+            VERTEX_ADDED
         };
-        FrameEvent(const Type type) : type(type) {}
-        virtual ~FrameEvent() {}
+        TreeEvent(const Type type) : type(type) {}
+        virtual ~TreeEvent() {}
 
         Type type;
     };

@@ -6,8 +6,8 @@
 #include <envire_core/TransformTree.hpp>
 #include <envire_core/Item.hpp>
 #include <envire_core/GraphViz.hpp>
-#include <envire_core/FrameEventDispatcher.hpp>
-#include <envire_core/FrameRootAddedEvent.hpp>
+#include <envire_core/events/TreeEventDispatcher.hpp>
+#include <envire_core/events/FrameRootAddedEvent.hpp>
 
 using namespace envire::core;
 
@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE(add_root_Frame_test)
   BOOST_CHECK(tree.num_edges() == 0);
 }
 
-class Dispatcher : public FrameEventDispatcher {
+class Dispatcher : public TreeEventDispatcher {
 public:
     boost::optional<FrameAddedEvent> frameAddedEvent;
     boost::optional<FrameRootAddedEvent> frameRootAddedEvent;

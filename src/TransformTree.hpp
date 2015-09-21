@@ -15,10 +15,10 @@
 #include <boost/uuid/uuid.hpp>
 #include <cassert>
 
-#include "events/FrameEventPublisher.hpp"
 #include "TransformTreeTypes.hpp"
 #include "events/FrameAddedEvent.hpp"
 #include "events/FrameRootAddedEvent.hpp"
+#include "events/TreeEventPublisher.hpp"
 
 namespace envire { namespace core
 {
@@ -31,7 +31,7 @@ namespace envire { namespace core
      *       the vertices and edges.
      *       This is done to ensure that
     */
-    class TransformTree : protected TransformGraph, public FrameEventPublisher
+    class TransformTree : protected TransformGraph, public TreeEventPublisher
     {
         //GraphViz has been implemented for TransformGraph.
         //As it only reads and does no manipulation it is ok to let it know

@@ -9,36 +9,36 @@
 #ifndef FRAME_EVENT_PUBLISHER_HPP
 #define FRAME_EVENT_PUBLISHER_HPP
 #include <vector>
-#include "FrameEventSubscriber.hpp"
-#include "FrameEvent.hpp"
 #include <cassert>
+#include "TreeEvent.hpp"
+#include "TreeEventSubscriber.hpp"
 
 namespace envire { namespace core
 {
-    class FrameEvent;
+    class TreeEvent;
 
     /**
      * Base class for frame-event publishers.
      * Handles the subscription and notification of subscribers.
      */
-    class FrameEventPublisher
+    class TreeEventPublisher
     {
     private:
-      std::vector<FrameEventSubscriber*> subscribers;
+      std::vector<TreeEventSubscriber*> subscribers;
 
     public:
         /**Subscribes the @param handler to all events by this event source */
-        void subscribe(FrameEventSubscriber* subscriber);
-        void unsubscribe(FrameEventSubscriber* subscriber);
+        void subscribe(TreeEventSubscriber* subscriber);
+        void unsubscribe(TreeEventSubscriber* subscriber);
 
     protected:
         /**Notify all subscribers about a certain frame event */
-        void notify(const FrameEvent& e) const;
+        void notify(const TreeEvent& e) const;
 
         //there is no use in creating an instance of the publisher
         //on its own.
-        FrameEventPublisher() {}
-        ~FrameEventPublisher() {}
+        TreeEventPublisher() {}
+        ~TreeEventPublisher() {}
 
     };
 }}

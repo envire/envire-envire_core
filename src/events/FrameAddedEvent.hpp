@@ -7,9 +7,9 @@
 
 #ifndef SRC_FRAMEADDEDEVENT_HPP_
 #define SRC_FRAMEADDEDEVENT_HPP_
-#include "FrameEvent.hpp"
 #include <envire_core/TransformTreeTypes.hpp>
 #include <envire_core/Transform.hpp>
+#include "TreeEvent.hpp"
 
 namespace envire { namespace core
 {
@@ -17,13 +17,13 @@ namespace envire { namespace core
      * A frame-added event is caused whenever a new frame has been added
      * to the tree.
      */
-    class FrameAddedEvent : public FrameEvent
+    class FrameAddedEvent : public TreeEvent
     {
     public:
         FrameAddedEvent(const vertex_descriptor& parent,
                         const vertex_descriptor& newVertex,
                         const Transform& tf) :
-            FrameEvent(FrameEvent::FRAME_ADDED),
+            TreeEvent(TreeEvent::FRAME_ADDED),
             parent(parent), addedVertex(newVertex), transform(tf) {}
 
         vertex_descriptor parent; /**<The parent vertex of the added frame*/
