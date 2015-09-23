@@ -9,6 +9,17 @@
 using namespace envire::core;
 using namespace std;
 
+bool compareTransform(const Transform& a, const Transform& b)
+{
+    return a.transform.translation.x() == b.transform.translation.x() &&
+           a.transform.translation.y() == b.transform.translation.y() &&
+           a.transform.translation.z() == b.transform.translation.z() &&
+           a.transform.orientation.axis().x() == b.transform.orientation.axis().x() &&
+           a.transform.orientation.axis().y() == b.transform.orientation.axis().y() &&
+           a.transform.orientation.axis().z() == b.transform.orientation.axis().z() &&
+           a.transform.orientation.angle() == b.transform.orientation.angle();
+}
+
 class Dispatcher : public TreeEventDispatcher {
 public:
     vector<TransformAddedEvent> transformAddedEvent;
@@ -31,6 +42,29 @@ public:
     }
 };
 
+BOOST_AUTO_TEST_CASE(simple_modify_transform_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    TransformTree tree;
+    Transform tf;
+    tf.transform.translation << 42, 21, -42;
+    tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
+    BOOST_CHECK_NO_THROW(tree.addTransform(a, b, tf));
+
+    Transform tf2;
+    tf2.transform.translation << 0, 1, 2;
+    tf2.transform.orientation = base::AngleAxisd(0.42, base::Vector3d::UnitY());
+    tree.updateTransform(b, a, tf2);
+    Transform readBa = tree.getTransform(b, a);
+    Transform readAb = tree.getTransform(a, b);
+    BOOST_CHECK(compareTransform(readBa, tf2));
+
+    Transform tf2Inv = tf2;
+    tf2Inv.setTransform(tf2.transform.inverse());
+    BOOST_CHECK(compareTransform(readAb, tf2Inv));
+}
+
 BOOST_AUTO_TEST_CASE(simple_add_get_transform_test)
 {
     FrameId a = "frame_a";
@@ -43,23 +77,11 @@ BOOST_AUTO_TEST_CASE(simple_add_get_transform_test)
     BOOST_CHECK(tree.num_edges() == 2);
     BOOST_CHECK(tree.num_vertices() == 2);
     Transform readTf = tree.getTransform(a, b);
-    BOOST_CHECK(readTf.transform.translation.x() == tf.transform.translation.x());
-    BOOST_CHECK(readTf.transform.translation.y() == tf.transform.translation.y());
-    BOOST_CHECK(readTf.transform.translation.z() == tf.transform.translation.z());
-    BOOST_CHECK(readTf.transform.orientation.axis().x() == tf.transform.orientation.axis().x());
-    BOOST_CHECK(readTf.transform.orientation.axis().y() == tf.transform.orientation.axis().y());
-    BOOST_CHECK(readTf.transform.orientation.axis().z() == tf.transform.orientation.axis().z());
-    BOOST_CHECK(readTf.transform.orientation.angle() == tf.transform.orientation.angle());
+    BOOST_CHECK(compareTransform(readTf, tf));
     Transform invTf = tf;
     invTf.setTransform(tf.transform.inverse());
     Transform readTfInv = tree.getTransform(b, a);
-    BOOST_CHECK(readTfInv.transform.translation.x() == invTf.transform.translation.x());
-    BOOST_CHECK(readTfInv.transform.translation.y() == invTf.transform.translation.y());
-    BOOST_CHECK(readTfInv.transform.translation.z() == invTf.transform.translation.z());
-    BOOST_CHECK(readTfInv.transform.orientation.axis().x() == invTf.transform.orientation.axis().x());
-    BOOST_CHECK(readTfInv.transform.orientation.axis().y() == invTf.transform.orientation.axis().y());
-    BOOST_CHECK(readTfInv.transform.orientation.axis().z() == invTf.transform.orientation.axis().z());
-    BOOST_CHECK(readTfInv.transform.orientation.angle() == invTf.transform.orientation.angle());
+    BOOST_CHECK(compareTransform(readTfInv, invTf));
 }
 
 
@@ -76,7 +98,6 @@ BOOST_AUTO_TEST_CASE(add_transform_exception_test)
 BOOST_AUTO_TEST_CASE(get_transform_exception_test)
 {
     FrameId a = "frame_a";
-    FrameId b = "frame_b";
     FrameId c = "frame_c";
     TransformTree tree;
     Transform tf;
@@ -103,22 +124,10 @@ BOOST_AUTO_TEST_CASE(simple_add_transform_event_test)
     edge_descriptor bToA = tree.getEdge(b, a);
     BOOST_CHECK(d->transformAddedEvent[1].edge == bToA);
     //annoying amount of checks because there is no operator== in eigen
-    BOOST_CHECK(d->transformAddedEvent[0].transform.transform.translation.x() == tf.transform.translation.x());
-    BOOST_CHECK(d->transformAddedEvent[0].transform.transform.translation.y() == tf.transform.translation.y());
-    BOOST_CHECK(d->transformAddedEvent[0].transform.transform.translation.z() == tf.transform.translation.z());
-    BOOST_CHECK(d->transformAddedEvent[0].transform.transform.orientation.axis().x() == tf.transform.orientation.axis().x());
-    BOOST_CHECK(d->transformAddedEvent[0].transform.transform.orientation.axis().y() == tf.transform.orientation.axis().y());
-    BOOST_CHECK(d->transformAddedEvent[0].transform.transform.orientation.axis().z() == tf.transform.orientation.axis().z());
-    BOOST_CHECK(d->transformAddedEvent[0].transform.transform.orientation.angle() == tf.transform.orientation.angle());
+    BOOST_CHECK(compareTransform(d->transformAddedEvent[0].transform, tf));
     Transform invTf = tf;
     invTf.setTransform(tf.transform.inverse());
-    BOOST_CHECK(d->transformAddedEvent[1].transform.transform.translation.x() == invTf.transform.translation.x());
-    BOOST_CHECK(d->transformAddedEvent[1].transform.transform.translation.y() == invTf.transform.translation.y());
-    BOOST_CHECK(d->transformAddedEvent[1].transform.transform.translation.z() == invTf.transform.translation.z());
-    BOOST_CHECK(d->transformAddedEvent[1].transform.transform.orientation.axis().x() == invTf.transform.orientation.axis().x());
-    BOOST_CHECK(d->transformAddedEvent[1].transform.transform.orientation.axis().y() == invTf.transform.orientation.axis().y());
-    BOOST_CHECK(d->transformAddedEvent[1].transform.transform.orientation.axis().z() == invTf.transform.orientation.axis().z());
-    BOOST_CHECK(d->transformAddedEvent[1].transform.transform.orientation.angle() == invTf.transform.orientation.angle());
+    BOOST_CHECK(compareTransform(d->transformAddedEvent[1].transform, invTf));
 
 }
 

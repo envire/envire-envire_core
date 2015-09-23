@@ -59,17 +59,22 @@ namespace envire { namespace core
          * The inverse transform will be added automatically.
          *
          * @throw TransformAlreadyExistsException if the transformation already exists.*/
-        void addTransform(const FrameId& origin, const FrameId& target, const Transform& tf);
+        void addTransform(const FrameId& origin, const FrameId& target,
+                          const Transform& tf);
 
-        /**Updates the value of the transform from @p a to @p b to @p tf
-         * and the value of the transform from @p b to @p a to inv(tf).
+        /**Updates the value of the transform from @p origin to
+         * @p target and the inverse transformation according to @p tf.
          * Both frames need to exist beforehand.
+         * A direct transformation has to exist between @p orign and @p target
+         * for this method to work.
          *
          * Causes two TransformUpdated events. One for the
          * transform and one for the inverse.
          *
-         * @throw UnknownTransformException if the transformation doesn't exist */
-        void updateTransform(const FrameId& a, const FrameId& b, const Transform& tf);
+         * @throw UnknownTransformException if no direct transformation between
+         *        @p origin and @p target exists. */
+        void updateTransform(const FrameId& origin, const FrameId& target,
+                             const Transform& tf);
 
         /**Removes the transform between @p a and @p b.
          * If frames are left unconnected after the transform has been removed, they
@@ -156,10 +161,9 @@ namespace envire { namespace core
          * attached will result in undefined behavior. */
         void remove_vertex(vertex_descriptor v);
 
-        /**
-         * Sets the transform value and causes transformModified event.
-         */
-        void setTransform(edge_descriptor ed, const Transform& tf);
+        /**Sets the transform value and causes transformModified event. */
+        void updateTransform(edge_descriptor ed, const Transform& tf,
+                             const FrameId& origin, const FrameId& target);
 
     };
 }}

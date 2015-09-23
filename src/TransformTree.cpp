@@ -53,19 +53,26 @@ const Transform& TransformTree::getTransform(const FrameId& a, const FrameId& b)
     return (*this)[pair.first].transform;
 }
 
-void TransformTree::updateTransform(const FrameId& a, const FrameId& b, const Transform& tf)
+void TransformTree::updateTransform(const FrameId& origin, const FrameId& target,
+                                    const Transform& tf)
 {
-//  edgePair aToB = boost::edge(aDesc, bDesc, *this);
-//  if(!aToB.second)
-//  {
-//      throw UnknownTransformException(a, b);
-//  }
-//  setTransform(aToB.first, tf);
-//  Transform invTf = tf;//copies the time
-//  invTf.setTransform(tf.inverse());
-//  edgePair bToA = boost::edge(aDesc, bDesc, *this);
-//  assert(bToA.second);//there should always be an inverse edge
-//  setTransform(bToA, invTf);
+    if(num_edges() <= 0)
+    {   //boost::edge_by_label segfaults on empty graphs...
+        throw UnknownTransformException(origin, target);
+    }
+
+    edgePair originToTarget = boost::edge_by_label(origin, target, *this);
+    if(!originToTarget.second)
+    {
+      throw UnknownTransformException(origin, target);
+    }
+
+    updateTransform(originToTarget.first, tf, origin, target);
+    Transform invTf = tf;//copies the time
+    invTf.setTransform(tf.transform.inverse());
+    edgePair targetToOrigin = boost::edge_by_label(target, origin, *this);
+    assert(targetToOrigin.second);//there should always be an inverse edge
+    updateTransform(targetToOrigin.first, invTf, target, origin);
 }
 
 
@@ -144,3 +151,10 @@ edge_descriptor TransformTree::getEdge(const FrameId& origin, const FrameId& tar
     return e.first;
 }
 
+void TransformTree::updateTransform(edge_descriptor ed, const Transform& tf,
+                                    const FrameId& origin, const FrameId& target)
+{
+    Transform old = (*this)[ed].transform;
+    boost::put(&TransformProperty::transform, *this, ed, tf);
+    notify(TransformModifiedEvent(origin, target, ed, old, (*this)[ed].transform));
+}
