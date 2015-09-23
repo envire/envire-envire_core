@@ -26,8 +26,6 @@ namespace envire { namespace core
         virtual void frameAdded(const FrameAddedEvent& e){}
        // virtual void frameModified(const FrameModifedEventArgs& args){}
       //  virtual void frameRemoved(const FrameRemovedEventArgs& args){}
-        virtual void vertexAdded(const VertexAddedEvent& e) {}
-        virtual void vertexRemoved(const VertexRemovedEvent& e) {}
         virtual void transformAdded(const TransformAddedEvent& e) {}
         virtual void transformRemoved(const TransformRemovedEvent& e) {}
         virtual void transformModified(const TransformModifiedEvent& e) {}

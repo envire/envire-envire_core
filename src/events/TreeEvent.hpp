@@ -11,11 +11,6 @@ namespace envire { namespace core
         //all possible events
         enum Type
         {
-            FRAME_ADDED,
-            FRAME_MODIFIED,
-            FRAME_REMOVED,
-            VERTEX_ADDED,
-            VERTEX_REMOVED,
             TRANSFORMATION_ADDED,
             TRANSFORMATION_REMOVED,
             TRANSFORMATION_MODIFIED

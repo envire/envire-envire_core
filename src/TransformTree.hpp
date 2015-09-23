@@ -14,12 +14,12 @@
 
 #include <boost/uuid/uuid.hpp>
 #include <cassert>
+#include <string>
+
 
 #include "TransformTreeTypes.hpp"
-#include "events/FrameAddedEvent.hpp"
+#include "TransformTreeExceptions.hpp"
 #include "events/TreeEventPublisher.hpp"
-#include "events/VertexAddedEvent.hpp"
-#include "events/VertexRemovedEvent.hpp"
 #include "events/TransformAddedEvent.hpp"
 #include "events/TransformRemovedEvent.hpp"
 #include "events/TransformModifiedEvent.hpp"
@@ -28,6 +28,8 @@ namespace envire { namespace core
 {
     class GraphViz;
     /**
+     * A tree-like graph structure.
+     * Each vertex contains a labeled Frame. The label must be unique.
      *
      * @note The inheritance from TransformGraph is protected to stop
      *       users from calling boost::graph methods directly.
@@ -47,6 +49,42 @@ namespace envire { namespace core
           LabeledTransformGraph (environment)
         {}
 
+
+        /**Adds a transform from frame @p a to frame @p b.
+         * If the frames do not exist, they will be created.
+         * If the transform already exists, it will **not** be updated.
+         *
+         * Causes a TransformAdded event.
+         *
+         * The inverse transform will be added automatically.
+         *
+         * @throw TransformAlreadyExistsException if the transformation already exists.*/
+        void addTransform(const FrameId& origin, const FrameId& target, const Transform& tf);
+
+        /**Updates the value of the transform from @p a to @p b to @p tf
+         * and the value of the transform from @p b to @p a to inv(tf).
+         * Both frames need to exist beforehand.
+         *
+         * Causes two TransformUpdated events. One for the
+         * transform and one for the inverse.
+         *
+         * @throw UnknownTransformException if the transformation doesn't exist */
+        void updateTransform(const FrameId& a, const FrameId& b, const Transform& tf);
+
+        /**Removes the transform between @p a and @p b.
+         * If frames are left unconnected after the transform has been removed, they
+         * will be removed as well.
+         *
+         * Causes TransformRemoved event.
+         *
+         * @throw UnknownTransformException if the transformation doesn't exist */
+        void removeTransform(const FrameId& a, const FrameId& b);
+
+        /**@return the transform between a and b. Calculating it if necessary.
+         * @throw UnknownTransformException if the transformation doesn't exist*/
+        const Transform& getTransform(const FrameId& a, const FrameId& b) const;
+
+
         /***************************************************
          * Methods Naming convention
          * Overloading boost methods uses delimited separated
@@ -54,130 +92,23 @@ namespace envire { namespace core
          ***************************************************/
 
 
-        /**Adds @param frame below @param parent to the tree.
-         *
-         * Causes a FrameAddedEvent.
-         * Does not cause VertexAdded or EdgeAdded events.
-         *
-         * @note the name of the frame must be unique.
-         *  */
-        vertex_descriptor addFrame(const envire::core::Frame &frame,
-            vertex_descriptor parent, const envire::core::Transform &tf)
-        {
-            disableEvents();//otherwise add_vertex and add_edge will cause events
+        /** @return a reference to the frame identified by the id.
+         *  @throw UnknownFrameException if the frame id is invalid **/
+        const envire::core::Frame& getFrame(const FrameId& frame);
 
-            vertex_descriptor newNode = add_vertex(frame);
-            edge_descriptor newEdge;
-            bool edgeAdded = false;
-            boost::tie(newEdge, edgeAdded) = add_edge(parent, newNode, tf);
-            assert(edgeAdded);
+        /**@brief Get all edges */
+        std::pair<edge_iterator, edge_iterator> edges();
 
-            enableEvents();
-            notify(FrameAddedEvent(parent, newNode, tf));
-            return newNode;
-        }
+        /**@brief Get the source of an edge */
+        vertex_descriptor source(const edge_descriptor it_node);
 
-        /**@brief Get all edges
-         */
-        std::pair<edge_iterator, edge_iterator>
-        edges()
-        {
-            return boost::edges(*this);
-        }
-
-        /**@brief source of an edge
-         *
-         * Get source vertex descriptor for edge descriptor
-         * */
-        vertex_descriptor source(const edge_descriptor it_node)
-        {
-            return boost::source(it_node, *this);
-        }
-
-        /**@brief target of an edge
-         *
-         * Get target vertex descriptor for edge descriptor
-         * */
-        vertex_descriptor target(const edge_descriptor it_node)
-        {
-            return boost::target(it_node, *this);
-        }
-
-        /** PROPERTIES METHODS **/
-
-        /** @return a reference to the frame that is attached to the specified vertex.**/
-        const envire::core::Frame& getFrame(const vertex_descriptor& vd)
-        {
-          //for some reason the operator[](vertex_descriptor) is hidden in
-          //labeled_graph. But it is available in TransformGraph.
-          return graph()[vd].frame;
-        }
-
-        /**@brief get Transform
-         *
-         * Transform associated to an edge.
-         * @note you are not allowed to change the transform directly because
-         *       that would circumvent the event system.
-         *       Use setTransform to change the value of a transform
-         * */
-        const envire::core::Transform& getTransform(const edge_descriptor& ed)
-        {
-            return (*this)[ed].transform;
-        }
-
-        /**@brief sets the transform property of the specified edge to the
-         *        specified value.
-         * @param ed The edge whose transform property should be modified
-         * @param tf The new transform value
-         */
-        void setTransform(edge_descriptor ed, const Transform& tf)
-        {
-            const Transform oldTransform = getTransform(ed);
-            const vertex_descriptor from = source(ed);
-            const vertex_descriptor to = target(ed);
-            boost::put(&TransformProperty::transform, *this, ed, tf);
-            notify(TransformModifiedEvent(from, to, ed, oldTransform, tf));
-        }
-
-        /**@brief Add a vertex
-         *
-         * causes a VertexAddedEvent
-         *
-         * @note the frame's name must be unique.
-         */
-        vertex_descriptor add_vertex(const envire::core::Frame &frame)
-        {
-            FrameProperty node_prop;
-            node_prop.frame = frame;
-            vertex_descriptor v = LabeledTransformGraph::add_vertex(frame.name, node_prop);
-            notify(VertexAddedEvent(v));
-            return v;
-        }
-
-        /**Removes a vertex from the tree.
-         * A vertex can only be removed if there are no edges to
-         * and from the vertex. Removing a vertex that still has edges
-         * attached will result in undefined behavior.
-         *
-         * If you want to remove a vertex and all corresponding edges
-         * you should consider removeFrame() */
-        void remove_vertex(vertex_descriptor v)
-        {
-            assert(degree(v) <= 0);
-            graph().remove_vertex(v);
-            notify(VertexRemovedEvent());
-        }
+        /**@brief Get the target of an edge */
+        vertex_descriptor target(const edge_descriptor it_node);
 
         /**@brief Get all vertices
          */
         std::pair<vertex_iterator, vertex_iterator>
-        vertices()
-        {
-            return boost::vertices(*this);
-        }
-
-
-        /** EDGES METHODS **/
+        vertices();
 
         /**@brief Add an Edge
          * Add an edge between two vertices.
@@ -189,73 +120,44 @@ namespace envire { namespace core
          *         In that case no new edge was added, instead the existing
          *         edge was updated.
          */
-        std::pair<edge_descriptor, bool>
-        add_edge(const vertex_descriptor node_from,
-                    const vertex_descriptor node_to,
-                    const envire::core::Transform &tf = envire::core::Transform())
-        {
-            /* Don't allow parallel edges **/
-            std::pair<envire::core::edge_descriptor, bool> edge_pair =
-                boost::edge(node_from, node_to, *this);
-            //second is true if the edge exists
-            /** Update the edge in case it already exists **/
-            if (edge_pair.second)
-            {
-                const Transform oldTransform = getTransform(edge_pair.first);
-                boost::put(&TransformProperty::transform, *this, edge_pair.first, tf);
-                edge_pair.second = false;//to comply with the interface of add_edge
-                notify(TransformModifiedEvent(node_from, node_to, edge_pair.first,
-                                              oldTransform, tf));
-            }
-            else
-            {
-                /** TO-DO: Avoid loops? **/
-               // if (boost::in_degree(node_to, *this) == 0)
-               // {
-                    /** Add the new edge **/
-                    TransformProperty tf_prop;
-                    tf_prop.transform = tf;
-                    edge_pair =  boost::add_edge(node_from, node_to, tf_prop, *this);
-                    notify(TransformAddedEvent(node_from, node_to, edge_pair.first, tf));
-               // }
-               // else
-               // {
-               //     throw std::logic_error("envire::core::TransformTree: No loop closure!");
-               // }
-            }
-            return edge_pair;
-        }
+        edge_descriptor add_edge(const vertex_descriptor node_from,
+                                 const vertex_descriptor node_to,
+                                 const envire::core::Transform &tf);
 
-        void remove_edge(edge_descriptor e)
-        {
-            TransformRemovedEvent event(source(e), target(e), getTransform(e));
-            boost::remove_edge(e, *this);
-            notify(event);
-        }
 
-        vertices_size_type num_vertices() const
-        {
-            return boost::num_vertices(*this);
-        }
+        void remove_edge(edge_descriptor e);
 
-        edges_size_type num_edges() const
-        {
-            return boost::num_edges(*this);
-        }
+        vertices_size_type num_vertices() const;
+        edges_size_type num_edges() const;
+
 
         /**@return the total number of edges connected to @param v.
          *         I.e. the sum of the in and out edges.
          */
-        degree_size_type degree(const vertex_descriptor v) const
-        {
-            return boost::degree(v, *this);
-        }
+        degree_size_type degree(const vertex_descriptor v) const;
 
         /**@return the vertex identified by @param label */
         vertex_descriptor vertex(const std::string& label) const
         {
             return LabeledTransformGraph::vertex(label);
         }
+
+    protected:
+         /**@brief Add a vertex
+         * @note the frame's name must be unique. */
+        vertex_descriptor add_vertex(const FrameId& frameId);
+
+        /**Removes a vertex from the tree.
+         * A vertex can only be removed if there are no edges to
+         * and from the vertex. Removing a vertex that still has edges
+         * attached will result in undefined behavior. */
+        void remove_vertex(vertex_descriptor v);
+
+        /**
+         * Sets the transform value and causes transformModified event.
+         */
+        void setTransform(edge_descriptor ed, const Transform& tf);
+
     };
 }}
 #endif
