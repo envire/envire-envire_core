@@ -26,6 +26,7 @@ namespace envire { namespace core
 
     public:
 
+        virtual ~BoundingVolume() {};
         virtual void extend(const Eigen::Vector3d& point) = 0;
         virtual bool contains(const Eigen::Vector3d& point) const = 0;
         virtual double exteriorDistance(const Eigen::Vector3d& point) const = 0;
