@@ -31,7 +31,3 @@ rock_library(envire_core
     DEPS_CMAKE Boost
     DEPS_PKGCONFIG base-types class_loader)
     
-    
-SET_TARGET_PROPERTIES(envire_core PROPERTIES
-                      COMPILE_FLAGS "-fprofile-arcs -ftest-coverage"
-                      LINK_FLAGS "-fprofile-arcs -ftest-coverage -lgcov")
