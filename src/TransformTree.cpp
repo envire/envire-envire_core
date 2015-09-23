@@ -160,7 +160,15 @@ const envire::core::Frame& TransformTree::getFrame(const FrameId& frame)
 
 edge_descriptor TransformTree::getEdge(const FrameId& origin, const FrameId& target) const
 {
-    edgePair e = boost::edge_by_label(origin, target, *this);
+    vertex_descriptor originDesc = vertex(origin);
+    vertex_descriptor targetDesc = vertex(target);
+
+    if(originDesc == null_vertex() || targetDesc == null_vertex())
+    {//boost segfaults if one of them is null
+        throw UnknownTransformException(origin, target);
+    }
+
+    edgePair e = boost::edge(originDesc, targetDesc, graph());
     if(!e.second)
     {
         throw UnknownTransformException(origin, target);
