@@ -42,6 +42,41 @@ public:
     }
 };
 
+BOOST_AUTO_TEST_CASE(simple_remove_transform_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    TransformTree tree;
+    Transform tf;
+    tf.transform.translation << 42, 21, -42;
+    tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
+    tree.addTransform(a, b, tf);
+
+    tree.removeTransform(b, a);
+    BOOST_CHECK(tree.num_edges() == 0);
+    BOOST_CHECK(tree.num_vertices() == 0);
+}
+
+BOOST_AUTO_TEST_CASE(complex_remove_transform_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    TransformTree tree;
+    Transform tf;
+    tf.transform.translation << 42, 21, -42;
+    tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
+    tree.addTransform(a, b, tf);
+    tree.addTransform(a, c, tf);
+
+    tree.removeTransform(b, a);
+    BOOST_CHECK(tree.num_edges() == 2);
+    BOOST_CHECK(tree.num_vertices() == 2);
+    BOOST_CHECK_NO_THROW(tree.getFrame(a));
+    BOOST_CHECK_NO_THROW(tree.getFrame(c));
+    BOOST_CHECK_THROW(tree.getFrame(b), UnknownFrameException);
+}
+
 BOOST_AUTO_TEST_CASE(simple_modify_transform_test)
 {
     FrameId a = "frame_a";

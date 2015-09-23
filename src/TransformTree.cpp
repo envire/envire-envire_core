@@ -75,7 +75,31 @@ void TransformTree::updateTransform(const FrameId& origin, const FrameId& target
     updateTransform(targetToOrigin.first, invTf, target, origin);
 }
 
+void TransformTree::removeTransform(const FrameId& origin, const FrameId& target)
+{
+    if(num_edges() <= 0)
+    {
+        throw UnknownTransformException(origin, target);
+    }
+    edgePair originToTarget = boost::edge_by_label(origin, target, *this);
+    edgePair targetToOrigin = boost::edge_by_label(target, origin, *this);
+    if(!originToTarget.second || !targetToOrigin.second)
+    {
+        throw UnknownTransformException(origin, target);
+    }
+    boost::remove_edge(originToTarget.first, *this);
+    boost::remove_edge(targetToOrigin.first, *this);
 
+    //remove dangling frames
+    if(boost::degree(vertex(origin), *this) <= 0)
+    {
+        remove_frame(origin);
+    }
+    if(boost::degree(vertex(target), *this) <= 0)
+    {
+        remove_frame(target);
+    }
+}
 
 edge_descriptor TransformTree::add_edge(const vertex_descriptor node_from,
                                         const vertex_descriptor node_to,
@@ -130,10 +154,10 @@ vertex_descriptor TransformTree::add_vertex(const FrameId& frameId)
     return v;
 }
 
-void TransformTree::remove_vertex(vertex_descriptor v)
+void TransformTree::remove_frame(FrameId fId)
 {
-    assert(degree(v) <= 0);
-    graph().remove_vertex(v);
+    assert(degree(vertex(fId)) <= 0);
+    boost::remove_vertex(fId, *this);
 }
 
 const envire::core::Frame& TransformTree::getFrame(const FrameId& frame)

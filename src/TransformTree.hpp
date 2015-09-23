@@ -76,14 +76,15 @@ namespace envire { namespace core
         void updateTransform(const FrameId& origin, const FrameId& target,
                              const Transform& tf);
 
-        /**Removes the transform between @p a and @p b.
+        /**Removes the transform between @p origin and @p target as well as
+         * the transform between @p target and @p origin.
          * If frames are left unconnected after the transform has been removed, they
          * will be removed as well.
          *
          * Causes TransformRemoved event.
          *
          * @throw UnknownTransformException if the transformation doesn't exist */
-        void removeTransform(const FrameId& a, const FrameId& b);
+        void removeTransform(const FrameId& origin, const FrameId& target);
 
         /**@return the transform between a and b. Calculating it if necessary.
          * @throw UnknownTransformException if the transformation doesn't exist*/
@@ -159,7 +160,7 @@ namespace envire { namespace core
          * A vertex can only be removed if there are no edges to
          * and from the vertex. Removing a vertex that still has edges
          * attached will result in undefined behavior. */
-        void remove_vertex(vertex_descriptor v);
+        void remove_frame(FrameId fId);
 
         /**Sets the transform value and causes transformModified event. */
         void updateTransform(edge_descriptor ed, const Transform& tf,
