@@ -1,14 +1,35 @@
 #include <boost/test/unit_test.hpp>
-#include <boost/lexical_cast.hpp> /** to string conversion when using < C++11 */
-
 #include <envire_core/TransformTreeTypes.hpp>
 #include <envire_core/TransformTree.hpp>
 #include <envire_core/Item.hpp>
 #include <envire_core/GraphViz.hpp>
 #include <envire_core/events/TreeEventDispatcher.hpp>
+#include <vector>
 
 using namespace envire::core;
+using namespace std;
 
+class Dispatcher : public TreeEventDispatcher {
+public:
+    vector<TransformAddedEvent> transformAddedEvent;
+    vector<TransformModifiedEvent> transformModifiedEvent;
+    vector<TransformRemovedEvent> transformRemovedEvent;
+
+    virtual void transformAdded(const TransformAddedEvent& e)
+    {
+        transformAddedEvent.push_back(e);
+    }
+
+    virtual void transformModified(const TransformModifiedEvent& e)
+    {
+        transformModifiedEvent.push_back(e);
+    }
+
+    virtual void transformRemoved(const TransformRemovedEvent& e)
+    {
+        transformRemovedEvent.push_back(e);
+    }
+};
 
 BOOST_AUTO_TEST_CASE(simple_add_get_transform_test)
 {
@@ -41,41 +62,45 @@ BOOST_AUTO_TEST_CASE(simple_add_get_transform_test)
     BOOST_CHECK(readTfInv.transform.orientation.angle() == invTf.transform.orientation.angle());
 }
 
+BOOST_AUTO_TEST_CASE(simple_add_transform_event_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    TransformTree tree;
+    Transform tf;
+    tf.transform.translation << 42, 21, -42;
+    tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
 
-//
-//
-//class Dispatcher : public TreeEventDispatcher {
-//public:
-//    boost::optional<FrameAddedEvent> frameAddedEvent;
-//    boost::optional<TransformAddedEvent> transformAddedEvent;
-//    boost::optional<TransformModifiedEvent> transformModifiedEvent;
-//    boost::optional<TransformRemovedEvent> transformRemovedEvent;
-//    int callCount = 0;
-//
-//    virtual void frameAdded(const FrameAddedEvent& e)
-//    {
-//        ++callCount;
-//        frameAddedEvent = e;
-//    }
-//
-//    virtual void transformAdded(const TransformAddedEvent& e)
-//    {
-//        ++callCount;
-//        transformAddedEvent = e;
-//    }
-//
-//    virtual void transformModified(const TransformModifiedEvent& e)
-//    {
-//        ++callCount;
-//        transformModifiedEvent = e;
-//    }
-//
-//    virtual void transformRemoved(const TransformRemovedEvent& e)
-//    {
-//        ++callCount;
-//        transformRemovedEvent = e;
-//    }
-//};
+    std::shared_ptr<Dispatcher> d(new Dispatcher());
+
+    tree.subscribe(d);
+    tree.addTransform(a, b, tf);
+    BOOST_CHECK(d->transformAddedEvent.size() == 2);
+    edge_descriptor aToB = tree.getEdge(a, b);
+    BOOST_CHECK(d->transformAddedEvent[0].edge == aToB);
+    edge_descriptor bToA = tree.getEdge(b, a);
+    BOOST_CHECK(d->transformAddedEvent[1].edge == bToA);
+    //annoying amount of checks because there is no operator== in eigen
+    BOOST_CHECK(d->transformAddedEvent[0].transform.transform.translation.x() == tf.transform.translation.x());
+    BOOST_CHECK(d->transformAddedEvent[0].transform.transform.translation.y() == tf.transform.translation.y());
+    BOOST_CHECK(d->transformAddedEvent[0].transform.transform.translation.z() == tf.transform.translation.z());
+    BOOST_CHECK(d->transformAddedEvent[0].transform.transform.orientation.axis().x() == tf.transform.orientation.axis().x());
+    BOOST_CHECK(d->transformAddedEvent[0].transform.transform.orientation.axis().y() == tf.transform.orientation.axis().y());
+    BOOST_CHECK(d->transformAddedEvent[0].transform.transform.orientation.axis().z() == tf.transform.orientation.axis().z());
+    BOOST_CHECK(d->transformAddedEvent[0].transform.transform.orientation.angle() == tf.transform.orientation.angle());
+    Transform invTf = tf;
+    invTf.setTransform(tf.transform.inverse());
+    BOOST_CHECK(d->transformAddedEvent[1].transform.transform.translation.x() == invTf.transform.translation.x());
+    BOOST_CHECK(d->transformAddedEvent[1].transform.transform.translation.y() == invTf.transform.translation.y());
+    BOOST_CHECK(d->transformAddedEvent[1].transform.transform.translation.z() == invTf.transform.translation.z());
+    BOOST_CHECK(d->transformAddedEvent[1].transform.transform.orientation.axis().x() == invTf.transform.orientation.axis().x());
+    BOOST_CHECK(d->transformAddedEvent[1].transform.transform.orientation.axis().y() == invTf.transform.orientation.axis().y());
+    BOOST_CHECK(d->transformAddedEvent[1].transform.transform.orientation.axis().z() == invTf.transform.orientation.axis().z());
+    BOOST_CHECK(d->transformAddedEvent[1].transform.transform.orientation.angle() == invTf.transform.orientation.angle());
+
+}
+
+
 //
 //BOOST_AUTO_TEST_CASE(remove_frame_with_children_test)
 //{
@@ -131,10 +156,10 @@ BOOST_AUTO_TEST_CASE(simple_add_get_transform_test)
 //    tree.subscribe(&d);
 //    tf.transform.translation.x() = 44;
 //    tree.setTransform(edge, tf);
-//    BOOST_CHECK(d.callCount == 1);
-//    BOOST_CHECK(d.transformModifiedEvent->newTransform.transform.translation.x() == 44);
-//    BOOST_CHECK(d.transformModifiedEvent->oldTransform.transform.translation.x() == 42);
-//    BOOST_CHECK(d.transformModifiedEvent->edge == edge);
+//    BOOST_CHECK(d->callCount == 1);
+//    BOOST_CHECK(d->transformModifiedEvent->newTransform.transform.translation.x() == 44);
+//    BOOST_CHECK(d->transformModifiedEvent->oldTransform.transform.translation.x() == 42);
+//    BOOST_CHECK(d->transformModifiedEvent->edge == edge);
 //}
 //
 //BOOST_AUTO_TEST_CASE(add_remove_transform_event_test)
@@ -155,19 +180,19 @@ BOOST_AUTO_TEST_CASE(simple_add_get_transform_test)
 //    bool added = true;
 //    tf.transform.translation.x() = 44;
 //    boost::tie(edge, added) = tree.add_edge(v1, v2, tf);
-//    BOOST_CHECK(d.callCount == 1);
-//    BOOST_CHECK(d.transformModifiedEvent->edge == edge);
-//    BOOST_CHECK(d.transformModifiedEvent->from == v1);
-//    BOOST_CHECK(d.transformModifiedEvent->to == v2);
-//    BOOST_CHECK(d.transformModifiedEvent->oldTransform.transform.translation.x() == 42);
-//    BOOST_CHECK(d.transformModifiedEvent->newTransform.transform.translation.x() == 44);
+//    BOOST_CHECK(d->callCount == 1);
+//    BOOST_CHECK(d->transformModifiedEvent->edge == edge);
+//    BOOST_CHECK(d->transformModifiedEvent->from == v1);
+//    BOOST_CHECK(d->transformModifiedEvent->to == v2);
+//    BOOST_CHECK(d->transformModifiedEvent->oldTransform.transform.translation.x() == 42);
+//    BOOST_CHECK(d->transformModifiedEvent->newTransform.transform.translation.x() == 44);
 //
 //    //remove the edge
 //    tree.remove_edge(edge);
-//    BOOST_CHECK(d.callCount == 2);
-//    BOOST_CHECK(d.transformRemovedEvent->from == v1);
-//    BOOST_CHECK(d.transformRemovedEvent->to == v2);
-//    BOOST_CHECK(d.transformRemovedEvent->transform.transform.translation.x() == 44);
+//    BOOST_CHECK(d->callCount == 2);
+//    BOOST_CHECK(d->transformRemovedEvent->from == v1);
+//    BOOST_CHECK(d->transformRemovedEvent->to == v2);
+//    BOOST_CHECK(d->transformRemovedEvent->transform.transform.translation.x() == 44);
 //
 //}
 //
@@ -186,29 +211,29 @@ BOOST_AUTO_TEST_CASE(simple_add_get_transform_test)
 //    Transform tf;
 //    tf.transform.translation.x() = 42;
 //
-//    BOOST_CHECK(!d.frameAddedEvent.is_initialized());
-//   // BOOST_CHECK(d.callCount == 1);
+//    BOOST_CHECK(!d->frameAddedEvent.is_initialized());
+//   // BOOST_CHECK(d->callCount == 1);
 //    vertex_descriptor childVertex;
 //    edge_descriptor childEdge;
 //    boost::tie(childVertex, childEdge) = tree.addFrame(child, rootVertex, tf);
-//    BOOST_CHECK(d.frameAddedEvent.is_initialized());
-//    BOOST_CHECK(d.callCount == 2);
-//    BOOST_CHECK(d.frameAddedEvent->parent == rootVertex);
-//    BOOST_CHECK(d.frameAddedEvent->addedVertex == childVertex);
-//    BOOST_CHECK(d.frameAddedEvent->transform.transform.translation.x() == 42);
+//    BOOST_CHECK(d->frameAddedEvent.is_initialized());
+//    BOOST_CHECK(d->callCount == 2);
+//    BOOST_CHECK(d->frameAddedEvent->parent == rootVertex);
+//    BOOST_CHECK(d->frameAddedEvent->addedVertex == childVertex);
+//    BOOST_CHECK(d->frameAddedEvent->transform.transform.translation.x() == 42);
 //
-//    d.frameAddedEvent.reset();
-//    BOOST_CHECK(!d.frameAddedEvent.is_initialized());
+//    d->frameAddedEvent.reset();
+//    BOOST_CHECK(!d->frameAddedEvent.is_initialized());
 //    Transform tf2;
 //    tf2.transform.translation.x() = 84;
 //    vertex_descriptor childChildVertex;
 //    edge_descriptor childChildEdge;
 //    boost::tie(childChildVertex, childChildEdge)= tree.addFrame(childchild, childVertex, tf2);
-//    BOOST_CHECK(d.frameAddedEvent.is_initialized());
-//   // BOOST_CHECK(d.callCount == 3);
-//    BOOST_CHECK(d.frameAddedEvent->parent == childVertex);
-//    BOOST_CHECK(d.frameAddedEvent->addedVertex == childChildVertex);
-//    BOOST_CHECK(d.frameAddedEvent->transform.transform.translation.x() == 84);
+//    BOOST_CHECK(d->frameAddedEvent.is_initialized());
+//   // BOOST_CHECK(d->callCount == 3);
+//    BOOST_CHECK(d->frameAddedEvent->parent == childVertex);
+//    BOOST_CHECK(d->frameAddedEvent->addedVertex == childChildVertex);
+//    BOOST_CHECK(d->frameAddedEvent->transform.transform.translation.x() == 84);
 //}
 //
 //

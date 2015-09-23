@@ -7,11 +7,12 @@
 #include <vector>
 #include <string>
 
-#include <envire_core/ItemBase.hpp>
-#include <envire_core/RandomGenerator.hpp>
+#include "ItemBase.hpp"
+#include "RandomGenerator.hpp"
 
 namespace envire { namespace core
 {
+    using FrameId = std::string;
     /**@class Frame
     *
     * Frame class
@@ -19,7 +20,7 @@ namespace envire { namespace core
     class Frame
     {
     public:
-        std::string name; /** Frame name */
+        FrameId name; /** Frame name */
         boost::uuids::uuid uuid; /** Unique Identifier */
         std::vector< boost::intrusive_ptr<ItemBase> > items; /** List of items in the node */
 

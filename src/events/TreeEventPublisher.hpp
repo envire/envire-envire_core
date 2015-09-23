@@ -8,6 +8,8 @@
 #pragma once
 #include <vector>
 #include <cassert>
+#include <memory>
+
 #include "TreeEvent.hpp"
 #include "TreeEventSubscriber.hpp"
 
@@ -22,17 +24,17 @@ namespace envire { namespace core
     class TreeEventPublisher
     {
     private:
-      std::vector<TreeEventSubscriber*> subscribers;
+      std::vector<std::shared_ptr<TreeEventSubscriber>> subscribers;
       bool eventsEnabled = true;/**<If false notify() has no effect */
 
     public:
         /**Subscribes the @param handler to all events by this event source */
-        void subscribe(TreeEventSubscriber* subscriber);
-        void unsubscribe(TreeEventSubscriber* subscriber);
+        void subscribe(std::shared_ptr<TreeEventSubscriber> subscriber);
+        void unsubscribe(std::shared_ptr<TreeEventSubscriber> subscriber);
 
     protected:
         /**Notify all subscribers about a certain frame event */
-        void notify(const TreeEvent& e) const;
+        void notify(const TreeEvent& e);
 
         /**Disables all events. I.e. notify() will have no effect*/
         void disableEvents();

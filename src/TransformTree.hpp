@@ -84,6 +84,9 @@ namespace envire { namespace core
          * @throw UnknownTransformException if the transformation doesn't exist*/
         const Transform& getTransform(const FrameId& a, const FrameId& b) const;
 
+        /**@return the edge between frame @p origin and @p target
+         * @throw UnknownTransformException if there is no such edge  */
+        edge_descriptor getEdge(const FrameId& origin, const FrameId& target) const;
 
         /***************************************************
          * Methods Naming convention

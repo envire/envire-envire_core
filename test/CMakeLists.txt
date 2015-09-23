@@ -23,3 +23,6 @@ rock_testsuite(test_parameter_forwarding suite.cpp
     DEPS_CMAKE Boost
     DEPS envire_core)
 
+SET_TARGET_PROPERTIES(test_suite PROPERTIES
+                      COMPILE_FLAGS "-fprofile-arcs -ftest-coverage"
+                      LINK_FLAGS "-fprofile-arcs -ftest-coverage -lgcov")

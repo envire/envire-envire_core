@@ -47,7 +47,6 @@ namespace envire { namespace core
     */
     using TransformGraph = boost::directed_graph<FrameProperty, TransformProperty,
                                                  envire::core::Environment>;
-    using FrameId = std::string;
     using LabeledTransformGraph = boost::labeled_graph< TransformGraph, FrameId>;
 
     typedef LabeledTransformGraph::vertex_descriptor vertex_descriptor;
