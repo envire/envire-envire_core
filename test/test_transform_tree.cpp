@@ -65,6 +65,36 @@ BOOST_AUTO_TEST_CASE(simple_modify_transform_test)
     BOOST_CHECK(compareTransform(readAb, tf2Inv));
 }
 
+BOOST_AUTO_TEST_CASE(modify_transform_event_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    TransformTree tree;
+    Transform tf;
+    tf.transform.translation << 42, 21, -42;
+    tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
+    tree.addTransform(a, b, tf);
+
+    std::shared_ptr<Dispatcher> d(new Dispatcher());
+    tree.subscribe(d);
+    Transform tf2;
+    tf2.transform.translation << 0, 1, 2;
+    tf2.transform.orientation = base::AngleAxisd(0.42, base::Vector3d::UnitY());
+    tree.updateTransform(a, b, tf2);
+    BOOST_CHECK(d->transformModifiedEvent.size() == 2);
+    BOOST_CHECK(compareTransform(d->transformModifiedEvent[0].newTransform, tf2));
+    BOOST_CHECK(compareTransform(d->transformModifiedEvent[0].oldTransform, tf));
+    Transform tf2Inv = tf2;
+    tf2Inv.setTransform(tf2.transform.inverse());
+    BOOST_CHECK(compareTransform(d->transformModifiedEvent[1].newTransform, tf2Inv));
+    BOOST_CHECK(d->transformModifiedEvent[0].from == a);
+    BOOST_CHECK(d->transformModifiedEvent[0].to == b);
+    BOOST_CHECK(d->transformModifiedEvent[1].from == b);
+    BOOST_CHECK(d->transformModifiedEvent[1].to == a);
+    BOOST_CHECK(d->transformModifiedEvent[0].edge == tree.getEdge(a, b));
+    BOOST_CHECK(d->transformModifiedEvent[1].edge == tree.getEdge(b, a));
+}
+
 BOOST_AUTO_TEST_CASE(simple_add_get_transform_test)
 {
     FrameId a = "frame_a";
