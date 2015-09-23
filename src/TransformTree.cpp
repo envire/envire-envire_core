@@ -77,12 +77,18 @@ void TransformTree::updateTransform(const FrameId& origin, const FrameId& target
 
 void TransformTree::removeTransform(const FrameId& origin, const FrameId& target)
 {
-    if(num_edges() <= 0)
+    //note: do not use boost::edge_by_label as it will segfault if one of the
+    //frames is not part of the tree.
+
+    vertex_descriptor originDesc = vertex(origin);
+    vertex_descriptor targetDesc = vertex(target);
+    if(originDesc == null_vertex() || targetDesc == null_vertex())
     {
         throw UnknownTransformException(origin, target);
     }
-    edgePair originToTarget = boost::edge_by_label(origin, target, *this);
-    edgePair targetToOrigin = boost::edge_by_label(target, origin, *this);
+
+    edgePair originToTarget = boost::edge(originDesc, targetDesc, graph());
+    edgePair targetToOrigin = boost::edge(targetDesc, originDesc, graph());
     if(!originToTarget.second || !targetToOrigin.second)
     {
         throw UnknownTransformException(origin, target);
@@ -112,26 +118,6 @@ edge_descriptor TransformTree::add_edge(const vertex_descriptor node_from,
     return edge_pair.first;
 }
 
-std::pair<edge_iterator, edge_iterator> TransformTree::edges()
-{
-    return boost::edges(*this);
-}
-
-std::pair<vertex_iterator, vertex_iterator> TransformTree::vertices()
-{
-    return boost::vertices(*this);
-}
-
-vertex_descriptor TransformTree::source(const edge_descriptor it_node)
-{
-    return boost::source(it_node, *this);
-}
-
-vertex_descriptor TransformTree::target(const edge_descriptor it_node)
-{
-    return boost::target(it_node, *this);
-}
-
 vertices_size_type TransformTree::num_vertices() const
 {
     return boost::num_vertices(*this);
@@ -140,11 +126,6 @@ vertices_size_type TransformTree::num_vertices() const
 edges_size_type TransformTree::num_edges() const
 {
     return boost::num_edges(*this);
-}
-
-degree_size_type TransformTree::degree(const vertex_descriptor v) const
-{
-    return boost::degree(v, *this);
 }
 
 vertex_descriptor TransformTree::add_vertex(const FrameId& frameId)
@@ -156,7 +137,7 @@ vertex_descriptor TransformTree::add_vertex(const FrameId& frameId)
 
 void TransformTree::remove_frame(FrameId fId)
 {
-    assert(degree(vertex(fId)) <= 0);
+    assert(boost::degree(vertex(fId), *this) <= 0);
     boost::remove_vertex(fId, *this);
     //HACK this is a workaround for bug https://svn.boost.org/trac/boost/ticket/9493
     //It should be removed as soon as the bug is fixed in boost.

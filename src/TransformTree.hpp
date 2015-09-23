@@ -45,6 +45,12 @@ namespace envire { namespace core
         friend class GraphViz;
     public:
 
+        /***************************************************
+         * Methods Naming convention
+         * Overloading boost methods uses delimited separated
+         * words, new methods use Camel Case separated words
+         ***************************************************/
+
         TransformTree(envire::core::Environment const &environment = Environment()):
           LabeledTransformGraph (environment)
         {}
@@ -94,30 +100,17 @@ namespace envire { namespace core
          * @throw UnknownTransformException if there is no such edge  */
         edge_descriptor getEdge(const FrameId& origin, const FrameId& target) const;
 
-        /***************************************************
-         * Methods Naming convention
-         * Overloading boost methods uses delimited separated
-         * words, new methods use Camel Case separated words
-         ***************************************************/
-
-
         /** @return a reference to the frame identified by the id.
          *  @throw UnknownFrameException if the frame id is invalid **/
         const envire::core::Frame& getFrame(const FrameId& frame);
 
-        /**@brief Get all edges */
-        std::pair<edge_iterator, edge_iterator> edges();
+        vertices_size_type num_vertices() const;
+        edges_size_type num_edges() const;
 
-        /**@brief Get the source of an edge */
-        vertex_descriptor source(const edge_descriptor it_node);
-
-        /**@brief Get the target of an edge */
-        vertex_descriptor target(const edge_descriptor it_node);
-
-        /**@brief Get all vertices
-         */
-        std::pair<vertex_iterator, vertex_iterator>
-        vertices();
+    protected:
+         /**@brief Add a vertex
+         * @note the frame's name must be unique. */
+        vertex_descriptor add_vertex(const FrameId& frameId);
 
         /**@brief Add an Edge
          * Add an edge between two vertices.
@@ -133,29 +126,6 @@ namespace envire { namespace core
                                  const vertex_descriptor node_to,
                                  const envire::core::Transform &tf);
 
-
-        void remove_edge(edge_descriptor e);
-
-        vertices_size_type num_vertices() const;
-        edges_size_type num_edges() const;
-
-
-        /**@return the total number of edges connected to @param v.
-         *         I.e. the sum of the in and out edges.
-         */
-        degree_size_type degree(const vertex_descriptor v) const;
-
-        /**@return the vertex identified by @param label */
-        vertex_descriptor vertex(const std::string& label) const
-        {
-            return LabeledTransformGraph::vertex(label);
-        }
-
-    protected:
-         /**@brief Add a vertex
-         * @note the frame's name must be unique. */
-        vertex_descriptor add_vertex(const FrameId& frameId);
-
         /**Removes a vertex from the tree.
          * A vertex can only be removed if there are no edges to
          * and from the vertex. Removing a vertex that still has edges
@@ -165,6 +135,7 @@ namespace envire { namespace core
         /**Sets the transform value and causes transformModified event. */
         void updateTransform(edge_descriptor ed, const Transform& tf,
                              const FrameId& origin, const FrameId& target);
+
 
     };
 }}

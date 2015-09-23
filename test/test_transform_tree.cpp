@@ -57,6 +57,18 @@ BOOST_AUTO_TEST_CASE(simple_remove_transform_test)
     BOOST_CHECK(tree.num_vertices() == 0);
 }
 
+BOOST_AUTO_TEST_CASE(remove_existing_but_unconnected_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    TransformTree tree;
+    Transform tf;
+    tree.addTransform(a, b, tf);
+    tree.addTransform(a, c, tf);
+    BOOST_CHECK_THROW(tree.removeTransform(b, c), UnknownTransformException);
+}
+
 BOOST_AUTO_TEST_CASE(complex_remove_transform_test)
 {
     FrameId a = "frame_a";
@@ -98,6 +110,58 @@ BOOST_AUTO_TEST_CASE(simple_modify_transform_test)
     Transform tf2Inv = tf2;
     tf2Inv.setTransform(tf2.transform.inverse());
     BOOST_CHECK(compareTransform(readAb, tf2Inv));
+}
+
+BOOST_AUTO_TEST_CASE(update_transform_on_empty_tree_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    TransformTree tree;
+    Transform tf;
+    BOOST_CHECK_THROW(tree.updateTransform(a, b, tf), UnknownTransformException);
+}
+
+BOOST_AUTO_TEST_CASE(update_transform_invalid_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    TransformTree tree;
+    Transform tf;
+    tree.addTransform(a, b, tf);
+    BOOST_CHECK_THROW(tree.updateTransform(a, c, tf), UnknownTransformException);
+}
+
+BOOST_AUTO_TEST_CASE(remove_transform_on_empty_tree_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    TransformTree tree;
+    BOOST_CHECK_THROW(tree.removeTransform(a, b), UnknownTransformException);
+}
+
+BOOST_AUTO_TEST_CASE(remove_transform_invalid_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    TransformTree tree;
+    Transform tf;
+    tree.addTransform(a, b, tf);
+    BOOST_CHECK_THROW(tree.removeTransform(a, c), UnknownTransformException);
+}
+
+BOOST_AUTO_TEST_CASE(get_invalid_transform_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    TransformTree tree;
+    Transform tf;
+    tf.transform.translation << 42, 21, -42;
+    tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
+    BOOST_CHECK_NO_THROW(tree.addTransform(a, b, tf));
+    BOOST_CHECK_THROW(tree.getTransform(a, c), UnknownTransformException);
 }
 
 BOOST_AUTO_TEST_CASE(modify_transform_event_test)
