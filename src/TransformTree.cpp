@@ -38,6 +38,12 @@ void TransformTree::addTransform(const FrameId& origin, const FrameId& target,
 
 const Transform& TransformTree::getTransform(const FrameId& a, const FrameId& b) const
 {
+    //calling boost::edge_by_label on an empty graph results in a segfault.
+    //therefore catch it before that happens.
+    if(num_edges() == 0)
+    {
+        throw UnknownTransformException(a, b);
+    }
     //FIXME for now this only works with direct edges
     edgePair pair = boost::edge_by_label(a, b, *this);
     if(!pair.second)

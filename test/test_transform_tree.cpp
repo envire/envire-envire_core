@@ -77,8 +77,10 @@ BOOST_AUTO_TEST_CASE(get_transform_exception_test)
 {
     FrameId a = "frame_a";
     FrameId b = "frame_b";
+    FrameId c = "frame_c";
     TransformTree tree;
-    BOOST_CHECK_THROW(tree.getTransform(a, b), UnknownTransformException);
+    Transform tf;
+    BOOST_CHECK_THROW(tree.getTransform(a, c), UnknownTransformException);
 }
 
 
