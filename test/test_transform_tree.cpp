@@ -62,6 +62,26 @@ BOOST_AUTO_TEST_CASE(simple_add_get_transform_test)
     BOOST_CHECK(readTfInv.transform.orientation.angle() == invTf.transform.orientation.angle());
 }
 
+
+BOOST_AUTO_TEST_CASE(add_transform_exception_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    TransformTree tree;
+    Transform tf;
+    BOOST_CHECK_NO_THROW(tree.addTransform(a, b, tf));
+    BOOST_CHECK_THROW(tree.addTransform(b, a, tf), TransformAlreadyExistsException);
+}
+
+BOOST_AUTO_TEST_CASE(get_transform_exception_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    TransformTree tree;
+    BOOST_CHECK_THROW(tree.getTransform(a, b), UnknownTransformException);
+}
+
+
 BOOST_AUTO_TEST_CASE(simple_add_transform_event_test)
 {
     FrameId a = "frame_a";
