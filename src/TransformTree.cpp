@@ -168,6 +168,10 @@ void TransformTree::remove_frame(FrameId fId)
 
 const envire::core::Frame& TransformTree::getFrame(const FrameId& frame)
 {
+    if(vertex(frame) == null_vertex())
+    {
+        throw UnknownFrameException(frame);
+    }
     return (*this)[frame].frame;
 }
 
