@@ -94,7 +94,9 @@ void TransformTree::removeTransform(const FrameId& origin, const FrameId& target
         throw UnknownTransformException(origin, target);
     }
     boost::remove_edge(originToTarget.first, *this);
+    notify(TransformRemovedEvent(origin, target));
     boost::remove_edge(targetToOrigin.first, *this);
+    notify(TransformRemovedEvent(target, origin));
 
     //remove dangling frames
     if(boost::degree(vertex(origin), *this) <= 0)

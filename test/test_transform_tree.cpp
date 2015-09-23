@@ -42,6 +42,25 @@ public:
     }
 };
 
+BOOST_AUTO_TEST_CASE(remove_transform_event_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    TransformTree tree;
+    Transform tf;
+    tf.transform.translation << 42, 21, -42;
+    tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
+    tree.addTransform(a, b, tf);
+    std::shared_ptr<Dispatcher> d(new Dispatcher());
+    tree.subscribe(d);
+    tree.removeTransform(a, b);
+    BOOST_CHECK(d->transformRemovedEvent.size() == 2);
+    BOOST_CHECK(d->transformRemovedEvent[0].origin == a);
+    BOOST_CHECK(d->transformRemovedEvent[0].target == b);
+    BOOST_CHECK(d->transformRemovedEvent[1].origin == b);
+    BOOST_CHECK(d->transformRemovedEvent[1].target == a);
+}
+
 BOOST_AUTO_TEST_CASE(simple_remove_transform_test)
 {
     FrameId a = "frame_a";
