@@ -17,7 +17,13 @@
 #include "Environment.hpp" /** Environment is the tree property **/
 
 #include <boost/graph/directed_graph.hpp>
+
+//HACK to gain access to private members in labeled_graph
+//This is necessary because there is a bug in boost and a workaround needs to be
+//implemented while we wait for boost to fix it
+#define private protected
 #include <boost/graph/labeled_graph.hpp>
+#undef private
 #include <string>
 
 namespace envire { namespace core

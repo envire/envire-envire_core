@@ -158,6 +158,12 @@ void TransformTree::remove_frame(FrameId fId)
 {
     assert(degree(vertex(fId)) <= 0);
     boost::remove_vertex(fId, *this);
+    //HACK this is a workaround for bug https://svn.boost.org/trac/boost/ticket/9493
+    //It should be removed as soon as the bug is fixed in boost.
+    //If the bug is fixed also remove the #define private protected in TransformTreeTypes
+    map_type::iterator it = _map.find(fId);
+    if(it != _map.end())
+        _map.erase(it);
 }
 
 const envire::core::Frame& TransformTree::getFrame(const FrameId& frame)
