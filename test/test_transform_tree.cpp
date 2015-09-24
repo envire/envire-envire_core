@@ -323,7 +323,6 @@ BOOST_AUTO_TEST_CASE(add_invalid_item_test)
 BOOST_AUTO_TEST_CASE(add_item_test)
 {
     TransformGraph graph;
-    Frame frame("Example frame");
     Transform tf;
     FrameId a = "frame_a";
     FrameId b = "frame_b";
@@ -346,7 +345,6 @@ BOOST_AUTO_TEST_CASE(get_item_empty_graph_test)
 BOOST_AUTO_TEST_CASE(get_invalid_item_test)
 {
     TransformGraph graph;
-    Frame frame("Example frame");
     Transform tf;
     FrameId a = "frame_a";
     FrameId b = "frame_b";
@@ -358,88 +356,20 @@ BOOST_AUTO_TEST_CASE(get_invalid_item_test)
     BOOST_CHECK_THROW(graph.getItems(c), UnknownFrameException);
 }
 
-//
-//class Vector: public envire::core::Item<Eigen::Vector3d>
-//{
-//};
-//
-//BOOST_AUTO_TEST_CASE(property_and_grahviz_test)
-//{
-//
-////    unsigned int max_vertices = 100;
-////
-////    envire::core::TransformTree tree;
-////    unsigned int vector_size = 100;
-////    unsigned int magic_number = 42;
-////
-////    /** Create a list of items **/
-////    std::vector< boost::intrusive_ptr<envire::core::ItemBase> > items_vector(vector_size);
-////    boost::intrusive_ptr<Vector> my_vector(new Vector());
-////    my_vector->setData(magic_number * Eigen::Vector3d::Ones());
-////
-////    for (std::vector<boost::intrusive_ptr<envire::core::ItemBase> >::iterator it = items_vector.begin() ; it != items_vector.end(); ++it)
-////    {
-////        /** Pointer to the same object **/
-////        *it = my_vector;
-////    }
-////
-////    for (unsigned int i = 0; i<max_vertices; ++i)
-////    {
-////        envire::core::Frame frame("frame_"+boost::lexical_cast<std::string>(i));
-////        frame.items = items_vector;
-////        tree.add_vertex(frame);
-////    }
-////
-////    BOOST_TEST_MESSAGE("FRAME PROPERTY TEST...");
-////    for (unsigned int i = 0; i < max_vertices; ++i)
-////    {
-////        const std::string label = "frame_"+boost::lexical_cast<std::string>(i);
-////        envire::core::Frame frame = tree.getFrame(tree.vertex(label));
-////        BOOST_CHECK(frame.name == "frame_"+boost::lexical_cast<std::string>(i));
-////        BOOST_CHECK(frame.items.size() == vector_size);
-////        for (std::vector< boost::intrusive_ptr<envire::core::ItemBase> >::const_iterator it = frame.items.begin();
-////                it != frame.items.end(); ++it)
-////        {
-////            BOOST_CHECK(*it == my_vector);
-////            Vector* pvector = dynamic_cast< Vector* >(it->get());
-////            BOOST_CHECK(pvector->getData() == magic_number * Eigen::Vector3d::Ones());
-////        }
-////    }
-////    BOOST_TEST_MESSAGE("DONE\n");
-////
-////    /** get root node and create edges **/
-////    base::Time now = base::Time::now();
-////    envire::core::vertex_descriptor root = tree.vertex("frame_0");
-////    for (envire::core::vertices_size_type iv = 1; iv < tree.num_vertices(); ++iv)
-////    {
-////        envire::core::edge_descriptor edge; bool b;
-////        envire::core::Transform tf_prop(now);
-////        base::TransformWithCovariance tf(Eigen::AngleAxisd::Identity(), static_cast<base::Position>(my_vector->getData()));
-////        tf_prop.setTransform(tf);
-////        const std::string label = "frame_"+boost::lexical_cast<std::string>(iv);
-////        envire::core::vertex_descriptor node_to = tree.vertex(label);
-////        boost::tie(edge, b) = tree.add_edge(root, node_to, tf_prop);
-////        BOOST_CHECK(b == true);
-////    }
-////
-////    BOOST_TEST_MESSAGE("TRANSFORM PROPERTY TEST...");
-////    envire::core::edge_iterator it, end;
-////    for(boost::tie(it, end) = tree.edges(); it != end; ++it)
-////    {
-////
-////        const Transform& transform = tree.getTransform(*it);
-////        BOOST_CHECK(transform.time == now);
-////        BOOST_CHECK(transform.transform.translation == my_vector->getData());
-////    }
-////    BOOST_TEST_MESSAGE("DONE\n");
-////
-////    BOOST_TEST_MESSAGE("GRAPHVIZ TEST...");
-////    envire::core::GraphViz gviz;
-////
-////    gviz.write(tree, "graphviz_boost_test_transform_tree.dot");
-////
-////    //tree.clear();
-////    BOOST_TEST_MESSAGE("DONE\n");
-//}
-//
 
+class Vector: public envire::core::Item<Eigen::Vector3d>{};
+
+BOOST_AUTO_TEST_CASE(graphviz_test)
+{
+    TransformGraph graph;
+    
+    for(int i = 0; i < 12; ++i)
+    {
+        FrameId origin = "frame_" + boost::lexical_cast<std::string>(i);
+        FrameId target = "frame_" + boost::lexical_cast<std::string>(i + 1);
+        Transform tf;
+        graph.addTransform(origin, target, tf);
+    }
+    GraphViz viz;
+    viz.write(graph, "transformGraph_graphviz_test.dot");
+}
