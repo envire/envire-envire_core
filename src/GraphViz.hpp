@@ -3,7 +3,7 @@
 
 #include <fstream> // std::ofstream
 
-#include <envire_core/TransformTree.hpp>
+#include <envire_core/TransformGraph.hpp>
 #include <boost/graph/graphviz.hpp>
 
 
