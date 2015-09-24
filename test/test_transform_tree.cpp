@@ -14,10 +14,10 @@ bool compareTransform(const Transform& a, const Transform& b)
     return a.transform.translation.x() == b.transform.translation.x() &&
            a.transform.translation.y() == b.transform.translation.y() &&
            a.transform.translation.z() == b.transform.translation.z() &&
-           a.transform.orientation.axis().x() == b.transform.orientation.axis().x() &&
-           a.transform.orientation.axis().y() == b.transform.orientation.axis().y() &&
-           a.transform.orientation.axis().z() == b.transform.orientation.axis().z() &&
-           a.transform.orientation.angle() == b.transform.orientation.angle();
+           a.transform.orientation.x() == b.transform.orientation.x() &&
+           a.transform.orientation.y() == b.transform.orientation.y() &&
+           a.transform.orientation.z() == b.transform.orientation.z() &&
+           a.transform.orientation.w() == b.transform.orientation.w();
 }
 
 class Dispatcher : public TreeEventDispatcher {
