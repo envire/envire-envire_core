@@ -226,10 +226,10 @@ BOOST_AUTO_TEST_CASE(modify_transform_event_test)
     Transform tf2Inv = tf2;
     tf2Inv.setTransform(tf2.transform.inverse());
     BOOST_CHECK(compareTransform(d->transformModifiedEvent[1].newTransform, tf2Inv));
-    BOOST_CHECK(d->transformModifiedEvent[0].from == a);
-    BOOST_CHECK(d->transformModifiedEvent[0].to == b);
-    BOOST_CHECK(d->transformModifiedEvent[1].from == b);
-    BOOST_CHECK(d->transformModifiedEvent[1].to == a);
+    BOOST_CHECK(d->transformModifiedEvent[0].origin == a);
+    BOOST_CHECK(d->transformModifiedEvent[0].target == b);
+    BOOST_CHECK(d->transformModifiedEvent[1].origin == b);
+    BOOST_CHECK(d->transformModifiedEvent[1].target == a);
     BOOST_CHECK(d->transformModifiedEvent[0].edge == tree.getEdge(a, b));
     BOOST_CHECK(d->transformModifiedEvent[1].edge == tree.getEdge(b, a));
 }
