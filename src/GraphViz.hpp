@@ -3,7 +3,7 @@
 
 #include <fstream> // std::ofstream
 
-#include <envire_core/TransformTree.hpp>
+#include <envire_core/TransformGraph.hpp>
 #include <boost/graph/graphviz.hpp>
 
 
@@ -116,7 +116,7 @@ namespace envire { namespace core
         /**@brief Export to GraphViz
          *
          */
-        void write(const TransformGraph &graph, const std::string& filename = "")
+        void write(const TransformGraphBase &graph, const std::string& filename = "")
         {
             std::streambuf * buf;
             std::ofstream of;
@@ -137,6 +137,11 @@ namespace envire { namespace core
                     make_node_writer(boost::get(&FrameProperty::frame, graph)),
                     make_edge_writer(boost::get(&TransformProperty::transform, graph)),
                     make_graph_writer());
+        }
+
+        void write(const TransformGraph &tree, const std::string& filename = "")
+        {
+            write(dynamic_cast<const TransformGraphBase&>(tree.graph()), filename);
         }
     };
 }}
