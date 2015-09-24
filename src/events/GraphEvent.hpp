@@ -5,7 +5,7 @@ namespace envire { namespace core
     
     /** TODO comment
      */
-    class TreeEvent
+    class GraphEvent
     {
     public:
         //all possible events
@@ -15,8 +15,8 @@ namespace envire { namespace core
             TRANSFORMATION_REMOVED,
             TRANSFORMATION_MODIFIED
         };
-        TreeEvent(const Type type) : type(type) {}
-        virtual ~TreeEvent() {}
+        GraphEvent(const Type type) : type(type) {}
+        virtual ~GraphEvent() {}
 
         Type type;
     };

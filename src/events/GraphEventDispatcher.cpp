@@ -1,5 +1,5 @@
-#include "TreeEventDispatcher.hpp"
-#include "TreeEvent.hpp"
+#include "GraphEventDispatcher.hpp"
+#include "GraphEvent.hpp"
 #include "TransformAddedEvent.hpp"
 #include "TransformModifiedEvent.hpp"
 #include "TransformRemovedEvent.hpp"
@@ -8,17 +8,17 @@
 
 using namespace envire::core;
 
-void TreeEventDispatcher::notifyTreeEvent(const TreeEvent& event)
+void GraphEventDispatcher::notifyTreeEvent(const GraphEvent& event)
 {
     switch(event.type)
     {
-    case TreeEvent::TRANSFORMATION_ADDED:
+    case GraphEvent::TRANSFORMATION_ADDED:
         transformAdded(dynamic_cast<const TransformAddedEvent&>(event));
         break;
-    case TreeEvent::TRANSFORMATION_MODIFIED:
+    case GraphEvent::TRANSFORMATION_MODIFIED:
         transformModified(dynamic_cast<const TransformModifiedEvent&>(event));
         break;
-    case TreeEvent::TRANSFORMATION_REMOVED:
+    case GraphEvent::TRANSFORMATION_REMOVED:
         transformRemoved(dynamic_cast<const TransformRemovedEvent&>(event));
         break;
     default:

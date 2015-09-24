@@ -51,8 +51,8 @@ namespace envire { namespace core
     * The basic class for the Transform Graph
     *
     */
-    typedef boost::directed_graph<FrameProperty, TransformProperty, envire::core::Environment> TransformGraph;
-    typedef boost::labeled_graph< TransformGraph, FrameId> LabeledTransformGraph;
+    typedef boost::directed_graph<FrameProperty, TransformProperty, envire::core::Environment> TransformGraphBase;
+    typedef boost::labeled_graph<TransformGraphBase, FrameId> LabeledTransformGraph;
     typedef LabeledTransformGraph::vertex_descriptor vertex_descriptor;
     typedef LabeledTransformGraph::edge_descriptor edge_descriptor;
     typedef LabeledTransformGraph::edge_iterator edge_iterator;

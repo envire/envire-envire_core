@@ -4,9 +4,8 @@ rock_library(envire_core
             Frame.hpp
             Transform.hpp
             Environment.hpp
-            TransformTree.hpp
-            TransformTreeTypes.hpp
-            LabeledTransformTree.hpp
+            TransformGraph.hpp
+            TransformGraphTypes.hpp
             GraphViz.hpp
             SpatialItem.hpp
             BoundingVolume.hpp
@@ -14,20 +13,22 @@ rock_library(envire_core
             AlignedBoundingBox.hpp
             DummyItem.hpp
             RandomGenerator.hpp
-            events/TreeEvent.hpp
-            events/FrameAddedEvent.hpp
-            events/FrameRootAddedEvent.hpp
-            events/TreeEventSubscriber.hpp
-            events/TreeEventDispatcher.hpp
-            events/TreeEventPublisher.hpp
+            events/GraphEvent.hpp
+            events/GraphEventSubscriber.hpp
+            events/GraphEventDispatcher.hpp
+            events/GraphEventPublisher.hpp
+            events/TransformAddedEvent.hpp
+            events/TransformModifiedEvent.hpp
+            events/TransformRemovedEvent.hpp
+            
     SOURCES ItemBase.cpp
             ClassLoader.cpp
             BoundingVolume.cpp
             AlignedBoundingBox.cpp
             DummyItem.cpp
-            events/TreeEventPublisher.cpp
-            events/TreeEventDispatcher.cpp
-            TransformTree.cpp            
+            events/GraphEventPublisher.cpp
+            events/GraphEventDispatcher.cpp
+            TransformGraph.cpp            
     DEPS_CMAKE Boost
     DEPS_PKGCONFIG base-types class_loader)
     

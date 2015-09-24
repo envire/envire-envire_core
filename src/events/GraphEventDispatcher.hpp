@@ -1,5 +1,5 @@
 #pragma once
-#include "TreeEventSubscriber.hpp"
+#include "GraphEventSubscriber.hpp"
 
 
 namespace envire { namespace core
@@ -17,10 +17,10 @@ namespace envire { namespace core
      *
      * You should override the methods, that you are interested in.
      */
-    class TreeEventDispatcher : public TreeEventSubscriber
+    class GraphEventDispatcher : public GraphEventSubscriber
     {
     public:
-        virtual void notifyTreeEvent(const TreeEvent& event);
+        virtual void notifyTreeEvent(const GraphEvent& event);
 
     protected:
         virtual void frameAdded(const FrameAddedEvent& e){}

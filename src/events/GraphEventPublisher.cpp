@@ -5,19 +5,19 @@
  *      Author: aboeckmann
  */
 #include <algorithm>
-#include "TreeEventPublisher.hpp"
+#include "GraphEventPublisher.hpp"
 
 
 using namespace envire::core;
 using namespace std;
 
-void TreeEventPublisher::subscribe(shared_ptr<TreeEventSubscriber> subscriber)
+void GraphEventPublisher::subscribe(shared_ptr<GraphEventSubscriber> subscriber)
 {
     assert(nullptr != subscriber);
     subscribers.push_back(subscriber);
 }
 
-void TreeEventPublisher::unsubscribe(shared_ptr<TreeEventSubscriber> subscriber)
+void GraphEventPublisher::unsubscribe(shared_ptr<GraphEventSubscriber> subscriber)
 {
     assert(nullptr != subscriber);
     auto pos = std::find(subscribers.begin(), subscribers.end(), subscriber);
@@ -27,22 +27,22 @@ void TreeEventPublisher::unsubscribe(shared_ptr<TreeEventSubscriber> subscriber)
     }
 }
 
-void TreeEventPublisher::notify(const TreeEvent& e)
+void GraphEventPublisher::notify(const GraphEvent& e)
 {
     if(eventsEnabled)
     {
-        for(shared_ptr<TreeEventSubscriber>& s : subscribers)
+        for(shared_ptr<GraphEventSubscriber>& s : subscribers)
         {
             s->notifyTreeEvent(e);
         }
     }
 }
 
-void TreeEventPublisher::disableEvents()
+void GraphEventPublisher::disableEvents()
 {
     eventsEnabled = false;
 }
-void TreeEventPublisher::enableEvents()
+void GraphEventPublisher::enableEvents()
 {
     eventsEnabled = true;
 }

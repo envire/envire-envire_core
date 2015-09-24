@@ -13,10 +13,8 @@
 namespace envire { namespace core
 {
     using FrameId = std::string;
-    /**@class Frame
-    *
-    * Frame class
-    */
+    
+    //TODO comment
     class Frame
     {
     public:

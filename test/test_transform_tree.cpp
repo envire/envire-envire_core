@@ -1,9 +1,9 @@
 #include <boost/test/unit_test.hpp>
-#include <envire_core/TransformTreeTypes.hpp>
-#include <envire_core/TransformTree.hpp>
+#include <envire_core/TransformGraphTypes.hpp>
+#include <envire_core/TransformGraph.hpp>
 #include <envire_core/Item.hpp>
 #include <envire_core/GraphViz.hpp>
-#include <envire_core/events/TreeEventDispatcher.hpp>
+#include <envire_core/events/GraphEventDispatcher.hpp>
 #include <vector>
 
 using namespace envire::core;
@@ -20,7 +20,7 @@ bool compareTransform(const Transform& a, const Transform& b)
            a.transform.orientation.w() == b.transform.orientation.w();
 }
 
-class Dispatcher : public TreeEventDispatcher {
+class Dispatcher : public GraphEventDispatcher {
 public:
     vector<TransformAddedEvent> transformAddedEvent;
     vector<TransformModifiedEvent> transformModifiedEvent;
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(remove_transform_event_test)
 {
     FrameId a = "frame_a";
     FrameId b = "frame_b";
-    TransformTree tree;
+    TransformGraph tree;
     Transform tf;
     tf.transform.translation << 42, 21, -42;
     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(simple_remove_transform_test)
 {
     FrameId a = "frame_a";
     FrameId b = "frame_b";
-    TransformTree tree;
+    TransformGraph tree;
     Transform tf;
     tf.transform.translation << 42, 21, -42;
     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(remove_existing_but_unconnected_test)
     FrameId a = "frame_a";
     FrameId b = "frame_b";
     FrameId c = "frame_c";
-    TransformTree tree;
+    TransformGraph tree;
     Transform tf;
     tree.addTransform(a, b, tf);
     tree.addTransform(a, c, tf);
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(complex_remove_transform_test)
     FrameId a = "frame_a";
     FrameId b = "frame_b";
     FrameId c = "frame_c";
-    TransformTree tree;
+    TransformGraph tree;
     Transform tf;
     tf.transform.translation << 42, 21, -42;
     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(simple_modify_transform_test)
 {
     FrameId a = "frame_a";
     FrameId b = "frame_b";
-    TransformTree tree;
+    TransformGraph tree;
     Transform tf;
     tf.transform.translation << 42, 21, -42;
     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(update_transform_on_empty_tree_test)
 {
     FrameId a = "frame_a";
     FrameId b = "frame_b";
-    TransformTree tree;
+    TransformGraph tree;
     Transform tf;
     BOOST_CHECK_THROW(tree.updateTransform(a, b, tf), UnknownTransformException);
 }
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(update_transform_invalid_test)
     FrameId a = "frame_a";
     FrameId b = "frame_b";
     FrameId c = "frame_c";
-    TransformTree tree;
+    TransformGraph tree;
     Transform tf;
     tree.addTransform(a, b, tf);
     BOOST_CHECK_THROW(tree.updateTransform(a, c, tf), UnknownTransformException);
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(remove_transform_on_empty_tree_test)
 {
     FrameId a = "frame_a";
     FrameId b = "frame_b";
-    TransformTree tree;
+    TransformGraph tree;
     BOOST_CHECK_THROW(tree.removeTransform(a, b), UnknownTransformException);
 }
 
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(remove_transform_invalid_test)
     FrameId a = "frame_a";
     FrameId b = "frame_b";
     FrameId c = "frame_c";
-    TransformTree tree;
+    TransformGraph tree;
     Transform tf;
     tree.addTransform(a, b, tf);
     BOOST_CHECK_THROW(tree.removeTransform(a, c), UnknownTransformException);
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(get_invalid_transform_test)
     FrameId a = "frame_a";
     FrameId b = "frame_b";
     FrameId c = "frame_c";
-    TransformTree tree;
+    TransformGraph tree;
     Transform tf;
     tf.transform.translation << 42, 21, -42;
     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
@@ -187,7 +187,7 @@ BOOST_AUTO_TEST_CASE(get_edge_on_empty_tree_test)
 {
     FrameId a = "frame_a";
     FrameId b = "frame_b";
-    TransformTree tree;
+    TransformGraph tree;
     BOOST_CHECK_THROW(tree.getEdge(a, b), UnknownTransformException);
 }
 
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(get_edge_invalid_test)
     FrameId a = "frame_a";
     FrameId b = "frame_b";
     FrameId c = "frame_c";
-    TransformTree tree;
+    TransformGraph tree;
     Transform tf;
     tree.addTransform(a, b, tf);
     tree.addTransform(a, c, tf);
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(modify_transform_event_test)
 {
     FrameId a = "frame_a";
     FrameId b = "frame_b";
-    TransformTree tree;
+    TransformGraph tree;
     Transform tf;
     tf.transform.translation << 42, 21, -42;
     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(simple_add_get_transform_test)
 {
     FrameId a = "frame_a";
     FrameId b = "frame_b";
-    TransformTree tree;
+    TransformGraph tree;
     Transform tf;
     tf.transform.translation << 42, 21, -42;
     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE(add_transform_exception_test)
 {
     FrameId a = "frame_a";
     FrameId b = "frame_b";
-    TransformTree tree;
+    TransformGraph tree;
     Transform tf;
     BOOST_CHECK_NO_THROW(tree.addTransform(a, b, tf));
     BOOST_CHECK_THROW(tree.addTransform(b, a, tf), TransformAlreadyExistsException);
@@ -268,7 +268,7 @@ BOOST_AUTO_TEST_CASE(get_transform_exception_test)
 {
     FrameId a = "frame_a";
     FrameId c = "frame_c";
-    TransformTree tree;
+    TransformGraph tree;
     Transform tf;
     BOOST_CHECK_THROW(tree.getTransform(a, c), UnknownTransformException);
 }
@@ -278,7 +278,7 @@ BOOST_AUTO_TEST_CASE(simple_add_transform_event_test)
 {
     FrameId a = "frame_a";
     FrameId b = "frame_b";
-    TransformTree tree;
+    TransformGraph tree;
     Transform tf;
     tf.transform.translation << 42, 21, -42;
     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());

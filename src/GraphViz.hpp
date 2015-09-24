@@ -116,7 +116,7 @@ namespace envire { namespace core
         /**@brief Export to GraphViz
          *
          */
-        void write(const TransformGraph &graph, const std::string& filename = "")
+        void write(const TransformGraphBase &graph, const std::string& filename = "")
         {
             std::streambuf * buf;
             std::ofstream of;
@@ -139,9 +139,9 @@ namespace envire { namespace core
                     make_graph_writer());
         }
 
-        void write(const TransformTree &tree, const std::string& filename = "")
+        void write(const TransformGraph &tree, const std::string& filename = "")
         {
-            write(dynamic_cast<const TransformGraph&>(tree.graph()), filename);
+            write(dynamic_cast<const TransformGraphBase&>(tree.graph()), filename);
         }
     };
 }}

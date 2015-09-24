@@ -37,7 +37,7 @@ namespace envire { namespace core
      *       the vertices and edges.
      *       This is done to ensure that
     */
-    class TransformTree : protected LabeledTransformGraph, public TreeEventPublisher
+    class TransformTree : protected LabeledTransformGraph, public GraphEventPublisher
     {
         //GraphViz has been implemented for TransformGraph.
         //As it only reads and does no manipulation it is ok to let it know

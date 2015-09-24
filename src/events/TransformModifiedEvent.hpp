@@ -1,12 +1,12 @@
 #pragma once
-#include <envire_core/TransformTreeTypes.hpp>
+#include <envire_core/TransformGraphTypes.hpp>
 #include <envire_core/Transform.hpp>
 #include <envire_core/Frame.hpp>
-#include "TreeEvent.hpp"
+#include "GraphEvent.hpp"
 
 namespace envire { namespace core
 {
-    class TransformModifiedEvent : public TreeEvent
+    class TransformModifiedEvent : public GraphEvent
     {
     public:
       TransformModifiedEvent(const FrameId& from,
@@ -14,7 +14,7 @@ namespace envire { namespace core
                              const edge_descriptor& edge,
                              const Transform& oldTransform,
                              const Transform& newTransform) :
-        TreeEvent(TreeEvent::TRANSFORMATION_MODIFIED), from(from), to(to),
+        GraphEvent(GraphEvent::TRANSFORMATION_MODIFIED), from(from), to(to),
         edge(edge), oldTransform(oldTransform), newTransform(newTransform){}
 
       FrameId from;/**<Source vertex of the transform */
