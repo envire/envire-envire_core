@@ -51,10 +51,7 @@ namespace envire { namespace core
          * words, new methods use Camel Case separated words
          ***************************************************/
 
-        TransformGraph(envire::core::Environment const &environment = Environment()):
-          LabeledTransformGraph (environment)
-        {}
-
+        TransformGraph(envire::core::Environment const &environment = Environment());
 
         /**Adds a transform from frame @p a to frame @p b.
          * If the frames do not exist, they will be created.

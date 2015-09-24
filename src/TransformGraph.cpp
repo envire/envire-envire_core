@@ -5,9 +5,21 @@
  *      Author: aboeckmann
  */
 #include "TransformGraph.hpp"
+#include <type_traits> //For is_same()
 
 using namespace envire::core;
+using namespace std;
 using edgePair = std::pair<edge_descriptor, bool>;
+
+
+TransformGraph::TransformGraph(envire::core::Environment const &environment) :
+    LabeledTransformGraph (environment)
+{
+    static_assert(is_same<Base::graph_type::graph_type::graph_type::vertex_list_selector, boost::listS>::value,
+                  "vertex list type should be listS to ensure that vertex_descriptors remain valid");
+    static_assert(is_same<Base::graph_type::graph_type::graph_type::edge_list_selector, boost::listS>::value,
+                  "edge list type should be listS to ensure that vertex_descriptors remain valid");
+}
 
 void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
                                  const Transform& tf)
