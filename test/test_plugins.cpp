@@ -3,21 +3,32 @@
 #include <Eigen/Geometry>
 #include <class_loader/class_loader.h>
 #include <envire_core/ClassLoader.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
+#include <vector>
 
 using namespace envire::core;
+using namespace envire;
+using namespace std;
 
 BOOST_AUTO_TEST_CASE(vector_plugin_test)
 {
-    const char* env_p = std::getenv("LD_LIBRARY_PATH");
-    BOOST_ASSERT(env_p);
-
-    // load library
-    std::string path_plugin(env_p);
-    path_plugin += "/libVectorPlugin_envire_plugin.so";
+    vector<string> paths = ClassLoader::loadLibraryPath();
+    //find correct lib path
+    string path_plugin = "";
+    for(string path : paths)
+    {
+        path += "/libVectorPlugin_envire_plugin.so";
+        if(boost::filesystem::exists(path))
+        {
+            path_plugin = path;
+        }
+    }
+    BOOST_CHECK(path_plugin.length() > 0);
     class_loader::ClassLoader loader(path_plugin, false);
 
     // check available classes
-    std::vector<std::string> classes = loader.getAvailableClasses<ItemBase>();
+    vector<string> classes = loader.getAvailableClasses<ItemBase>();
     BOOST_ASSERT(classes.size() == 1);
     for(auto &class_name : classes)
         BOOST_ASSERT(class_name == "VectorPlugin");

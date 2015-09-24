@@ -1,11 +1,28 @@
 #include "ClassLoader.hpp"
+#include <boost/algorithm/string.hpp>
 
 using namespace envire;
+using namespace std;
 
-const std::string ClassLoader::plugin_path = std::string(std::getenv("LD_LIBRARY_PATH"));
+const std::vector<std::string> ClassLoader::plugin_paths = ClassLoader::loadLibraryPath();
 constexpr char ClassLoader::envire_item_suffix[];
 constexpr char ClassLoader::envire_collision_suffix[];
 
+
+vector<string> ClassLoader::loadLibraryPath()
+{
+    const string path(std::getenv("LD_LIBRARY_PATH"));
+    vector<string> paths;
+    //":" is the separator in LD_LIBRARY_PATH
+    boost::split(paths, path, boost::is_any_of(":"));
+    //trim ":" and " " from the beginning and end of the string
+    for(string& path : paths)
+    {
+        boost::trim_if(path, boost::is_any_of(": "));
+    }
+    return paths;
+}
+    
 
 ClassLoader::ClassLoader()
 {
@@ -31,7 +48,7 @@ ClassLoader* ClassLoader::getInstance()
 
 bool ClassLoader::hasValidPluginPath()
 {
-    return !plugin_path.empty();
+    return !plugin_paths.empty();
 }
 
 bool ClassLoader::hasItem(const std::string& class_name)
@@ -74,21 +91,27 @@ void ClassLoader::loadLibrary(const std::string& class_name)
 {
     if(hasValidPluginPath())
     {
-        std::string path = plugin_path;
-        path += "/lib";
-        path += class_name;
-        path += envire_item_suffix;
-        path += ".so";
-        boost::shared_ptr<class_loader::ClassLoader> loader(new class_loader::ClassLoader(path, false));
-        if(loader->isLibraryLoaded() && loader->isClassAvailable<ItemBaseClass>(class_name))
-            loaders.insert( std::make_pair(class_name, loader));
-        else
+        const string lib_name = "lib" + class_name + envire_item_suffix + ".so";
+        //try to load the plugin from all available paths
+        bool loaded = false;
+        for(string path : plugin_paths)
         {
-            std::string error_msg = "Failed to load plugin library ";
-            error_msg += path;
+            path += "/" + lib_name;
+            boost::shared_ptr<class_loader::ClassLoader> loader(new class_loader::ClassLoader(path, false));
+            
+            if(loader->isLibraryLoaded() && loader->isClassAvailable<ItemBaseClass>(class_name))
+            {
+                loaders.insert(std::make_pair(class_name, loader));
+                loaded = true;
+                break;
+            }
+        }
+        if(!loaded)
+        {
+            std::string error_msg = "Failed to load plugin library " + lib_name;
             throw std::runtime_error(error_msg);
         }
     }
     else
-        throw std::runtime_error("Have no valid path in environment variable, called LD_LIBRARY_PATH");
+        throw std::runtime_error("Have no valid path in environment variable. Please set LD_LIBRARY_PATH");
 }

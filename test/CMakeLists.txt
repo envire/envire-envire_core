@@ -17,6 +17,8 @@ rock_testsuite(test_dummy suite.cpp
     test_dummy_graph.cpp
     test_property_tag.cpp)
 
+find_package(Boost COMPONENTS unit_test_framework system filesystem)
+target_link_libraries(test_suite ${Boost_LIBRARIES})
 rock_testsuite(test_parameter_forwarding suite.cpp
     test_dummy_item.cpp
     DEPS_CMAKE Boost
