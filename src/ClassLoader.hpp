@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 #include <boost/shared_ptr.hpp>
 #include <class_loader/class_loader.h>
 #include <envire_core/ItemBase.hpp>
@@ -14,8 +15,7 @@ namespace envire
     class ClassLoader
     {
         friend class base::Singleton<ClassLoader>;
-
-        static const std::string plugin_path;
+        static const std::vector<std::string> plugin_paths;//contains all search paths for plugins
         static constexpr char envire_item_suffix[] = "_envire_plugin";
         static constexpr char envire_collision_suffix[] = "_collision_plugin";
         typedef std::map<std::string, boost::shared_ptr<class_loader::ClassLoader> > LoaderMap;
@@ -45,7 +45,9 @@ namespace envire
             }
             return typename T::Ptr(inherited_item);
         }
-
+        
+        /**Loads LD_LIBRARY_PATH and parses it into a list of paths */
+        static std::vector<std::string> loadLibraryPath();
 /*
         template<class T>
         static boost::intrusive_ptr<T> createCollisionObject(const std::string& class_name);
