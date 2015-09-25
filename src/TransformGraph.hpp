@@ -18,11 +18,8 @@
 
 
 #include "TransformGraphTypes.hpp"
-#include "TransformTreeExceptions.hpp"
 #include "events/GraphEventPublisher.hpp"
-#include "events/TransformAddedEvent.hpp"
-#include "events/TransformRemovedEvent.hpp"
-#include "events/TransformModifiedEvent.hpp"
+
 
 namespace envire { namespace core
 {
@@ -102,6 +99,7 @@ namespace envire { namespace core
         const envire::core::Frame& getFrame(const FrameId& frame);
         
         /** Adds @p item to the item list of the specified frame 
+         *  Causes ItemAddedEvent.
          *  @throw UnknownFrameException if the frame id is invalid **/
         void addItemToFrame(const FrameId& frame, boost::intrusive_ptr<ItemBase> item);
         

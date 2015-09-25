@@ -5,6 +5,11 @@
  *      Author: aboeckmann
  */
 #include "TransformGraph.hpp"
+#include "TransformGraphExceptions.hpp"
+#include "events/TransformAddedEvent.hpp"
+#include "events/TransformRemovedEvent.hpp"
+#include "events/TransformModifiedEvent.hpp"
+#include "events/ItemAddedEvent.hpp"
 #include <type_traits> //For is_same()
 
 using namespace envire::core;
@@ -204,7 +209,7 @@ void TransformGraph::addItemToFrame(const FrameId& frame, boost::intrusive_ptr<I
     }
     
     (*this)[frame].frame.items.push_back(item);
-    
+    notify(ItemAddedEvent(frame, item));
 }
 
 const std::vector<boost::intrusive_ptr<ItemBase>>& TransformGraph::getItems(const FrameId& frame) const
