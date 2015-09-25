@@ -308,7 +308,7 @@ BOOST_AUTO_TEST_CASE(add_item_on_empty_graph_test)
 {
     TransformGraph graph;
     FrameId a = "frame_a";
-    boost::intrusive_ptr<Item<std::string>> item(new Item<std::string>());
+    Item<std::string>::Ptr item(new Item<std::string>());
     BOOST_CHECK_THROW(graph.addItemToFrame(a, item), UnknownFrameException);
     
 }
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE(add_invalid_item_test)
     FrameId c = "frame_c";
     Transform tf;
     graph.addTransform(a, b, tf);
-    boost::intrusive_ptr<Item<std::string>> item(new Item<std::string>());
+    Item<std::string>::Ptr item(new Item<std::string>());
     BOOST_CHECK_THROW(graph.addItemToFrame(c, item), UnknownFrameException);
 }
 
@@ -333,7 +333,7 @@ BOOST_AUTO_TEST_CASE(add_item_test)
     FrameId b = "frame_b";
     graph.addTransform(a, b, tf);
     
-    boost::intrusive_ptr<Item<std::string>> item(new Item<std::string>());
+    Item<std::string>::Ptr item(new Item<std::string>());
     BOOST_CHECK_NO_THROW(graph.addItemToFrame(a, item));
 
     BOOST_CHECK(graph.getItems(a).size() == 1);
@@ -356,7 +356,7 @@ BOOST_AUTO_TEST_CASE(get_invalid_item_test)
     FrameId c = "frame_c";
     graph.addTransform(a, b, tf);
     
-    boost::intrusive_ptr<Item<std::string>> item(new Item<std::string>());
+    Item<std::string>::Ptr item(new Item<std::string>());
     BOOST_CHECK_NO_THROW(graph.addItemToFrame(a, item));
     BOOST_CHECK_THROW(graph.getItems(c), UnknownFrameException);
 }

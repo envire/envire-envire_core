@@ -9,10 +9,10 @@ namespace envire { namespace core
     class ItemAddedEvent : public GraphEvent
     {
     public:
-      ItemAddedEvent(const FrameId& frame, const boost::intrusive_ptr<ItemBase> item) :
+      ItemAddedEvent(const FrameId& frame, const ItemBase::Ptr item) :
         GraphEvent(GraphEvent::ITEM_ADDED_TO_FRAME), frame(frame), item(item){}
 
       FrameId frame;/**<frame that the item has been added to.*/
-      boost::intrusive_ptr<ItemBase> item; /**<The item */
+      ItemBase::Ptr item; /**<The item */
     };
 }}

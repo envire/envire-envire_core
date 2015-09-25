@@ -201,7 +201,7 @@ void TransformGraph::updateTransform(edge_descriptor ed, const Transform& tf,
     notify(TransformModifiedEvent(origin, target, ed, old, (*this)[ed].transform));
 }
 
-void TransformGraph::addItemToFrame(const FrameId& frame, boost::intrusive_ptr<ItemBase> item)
+void TransformGraph::addItemToFrame(const FrameId& frame, ItemBase::Ptr item)
 {
     if(vertex(frame) == null_vertex())
     {
@@ -212,7 +212,7 @@ void TransformGraph::addItemToFrame(const FrameId& frame, boost::intrusive_ptr<I
     notify(ItemAddedEvent(frame, item));
 }
 
-const std::vector<boost::intrusive_ptr<ItemBase>>& TransformGraph::getItems(const FrameId& frame) const
+const std::vector<ItemBase::Ptr>& TransformGraph::getItems(const FrameId& frame) const
 {
     //FIXME if item events should be added later this method needs to change because it provides a way
     //to modify items without the event system noticing

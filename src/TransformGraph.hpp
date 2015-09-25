@@ -101,11 +101,11 @@ namespace envire { namespace core
         /** Adds @p item to the item list of the specified frame 
          *  Causes ItemAddedEvent.
          *  @throw UnknownFrameException if the frame id is invalid **/
-        void addItemToFrame(const FrameId& frame, boost::intrusive_ptr<ItemBase> item);
+        void addItemToFrame(const FrameId& frame, ItemBase::Ptr item);
         
         /** @return a list of items that are attached to the specified @p frame.
          *  @throw UnknownFrameException if the @p frame id is invalid.*/
-        const std::vector<boost::intrusive_ptr<ItemBase>>& getItems(const FrameId& frame) const;
+        const std::vector<ItemBase::Ptr>& getItems(const FrameId& frame) const;
         
 
         vertices_size_type num_vertices() const;
