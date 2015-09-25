@@ -21,6 +21,7 @@ rock_library(envire_core
             events/TransformAddedEvent.hpp
             events/TransformModifiedEvent.hpp
             events/TransformRemovedEvent.hpp
+            events/ItemAddedEvent.hpp
             
     SOURCES ItemBase.cpp
             ClassLoader.cpp
