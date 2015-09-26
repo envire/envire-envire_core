@@ -1,5 +1,5 @@
 /*
- * TransformTreeExceptions.hpp
+ * TransformGraphExceptions.hpp
  *
  *  Created on: Sep 22, 2015
  *      Author: aboeckmann
@@ -39,6 +39,16 @@ namespace envire { namespace core
         virtual char const * what() const throw() { return msg.c_str(); }
         const std::string msg;
     };
+
+    class FoundFrameException : public std::exception
+    {
+    public:
+        FoundFrameException(const FrameId& name) :
+          msg("Found Frame " + name) {}
+        virtual char const * what() const throw() { return msg.c_str(); }
+        const std::string msg;
+    };
+
 
 }}
 
