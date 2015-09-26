@@ -8,8 +8,8 @@
  */
 
 
-#ifndef __ENVIRE_CORE_TRANSFORM_TREE__
-#define __ENVIRE_CORE_TRANSFORM_TREE__
+#ifndef __ENVIRE_CORE_TRANSFORM_GRAPH__
+#define __ENVIRE_CORE_TRANSFORM_GRAPH__
 
 
 #include <boost/uuid/uuid.hpp>
@@ -18,7 +18,8 @@
 
 
 #include "TransformGraphTypes.hpp"
-#include "TransformTreeExceptions.hpp"
+#include "TransformGraphExceptions.hpp"
+#include "TransformGraphVisitors.hpp"
 #include "events/GraphEventPublisher.hpp"
 #include "events/TransformAddedEvent.hpp"
 #include "events/TransformRemovedEvent.hpp"
@@ -100,15 +101,15 @@ namespace envire { namespace core
         /** @return a reference to the frame identified by the id.
          *  @throw UnknownFrameException if the frame id is invalid **/
         const envire::core::Frame& getFrame(const FrameId& frame);
-        
+
         /** Adds @p item to the item list of the specified frame 
          *  @throw UnknownFrameException if the frame id is invalid **/
         void addItemToFrame(const FrameId& frame, boost::intrusive_ptr<ItemBase> item);
-        
+
         /** @return a list of items that are attached to the specified @p frame.
          *  @throw UnknownFrameException if the @p frame id is invalid.*/
         const std::vector<boost::intrusive_ptr<ItemBase>>& getItems(const FrameId& frame) const;
-        
+
 
         vertices_size_type num_vertices() const;
         edges_size_type num_edges() const;
