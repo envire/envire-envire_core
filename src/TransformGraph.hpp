@@ -92,7 +92,7 @@ namespace envire { namespace core
 
         /** @return the transform between a and b. Calculating it if necessary.
          * @throw UnknownTransformException if the transformation doesn't exist*/
-        const Transform& getTransform(const FrameId& a, const FrameId& b) const;
+        const Transform getTransform(const FrameId& a, const FrameId& b) const;
 
         /** @return the edge between frame @p origin and @p target
          * @throw UnknownTransformException if there is no such edge  */
