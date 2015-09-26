@@ -50,18 +50,24 @@ void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
 
 const Transform& TransformGraph::getTransform(const FrameId& a, const FrameId& b) const
 {
+    vertex_descriptor origin_frame = vertex(a);
+    vertex_descriptor target_frame = vertex(b);
+    envire::core::TransformGraphBFSVisitor <vertex_descriptor>vis(origin_frame, this->graph());
+
     //calling boost::edge_by_label on an empty graph results in a segfault.
     //therefore catch it before that happens.
     if(num_edges() == 0)
     {
         throw UnknownTransformException(a, b);
     }
-    //FIXME for now this only works with direct edges
+
+    //direct edges
     edgePair pair = boost::edge_by_label(a, b, *this);
     if(!pair.second)
     {
         throw UnknownTransformException(a, b);
     }
+
     return (*this)[pair.first].transform;
 }
 
@@ -144,7 +150,7 @@ edges_size_type TransformGraph::num_edges() const
 
 vertex_descriptor TransformGraph::add_vertex(const FrameId& frameId)
 {
-    FrameProperty node_prop;
+    FrameProperty node_prop(frameId);
     vertex_descriptor v = LabeledTransformGraph::add_vertex(frameId, node_prop);
     return v;
 }
