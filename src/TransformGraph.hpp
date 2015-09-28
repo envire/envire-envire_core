@@ -128,7 +128,9 @@ namespace envire { namespace core
          */
         edge_descriptor add_edge(const vertex_descriptor node_from,
                                  const vertex_descriptor node_to,
-                                 const envire::core::Transform &tf);
+                                 const envire::core::Transform &tf,
+                                 const FrameId& originName,
+                                 const FrameId& targetName);
 
         /**Removes a vertex from the tree.
          * A vertex can only be removed if there are no edges to

@@ -46,11 +46,11 @@ void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
         throw TransformAlreadyExistsException(origin, target);
     }
     //we always add two edges, one for the transform and one for the inverse transform
-    edge_descriptor originToTarget = add_edge(originDesc, targetDesc, tf);
+    edge_descriptor originToTarget = add_edge(originDesc, targetDesc, tf, origin, target);
 
     Transform invTf = tf;
     invTf.setTransform(invTf.transform.inverse());
-    edge_descriptor targetToOrigin = add_edge(targetDesc, originDesc, invTf);
+    edge_descriptor targetToOrigin = add_edge(targetDesc, originDesc, invTf, target, origin);
 }
 
 const Transform& TransformGraph::getTransform(const FrameId& a, const FrameId& b) const
@@ -126,14 +126,16 @@ void TransformGraph::removeTransform(const FrameId& origin, const FrameId& targe
     }
 }
 
-edge_descriptor TransformGraph::add_edge(const vertex_descriptor node_from,
-                                        const vertex_descriptor node_to,
-                                        const envire::core::Transform &tf)
+edge_descriptor TransformGraph::add_edge(const vertex_descriptor origin,
+                                         const vertex_descriptor target,
+                                         const envire::core::Transform &tf,
+                                         const FrameId& originName,
+                                         const FrameId& targetName)
 {
     TransformProperty tf_prop;
     tf_prop.transform = tf;
-    auto edge_pair =  boost::add_edge(node_from, node_to, tf_prop, *this);
-    notify(TransformAddedEvent(node_from, node_to, edge_pair.first, tf));
+    auto edge_pair =  boost::add_edge(origin, target, tf_prop, *this);
+    notify(TransformAddedEvent(originName, targetName, edge_pair.first, tf));
     return edge_pair.first;
 }
 
