@@ -24,7 +24,7 @@ namespace envire { namespace core
     public:
         Frame() : name("envire::core::noname"),
             uuid(RandomGenerator::getRandomGenerator()()) {}
-        Frame(const std::string &_name): 
+        Frame(const FrameId& _name): 
             name(_name), uuid(RandomGenerator::getRandomGenerator()()) {}
 
         ~Frame(){ this->items.clear(); }
@@ -33,13 +33,13 @@ namespace envire { namespace core
         *
         * Sets the frame name of the item
         */
-        void setName(const std::string& name) { this->name = name; }
+        void setName(const FrameId& name) { this->name = name; }
 
         /**@brief getFrame
         *
         * Returns the frame name of the item
         */
-        const std::string& getName() const { return this->name; }
+        const FrameId& getName() const { return this->name; }
     };
 }}
 #endif
