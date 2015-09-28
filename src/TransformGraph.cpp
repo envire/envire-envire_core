@@ -175,13 +175,18 @@ void TransformGraph::remove_frame(FrameId fId)
         _map.erase(it);
 }
 
-const envire::core::Frame& TransformGraph::getFrame(const FrameId& frame)
+const envire::core::Frame& TransformGraph::getFrame(const FrameId& frame) const
 {
     if(vertex(frame) == null_vertex())
     {
         throw UnknownFrameException(frame);
     }
     return (*this)[frame].frame;
+}
+
+const envire::core::Frame& TransformGraph::getFrame(const vertex_descriptor desc) const
+{
+    return graph()[desc].frame;
 }
 
 edge_descriptor TransformGraph::getEdge(const FrameId& origin, const FrameId& target) const
@@ -227,5 +232,10 @@ const std::vector<ItemBase::Ptr>& TransformGraph::getItems(const FrameId& frame)
         throw UnknownFrameException(frame);
     }
     return (*this)[frame].frame.items;
+}
+
+const std::vector<ItemBase::Ptr>& TransformGraph::getItems(const vertex_descriptor desc) const
+{
+    return graph()[desc].frame.items;
 }
 

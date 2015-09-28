@@ -90,7 +90,8 @@ namespace envire { namespace core
 
         /** @return a reference to the frame identified by the id.
          *  @throw UnknownFrameException if the frame id is invalid **/
-        const envire::core::Frame& getFrame(const FrameId& frame);
+        const envire::core::Frame& getFrame(const FrameId& frame) const;
+        const envire::core::Frame& getFrame(const vertex_descriptor desc) const;
         
         /** Adds @p item to the item list of the specified frame 
          *  Causes ItemAddedEvent.
@@ -100,6 +101,9 @@ namespace envire { namespace core
         /** @return a list of items that are attached to the specified @p frame.
          *  @throw UnknownFrameException if the @p frame id is invalid.*/
         const std::vector<ItemBase::Ptr>& getItems(const FrameId& frame) const;
+        const std::vector<ItemBase::Ptr>& getItems(const vertex_descriptor desc) const;
+        
+        
         
 
         vertices_size_type num_vertices() const;
