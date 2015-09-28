@@ -21,6 +21,7 @@ namespace envire { namespace core
     class GraphEventDispatcher : public GraphEventSubscriber
     {
     public:
+        virtual ~GraphEventDispatcher() {}
         virtual void notifyTreeEvent(const GraphEvent& event);
 
     protected:
