@@ -23,23 +23,18 @@
 
 namespace envire { namespace core
 {
-    class GraphViz;
     /**
      * A tree-like graph structure.
      * Each vertex contains a labeled Frame. The label must be unique.
      *
-     * @note The inheritance from TransformGraph is protected to stop
-     *       users from calling boost::graph methods directly.
-     *       This way the tree methods are the only way to manipulate
-     *       the vertices and edges.
-     *       This is done to ensure that
+     * @warning Do **not** manipulate the tree directly using boost functions.
+     *          If you do that you will **break** the event system.
+     *          Instead use the methods provided by this class for manipulation.
+     *          I.e. do not modify transforms, frames or items directly!!!!
+     *          
     */
-    class TransformGraph : protected LabeledTransformGraph, public GraphEventPublisher
+    class TransformGraph : public LabeledTransformGraph, public GraphEventPublisher
     {
-        //GraphViz has been implemented for TransformGraph.
-        //As it only reads and does no manipulation it is ok to let it know
-        //about the inheritance from TransformGraph
-        friend class GraphViz;
     public:
 
         /***************************************************
@@ -47,10 +42,10 @@ namespace envire { namespace core
          * Overloading boost methods uses delimited separated
          * words, new methods use Camel Case separated words
          ***************************************************/
-
+    
         TransformGraph(envire::core::Environment const &environment = Environment());
 
-        /**Adds a transform from frame @p a to frame @p b.
+        /**Adds a transform from frame @p origin to frame @p target.
          * If the frames do not exist, they will be created.
          * If the transform already exists, it will **not** be updated.
          *
@@ -68,11 +63,10 @@ namespace envire { namespace core
          * A direct transformation has to exist between @p orign and @p target
          * for this method to work.
          *
-         * Causes two TransformUpdated events. One for the
-         * transform and one for the inverse.
+         * Causes a TransformUpdated event.
          *
          * @throw UnknownTransformException if no direct transformation between
-         *        @p origin and @p target exists. */
+         *                                  @p origin and @p target exists. */
         void updateTransform(const FrameId& origin, const FrameId& target,
                              const Transform& tf);
 
@@ -139,8 +133,7 @@ namespace envire { namespace core
         void remove_frame(FrameId fId);
 
         /**Sets the transform value and causes transformModified event. */
-        void updateTransform(edge_descriptor ed, const Transform& tf,
-                             const FrameId& origin, const FrameId& target);
+        void updateTransform(edge_descriptor ed, const Transform& tf);
 
 
     };

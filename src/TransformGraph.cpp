@@ -82,14 +82,21 @@ void TransformGraph::updateTransform(const FrameId& origin, const FrameId& targe
     if(!originToTarget.second)
     {
       throw UnknownTransformException(origin, target);
-    }
-
-    updateTransform(originToTarget.first, tf, origin, target);
+    } 
+    
+    const Transform oldTransform = (*this)[originToTarget.first].transform;    
+    updateTransform(originToTarget.first, tf);
+    
     Transform invTf = tf;//copies the time
     invTf.setTransform(tf.transform.inverse());
     edgePair targetToOrigin = boost::edge_by_label(target, origin, *this);
     assert(targetToOrigin.second);//there should always be an inverse edge
-    updateTransform(targetToOrigin.first, invTf, target, origin);
+    const Transform oldInvTransform = (*this)[targetToOrigin.first].transform;
+    updateTransform(targetToOrigin.first, invTf);
+    
+    notify(TransformModifiedEvent(origin, target, originToTarget.first,
+                                  targetToOrigin.first, oldTransform,
+                                  tf, oldInvTransform, invTf));
 }
 
 void TransformGraph::removeTransform(const FrameId& origin, const FrameId& target)
@@ -195,12 +202,9 @@ edge_descriptor TransformGraph::getEdge(const FrameId& origin, const FrameId& ta
     return e.first;
 }
 
-void TransformGraph::updateTransform(edge_descriptor ed, const Transform& tf,
-                                    const FrameId& origin, const FrameId& target)
+void TransformGraph::updateTransform(edge_descriptor ed, const Transform& tf)
 {
-    Transform old = (*this)[ed].transform;
     boost::put(&TransformProperty::transform, *this, ed, tf);
-    notify(TransformModifiedEvent(origin, target, ed, old, (*this)[ed].transform));
 }
 
 void TransformGraph::addItemToFrame(const FrameId& frame, ItemBase::Ptr item)
