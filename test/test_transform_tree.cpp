@@ -241,6 +241,20 @@ BOOST_AUTO_TEST_CASE(modify_transform_event_test)
     BOOST_CHECK(d->transformModifiedEvent[0].inverseEdge == tree.getEdge(b, a));
 }
 
+BOOST_AUTO_TEST_CASE(operations_with_transform)
+{
+    Transform tf1, tf2;
+    tf1.transform.translation << 42, 21, -42;
+    tf1.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
+    tf2.transform.translation << 42, 21, -42;
+    tf2.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
+
+    Transform tf_manual;
+    tf_manual.setTransform(tf1.transform * tf2.transform);
+    Transform tf_operator(tf1 * tf2);
+    BOOST_CHECK(compareTransform(tf_operator, tf_manual));
+}
+
 BOOST_AUTO_TEST_CASE(simple_add_get_transform_test)
 {
     FrameId a = "frame_a";
@@ -258,6 +272,82 @@ BOOST_AUTO_TEST_CASE(simple_add_get_transform_test)
     invTf.setTransform(tf.transform.inverse());
     Transform readTfInv = tree.getTransform(b, a);
     BOOST_CHECK(compareTransform(readTfInv, invTf));
+}
+
+BOOST_AUTO_TEST_CASE(complex_add_get_transform_test)
+{
+
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    FrameId d = "frame_d";
+    TransformGraph tree;
+    Transform tf;
+    tf.transform.translation << 42, 21, -42;
+    tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
+    BOOST_CHECK_NO_THROW(tree.addTransform(a, b, tf));
+    BOOST_CHECK_NO_THROW(tree.addTransform(b, c, tf));
+    BOOST_CHECK_NO_THROW(tree.addTransform(a, d, tf));
+    BOOST_CHECK(tree.num_edges() == 6);
+    BOOST_CHECK(tree.num_vertices() == 4);
+
+    /* a -> c **/
+    BOOST_TEST_MESSAGE( "a - > c" );
+    Transform readTf;
+    BOOST_CHECK_NO_THROW(readTf = tree.getTransform(a, c));
+    BOOST_CHECK(compareTransform(readTf, tf*tf));
+
+    /* c -> a **/
+    BOOST_TEST_MESSAGE( "c - > a" );
+    Transform invTf;
+    invTf.setTransform(tf.transform.inverse() * tf.transform.inverse());
+    Transform readTfInv;
+    BOOST_CHECK_NO_THROW(readTfInv = tree.getTransform(c, a));
+    BOOST_CHECK(compareTransform(readTfInv, invTf));
+
+    /* a -> d **/
+    BOOST_TEST_MESSAGE( "a - > d" );
+    BOOST_CHECK_NO_THROW(readTf = tree.getTransform(a, d));
+    BOOST_CHECK(compareTransform(readTf, tf));
+
+    /* c -> d **/
+    BOOST_TEST_MESSAGE( "c - > d" );
+    Transform complexTf;
+    complexTf.setTransform(tf.transform.inverse()*tf.transform.inverse()*tf.transform);
+    BOOST_CHECK_NO_THROW(readTf = tree.getTransform(c, d));
+    BOOST_CHECK(compareTransform(readTf, complexTf));
+
+    /* d -> c **/
+    BOOST_TEST_MESSAGE( "d - > c" );
+    complexTf.setTransform(tf.transform.inverse()*tf.transform*tf.transform);
+    BOOST_CHECK_NO_THROW(readTf = tree.getTransform(d, c));
+    BOOST_CHECK(compareTransform(readTf, complexTf));
+
+    //Close a cycle with an extra frame.
+    //In practice it should not happen in envire
+    FrameId e = "frame_e";
+    BOOST_CHECK_NO_THROW(tree.addTransform(d, e, tf));
+    BOOST_CHECK_NO_THROW(tree.addTransform(e, c, tf));
+
+    /* d -> c **/
+    BOOST_TEST_MESSAGE( "d - > c" );
+    BOOST_CHECK_NO_THROW(readTf = tree.getTransform(d, c));
+    BOOST_CHECK(compareTransform(readTf, tf*tf));
+
+    /* a-> e **/
+    BOOST_TEST_MESSAGE( "a - > e" );
+    BOOST_CHECK_NO_THROW(readTf = tree.getTransform(a, e));
+    BOOST_CHECK(compareTransform(readTf, tf*tf));
+
+    FrameId f = "frame_f";
+    BOOST_CHECK_NO_THROW(tree.addTransform(d, f, tf));
+
+    /* c -> f **/
+    BOOST_TEST_MESSAGE( "c - > f" );
+    BOOST_CHECK_NO_THROW(readTf = tree.getTransform(c, f));
+    complexTf.setTransform(tf.transform.inverse()*tf.transform.inverse()*tf.transform);
+    BOOST_CHECK(compareTransform(readTf, complexTf));
+
 }
 
 

@@ -14,7 +14,7 @@
 
 #include "Frame.hpp" /** Frames are for the Vertex **/
 #include "Transform.hpp" /** Transform are the Edges **/
-#include "Environment.hpp" /** Environment is the tree property **/
+#include "Environment.hpp" /** Environment is the graph property **/
 
 #include <boost/graph/directed_graph.hpp>
 
@@ -35,6 +35,8 @@ namespace envire { namespace core
     struct FrameProperty
     {
         Frame frame;
+        FrameProperty(){}
+        FrameProperty(const FrameId& frameId): frame(Frame(frameId)){}
     };
 
     /**@brief Transform Property

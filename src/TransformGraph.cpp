@@ -53,7 +53,7 @@ void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
     edge_descriptor targetToOrigin = add_edge(targetDesc, originDesc, invTf, target, origin);
 }
 
-const Transform& TransformGraph::getTransform(const FrameId& a, const FrameId& b) const
+const Transform TransformGraph::getTransform(const FrameId& a, const FrameId& b) const
 {
     //calling boost::edge_by_label on an empty graph results in a segfault.
     //therefore catch it before that happens.
@@ -61,12 +61,54 @@ const Transform& TransformGraph::getTransform(const FrameId& a, const FrameId& b
     {
         throw UnknownTransformException(a, b);
     }
-    //FIXME for now this only works with direct edges
-    edgePair pair = boost::edge_by_label(a, b, *this);
+
+    //direct edges
+    edgePair pair;
+    pair = boost::edge_by_label(a, b, *this);
     if(!pair.second)
     {
-        throw UnknownTransformException(a, b);
+        /** It is not a direct edge transformation **/
+        Transform tf;
+        vertex_descriptor origin_frame = vertex(a);
+        vertex_descriptor target_frame = vertex(b);
+        envire::core::TransformGraphBFSVisitor <vertex_descriptor>visit(target_frame, this->graph());
+
+        // check whether the vertices exist in the graph
+        // search algorithm result on segfault in case some of the vertices do not exist
+        if (origin_frame == null_vertex() || target_frame == null_vertex())
+        {
+            throw UnknownTransformException(a, b);
+        }
+
+        try
+        {
+            boost::breadth_first_search(this->graph(), origin_frame, visitor(visit));
+
+        }catch(const FoundFrameException &e)
+        {
+            //std::cout<< e.what() << std::endl;
+            base::TransformWithCovariance &trans(tf.transform);
+
+            /** Compute the transformation **/
+            trans.setTransform (base::Affine3d::Identity());
+            std::deque<vertex_descriptor>::iterator it = visit.tree->begin();
+            for (; (it+1) != visit.tree->end(); ++it)
+            {
+                pair = boost::edge(*it, *(it+1), graph());
+                trans = trans * (*this)[pair.first].transform.transform;
+            }
+        }
+
+        if(tf.transform.hasValidTransform())
+        {
+            return tf;
+        }
+        else
+        {
+            throw UnknownTransformException(a, b);
+        }
     }
+
     return (*this)[pair.first].transform;
 }
 
@@ -158,7 +200,7 @@ edges_size_type TransformGraph::num_edges() const
 
 vertex_descriptor TransformGraph::add_vertex(const FrameId& frameId)
 {
-    FrameProperty node_prop;
+    FrameProperty node_prop(frameId);
     vertex_descriptor v = LabeledTransformGraph::add_vertex(frameId, node_prop);
     return v;
 }

@@ -7,6 +7,7 @@ rock_library(envire_core
             TransformGraph.hpp
             TransformGraphTypes.hpp
             TransformGraphExceptions.hpp
+            TransformGraphVisitors.hpp
             GraphViz.hpp
             SpatialItem.hpp
             BoundingVolume.hpp

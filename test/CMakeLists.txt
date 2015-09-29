@@ -23,3 +23,19 @@ rock_testsuite(test_parameter_forwarding suite.cpp
     test_dummy_item.cpp
     DEPS_CMAKE Boost
     DEPS envire_core)
+
+rock_executable(dfs_test dfs_test.cpp
+    DEPS_CMAKE Boost
+	DEPS envire_core)
+
+rock_executable(bfs_test bfs_test.cpp
+    DEPS_CMAKE Boost
+	DEPS envire_core)
+
+rock_executable(dijkstra_color_test dijkstra_color_test.cpp
+    DEPS_CMAKE Boost
+	DEPS envire_core)
+
+rock_executable(dijkstra_test dijkstra_test.cpp
+    DEPS_CMAKE Boost
+	DEPS envire_core)

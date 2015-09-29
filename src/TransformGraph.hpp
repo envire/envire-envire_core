@@ -8,8 +8,8 @@
  */
 
 
-#ifndef __ENVIRE_CORE_TRANSFORM_TREE__
-#define __ENVIRE_CORE_TRANSFORM_TREE__
+#ifndef __ENVIRE_CORE_TRANSFORM_GRAPH__
+#define __ENVIRE_CORE_TRANSFORM_GRAPH__
 
 
 #include <boost/uuid/uuid.hpp>
@@ -18,6 +18,8 @@
 
 
 #include "TransformGraphTypes.hpp"
+#include "TransformGraphExceptions.hpp"
+#include "TransformGraphVisitors.hpp"
 #include "events/GraphEventPublisher.hpp"
 
 
@@ -82,7 +84,7 @@ namespace envire { namespace core
 
         /** @return the transform between a and b. Calculating it if necessary.
          * @throw UnknownTransformException if the transformation doesn't exist*/
-        const Transform& getTransform(const FrameId& a, const FrameId& b) const;
+        const Transform getTransform(const FrameId& a, const FrameId& b) const;
 
         /** @return the edge between frame @p origin and @p target
          * @throw UnknownTransformException if there is no such edge  */
