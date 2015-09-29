@@ -1,2 +1,7 @@
 build/
 *.sw?
+*.cproject
+*.project
+/.idea/
+*.kdev4
+/.settings/
