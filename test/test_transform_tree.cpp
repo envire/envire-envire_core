@@ -9,6 +9,7 @@
 #include <envire_core/events/TransformRemovedEvent.hpp>
 #include <envire_core/events/ItemAddedEvent.hpp>
 #include <envire_core/TransformGraphExceptions.hpp>
+#include <envire_core/TransformGraphTypes.hpp>
 #include <vector>
 
 using namespace envire::core;
@@ -57,7 +58,7 @@ BOOST_AUTO_TEST_CASE(remove_transform_event_test)
     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
     tree.addTransform(a, b, tf);
     std::shared_ptr<Dispatcher> d(new Dispatcher());
-    tree.subscribe(d);
+    tree.subscribe(d);  
     tree.removeTransform(a, b);
     BOOST_CHECK(d->transformRemovedEvent.size() == 2);
     BOOST_CHECK(d->transformRemovedEvent[0].origin == a);
@@ -470,3 +471,85 @@ BOOST_AUTO_TEST_CASE(graphviz_test)
     GraphViz viz;
     viz.write(graph, "transformGraph_graphviz_test.dot");
 }
+
+
+BOOST_AUTO_TEST_CASE(simple_get_tree_test)
+{
+    TransformGraph graph;
+    /*       a
+     *      / \
+     *     c   b
+     *   /  \
+     *  d   e
+     *    /  \
+     *   f   g
+     */
+
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    FrameId d = "frame_d";  
+    FrameId e = "frame_e";  
+    FrameId f = "frame_f";  
+    FrameId g = "frame_g";  
+    
+    Transform tf;
+    
+    graph.addTransform(a, b, tf);
+    graph.addTransform(a, c, tf);
+    graph.addTransform(c, d, tf);
+    graph.addTransform(c, e, tf);
+    graph.addTransform(e, f, tf);
+    graph.addTransform(e, g, tf);
+    
+    //use a as root
+    VertexMap parentToChildren = graph.getTree(graph.vertex(a));
+    BOOST_CHECK(parentToChildren.size() == 3); 
+    BOOST_CHECK(parentToChildren[graph.vertex(a)].size() == 2);
+    BOOST_CHECK(parentToChildren[graph.vertex(c)].size() == 2);
+    BOOST_CHECK(parentToChildren[graph.vertex(e)].size() == 2);
+    BOOST_CHECK(parentToChildren.find(graph.vertex(b)) == parentToChildren.end());
+    BOOST_CHECK(parentToChildren.find(graph.vertex(d)) == parentToChildren.end());
+    BOOST_CHECK(parentToChildren.find(graph.vertex(f)) == parentToChildren.end());
+    BOOST_CHECK(parentToChildren.find(graph.vertex(g)) == parentToChildren.end());
+    std::vector<vertex_descriptor>& aChildren = parentToChildren[graph.vertex(a)];
+    BOOST_CHECK(aChildren[0] == graph.vertex(b) || aChildren[0] == graph.vertex(c));
+    BOOST_CHECK(aChildren[1] == graph.vertex(b) || aChildren[1] == graph.vertex(c));
+    std::vector<vertex_descriptor>& cChildren = parentToChildren[graph.vertex(c)];
+    BOOST_CHECK(cChildren[0] == graph.vertex(d) || cChildren[0] == graph.vertex(e));
+    BOOST_CHECK(cChildren[1] == graph.vertex(d) || cChildren[1] == graph.vertex(e));    
+    std::vector<vertex_descriptor>& eChildren = parentToChildren[graph.vertex(e)];
+    BOOST_CHECK(eChildren[0] == graph.vertex(f) || eChildren[0] == graph.vertex(g));
+    BOOST_CHECK(eChildren[1] == graph.vertex(f) || eChildren[1] == graph.vertex(g));     
+    
+     /*       d
+     *        |
+     *        c
+     *       / \
+     *      a   e
+     *     /   / \
+     *    b   f   g
+     * Now use d as root node
+     */
+    parentToChildren = graph.getTree(graph.vertex(d));
+    BOOST_CHECK(parentToChildren.size() == 4); 
+    BOOST_CHECK(parentToChildren[graph.vertex(d)].size() == 1);
+    BOOST_CHECK(parentToChildren[graph.vertex(c)].size() == 2);
+    BOOST_CHECK(parentToChildren[graph.vertex(e)].size() == 2);
+    BOOST_CHECK(parentToChildren[graph.vertex(a)].size() == 1);
+    BOOST_CHECK(parentToChildren.find(graph.vertex(b)) == parentToChildren.end());
+    BOOST_CHECK(parentToChildren.find(graph.vertex(f)) == parentToChildren.end());
+    BOOST_CHECK(parentToChildren.find(graph.vertex(g)) == parentToChildren.end());
+    
+    aChildren = parentToChildren[graph.vertex(a)];
+    BOOST_CHECK(aChildren[0] == graph.vertex(b));
+    cChildren = parentToChildren[graph.vertex(c)];
+    BOOST_CHECK(cChildren[0] == graph.vertex(a) || cChildren[0] == graph.vertex(e));
+    BOOST_CHECK(cChildren[1] == graph.vertex(a) || cChildren[1] == graph.vertex(e)); 
+    std::vector<vertex_descriptor>& dChildren = parentToChildren[graph.vertex(d)];
+    BOOST_CHECK(dChildren[0] == graph.vertex(c));
+    eChildren = parentToChildren[graph.vertex(e)];
+    BOOST_CHECK(eChildren[0] == graph.vertex(f) || eChildren[0] == graph.vertex(g));
+    BOOST_CHECK(eChildren[1] == graph.vertex(f) || eChildren[1] == graph.vertex(g));       
+}
+

@@ -22,8 +22,6 @@ namespace envire { namespace core
         std::vector< ItemBase::Ptr > items; /** List of items in the node */
 
     public:
-        Frame() : name("envire::core::noname"),
-            uuid(RandomGenerator::getRandomGenerator()()) {}
         Frame(const FrameId& _name): 
             name(_name), uuid(RandomGenerator::getRandomGenerator()()) {}
 

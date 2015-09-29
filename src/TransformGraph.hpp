@@ -95,6 +95,9 @@ namespace envire { namespace core
         const envire::core::Frame& getFrame(const FrameId& frame) const;
         const envire::core::Frame& getFrame(const vertex_descriptor desc) const;
         
+        /** @return the frame id of the specified @p vertex */
+        const envire::core::FrameId& getFrameId(const vertex_descriptor vertex) const;
+        
         /** Adds @p item to the item list of the specified frame 
          *  Causes ItemAddedEvent.
          *  @throw UnknownFrameException if the frame id is invalid **/
@@ -104,6 +107,10 @@ namespace envire { namespace core
          *  @throw UnknownFrameException if the @p frame id is invalid.*/
         const std::vector<ItemBase::Ptr>& getItems(const FrameId& frame) const;
         const std::vector<ItemBase::Ptr>& getItems(const vertex_descriptor desc) const;
+        
+        /**Builds a tree containing all vertices that are accessible starting
+         * from @p root.  */
+        VertexMap getTree(const vertex_descriptor root) const;
         
         
         
@@ -140,8 +147,6 @@ namespace envire { namespace core
 
         /**Sets the transform value and causes transformModified event. */
         void updateTransform(edge_descriptor ed, const Transform& tf);
-
-
     };
 }}
 #endif

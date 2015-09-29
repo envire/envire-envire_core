@@ -7,6 +7,7 @@
 
 #pragma once
 #include "TransformGraphExceptions.hpp"
+#include "TransformGraphTypes.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/graph/breadth_first_search.hpp>
 
@@ -69,6 +70,21 @@ namespace envire { namespace core
         boost::shared_ptr< std::unordered_map<Vertex, Vertex> > parent;
         boost::shared_ptr< std::deque<Vertex> > tree; /** tree from origin tree[0] to target tree[n] */
     };
+    
+        
+    /**Visits every node in bfs order and stores the search tree in the provided map */
+    struct TreeBuilderVisitor : public boost::default_bfs_visitor 
+    {
+        TreeBuilderVisitor(VertexMap& parentToChildren) : parentToChildren(parentToChildren) {}
+        
+        template <typename Edge, typename Graph>
+        void tree_edge(Edge e, const Graph &g)
+        {
+            parentToChildren[boost::source(e, g)].emplace_back(boost::target(e, g));
+        }
+        VertexMap& parentToChildren;
+    };
+    
 
 
     /** TESTING BOOST CODE **/

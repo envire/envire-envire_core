@@ -35,8 +35,8 @@ namespace envire { namespace core
     struct FrameProperty
     {
         Frame frame;
-        FrameProperty(){}
-        FrameProperty(const FrameId& frameId): frame(Frame(frameId)){}
+        FrameProperty() : frame("envire::core::frame::default_name"){}
+        FrameProperty(const FrameId& frameId): frame(frameId){}
     };
 
     /**@brief Transform Property
@@ -64,7 +64,9 @@ namespace envire { namespace core
     typedef LabeledTransformGraph::degree_size_type degree_size_type;
     typedef LabeledTransformGraph::out_edge_iterator out_edge_iterator;
     typedef LabeledTransformGraph::in_edge_iterator in_edge_iterator;
-    //TODO add the others if this works
-
+    
+    /**A map that shows the parent->children relation between vertices in a tree.
+       The key is the parent.*/
+    using VertexMap = std::map<vertex_descriptor, std::vector<vertex_descriptor>>;
 }}
 #endif /* SRC_TRANSFORMTREETYPES_HPP_ */

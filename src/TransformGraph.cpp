@@ -281,3 +281,18 @@ const std::vector<ItemBase::Ptr>& TransformGraph::getItems(const vertex_descript
     return graph()[desc].frame.items;
 }
 
+const envire::core::FrameId& TransformGraph::getFrameId(const vertex_descriptor vertex) const
+{
+    return getFrame(vertex).getName();
+}
+
+
+VertexMap TransformGraph::getTree(const vertex_descriptor root) const
+{
+  VertexMap map;
+  TreeBuilderVisitor visitor(map);
+  boost::breadth_first_search(*this, root, boost::visitor(visitor));
+  return map;
+}
+
+
