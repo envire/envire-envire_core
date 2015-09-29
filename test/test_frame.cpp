@@ -1,5 +1,5 @@
 #include <boost/test/unit_test.hpp>
-#include <envire_core/Frame.hpp>
+#include <envire_core/items/Frame.hpp>
 
 using envire::core::Frame;
 using boost::uuids::uuid;

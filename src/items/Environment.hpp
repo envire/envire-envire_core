@@ -12,6 +12,9 @@
 #ifndef __ENVIRE_CORE_ENVIRONMENT__
 #define __ENVIRE_CORE_ENVIRONMENT__
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+
 namespace envire { namespace core
 {
     /**@brief Environment information

@@ -6,10 +6,10 @@
  */
 #include "TransformGraph.hpp"
 #include "TransformGraphExceptions.hpp"
-#include "events/TransformAddedEvent.hpp"
-#include "events/TransformRemovedEvent.hpp"
-#include "events/TransformModifiedEvent.hpp"
-#include "events/ItemAddedEvent.hpp"
+#include <envire_core/events/TransformAddedEvent.hpp>
+#include <envire_core/events/TransformRemovedEvent.hpp>
+#include <envire_core/events/TransformModifiedEvent.hpp>
+#include <envire_core/events/ItemAddedEvent.hpp>
 #include <type_traits> //For is_same()
 
 using namespace envire::core;

@@ -6,8 +6,9 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <class_loader/class_loader.h>
-#include <envire_core/ItemBase.hpp>
 #include <base/Singleton.hpp>
+
+#include <envire_core/items/ItemBase.hpp>
 
 namespace envire
 {

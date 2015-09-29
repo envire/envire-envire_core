@@ -20,7 +20,7 @@
 #include "TransformGraphTypes.hpp"
 #include "TransformGraphExceptions.hpp"
 #include "TransformGraphVisitors.hpp"
-#include "events/GraphEventPublisher.hpp"
+#include <envire_core/events/GraphEventPublisher.hpp>
 
 
 namespace envire { namespace core

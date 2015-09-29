@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include <iostream>
-#include <envire_core/DummyItem.hpp>
+#include <envire_core/items/DummyItem.hpp>
 #include <assert.h>
 
 using namespace envire::core;

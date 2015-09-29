@@ -1,5 +1,5 @@
 #include "ItemBase.hpp"
-#include <envire_core/RandomGenerator.hpp>
+#include "RandomGenerator.hpp"
 
 using namespace envire::core;
 

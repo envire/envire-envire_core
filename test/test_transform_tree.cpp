@@ -1,15 +1,5 @@
 #include <boost/test/unit_test.hpp>
-#include <envire_core/TransformGraphTypes.hpp>
-#include <envire_core/TransformGraph.hpp>
-#include <envire_core/Item.hpp>
-#include <envire_core/GraphViz.hpp>
-#include <envire_core/events/GraphEventDispatcher.hpp>
-#include <envire_core/events/TransformAddedEvent.hpp>
-#include <envire_core/events/TransformModifiedEvent.hpp>
-#include <envire_core/events/TransformRemovedEvent.hpp>
-#include <envire_core/events/ItemAddedEvent.hpp>
-#include <envire_core/TransformGraphExceptions.hpp>
-#include <envire_core/TransformGraphTypes.hpp>
+#include <envire_core/all>
 #include <vector>
 
 using namespace envire::core;

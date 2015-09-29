@@ -1,7 +1,7 @@
 #pragma once
-#include <envire_core/TransformGraphTypes.hpp>
-#include <envire_core/Transform.hpp>
-#include <envire_core/Frame.hpp>
+#include <envire_core/items/Transform.hpp>
+#include <envire_core/items/Frame.hpp>
+#include <envire_core/graph/TransformGraphTypes.hpp>
 #include "GraphEvent.hpp"
 
 namespace envire { namespace core

@@ -1,8 +1,8 @@
 #ifndef __ENVIRE_CORE_SPATIAL_ITEM__
 #define __ENVIRE_CORE_SPATIAL_ITEM__
 
-#include <envire_core/Item.hpp>
-#include <envire_core/BoundingVolume.hpp>
+#include <envire_core/items/Item.hpp>
+#include <envire_core/items/BoundingVolume.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include <Eigen/Geometry>
 

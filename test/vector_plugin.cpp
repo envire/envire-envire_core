@@ -1,4 +1,4 @@
-#include <envire_core/Item.hpp>
+#include <envire_core/items/Item.hpp>
 #include <Eigen/Geometry>
 
 namespace envire

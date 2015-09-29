@@ -1,7 +1,7 @@
-#include <boost/test/unit_test.hpp>
-#include <envire_core/SpatialItem.hpp>
 #include <Eigen/Geometry>
-#include <envire_core/AlignedBoundingBox.hpp>
+#include <boost/test/unit_test.hpp>
+#include <envire_core/items/SpatialItem.hpp>
+#include <envire_core/items/AlignedBoundingBox.hpp>
 
 using namespace envire::core;
 

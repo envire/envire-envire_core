@@ -12,9 +12,9 @@
 #define SRC_TRANSFORMTREETYPES_HPP_
 
 
-#include "Frame.hpp" /** Frames are for the Vertex **/
-#include "Transform.hpp" /** Transform are the Edges **/
-#include "Environment.hpp" /** Environment is the graph property **/
+#include <envire_core/items/Frame.hpp> /** Frames are for the Vertex **/
+#include <envire_core/items/Transform.hpp> /** Transform are the Edges **/
+#include <envire_core/items/Environment.hpp> /** Environment is the graph property **/
 
 #include <boost/graph/directed_graph.hpp>
 

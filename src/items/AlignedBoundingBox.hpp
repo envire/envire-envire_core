@@ -3,7 +3,7 @@
 
 #include <Eigen/Geometry>
 #include <boost/intrusive_ptr.hpp>
-#include <envire_core/BoundingVolume.hpp>
+#include "BoundingVolume.hpp"
 
 namespace envire { namespace core
 {

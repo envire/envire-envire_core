@@ -8,7 +8,7 @@
 #pragma once
 #include <stdexcept>
 #include <string>
-#include "Frame.hpp"
+#include <envire_core/items/Frame.hpp>
 
 namespace envire { namespace core
 {

@@ -1,20 +1,20 @@
 rock_library(envire_core
-    HEADERS ItemBase.hpp
-            Item.hpp
-            Frame.hpp
-            Transform.hpp
-            Environment.hpp
-            TransformGraph.hpp
-            TransformGraphTypes.hpp
-            TransformGraphExceptions.hpp
-            TransformGraphVisitors.hpp
-            GraphViz.hpp
-            SpatialItem.hpp
-            BoundingVolume.hpp
-            ClassLoader.hpp
-            AlignedBoundingBox.hpp
-            DummyItem.hpp
-            RandomGenerator.hpp
+    HEADERS items/ItemBase.hpp
+            items/Item.hpp
+            items/Frame.hpp
+            items/Transform.hpp
+            items/Environment.hpp
+            items/AlignedBoundingBox.hpp
+            items/DummyItem.hpp
+            items/RandomGenerator.hpp
+            items/SpatialItem.hpp
+            items/BoundingVolume.hpp
+            graph/TransformGraph.hpp
+            graph/TransformGraphTypes.hpp
+            graph/TransformGraphExceptions.hpp
+            graph/TransformGraphVisitors.hpp
+            graph/GraphViz.hpp
+            plugin/ClassLoader.hpp
             events/GraphEvent.hpp
             events/GraphEventSubscriber.hpp
             events/GraphEventDispatcher.hpp
@@ -23,15 +23,20 @@ rock_library(envire_core
             events/TransformModifiedEvent.hpp
             events/TransformRemovedEvent.hpp
             events/ItemAddedEvent.hpp
-            
-    SOURCES ItemBase.cpp
-            ClassLoader.cpp
-            BoundingVolume.cpp
-            AlignedBoundingBox.cpp
-            DummyItem.cpp
+
+    SOURCES items/ItemBase.cpp
+            items/BoundingVolume.cpp
+            items/AlignedBoundingBox.cpp
+            items/DummyItem.cpp
+            plugin/ClassLoader.cpp
             events/GraphEventPublisher.cpp
             events/GraphEventDispatcher.cpp
-            TransformGraph.cpp            
+            graph/TransformGraph.cpp            
     DEPS_CMAKE Boost
     DEPS_PKGCONFIG base-types class_loader)
-    
+
+
+install(FILES
+    all
+    DESTINATION include/envire_core)
+

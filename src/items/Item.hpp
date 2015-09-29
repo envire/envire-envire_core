@@ -1,7 +1,7 @@
 #ifndef __ENVIRE_CORE_ITEM__
 #define __ENVIRE_CORE_ITEM__
 
-#include <envire_core/ItemBase.hpp>
+#include "ItemBase.hpp"
 #include <class_loader/class_loader.h>
 #include <utility>                                                              
 
