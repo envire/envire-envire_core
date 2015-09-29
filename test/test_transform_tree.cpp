@@ -4,6 +4,11 @@
 #include <envire_core/Item.hpp>
 #include <envire_core/GraphViz.hpp>
 #include <envire_core/events/GraphEventDispatcher.hpp>
+#include <envire_core/events/TransformAddedEvent.hpp>
+#include <envire_core/events/TransformModifiedEvent.hpp>
+#include <envire_core/events/TransformRemovedEvent.hpp>
+#include <envire_core/events/ItemAddedEvent.hpp>
+#include <envire_core/TransformGraphExceptions.hpp>
 #include <vector>
 
 using namespace envire::core;
@@ -217,21 +222,23 @@ BOOST_AUTO_TEST_CASE(modify_transform_event_test)
     std::shared_ptr<Dispatcher> d(new Dispatcher());
     tree.subscribe(d);
     Transform tf2;
-    tf2.transform.translation << 0, 1, 2;
+    tf2.transform.translation << 0, 1, 2; 
     tf2.transform.orientation = base::AngleAxisd(0.42, base::Vector3d::UnitY());
     tree.updateTransform(a, b, tf2);
-    BOOST_CHECK(d->transformModifiedEvent.size() == 2);
+    BOOST_CHECK(d->transformModifiedEvent.size() == 1);
     BOOST_CHECK(compareTransform(d->transformModifiedEvent[0].newTransform, tf2));
     BOOST_CHECK(compareTransform(d->transformModifiedEvent[0].oldTransform, tf));
     Transform tf2Inv = tf2;
     tf2Inv.setTransform(tf2.transform.inverse());
-    BOOST_CHECK(compareTransform(d->transformModifiedEvent[1].newTransform, tf2Inv));
+    BOOST_CHECK(compareTransform(d->transformModifiedEvent[0].newInverseTransform, tf2Inv));
+    Transform tfInv = tf;
+    tfInv.setTransform(tf.transform.inverse());
+    BOOST_CHECK(compareTransform(d->transformModifiedEvent[0].oldInverseTransform, tfInv));
+    
     BOOST_CHECK(d->transformModifiedEvent[0].origin == a);
     BOOST_CHECK(d->transformModifiedEvent[0].target == b);
-    BOOST_CHECK(d->transformModifiedEvent[1].origin == b);
-    BOOST_CHECK(d->transformModifiedEvent[1].target == a);
     BOOST_CHECK(d->transformModifiedEvent[0].edge == tree.getEdge(a, b));
-    BOOST_CHECK(d->transformModifiedEvent[1].edge == tree.getEdge(b, a));
+    BOOST_CHECK(d->transformModifiedEvent[0].inverseEdge == tree.getEdge(b, a));
 }
 
 BOOST_AUTO_TEST_CASE(operations_with_transform)
@@ -393,7 +400,7 @@ BOOST_AUTO_TEST_CASE(add_item_on_empty_graph_test)
 {
     TransformGraph graph;
     FrameId a = "frame_a";
-    boost::intrusive_ptr<Item<std::string>> item(new Item<std::string>());
+    Item<std::string>::Ptr item(new Item<std::string>());
     BOOST_CHECK_THROW(graph.addItemToFrame(a, item), UnknownFrameException);
     
 }
@@ -406,7 +413,7 @@ BOOST_AUTO_TEST_CASE(add_invalid_item_test)
     FrameId c = "frame_c";
     Transform tf;
     graph.addTransform(a, b, tf);
-    boost::intrusive_ptr<Item<std::string>> item(new Item<std::string>());
+    Item<std::string>::Ptr item(new Item<std::string>());
     BOOST_CHECK_THROW(graph.addItemToFrame(c, item), UnknownFrameException);
 }
 
@@ -418,7 +425,7 @@ BOOST_AUTO_TEST_CASE(add_item_test)
     FrameId b = "frame_b";
     graph.addTransform(a, b, tf);
     
-    boost::intrusive_ptr<Item<std::string>> item(new Item<std::string>());
+    Item<std::string>::Ptr item(new Item<std::string>());
     BOOST_CHECK_NO_THROW(graph.addItemToFrame(a, item));
 
     BOOST_CHECK(graph.getItems(a).size() == 1);
@@ -441,7 +448,7 @@ BOOST_AUTO_TEST_CASE(get_invalid_item_test)
     FrameId c = "frame_c";
     graph.addTransform(a, b, tf);
     
-    boost::intrusive_ptr<Item<std::string>> item(new Item<std::string>());
+    Item<std::string>::Ptr item(new Item<std::string>());
     BOOST_CHECK_NO_THROW(graph.addItemToFrame(a, item));
     BOOST_CHECK_THROW(graph.getItems(c), UnknownFrameException);
 }

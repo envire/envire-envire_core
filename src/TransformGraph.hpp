@@ -21,29 +21,22 @@
 #include "TransformGraphExceptions.hpp"
 #include "TransformGraphVisitors.hpp"
 #include "events/GraphEventPublisher.hpp"
-#include "events/TransformAddedEvent.hpp"
-#include "events/TransformRemovedEvent.hpp"
-#include "events/TransformModifiedEvent.hpp"
+
 
 namespace envire { namespace core
 {
-    class GraphViz;
     /**
      * A tree-like graph structure.
      * Each vertex contains a labeled Frame. The label must be unique.
      *
-     * @note The inheritance from TransformGraph is protected to stop
-     *       users from calling boost::graph methods directly.
-     *       This way the tree methods are the only way to manipulate
-     *       the vertices and edges.
-     *       This is done to ensure that
+     * @warning Do **not** manipulate the tree directly using boost functions.
+     *          If you do that you will **break** the event system.
+     *          Instead use the methods provided by this class for manipulation.
+     *          I.e. do not modify transforms, frames or items directly!!!!
+     *          
     */
-    class TransformGraph : protected LabeledTransformGraph, public GraphEventPublisher
+    class TransformGraph : public LabeledTransformGraph, public GraphEventPublisher
     {
-        //GraphViz has been implemented for TransformGraph.
-        //As it only reads and does no manipulation it is ok to let it know
-        //about the inheritance from TransformGraph
-        friend class GraphViz;
     public:
 
         /***************************************************
@@ -51,10 +44,10 @@ namespace envire { namespace core
          * Overloading boost methods uses delimited separated
          * words, new methods use Camel Case separated words
          ***************************************************/
-
+    
         TransformGraph(envire::core::Environment const &environment = Environment());
 
-        /**Adds a transform from frame @p a to frame @p b.
+        /**Adds a transform from frame @p origin to frame @p target.
          * If the frames do not exist, they will be created.
          * If the transform already exists, it will **not** be updated.
          *
@@ -72,11 +65,10 @@ namespace envire { namespace core
          * A direct transformation has to exist between @p orign and @p target
          * for this method to work.
          *
-         * Causes two TransformUpdated events. One for the
-         * transform and one for the inverse.
+         * Causes a TransformUpdated event.
          *
          * @throw UnknownTransformException if no direct transformation between
-         *        @p origin and @p target exists. */
+         *                                  @p origin and @p target exists. */
         void updateTransform(const FrameId& origin, const FrameId& target,
                              const Transform& tf);
 
@@ -100,16 +92,21 @@ namespace envire { namespace core
 
         /** @return a reference to the frame identified by the id.
          *  @throw UnknownFrameException if the frame id is invalid **/
-        const envire::core::Frame& getFrame(const FrameId& frame);
-
+        const envire::core::Frame& getFrame(const FrameId& frame) const;
+        const envire::core::Frame& getFrame(const vertex_descriptor desc) const;
+        
         /** Adds @p item to the item list of the specified frame 
+         *  Causes ItemAddedEvent.
          *  @throw UnknownFrameException if the frame id is invalid **/
-        void addItemToFrame(const FrameId& frame, boost::intrusive_ptr<ItemBase> item);
-
+        void addItemToFrame(const FrameId& frame, ItemBase::Ptr item);
+        
         /** @return a list of items that are attached to the specified @p frame.
          *  @throw UnknownFrameException if the @p frame id is invalid.*/
-        const std::vector<boost::intrusive_ptr<ItemBase>>& getItems(const FrameId& frame) const;
-
+        const std::vector<ItemBase::Ptr>& getItems(const FrameId& frame) const;
+        const std::vector<ItemBase::Ptr>& getItems(const vertex_descriptor desc) const;
+        
+        
+        
 
         vertices_size_type num_vertices() const;
         edges_size_type num_edges() const;
@@ -131,7 +128,9 @@ namespace envire { namespace core
          */
         edge_descriptor add_edge(const vertex_descriptor node_from,
                                  const vertex_descriptor node_to,
-                                 const envire::core::Transform &tf);
+                                 const envire::core::Transform &tf,
+                                 const FrameId& originName,
+                                 const FrameId& targetName);
 
         /**Removes a vertex from the tree.
          * A vertex can only be removed if there are no edges to
@@ -140,8 +139,7 @@ namespace envire { namespace core
         void remove_frame(FrameId fId);
 
         /**Sets the transform value and causes transformModified event. */
-        void updateTransform(edge_descriptor ed, const Transform& tf,
-                             const FrameId& origin, const FrameId& target);
+        void updateTransform(edge_descriptor ed, const Transform& tf);
 
 
     };

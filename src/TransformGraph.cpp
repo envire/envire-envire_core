@@ -5,6 +5,11 @@
  *      Author: aboeckmann
  */
 #include "TransformGraph.hpp"
+#include "TransformGraphExceptions.hpp"
+#include "events/TransformAddedEvent.hpp"
+#include "events/TransformRemovedEvent.hpp"
+#include "events/TransformModifiedEvent.hpp"
+#include "events/ItemAddedEvent.hpp"
 #include <type_traits> //For is_same()
 
 using namespace envire::core;
@@ -41,11 +46,11 @@ void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
         throw TransformAlreadyExistsException(origin, target);
     }
     //we always add two edges, one for the transform and one for the inverse transform
-    edge_descriptor originToTarget = add_edge(originDesc, targetDesc, tf);
+    edge_descriptor originToTarget = add_edge(originDesc, targetDesc, tf, origin, target);
 
     Transform invTf = tf;
     invTf.setTransform(invTf.transform.inverse());
-    edge_descriptor targetToOrigin = add_edge(targetDesc, originDesc, invTf);
+    edge_descriptor targetToOrigin = add_edge(targetDesc, originDesc, invTf, target, origin);
 }
 
 const Transform TransformGraph::getTransform(const FrameId& a, const FrameId& b) const
@@ -119,14 +124,21 @@ void TransformGraph::updateTransform(const FrameId& origin, const FrameId& targe
     if(!originToTarget.second)
     {
       throw UnknownTransformException(origin, target);
-    }
-
-    updateTransform(originToTarget.first, tf, origin, target);
+    } 
+    
+    const Transform oldTransform = (*this)[originToTarget.first].transform;    
+    updateTransform(originToTarget.first, tf);
+    
     Transform invTf = tf;//copies the time
     invTf.setTransform(tf.transform.inverse());
     edgePair targetToOrigin = boost::edge_by_label(target, origin, *this);
     assert(targetToOrigin.second);//there should always be an inverse edge
-    updateTransform(targetToOrigin.first, invTf, target, origin);
+    const Transform oldInvTransform = (*this)[targetToOrigin.first].transform;
+    updateTransform(targetToOrigin.first, invTf);
+    
+    notify(TransformModifiedEvent(origin, target, originToTarget.first,
+                                  targetToOrigin.first, oldTransform,
+                                  tf, oldInvTransform, invTf));
 }
 
 void TransformGraph::removeTransform(const FrameId& origin, const FrameId& target)
@@ -163,14 +175,16 @@ void TransformGraph::removeTransform(const FrameId& origin, const FrameId& targe
     }
 }
 
-edge_descriptor TransformGraph::add_edge(const vertex_descriptor node_from,
-                                        const vertex_descriptor node_to,
-                                        const envire::core::Transform &tf)
+edge_descriptor TransformGraph::add_edge(const vertex_descriptor origin,
+                                         const vertex_descriptor target,
+                                         const envire::core::Transform &tf,
+                                         const FrameId& originName,
+                                         const FrameId& targetName)
 {
     TransformProperty tf_prop;
     tf_prop.transform = tf;
-    auto edge_pair =  boost::add_edge(node_from, node_to, tf_prop, *this);
-    notify(TransformAddedEvent(node_from, node_to, edge_pair.first, tf));
+    auto edge_pair =  boost::add_edge(origin, target, tf_prop, *this);
+    notify(TransformAddedEvent(originName, targetName, edge_pair.first, tf));
     return edge_pair.first;
 }
 
@@ -203,13 +217,18 @@ void TransformGraph::remove_frame(FrameId fId)
         _map.erase(it);
 }
 
-const envire::core::Frame& TransformGraph::getFrame(const FrameId& frame)
+const envire::core::Frame& TransformGraph::getFrame(const FrameId& frame) const
 {
     if(vertex(frame) == null_vertex())
     {
         throw UnknownFrameException(frame);
     }
     return (*this)[frame].frame;
+}
+
+const envire::core::Frame& TransformGraph::getFrame(const vertex_descriptor desc) const
+{
+    return graph()[desc].frame;
 }
 
 edge_descriptor TransformGraph::getEdge(const FrameId& origin, const FrameId& target) const
@@ -230,15 +249,12 @@ edge_descriptor TransformGraph::getEdge(const FrameId& origin, const FrameId& ta
     return e.first;
 }
 
-void TransformGraph::updateTransform(edge_descriptor ed, const Transform& tf,
-                                    const FrameId& origin, const FrameId& target)
+void TransformGraph::updateTransform(edge_descriptor ed, const Transform& tf)
 {
-    Transform old = (*this)[ed].transform;
     boost::put(&TransformProperty::transform, *this, ed, tf);
-    notify(TransformModifiedEvent(origin, target, ed, old, (*this)[ed].transform));
 }
 
-void TransformGraph::addItemToFrame(const FrameId& frame, boost::intrusive_ptr<ItemBase> item)
+void TransformGraph::addItemToFrame(const FrameId& frame, ItemBase::Ptr item)
 {
     if(vertex(frame) == null_vertex())
     {
@@ -246,10 +262,10 @@ void TransformGraph::addItemToFrame(const FrameId& frame, boost::intrusive_ptr<I
     }
     
     (*this)[frame].frame.items.push_back(item);
-    
+    notify(ItemAddedEvent(frame, item));
 }
 
-const std::vector<boost::intrusive_ptr<ItemBase>>& TransformGraph::getItems(const FrameId& frame) const
+const std::vector<ItemBase::Ptr>& TransformGraph::getItems(const FrameId& frame) const
 {
     //FIXME if item events should be added later this method needs to change because it provides a way
     //to modify items without the event system noticing
@@ -258,5 +274,10 @@ const std::vector<boost::intrusive_ptr<ItemBase>>& TransformGraph::getItems(cons
         throw UnknownFrameException(frame);
     }
     return (*this)[frame].frame.items;
+}
+
+const std::vector<ItemBase::Ptr>& TransformGraph::getItems(const vertex_descriptor desc) const
+{
+    return graph()[desc].frame.items;
 }
 
