@@ -66,6 +66,9 @@ namespace envire { namespace core
     template<class _ItemData>
     class Item : public ItemBase
     {
+    public:
+        typedef boost::shared_ptr< Item<_ItemData> > Ptr;
+
     protected:
 
         _ItemData user_data;

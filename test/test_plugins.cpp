@@ -58,9 +58,9 @@ BOOST_AUTO_TEST_CASE(class_loader_test)
     ItemBase::Ptr vector_plugin = envire::ClassLoader::getInstance()->createItem("VectorPlugin");
     BOOST_ASSERT(envire::ClassLoader::getInstance()->hasItem("VectorPlugin"));
     BOOST_ASSERT(vector_plugin->getClassName() == "VectorPlugin");
-    BOOST_ASSERT(vector_plugin->getRefCount() == 1);
+    BOOST_ASSERT(vector_plugin.use_count() == 1);
     ItemBase::Ptr vector_plugin_2 = vector_plugin;
-    BOOST_ASSERT(vector_plugin->getRefCount() == 2);
+    BOOST_ASSERT(vector_plugin.use_count() == 2);
     BOOST_ASSERT(vector_plugin->getID() == vector_plugin_2->getID());
 
     Item<Eigen::Vector3d>::Ptr vector_plugin_3 = envire::ClassLoader::getInstance()->createItem< Item<Eigen::Vector3d> >("VectorPlugin");

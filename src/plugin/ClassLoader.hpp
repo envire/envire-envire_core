@@ -36,15 +36,15 @@ namespace envire
         template<class T>
         typename T::Ptr createItem(const std::string& class_name)
         {
-            ItemBaseClass* item = createItemIntern(class_name);
-            T* inherited_item = dynamic_cast<T*>(item);
+            ItemBaseClassPtr item = createItemIntern(class_name);
+            typename T::Ptr inherited_item = boost::dynamic_pointer_cast<T>(item);
             if(inherited_item == NULL)
             {
                 std::string error_msg = "Failed to cast item of type ";
                 error_msg += class_name;
                 throw std::runtime_error(error_msg);
             }
-            return typename T::Ptr(inherited_item);
+            return inherited_item;
         }
         
         /**Loads LD_LIBRARY_PATH and parses it into a list of paths */
@@ -63,7 +63,7 @@ namespace envire
 
     private:
 
-        ItemBaseClass* createItemIntern(const std::string& class_name);
+        ItemBaseClassPtr createItemIntern(const std::string& class_name);
 
         void loadLibrary(const std::string& class_name);
 
