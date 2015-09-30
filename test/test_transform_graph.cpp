@@ -217,14 +217,10 @@ BOOST_AUTO_TEST_CASE(modify_transform_event_test)
     tf2.transform.orientation = base::AngleAxisd(0.42, base::Vector3d::UnitY());
     tree.updateTransform(a, b, tf2);
     BOOST_CHECK(d->transformModifiedEvent.size() == 1);
-    BOOST_CHECK(compareTransform(d->transformModifiedEvent[0].newTransform, tf2));
-    BOOST_CHECK(compareTransform(d->transformModifiedEvent[0].oldTransform, tf));
     Transform tf2Inv = tf2;
     tf2Inv.setTransform(tf2.transform.inverse());
-    BOOST_CHECK(compareTransform(d->transformModifiedEvent[0].newInverseTransform, tf2Inv));
     Transform tfInv = tf;
     tfInv.setTransform(tf.transform.inverse());
-    BOOST_CHECK(compareTransform(d->transformModifiedEvent[0].oldInverseTransform, tfInv));
     
     BOOST_CHECK(d->transformModifiedEvent[0].origin == a);
     BOOST_CHECK(d->transformModifiedEvent[0].target == b);

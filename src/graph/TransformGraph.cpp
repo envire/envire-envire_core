@@ -126,19 +126,16 @@ void TransformGraph::updateTransform(const FrameId& origin, const FrameId& targe
       throw UnknownTransformException(origin, target);
     } 
     
-    const Transform oldTransform = (*this)[originToTarget.first].transform;    
     updateTransform(originToTarget.first, tf);
     
     Transform invTf = tf;//copies the time
     invTf.setTransform(tf.transform.inverse());
     edgePair targetToOrigin = boost::edge_by_label(target, origin, *this);
     assert(targetToOrigin.second);//there should always be an inverse edge
-    const Transform oldInvTransform = (*this)[targetToOrigin.first].transform;
     updateTransform(targetToOrigin.first, invTf);
     
     notify(TransformModifiedEvent(origin, target, originToTarget.first,
-                                  targetToOrigin.first, oldTransform,
-                                  tf, oldInvTransform, invTf));
+                                  targetToOrigin.first));
 }
 
 void TransformGraph::removeTransform(const FrameId& origin, const FrameId& target)
@@ -181,8 +178,7 @@ edge_descriptor TransformGraph::add_edge(const vertex_descriptor origin,
                                          const FrameId& originName,
                                          const FrameId& targetName)
 {
-    TransformProperty tf_prop;
-    tf_prop.transform = tf;
+    TransformProperty tf_prop{tf};
     auto edge_pair =  boost::add_edge(origin, target, tf_prop, *this);
     notify(TransformAddedEvent(originName, targetName, edge_pair.first, tf));
     return edge_pair.first;

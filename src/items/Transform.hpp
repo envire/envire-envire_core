@@ -23,11 +23,24 @@ namespace envire { namespace core
             time(_time), transform(_twc){};
 
 
-        Transform(const Transform &_transform)
+        Transform(const Transform &tf) : time(tf.time), transform(tf.transform) {}
+        
+        Transform(Transform&& tf) : time(std::move(tf.time)),
+                                    transform(std::move(tf.transform)) {}
+                                    
+        Transform& operator=(const Transform& other)
         {
-            this->time = _transform.time;
-            this->transform = _transform.transform;
+          time = other.time;
+          transform = other.transform;
+          return *this;
         }
+        
+        Transform& operator=(Transform&& other)
+        {
+          time = std::move(other.time);
+          transform = std::move(other.transform);
+          return *this;
+        }        
 
         void setTransform(const base::TransformWithCovariance& tf)
         {
