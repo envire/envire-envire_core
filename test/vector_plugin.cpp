@@ -1,7 +1,6 @@
 #include <envire_core/items/Item.hpp>
 #include <Eigen/Geometry>
 
-namespace envire
-{
-    ENVIRE_PLUGIN(VectorPlugin, Eigen::Vector3d)
-}
+using namespace envire;
+
+ENVIRE_PLUGIN( VectorPlugin, Eigen::Vector3d )

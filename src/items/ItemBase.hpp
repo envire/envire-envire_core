@@ -4,12 +4,16 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/export.hpp>
+#include <boost/serialization/nvp.hpp>
+#include <boost/serialization/binary_object.hpp>
 #include <base/Time.hpp>
 #include <string>
 
 namespace envire { namespace core
 {
-
     /**@class ItemBase
     *
     * ItemBase class
@@ -87,12 +91,24 @@ namespace envire { namespace core
         */
         virtual const std::string& getClassName() const { return class_name; }
 
+        void* getRawData() const { return user_data_ptr; }
 
+    private:
+        friend class boost::serialization::access;
 
+        template <typename Archive>
+        void serialize(Archive &ar, const unsigned int version)
+        {
+            ar & boost::serialization::make_nvp("time", time.microseconds);
+            ar & boost::serialization::make_nvp("uuid", boost::serialization::make_binary_object(uuid.data, uuid.size()));
+            ar & BOOST_SERIALIZATION_NVP(frame_name);
+        }
     };
 
+    BOOST_SERIALIZATION_ASSUME_ABSTRACT(envire::core::ItemBase)
 
 }}
+
 #endif
 
 

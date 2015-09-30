@@ -1,3 +1,5 @@
+find_package(Boost COMPONENTS serialization)
+
 rock_library(envire_core
     HEADERS items/ItemBase.hpp
             items/Item.hpp
@@ -26,7 +28,11 @@ rock_library(envire_core
             events/ItemRemovedEvent.hpp
             events/FrameAddedEvent.hpp
             events/FrameRemovedEvent.hpp
-
+            serialization/Serialization.hpp
+            serialization/SerializationHandle.hpp
+            serialization/SerializationRegistration.hpp
+            serialization/ItemHeader.hpp
+            serialization/Eigen.hpp
     SOURCES items/ItemBase.cpp
             items/BoundingVolume.cpp
             items/AlignedBoundingBox.cpp
@@ -34,7 +40,8 @@ rock_library(envire_core
             plugin/ClassLoader.cpp
             events/GraphEventPublisher.cpp
             events/GraphEventDispatcher.cpp
-            graph/TransformGraph.cpp            
+            graph/TransformGraph.cpp
+            serialization/Serialization.cpp
     DEPS_CMAKE Boost
     DEPS_PKGCONFIG base-types class_loader)
 
@@ -42,4 +49,3 @@ rock_library(envire_core
 install(FILES
     all
     DESTINATION include/envire_core)
-
