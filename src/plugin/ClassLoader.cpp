@@ -63,11 +63,11 @@ bool ClassLoader::hasItem(const std::string& class_name)
 
 ClassLoader::ItemBaseClassPtr ClassLoader::createItem(const std::string& class_name)
 {
-    return ItemBaseClassPtr(createItemIntern(class_name));
+    return createItemIntern(class_name);
 }
 
 
-ClassLoader::ItemBaseClass* ClassLoader::createItemIntern(const std::string& class_name)
+ClassLoader::ItemBaseClassPtr ClassLoader::createItemIntern(const std::string& class_name)
 {
     LoaderMap::iterator it = loaders.find(class_name);
 
@@ -84,7 +84,7 @@ ClassLoader::ItemBaseClass* ClassLoader::createItemIntern(const std::string& cla
         throw std::runtime_error(error_msg);
     }
     else
-        return it->second->createUnmanagedInstance<ItemBaseClass>(class_name);
+        return it->second->createInstance<ItemBaseClass>(class_name);
 }
 
 void ClassLoader::loadLibrary(const std::string& class_name)

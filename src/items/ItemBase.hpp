@@ -3,7 +3,7 @@
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include <boost/intrusive_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include <base/Time.hpp>
 #include <string>
 
@@ -17,14 +17,9 @@ namespace envire { namespace core
     class ItemBase
     {
     public:
-
-        typedef boost::intrusive_ptr<ItemBase> Ptr;
+        typedef boost::shared_ptr<ItemBase> Ptr;
 
     protected:
-
-        /* TBD: using the intrusive pointer the raw pointer and the intrusive_ptr have the same memory layout.
-         * But in the serialization the ref count must be tropped */
-        long ref_count; /** Reference counter of the smart pointer */
 
         base::Time time; /** Timestamp */
 
@@ -92,22 +87,10 @@ namespace envire { namespace core
         */
         virtual const std::string& getClassName() const { return class_name; }
 
-        /**@brief getRefCount
-        *
-        * Returns the reference count of the item
-        *
-        */
-        long getRefCount() const { return ref_count; }
 
-    protected:
-
-        friend void intrusive_ptr_add_ref( ItemBase* item );
-        friend void intrusive_ptr_release( ItemBase* item );
 
     };
 
-    void intrusive_ptr_add_ref( ItemBase* item );
-    void intrusive_ptr_release( ItemBase* item );
 
 }}
 #endif
