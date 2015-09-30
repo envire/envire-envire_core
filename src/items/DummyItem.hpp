@@ -45,6 +45,8 @@
 //#include "WorldPhysics.h"
 //#include "envire_core/TransformTree.hpp"
 #include "Item.hpp"
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/vector.hpp>
 
 using namespace envire::core;
 
@@ -61,6 +63,15 @@ namespace envire{
         void welcome();
         int getId();
         std::vector<double> getMyVector();
+
+    private:
+        friend class boost::serialization::access;
+        template <typename Archive>
+        void serialize(Archive &ar, const unsigned int version)
+        {
+            ar & BOOST_SERIALIZATION_NVP(id);
+            ar & BOOST_SERIALIZATION_NVP(myVector);
+        }
     };
     // Inheritance from a template fitting the DummyClass type
     class DummyItem : public Item<DummyClass> {

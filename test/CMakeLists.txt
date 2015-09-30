@@ -1,3 +1,5 @@
+find_package(Boost COMPONENTS unit_test_framework system filesystem serialization)
+
 rock_library(VectorPlugin_envire_plugin
     SOURCES vector_plugin.cpp
     DEPS envire_core
@@ -9,6 +11,7 @@ rock_testsuite(test_suite suite.cpp
     test_transform_graph.cpp
     test_boundary.cpp
     test_frame.cpp
+    test_serialization.cpp
     DEPS_CMAKE Boost
     DEPS envire_core
     DEPS_PKGCONFIG class_loader)
@@ -17,8 +20,6 @@ rock_testsuite(test_dummy suite.cpp
     test_dummy_graph.cpp
     test_property_tag.cpp)
 
-find_package(Boost COMPONENTS unit_test_framework system filesystem)
-target_link_libraries(test_suite ${Boost_LIBRARIES})
 rock_testsuite(test_parameter_forwarding suite.cpp
     test_dummy_item.cpp
     DEPS_CMAKE Boost
