@@ -620,3 +620,38 @@ BOOST_AUTO_TEST_CASE(remove_items_test)
     BOOST_CHECK(d->itemRemovedEvent[2].item == item2);
 }
 
+BOOST_AUTO_TEST_CASE(remove_item_from_invalid_frame_test)
+{    
+    TransformGraph graph;
+    FrameId a("a");
+    ItemBase::Ptr item1(new Item<string>());
+    BOOST_CHECK_THROW(graph.removeItemFromFrame(a, item1), UnknownFrameException);
+  
+}
+
+BOOST_AUTO_TEST_CASE(remove_invalid_item_test)
+{    
+    TransformGraph graph;
+    FrameId a("a");
+    FrameId b("b");
+    ItemBase::Ptr item1(new Item<string>());
+    Transform tf;
+    graph.addTransform(a, b, tf);
+    BOOST_CHECK_THROW(graph.removeItemFromFrame(a, item1), UnknownItemException);
+  
+}
+
+BOOST_AUTO_TEST_CASE(get_transform_between_unconnected_trees)
+{
+    TransformGraph graph;
+    FrameId a("a");
+    FrameId b("b");
+    FrameId c("c");
+    FrameId d("d");
+    Transform tf;
+    
+    graph.addTransform(a, b, tf);
+    graph.addTransform(c, d, tf);
+    BOOST_CHECK_THROW(graph.getTransform(a, c), UnknownTransformException);
+}
+
