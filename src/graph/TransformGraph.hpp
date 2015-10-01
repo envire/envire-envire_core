@@ -78,6 +78,7 @@ namespace envire { namespace core
          * will be removed as well.
          *
          * Causes TransformRemoved event.
+         * Causes ItemRemovedEvent for each item of the frame if a frame is removed.
          *
          * @throw UnknownTransformException if the transformation doesn't exist */
         void removeTransform(const FrameId& origin, const FrameId& target);
@@ -102,6 +103,13 @@ namespace envire { namespace core
          *  Causes ItemAddedEvent.
          *  @throw UnknownFrameException if the frame id is invalid **/
         void addItemToFrame(const FrameId& frame, ItemBase::Ptr item);
+        
+        /** Removes @p item from @p frame.
+         *  Causes ItemRemovedEvent.
+         * @throw UnknownFrameException if the frame does not exist.
+         * @throw UnknownItemException if the item is not part of the frame's
+         *                             item list.  */ 
+        void removeItemFromFrame(const FrameId& frame, ItemBase::Ptr item);
         
         /** @return a list of items that are attached to the specified @p frame.
          *  @throw UnknownFrameException if the @p frame id is invalid.*/

@@ -48,6 +48,18 @@ namespace envire { namespace core
         virtual char const * what() const throw() { return msg.c_str(); }
         const std::string msg;
     };
+    
+    class UnknownItemException : public std::exception
+    {
+    public:
+        UnknownItemException(const FrameId& name, ItemBase::Ptr item) :
+          msg("The item with uuid '" + item->getIDString() + 
+              "' is not part of frame '" + name + "'") {}
+        virtual char const * what() const throw() { return msg.c_str(); }
+        const std::string msg;
+    };
+    
+    
 
 
 }}

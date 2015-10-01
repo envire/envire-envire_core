@@ -14,7 +14,8 @@ namespace envire { namespace core
             TRANSFORMATION_ADDED,
             TRANSFORMATION_REMOVED,
             TRANSFORMATION_MODIFIED,
-            ITEM_ADDED_TO_FRAME
+            ITEM_ADDED_TO_FRAME,
+            ITEM_REMOVED_FROM_FRAME
         };
         GraphEvent(const Type type) : type(type) {}
         virtual ~GraphEvent() {}

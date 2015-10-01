@@ -11,6 +11,7 @@ namespace envire { namespace core
     class TransformRemovedEvent;
     class TransformModifiedEvent;
     class ItemAddedEvent;
+    class ItemRemovedEvent;
 
     /**
      * A TreeEventSubscriber that parses the event and calls different methods
@@ -29,5 +30,6 @@ namespace envire { namespace core
         virtual void transformRemoved(const TransformRemovedEvent& e) {}
         virtual void transformModified(const TransformModifiedEvent& e) {}
         virtual void itemAdded(const ItemAddedEvent& e) {}
+        virtual void itemRemoved(const ItemRemovedEvent& e) {}
     };
 }}
