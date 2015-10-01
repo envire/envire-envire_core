@@ -498,15 +498,15 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     BOOST_CHECK(parentToChildren.find(graph.vertex(d)) == parentToChildren.end());
     BOOST_CHECK(parentToChildren.find(graph.vertex(f)) == parentToChildren.end());
     BOOST_CHECK(parentToChildren.find(graph.vertex(g)) == parentToChildren.end());
-    std::vector<vertex_descriptor>& aChildren = parentToChildren[graph.vertex(a)];
-    BOOST_CHECK(aChildren[0] == graph.vertex(b) || aChildren[0] == graph.vertex(c));
-    BOOST_CHECK(aChildren[1] == graph.vertex(b) || aChildren[1] == graph.vertex(c));
-    std::vector<vertex_descriptor>& cChildren = parentToChildren[graph.vertex(c)];
-    BOOST_CHECK(cChildren[0] == graph.vertex(d) || cChildren[0] == graph.vertex(e));
-    BOOST_CHECK(cChildren[1] == graph.vertex(d) || cChildren[1] == graph.vertex(e));    
-    std::vector<vertex_descriptor>& eChildren = parentToChildren[graph.vertex(e)];
-    BOOST_CHECK(eChildren[0] == graph.vertex(f) || eChildren[0] == graph.vertex(g));
-    BOOST_CHECK(eChildren[1] == graph.vertex(f) || eChildren[1] == graph.vertex(g));     
+    std::unordered_set<vertex_descriptor>& aChildren = parentToChildren[graph.vertex(a)];
+    BOOST_CHECK(aChildren.find(graph.vertex(b)) != aChildren.end());
+    BOOST_CHECK(aChildren.find(graph.vertex(c)) != aChildren.end());
+    std::unordered_set<vertex_descriptor>& cChildren = parentToChildren[graph.vertex(c)];
+    BOOST_CHECK(cChildren.find(graph.vertex(d)) != aChildren.end());
+    BOOST_CHECK(cChildren.find(graph.vertex(e)) != aChildren.end());
+    std::unordered_set<vertex_descriptor>& eChildren = parentToChildren[graph.vertex(e)];
+    BOOST_CHECK(eChildren.find(graph.vertex(f)) != aChildren.end());
+    BOOST_CHECK(eChildren.find(graph.vertex(g)) != aChildren.end());
     
      /*       d
      *        |
@@ -528,14 +528,14 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     BOOST_CHECK(parentToChildren.find(graph.vertex(g)) == parentToChildren.end());
     
     aChildren = parentToChildren[graph.vertex(a)];
-    BOOST_CHECK(aChildren[0] == graph.vertex(b));
+    BOOST_CHECK(aChildren.find(graph.vertex(b)) != aChildren.end());
     cChildren = parentToChildren[graph.vertex(c)];
-    BOOST_CHECK(cChildren[0] == graph.vertex(a) || cChildren[0] == graph.vertex(e));
-    BOOST_CHECK(cChildren[1] == graph.vertex(a) || cChildren[1] == graph.vertex(e)); 
-    std::vector<vertex_descriptor>& dChildren = parentToChildren[graph.vertex(d)];
-    BOOST_CHECK(dChildren[0] == graph.vertex(c));
+    BOOST_CHECK(cChildren.find(graph.vertex(a)) != aChildren.end());
+    BOOST_CHECK(cChildren.find(graph.vertex(e)) != aChildren.end());
+    std::unordered_set<vertex_descriptor>& dChildren = parentToChildren[graph.vertex(d)];
+    BOOST_CHECK(dChildren.find(graph.vertex(c)) != aChildren.end());
     eChildren = parentToChildren[graph.vertex(e)];
-    BOOST_CHECK(eChildren[0] == graph.vertex(f) || eChildren[0] == graph.vertex(g));
-    BOOST_CHECK(eChildren[1] == graph.vertex(f) || eChildren[1] == graph.vertex(g));       
+    BOOST_CHECK(eChildren.find(graph.vertex(f)) != aChildren.end());
+    BOOST_CHECK(eChildren.find(graph.vertex(g)) != aChildren.end());
 }
 

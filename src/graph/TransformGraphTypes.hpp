@@ -25,6 +25,8 @@
 #include <boost/graph/labeled_graph.hpp>
 #undef private
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace envire { namespace core
 {
@@ -67,6 +69,6 @@ namespace envire { namespace core
     
     /**A map that shows the parent->children relation between vertices in a tree.
        The key is the parent.*/
-    using VertexMap = std::map<vertex_descriptor, std::vector<vertex_descriptor>>;
+    using VertexMap = std::unordered_map<vertex_descriptor, std::unordered_set<vertex_descriptor>>;
 }}
 #endif /* SRC_TRANSFORMTREETYPES_HPP_ */

@@ -80,7 +80,7 @@ namespace envire { namespace core
         template <typename Edge, typename Graph>
         void tree_edge(Edge e, const Graph &g)
         {
-            parentToChildren[boost::source(e, g)].emplace_back(boost::target(e, g));
+            parentToChildren[boost::source(e, g)].insert(boost::target(e, g));
         }
         VertexMap& parentToChildren;
     };
