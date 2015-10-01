@@ -21,6 +21,8 @@ public:
     vector<TransformAddedEvent> transformAddedEvent;
     vector<TransformModifiedEvent> transformModifiedEvent;
     vector<TransformRemovedEvent> transformRemovedEvent;
+    vector<ItemAddedEvent> itemAddedEvent;
+    vector<ItemRemovedEvent> itemRemovedEvent;
 
     virtual void transformAdded(const TransformAddedEvent& e)
     {
@@ -35,6 +37,14 @@ public:
     virtual void transformRemoved(const TransformRemovedEvent& e)
     {
         transformRemovedEvent.push_back(e);
+    }
+    virtual void itemAdded(const ItemAddedEvent& e)
+    {
+        itemAddedEvent.push_back(e);
+    }
+    virtual void itemRemoved(const ItemRemovedEvent& e)
+    {
+        itemRemovedEvent.push_back(e);
     }
 };
 
@@ -502,11 +512,11 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     BOOST_CHECK(aChildren.find(graph.vertex(b)) != aChildren.end());
     BOOST_CHECK(aChildren.find(graph.vertex(c)) != aChildren.end());
     std::unordered_set<vertex_descriptor>& cChildren = parentToChildren[graph.vertex(c)];
-    BOOST_CHECK(cChildren.find(graph.vertex(d)) != aChildren.end());
-    BOOST_CHECK(cChildren.find(graph.vertex(e)) != aChildren.end());
+    BOOST_CHECK(cChildren.find(graph.vertex(d)) != cChildren.end());
+    BOOST_CHECK(cChildren.find(graph.vertex(e)) != cChildren.end());
     std::unordered_set<vertex_descriptor>& eChildren = parentToChildren[graph.vertex(e)];
-    BOOST_CHECK(eChildren.find(graph.vertex(f)) != aChildren.end());
-    BOOST_CHECK(eChildren.find(graph.vertex(g)) != aChildren.end());
+    BOOST_CHECK(eChildren.find(graph.vertex(f)) != eChildren.end());
+    BOOST_CHECK(eChildren.find(graph.vertex(g)) != eChildren.end());
     
      /*       d
      *        |
@@ -527,15 +537,86 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     BOOST_CHECK(parentToChildren.find(graph.vertex(f)) == parentToChildren.end());
     BOOST_CHECK(parentToChildren.find(graph.vertex(g)) == parentToChildren.end());
     
-    aChildren = parentToChildren[graph.vertex(a)];
-    BOOST_CHECK(aChildren.find(graph.vertex(b)) != aChildren.end());
-    cChildren = parentToChildren[graph.vertex(c)];
-    BOOST_CHECK(cChildren.find(graph.vertex(a)) != aChildren.end());
-    BOOST_CHECK(cChildren.find(graph.vertex(e)) != aChildren.end());
+    std::unordered_set<vertex_descriptor>& aChildren2 = parentToChildren[graph.vertex(a)];
+    BOOST_CHECK(aChildren2.find(graph.vertex(b)) != aChildren2.end());
+    std::unordered_set<vertex_descriptor>& cChildren2 = parentToChildren[graph.vertex(c)];
+    BOOST_CHECK(cChildren2.find(graph.vertex(a)) != cChildren2.end());
+    BOOST_CHECK(cChildren2.find(graph.vertex(e)) != cChildren2.end());
     std::unordered_set<vertex_descriptor>& dChildren = parentToChildren[graph.vertex(d)];
     BOOST_CHECK(dChildren.find(graph.vertex(c)) != aChildren.end());
-    eChildren = parentToChildren[graph.vertex(e)];
-    BOOST_CHECK(eChildren.find(graph.vertex(f)) != aChildren.end());
-    BOOST_CHECK(eChildren.find(graph.vertex(g)) != aChildren.end());
+    std::unordered_set<vertex_descriptor>& eChildren2 = parentToChildren[graph.vertex(e)];
+    BOOST_CHECK(eChildren2.find(graph.vertex(f)) != eChildren2.end());
+    BOOST_CHECK(eChildren2.find(graph.vertex(g)) != eChildren2.end());
+}
+
+
+BOOST_AUTO_TEST_CASE(add_items_test)
+{
+    TransformGraph graph;
+    FrameId a("a");
+    FrameId b("b");
+    Transform tf;
+    
+    graph.addTransform(a, b, tf);
+    ItemBase::Ptr item1(new Item<string>());
+    ItemBase::Ptr item2(new Item<string>());
+    ItemBase::Ptr item3(new Item<string>());
+    
+    std::shared_ptr<Dispatcher> d(new Dispatcher());
+    graph.subscribe(d);
+    graph.addItemToFrame(a, item1);
+    graph.addItemToFrame(b, item2);
+    graph.addItemToFrame(a, item3);
+    
+    BOOST_CHECK(d->itemAddedEvent.size() == 3);
+    BOOST_CHECK(d->itemAddedEvent[0].frame == a);
+    BOOST_CHECK(d->itemAddedEvent[1].frame == b);
+    BOOST_CHECK(d->itemAddedEvent[2].frame == a);
+    BOOST_CHECK(d->itemAddedEvent[0].item == item1);
+    BOOST_CHECK(d->itemAddedEvent[1].item == item2);
+    BOOST_CHECK(d->itemAddedEvent[2].item == item3);
+
+    BOOST_CHECK(graph.getItems(a).size() == 2);
+    BOOST_CHECK(graph.getItems(a)[0] == item1);
+    BOOST_CHECK(graph.getItems(a)[1] == item3);
+    BOOST_CHECK(graph.getItems(b).size() == 1);
+    BOOST_CHECK(graph.getItems(b)[0] == item2);
+}
+
+BOOST_AUTO_TEST_CASE(remove_items_test)
+{
+    TransformGraph graph;
+    FrameId a("a");
+    FrameId b("b");
+    Transform tf;
+    
+    graph.addTransform(a, b, tf);
+    ItemBase::Ptr item1(new Item<string>());
+    ItemBase::Ptr item2(new Item<string>());
+    ItemBase::Ptr item3(new Item<string>());
+    
+    std::shared_ptr<Dispatcher> d(new Dispatcher());
+    graph.subscribe(d);
+    graph.addItemToFrame(a, item1);
+    graph.addItemToFrame(b, item2);
+    graph.addItemToFrame(a, item3);
+
+    graph.removeItemFromFrame(a, item1);
+    BOOST_CHECK(d->itemRemovedEvent.size() == 1);
+    BOOST_CHECK(d->itemRemovedEvent[0].frame == a);
+    BOOST_CHECK(d->itemRemovedEvent[0].item == item1);
+    BOOST_CHECK(graph.getItems(a).size() == 1);
+    BOOST_CHECK(graph.getItems(a)[0] == item3);
+    
+    graph.removeItemFromFrame(a, item3);
+    BOOST_CHECK(d->itemRemovedEvent.size() == 2);
+    BOOST_CHECK(d->itemRemovedEvent[1].frame == a);
+    BOOST_CHECK(d->itemRemovedEvent[1].item == item3);
+    BOOST_CHECK(graph.getItems(a).empty());
+
+    graph.removeTransform(a, b);
+    BOOST_CHECK(d->itemRemovedEvent.size() == 3);
+    BOOST_CHECK(d->itemRemovedEvent[2].frame == b);
+    BOOST_CHECK(d->itemRemovedEvent[2].item == item2);
 }
 

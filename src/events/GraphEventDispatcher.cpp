@@ -28,6 +28,7 @@ void GraphEventDispatcher::notifyTreeEvent(const GraphEvent& event)
         break;
     case GraphEvent::ITEM_REMOVED_FROM_FRAME:
         itemRemoved(dynamic_cast<const ItemRemovedEvent&>(event));
+        break;
     default:
         assert(false);//you forgot to add an event type
     }
