@@ -21,6 +21,8 @@ namespace envire { namespace core
         { this->transform.invalidateTransform(); };
         Transform(const base::Time &_time, const base::TransformWithCovariance &_twc):
             time(_time), transform(_twc){};
+        Transform(const base::Time &_time, const base::Position &_translation, const base::Orientation &_orient, const base::Matrix6d &_cov):
+            time(_time), transform(_translation, _orient, _cov){};
 
 
         Transform(const Transform &tf) : time(tf.time), transform(tf.transform) {}
