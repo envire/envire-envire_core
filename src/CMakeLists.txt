@@ -23,6 +23,7 @@ rock_library(envire_core
             events/TransformModifiedEvent.hpp
             events/TransformRemovedEvent.hpp
             events/ItemAddedEvent.hpp
+            events/ItemRemovedEvent.hpp
 
     SOURCES items/ItemBase.cpp
             items/BoundingVolume.cpp
