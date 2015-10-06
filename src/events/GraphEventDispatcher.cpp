@@ -5,6 +5,7 @@
 #include "TransformRemovedEvent.hpp"
 #include "ItemAddedEvent.hpp"
 #include "ItemRemovedEvent.hpp"
+#include "FrameAddedEvent.hpp"
 
 #include <cassert>
 
@@ -28,6 +29,9 @@ void GraphEventDispatcher::notifyTreeEvent(const GraphEvent& event)
         break;
     case GraphEvent::ITEM_REMOVED_FROM_FRAME:
         itemRemoved(dynamic_cast<const ItemRemovedEvent&>(event));
+        break;
+    case GraphEvent::FRAME_ADDED:
+        frameAdded(dynamic_cast<const FrameAddedEvent&>(event));
         break;
     default:
         assert(false);//you forgot to add an event type

@@ -11,6 +11,7 @@
 #include <envire_core/events/TransformModifiedEvent.hpp>
 #include <envire_core/events/ItemAddedEvent.hpp>
 #include <envire_core/events/ItemRemovedEvent.hpp>
+#include <envire_core/events/FrameAddedEvent.hpp>
 #include <type_traits> //For is_same()
 
 using namespace envire::core;
@@ -27,6 +28,20 @@ TransformGraph::TransformGraph(envire::core::Environment const &environment) :
                   "edge list type should be listS to ensure that vertex_descriptors remain valid");
 }
 
+void TransformGraph::addFrame(const FrameId& frame)
+{
+    vertex_descriptor desc = vertex(frame);
+    if(desc == null_vertex())
+    {
+        desc = add_vertex(frame);
+    }
+    else
+    {
+      throw FrameAlreadyExistsException(frame);
+    }
+}
+
+
 void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
                                  const Transform& tf)
 {
@@ -35,9 +50,13 @@ void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
     vertex_descriptor targetDesc = vertex(target);
     //if they don't exist create them
     if(originDesc == null_vertex())
+    {
         originDesc = add_vertex(origin);
+    }
     if(targetDesc == null_vertex())
+    {
         targetDesc = add_vertex(target);
+    }
 
     //check if there is an edge between the vertices.
     //If a->b exists, b->a also exist. Therefore we need to check only one direction
@@ -199,6 +218,7 @@ vertex_descriptor TransformGraph::add_vertex(const FrameId& frameId)
 {
     FrameProperty node_prop(frameId);
     vertex_descriptor v = LabeledTransformGraph::add_vertex(frameId, node_prop);
+    notify(FrameAddedEvent(frameId));
     return v;
 }
 

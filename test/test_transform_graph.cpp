@@ -18,33 +18,38 @@ bool compareTransform(const Transform& a, const Transform& b)
 
 class Dispatcher : public GraphEventDispatcher {
 public:
-    vector<TransformAddedEvent> transformAddedEvent;
-    vector<TransformModifiedEvent> transformModifiedEvent;
-    vector<TransformRemovedEvent> transformRemovedEvent;
-    vector<ItemAddedEvent> itemAddedEvent;
-    vector<ItemRemovedEvent> itemRemovedEvent;
+    vector<TransformAddedEvent> transformAddedEvents;
+    vector<TransformModifiedEvent> transformModifiedEvents;
+    vector<TransformRemovedEvent> transformRemovedEvents;
+    vector<ItemAddedEvent> itemAddedEvents;
+    vector<ItemRemovedEvent> itemRemovedEvents;
+    vector<FrameAddedEvent> frameAddedEvents;
 
     virtual void transformAdded(const TransformAddedEvent& e)
     {
-        transformAddedEvent.push_back(e);
+        transformAddedEvents.push_back(e);
     }
 
     virtual void transformModified(const TransformModifiedEvent& e)
     {
-        transformModifiedEvent.push_back(e);
+        transformModifiedEvents.push_back(e);
     }
 
     virtual void transformRemoved(const TransformRemovedEvent& e)
     {
-        transformRemovedEvent.push_back(e);
+        transformRemovedEvents.push_back(e);
     }
     virtual void itemAdded(const ItemAddedEvent& e)
     {
-        itemAddedEvent.push_back(e);
+        itemAddedEvents.push_back(e);
     }
     virtual void itemRemoved(const ItemRemovedEvent& e)
     {
-        itemRemovedEvent.push_back(e);
+        itemRemovedEvents.push_back(e);
+    }
+    virtual void frameAdded(const FrameAddedEvent& e)
+    {
+        frameAddedEvents.push_back(e);
     }
 };
 
@@ -60,11 +65,11 @@ BOOST_AUTO_TEST_CASE(remove_transform_event_test)
     std::shared_ptr<Dispatcher> d(new Dispatcher());
     tree.subscribe(d);  
     tree.removeTransform(a, b);
-    BOOST_CHECK(d->transformRemovedEvent.size() == 2);
-    BOOST_CHECK(d->transformRemovedEvent[0].origin == a);
-    BOOST_CHECK(d->transformRemovedEvent[0].target == b);
-    BOOST_CHECK(d->transformRemovedEvent[1].origin == b);
-    BOOST_CHECK(d->transformRemovedEvent[1].target == a);
+    BOOST_CHECK(d->transformRemovedEvents.size() == 2);
+    BOOST_CHECK(d->transformRemovedEvents[0].origin == a);
+    BOOST_CHECK(d->transformRemovedEvents[0].target == b);
+    BOOST_CHECK(d->transformRemovedEvents[1].origin == b);
+    BOOST_CHECK(d->transformRemovedEvents[1].target == a);
 }
 
 BOOST_AUTO_TEST_CASE(simple_remove_transform_test)
@@ -209,6 +214,31 @@ BOOST_AUTO_TEST_CASE(get_edge_invalid_test)
     BOOST_CHECK_THROW(tree.getEdge(b, c), UnknownTransformException);
 }
 
+BOOST_AUTO_TEST_CASE(frame_added_event_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    TransformGraph graph;
+    Transform tf;  
+    std::shared_ptr<Dispatcher> d(new Dispatcher());
+    graph.subscribe(d);
+    graph.addFrame(a);
+    BOOST_CHECK(d->frameAddedEvents.size() == 1);
+    BOOST_CHECK(d->frameAddedEvents[0].addedFrame == a);
+    
+    graph.addTransform(a, b, tf);
+    BOOST_CHECK(d->frameAddedEvents.size() == 2);
+    BOOST_CHECK(d->frameAddedEvents[1].addedFrame == b);
+
+    FrameId c = "frame_c";
+    FrameId e = "frame_d";
+    graph.addTransform(c, e, tf);
+    BOOST_CHECK(d->frameAddedEvents.size() == 4);
+    BOOST_CHECK(d->frameAddedEvents[2].addedFrame == c);
+    BOOST_CHECK(d->frameAddedEvents[3].addedFrame == e);
+    
+    BOOST_CHECK_THROW(graph.addFrame(a), FrameAlreadyExistsException);
+}
 
 BOOST_AUTO_TEST_CASE(modify_transform_event_test)
 {
@@ -226,16 +256,16 @@ BOOST_AUTO_TEST_CASE(modify_transform_event_test)
     tf2.transform.translation << 0, 1, 2; 
     tf2.transform.orientation = base::AngleAxisd(0.42, base::Vector3d::UnitY());
     tree.updateTransform(a, b, tf2);
-    BOOST_CHECK(d->transformModifiedEvent.size() == 1);
+    BOOST_CHECK(d->transformModifiedEvents.size() == 1);
     Transform tf2Inv = tf2;
     tf2Inv.setTransform(tf2.transform.inverse());
     Transform tfInv = tf;
     tfInv.setTransform(tf.transform.inverse());
     
-    BOOST_CHECK(d->transformModifiedEvent[0].origin == a);
-    BOOST_CHECK(d->transformModifiedEvent[0].target == b);
-    BOOST_CHECK(d->transformModifiedEvent[0].edge == tree.getEdge(a, b));
-    BOOST_CHECK(d->transformModifiedEvent[0].inverseEdge == tree.getEdge(b, a));
+    BOOST_CHECK(d->transformModifiedEvents[0].origin == a);
+    BOOST_CHECK(d->transformModifiedEvents[0].target == b);
+    BOOST_CHECK(d->transformModifiedEvents[0].edge == tree.getEdge(a, b));
+    BOOST_CHECK(d->transformModifiedEvents[0].inverseEdge == tree.getEdge(b, a));
 }
 
 BOOST_AUTO_TEST_CASE(operations_with_transform)
@@ -381,16 +411,16 @@ BOOST_AUTO_TEST_CASE(simple_add_transform_event_test)
 
     tree.subscribe(d);
     tree.addTransform(a, b, tf);
-    BOOST_CHECK(d->transformAddedEvent.size() == 2);
+    BOOST_CHECK(d->transformAddedEvents.size() == 2);
     edge_descriptor aToB = tree.getEdge(a, b);
-    BOOST_CHECK(d->transformAddedEvent[0].edge == aToB);
+    BOOST_CHECK(d->transformAddedEvents[0].edge == aToB);
     edge_descriptor bToA = tree.getEdge(b, a);
-    BOOST_CHECK(d->transformAddedEvent[1].edge == bToA);
+    BOOST_CHECK(d->transformAddedEvents[1].edge == bToA);
     //annoying amount of checks because there is no operator== in eigen
-    BOOST_CHECK(compareTransform(d->transformAddedEvent[0].transform, tf));
+    BOOST_CHECK(compareTransform(d->transformAddedEvents[0].transform, tf));
     Transform invTf = tf;
     invTf.setTransform(tf.transform.inverse());
-    BOOST_CHECK(compareTransform(d->transformAddedEvent[1].transform, invTf));
+    BOOST_CHECK(compareTransform(d->transformAddedEvents[1].transform, invTf));
 }
 
 BOOST_AUTO_TEST_CASE(add_item_on_empty_graph_test)
@@ -568,13 +598,13 @@ BOOST_AUTO_TEST_CASE(add_items_test)
     graph.addItemToFrame(b, item2);
     graph.addItemToFrame(a, item3);
     
-    BOOST_CHECK(d->itemAddedEvent.size() == 3);
-    BOOST_CHECK(d->itemAddedEvent[0].frame == a);
-    BOOST_CHECK(d->itemAddedEvent[1].frame == b);
-    BOOST_CHECK(d->itemAddedEvent[2].frame == a);
-    BOOST_CHECK(d->itemAddedEvent[0].item == item1);
-    BOOST_CHECK(d->itemAddedEvent[1].item == item2);
-    BOOST_CHECK(d->itemAddedEvent[2].item == item3);
+    BOOST_CHECK(d->itemAddedEvents.size() == 3);
+    BOOST_CHECK(d->itemAddedEvents[0].frame == a);
+    BOOST_CHECK(d->itemAddedEvents[1].frame == b);
+    BOOST_CHECK(d->itemAddedEvents[2].frame == a);
+    BOOST_CHECK(d->itemAddedEvents[0].item == item1);
+    BOOST_CHECK(d->itemAddedEvents[1].item == item2);
+    BOOST_CHECK(d->itemAddedEvents[2].item == item3);
 
     BOOST_CHECK(graph.getItems(a).size() == 2);
     BOOST_CHECK(graph.getItems(a)[0] == item1);
@@ -602,22 +632,22 @@ BOOST_AUTO_TEST_CASE(remove_items_test)
     graph.addItemToFrame(a, item3);
 
     graph.removeItemFromFrame(a, item1);
-    BOOST_CHECK(d->itemRemovedEvent.size() == 1);
-    BOOST_CHECK(d->itemRemovedEvent[0].frame == a);
-    BOOST_CHECK(d->itemRemovedEvent[0].item == item1);
+    BOOST_CHECK(d->itemRemovedEvents.size() == 1);
+    BOOST_CHECK(d->itemRemovedEvents[0].frame == a);
+    BOOST_CHECK(d->itemRemovedEvents[0].item == item1);
     BOOST_CHECK(graph.getItems(a).size() == 1);
     BOOST_CHECK(graph.getItems(a)[0] == item3);
     
     graph.removeItemFromFrame(a, item3);
-    BOOST_CHECK(d->itemRemovedEvent.size() == 2);
-    BOOST_CHECK(d->itemRemovedEvent[1].frame == a);
-    BOOST_CHECK(d->itemRemovedEvent[1].item == item3);
+    BOOST_CHECK(d->itemRemovedEvents.size() == 2);
+    BOOST_CHECK(d->itemRemovedEvents[1].frame == a);
+    BOOST_CHECK(d->itemRemovedEvents[1].item == item3);
     BOOST_CHECK(graph.getItems(a).empty());
 
     graph.removeTransform(a, b);
-    BOOST_CHECK(d->itemRemovedEvent.size() == 3);
-    BOOST_CHECK(d->itemRemovedEvent[2].frame == b);
-    BOOST_CHECK(d->itemRemovedEvent[2].item == item2);
+    BOOST_CHECK(d->itemRemovedEvents.size() == 3);
+    BOOST_CHECK(d->itemRemovedEvents[2].frame == b);
+    BOOST_CHECK(d->itemRemovedEvents[2].item == item2);
 }
 
 BOOST_AUTO_TEST_CASE(remove_item_from_invalid_frame_test)

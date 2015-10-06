@@ -49,6 +49,15 @@ namespace envire { namespace core
         const std::string msg;
     };
     
+    class FrameAlreadyExistsException : public std::exception
+    {
+    public:
+        FrameAlreadyExistsException(const FrameId& name) :
+          msg("Frame " + name + " already exists") {}
+        virtual char const * what() const throw() { return msg.c_str(); }
+        const std::string msg;
+    };
+    
     class UnknownItemException : public std::exception
     {
     public:

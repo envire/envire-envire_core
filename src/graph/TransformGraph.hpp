@@ -46,12 +46,21 @@ namespace envire { namespace core
          ***************************************************/
     
         TransformGraph(envire::core::Environment const &environment = Environment());
+        
+        
+        /** Adds an unconnected frame to the graph.
+         * 
+         * @throw FrameAlreadyExistsException if the frame already exists
+         */
+        void addFrame(const FrameId& frame);
 
         /**Adds a transform from frame @p origin to frame @p target.
          * If the frames do not exist, they will be created.
          * If the transform already exists, it will **not** be updated.
          *
-         * Causes a TransformAdded event.
+         * Causes a TransformAddedEvent.
+         * Causes FrameAddedEvents if the frames did not exist before. Those events
+         * will occur **before** the TransformAddedEvent.
          *
          * The inverse transform will be added automatically.
          *
@@ -119,9 +128,6 @@ namespace envire { namespace core
         /**Builds a tree containing all vertices that are accessible starting
          * from @p root.  */
         VertexMap getTree(const vertex_descriptor root) const;
-        
-        
-        
 
         vertices_size_type num_vertices() const;
         edges_size_type num_edges() const;

@@ -26,5 +26,6 @@
 #include "events/TransformRemovedEvent.hpp"
 #include "events/ItemAddedEvent.hpp"
 #include "events/ItemRemovedEvent.hpp"
+#include "events/FrameAddedEvent.hpp"
 
 #endif // ENVIRE_CORE_H
