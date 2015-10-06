@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(simple_remove_transform_test)
 
     tree.removeTransform(b, a);
     BOOST_CHECK(tree.num_edges() == 0);
-    BOOST_CHECK(tree.num_vertices() == 0);
+    BOOST_CHECK(tree.num_vertices() == 2); //vertices are still there, just not connected anymore
 }
 
 BOOST_AUTO_TEST_CASE(remove_existing_but_unconnected_test)
@@ -113,10 +113,9 @@ BOOST_AUTO_TEST_CASE(complex_remove_transform_test)
 
     tree.removeTransform(b, a);
     BOOST_CHECK(tree.num_edges() == 2);
-    BOOST_CHECK(tree.num_vertices() == 2);
+    BOOST_CHECK(tree.num_vertices() == 3);
     BOOST_CHECK_NO_THROW(tree.getFrame(a));
     BOOST_CHECK_NO_THROW(tree.getFrame(c));
-    BOOST_CHECK_THROW(tree.getFrame(b), UnknownFrameException);
 }
 
 BOOST_AUTO_TEST_CASE(simple_modify_transform_test)
@@ -220,6 +219,19 @@ BOOST_AUTO_TEST_CASE(disconnect_frame_test)
     FrameId d = "frame_d";
     BOOST_CHECK_THROW(tree.disconnectFrame(d), UnknownFrameException);
     
+}
+
+BOOST_AUTO_TEST_CASE(remove_frame_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    TransformGraph graph;
+    Transform tf;
+    graph.addTransform(a, b, tf);
+    graph.addTransform(a, c, tf);
+    
+    BOOST_CHECK_THROW(graph.removeFrame(a), FrameStillConnectedException);
 }
 
 BOOST_AUTO_TEST_CASE(get_edge_invalid_test)
@@ -663,11 +675,6 @@ BOOST_AUTO_TEST_CASE(remove_items_test)
     BOOST_CHECK(d->itemRemovedEvents[1].frame == a);
     BOOST_CHECK(d->itemRemovedEvents[1].item == item3);
     BOOST_CHECK(graph.getItems(a).empty());
-
-    graph.removeTransform(a, b);
-    BOOST_CHECK(d->itemRemovedEvents.size() == 3);
-    BOOST_CHECK(d->itemRemovedEvents[2].frame == b);
-    BOOST_CHECK(d->itemRemovedEvents[2].item == item2);
 }
 
 BOOST_AUTO_TEST_CASE(remove_item_from_invalid_frame_test)

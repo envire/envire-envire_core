@@ -83,11 +83,8 @@ namespace envire { namespace core
 
         /**Removes the transform between @p origin and @p target as well as
          * the transform between @p target and @p origin.
-         * If frames are left unconnected after the transform has been removed, they
-         * will be removed as well.
          *
          * Causes TransformRemoved event.
-         * Causes ItemRemovedEvent for each item of the frame if a frame is removed.
          *
          * @throw UnknownTransformException if the transformation doesn't exist */
         void removeTransform(const FrameId& origin, const FrameId& target);
@@ -125,6 +122,15 @@ namespace envire { namespace core
          * @throw UnknownFrameException if the frame does not exist. */
         void disconnectFrame(const FrameId& frame);
         
+        /**Removes @p frame from the Graph.
+         * A frame can only be removed if there are no transforms connected to
+         * or coming from that frame.
+         * @throw UnknownFrameException of the frame does not exist.
+         * @ŧhrow FrameStillConnectedException if there are still transforms
+         *                                     coming from or leading to this
+         *                                     frame. */
+        void removeFrame(const FrameId& frame);
+        
         /** @return a list of items that are attached to the specified @p frame.
          *  @throw UnknownFrameException if the @p frame id is invalid.*/
         const std::vector<ItemBase::Ptr>& getItems(const FrameId& frame) const;
@@ -157,12 +163,6 @@ namespace envire { namespace core
                                  const envire::core::Transform &tf,
                                  const FrameId& originName,
                                  const FrameId& targetName);
-
-        /**Removes a vertex from the tree.
-         * A vertex can only be removed if there are no edges to
-         * and from the vertex. Removing a vertex that still has edges
-         * attached will result in undefined behavior. */
-        void remove_frame(FrameId fId);
 
         /**Sets the transform value and causes transformModified event. */
         void updateTransform(edge_descriptor ed, const Transform& tf);

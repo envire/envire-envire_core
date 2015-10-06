@@ -68,6 +68,16 @@ namespace envire { namespace core
         const std::string msg;
     };
     
+    class FrameStillConnectedException : public std::exception
+    {
+    public:
+        FrameStillConnectedException(const FrameId& name) :
+          msg("Frame " + name + " is stil connected to the graph. All transforms"
+              " coming from or leading to this frame need to be removed"
+              " before removing the frame") {}
+        virtual char const * what() const throw() { return msg.c_str(); }
+        const std::string msg;
+    };   
     
 
 
