@@ -324,7 +324,7 @@ const std::vector<ItemBase::Ptr>& TransformGraph::getItems(const FrameId& frame)
 
 const std::vector<ItemBase::Ptr>& TransformGraph::getItems(const vertex_descriptor desc) const
 {
-    return graph()[desc].frame.items;
+    return graph()[desc].frame.items;void disconnectFrame(const FrameId& frame);
 }
 
 const envire::core::FrameId& TransformGraph::getFrameId(const vertex_descriptor vertex) const
@@ -335,10 +335,23 @@ const envire::core::FrameId& TransformGraph::getFrameId(const vertex_descriptor 
 
 VertexMap TransformGraph::getTree(const vertex_descriptor root) const
 {
-  VertexMap map;
-  TreeBuilderVisitor visitor(map);
-  boost::breadth_first_search(*this, root, boost::visitor(visitor));
-  return map;
+    VertexMap map;
+    TreeBuilderVisitor visitor(map);
+    boost::breadth_first_search(*this, root, boost::visitor(visitor));
+    return map;
+}
+
+void TransformGraph::disconnectFrame(const FrameId& frame)
+{
+    vertex_descriptor desc = vertex(frame);
+    if(desc != null_vertex())
+    {
+        boost::clear_vertex(desc, *this);
+    }
+    else
+    {
+        throw UnknownFrameException(frame);
+    }
 }
 
 

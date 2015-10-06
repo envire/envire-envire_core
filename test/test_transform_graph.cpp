@@ -202,6 +202,26 @@ BOOST_AUTO_TEST_CASE(get_edge_on_empty_tree_test)
     BOOST_CHECK_THROW(tree.getEdge(a, b), UnknownTransformException);
 }
 
+BOOST_AUTO_TEST_CASE(disconnect_frame_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    TransformGraph tree;
+    Transform tf;
+    tree.addTransform(a, b, tf);
+    tree.addTransform(a, c, tf);
+    tree.disconnectFrame(a);
+    BOOST_CHECK_THROW(tree.getTransform(a, b), UnknownTransformException);
+    BOOST_CHECK_THROW(tree.getTransform(b, a), UnknownTransformException);
+    BOOST_CHECK_THROW(tree.getTransform(a, c), UnknownTransformException);
+    BOOST_CHECK_THROW(tree.getTransform(c, a), UnknownTransformException); 
+    
+    FrameId d = "frame_d";
+    BOOST_CHECK_THROW(tree.disconnectFrame(d), UnknownFrameException);
+    
+}
+
 BOOST_AUTO_TEST_CASE(get_edge_invalid_test)
 {
     FrameId a = "frame_a";

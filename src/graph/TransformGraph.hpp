@@ -120,6 +120,11 @@ namespace envire { namespace core
          *                             item list.  */ 
         void removeItemFromFrame(const FrameId& frame, ItemBase::Ptr item);
         
+        /**Disconnects @p frame from the Graph.
+         * I.e. all transformations from and to @p frame will be removed.
+         * @throw UnknownFrameException if the frame does not exist. */
+        void disconnectFrame(const FrameId& frame);
+        
         /** @return a list of items that are attached to the specified @p frame.
          *  @throw UnknownFrameException if the @p frame id is invalid.*/
         const std::vector<ItemBase::Ptr>& getItems(const FrameId& frame) const;
