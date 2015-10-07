@@ -148,28 +148,51 @@ const Transform TransformGraph::getTransform(const vertex_descriptor origin, con
 void TransformGraph::updateTransform(const FrameId& origin, const FrameId& target,
                                     const Transform& tf)
 {
+    const vertex_descriptor originVertex = vertex(origin);
+    if(originVertex == null_vertex())
+    {
+        throw UnknownFrameException(origin);
+    }
+    
+    const vertex_descriptor targetVertex = vertex(target);
+    if(targetVertex == null_vertex())
+    {
+        throw UnknownFrameException(target);
+    }    
+    return updateTransform(originVertex, targetVertex, tf);
+}
+
+void TransformGraph::updateTransform(const vertex_descriptor origin,
+                                     const vertex_descriptor target,
+                                     const Transform& tf)
+{
+    const FrameId& originId = getFrameId(origin); //throws UnknownFrameException
+    const FrameId& targetId = getFrameId(target); //throws UnknownFrameException
+    
     if(num_edges() <= 0)
     {   //boost::edge_by_label segfaults on empty graphs...
-        throw UnknownTransformException(origin, target);
+        throw UnknownTransformException(originId, targetId);
     }
-
-    EdgePair originToTarget = boost::edge_by_label(origin, target, *this);
+    
+    EdgePair originToTarget = boost::edge(origin, target, *this);
+    
     if(!originToTarget.second)
     {
-      throw UnknownTransformException(origin, target);
+      throw UnknownTransformException(originId, targetId);
     } 
     
     updateTransform(originToTarget.first, tf);
     
     Transform invTf = tf;//copies the time
     invTf.setTransform(tf.transform.inverse());
-    EdgePair targetToOrigin = boost::edge_by_label(target, origin, *this);
+    EdgePair targetToOrigin = boost::edge(target, origin, *this);
     assert(targetToOrigin.second);//there should always be an inverse edge
     updateTransform(targetToOrigin.first, invTf);
     
-    notify(TransformModifiedEvent(origin, target, originToTarget.first,
-                                  targetToOrigin.first));
+    notify(TransformModifiedEvent(originId, targetId, originToTarget.first,
+                                  targetToOrigin.first));    
 }
+
 
 void TransformGraph::removeTransform(const FrameId& origin, const FrameId& target)
 {

@@ -77,9 +77,13 @@ namespace envire { namespace core
          * Causes a TransformUpdated event.
          *
          * @throw UnknownTransformException if no direct transformation between
-         *                                  @p origin and @p target exists. */
+         *                                  @p origin and @p target exists.
+         * @throw UnknownFrameException if @p origin or @p target do not exist.
+         */
         void updateTransform(const FrameId& origin, const FrameId& target,
                              const Transform& tf);
+        void updateTransform(const vertex_descriptor origin,
+                             const vertex_descriptor target, const Transform& tf);
 
         /**Removes the transform between @p origin and @p target as well as
          * the transform between @p target and @p origin.

@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(update_transform_on_empty_tree_test)
     FrameId b = "frame_b";
     TransformGraph tree;
     Transform tf;
-    BOOST_CHECK_THROW(tree.updateTransform(a, b, tf), UnknownTransformException);
+    BOOST_CHECK_THROW(tree.updateTransform(a, b, tf), UnknownFrameException);
 }
 
 BOOST_AUTO_TEST_CASE(update_transform_invalid_test)
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(update_transform_invalid_test)
     TransformGraph tree;
     Transform tf;
     tree.addTransform(a, b, tf);
-    BOOST_CHECK_THROW(tree.updateTransform(a, c, tf), UnknownTransformException);
+    BOOST_CHECK_THROW(tree.updateTransform(a, c, tf), UnknownFrameException);
 }
 
 BOOST_AUTO_TEST_CASE(remove_transform_on_empty_tree_test)
