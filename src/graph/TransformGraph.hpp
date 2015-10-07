@@ -91,7 +91,9 @@ namespace envire { namespace core
 
         /** @return the transform between a and b. Calculating it if necessary.
          * @throw UnknownTransformException if the transformation doesn't exist*/
-        const Transform getTransform(const FrameId& a, const FrameId& b) const;
+        const Transform getTransform(const FrameId& origin, const FrameId& target) const;
+        const Transform getTransform(const vertex_descriptor origin, const vertex_descriptor target) const;
+        
 
         /** @return the edge between frame @p origin and @p target
          * @throw UnknownTransformException if there is no such edge  */
@@ -139,11 +141,17 @@ namespace envire { namespace core
         /**Builds a tree containing all vertices that are accessible starting
          * from @p root.  */
         VertexMap getTree(const vertex_descriptor root) const;
+        /**Builds a tree containing all vertices that are accessible starting
+         * from @p root.
+         * @throw UnknownFrameException if the frame does not exist */
+        VertexMap getTree(const FrameId rootId) const;
 
         vertices_size_type num_vertices() const;
         edges_size_type num_edges() const;
 
     protected:
+        using EdgePair = std::pair<edge_descriptor, bool>;
+      
          /**@brief Add a vertex
          * @note the frame's name must be unique. */
         vertex_descriptor add_vertex(const FrameId& frameId);
@@ -163,6 +171,16 @@ namespace envire { namespace core
                                  const envire::core::Transform &tf,
                                  const FrameId& originName,
                                  const FrameId& targetName);
+        
+        /**returns the transform between origin and target.
+         * @throw UnknownTransformException if the transformation doesn't exist.
+         * @param origin Name of the origin frame (used in exception msg only)
+         * @param target Name of the target frame (used in exception msg only)
+         * @param originVertex vertex_descriptor of the origin frame
+         * @param targetVertex vertex_descriptor of the target frame */
+        const Transform getTransform(const FrameId& origin, const FrameId& target,
+                                    const vertex_descriptor originVertex,
+                                    const vertex_descriptor targetVertex) const;
 
         /**Sets the transform value and causes transformModified event. */
         void updateTransform(edge_descriptor ed, const Transform& tf);

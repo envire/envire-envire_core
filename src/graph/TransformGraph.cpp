@@ -17,7 +17,7 @@
 
 using namespace envire::core;
 using namespace std;
-using edgePair = std::pair<edge_descriptor, bool>;
+
 
 
 TransformGraph::TransformGraph(envire::core::Environment const &environment) :
@@ -61,7 +61,7 @@ void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
 
     //check if there is an edge between the vertices.
     //If a->b exists, b->a also exist. Therefore we need to check only one direction
-    edgePair e = boost::edge(originDesc, targetDesc, *this);
+    EdgePair e = boost::edge(originDesc, targetDesc, *this);
     if(e.second)// edge already exists
     {
         throw TransformAlreadyExistsException(origin, target);
@@ -74,36 +74,30 @@ void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
     edge_descriptor targetToOrigin = add_edge(targetDesc, originDesc, invTf, target, origin);
 }
 
-const Transform TransformGraph::getTransform(const FrameId& a, const FrameId& b) const
-{
-    //calling boost::edge_by_label on an empty graph results in a segfault.
-    //therefore catch it before that happens.
-    if(num_edges() == 0)
-    {
-        throw UnknownTransformException(a, b);
-    }
 
+const Transform TransformGraph::getTransform(const FrameId& origin, const FrameId& target,
+                                             const vertex_descriptor originVertex,
+                                             const vertex_descriptor targetVertex) const
+{
     //direct edges
-    edgePair pair;
-    pair = boost::edge_by_label(a, b, *this);
+    EdgePair pair;
+    pair = boost::edge(originVertex, targetVertex, *this);
     if(!pair.second)
     {
         /** It is not a direct edge transformation **/
         Transform tf;
-        vertex_descriptor origin_frame = vertex(a);
-        vertex_descriptor target_frame = vertex(b);
-        envire::core::TransformGraphBFSVisitor <vertex_descriptor>visit(target_frame, this->graph());
+        envire::core::TransformGraphBFSVisitor <vertex_descriptor>visit(targetVertex, this->graph());
 
         // check whether the vertices exist in the graph
         // search algorithm result on segfault in case some of the vertices do not exist
-        if (origin_frame == null_vertex() || target_frame == null_vertex())
+        if (originVertex == null_vertex() || targetVertex == null_vertex())
         {
-            throw UnknownTransformException(a, b);
+            throw UnknownTransformException(origin, target);
         }
 
         try
         {
-            boost::breadth_first_search(this->graph(), origin_frame, visitor(visit));
+            boost::breadth_first_search(this->graph(), originVertex, visitor(visit));
 
         }catch(const FoundFrameException &e)
         {
@@ -126,13 +120,31 @@ const Transform TransformGraph::getTransform(const FrameId& a, const FrameId& b)
         }
         else
         {
-            throw UnknownTransformException(a, b);
+            throw UnknownTransformException(origin, target);
         }
     }
 
     return (*this)[pair.first].transform;
 }
 
+const Transform TransformGraph::getTransform(const FrameId& origin, const FrameId& target) const
+{
+    if(num_edges() == 0)
+    {
+        throw UnknownTransformException(origin, target);
+    }
+    return getTransform(origin, target, vertex(origin), vertex(target));
+}
+
+const Transform TransformGraph::getTransform(const vertex_descriptor origin, const vertex_descriptor target) const
+{
+    if(num_edges() == 0)
+    {
+        throw UnknownTransformException(getFrameId(origin),  getFrameId(target));
+    }
+    return getTransform(getFrameId(origin), getFrameId(target), origin, target);    
+}
+ 
 void TransformGraph::updateTransform(const FrameId& origin, const FrameId& target,
                                     const Transform& tf)
 {
@@ -141,7 +153,7 @@ void TransformGraph::updateTransform(const FrameId& origin, const FrameId& targe
         throw UnknownTransformException(origin, target);
     }
 
-    edgePair originToTarget = boost::edge_by_label(origin, target, *this);
+    EdgePair originToTarget = boost::edge_by_label(origin, target, *this);
     if(!originToTarget.second)
     {
       throw UnknownTransformException(origin, target);
@@ -151,7 +163,7 @@ void TransformGraph::updateTransform(const FrameId& origin, const FrameId& targe
     
     Transform invTf = tf;//copies the time
     invTf.setTransform(tf.transform.inverse());
-    edgePair targetToOrigin = boost::edge_by_label(target, origin, *this);
+    EdgePair targetToOrigin = boost::edge_by_label(target, origin, *this);
     assert(targetToOrigin.second);//there should always be an inverse edge
     updateTransform(targetToOrigin.first, invTf);
     
@@ -171,8 +183,8 @@ void TransformGraph::removeTransform(const FrameId& origin, const FrameId& targe
         throw UnknownTransformException(origin, target);
     }
 
-    edgePair originToTarget = boost::edge(originDesc, targetDesc, graph());
-    edgePair targetToOrigin = boost::edge(targetDesc, originDesc, graph());
+    EdgePair originToTarget = boost::edge(originDesc, targetDesc, graph());
+    EdgePair targetToOrigin = boost::edge(targetDesc, originDesc, graph());
     if(!originToTarget.second || !targetToOrigin.second)
     {
         throw UnknownTransformException(origin, target);
@@ -272,7 +284,7 @@ edge_descriptor TransformGraph::getEdge(const FrameId& origin, const FrameId& ta
         throw UnknownTransformException(origin, target);
     }
 
-    edgePair e = boost::edge(originDesc, targetDesc, graph());
+    EdgePair e = boost::edge(originDesc, targetDesc, graph());
     if(!e.second)
     {
         throw UnknownTransformException(origin, target);
@@ -340,6 +352,16 @@ VertexMap TransformGraph::getTree(const vertex_descriptor root) const
     TreeBuilderVisitor visitor(map);
     boost::breadth_first_search(*this, root, boost::visitor(visitor));
     return map;
+}
+
+VertexMap TransformGraph::getTree(const FrameId rootId) const
+{
+    const vertex_descriptor root = vertex(rootId);
+    if(root == null_vertex())
+    {
+        throw UnknownFrameException(rootId);
+    }
+    return getTree(root);
 }
 
 void TransformGraph::disconnectFrame(const FrameId& frame)
