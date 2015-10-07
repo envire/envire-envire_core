@@ -25,6 +25,7 @@ rock_library(envire_core
             events/ItemAddedEvent.hpp
             events/ItemRemovedEvent.hpp
             events/FrameAddedEvent.hpp
+            events/FrameRemovedEvent.hpp
 
     SOURCES items/ItemBase.cpp
             items/BoundingVolume.cpp
