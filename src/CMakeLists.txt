@@ -34,7 +34,6 @@ rock_library(envire_core
             serialization/ItemHeader.hpp
             serialization/Eigen.hpp
     SOURCES items/ItemBase.cpp
-            items/BoundingVolume.cpp
             items/AlignedBoundingBox.cpp
             items/DummyItem.cpp
             plugin/ClassLoader.cpp

@@ -3,7 +3,7 @@
 
 #include <envire_core/items/Item.hpp>
 #include <envire_core/items/BoundingVolume.hpp>
-#include <boost/intrusive_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include <Eigen/Geometry>
 
 namespace envire { namespace core
@@ -17,7 +17,7 @@ namespace envire { namespace core
     class SpatialItem : public Item<_ItemData>
     {
     protected:
-        boost::intrusive_ptr<BoundingVolume> boundary;
+        boost::shared_ptr<BoundingVolume> boundary;
 
     public:
 
@@ -26,12 +26,10 @@ namespace envire { namespace core
 
         };
 
-        void setBoundary(const boost::intrusive_ptr<BoundingVolume>& boundary) {this->boundary = boundary;}
+        void setBoundary(const boost::shared_ptr<BoundingVolume>& boundary) {this->boundary = boundary;}
 
-        boost::intrusive_ptr<BoundingVolume> getBoundary() {return boundary;}
-        const boost::intrusive_ptr<BoundingVolume>& getBoundary() const {return boundary;}
-
-        
+        boost::shared_ptr<BoundingVolume> getBoundary() {return boundary;}
+        const boost::shared_ptr<BoundingVolume>& getBoundary() const {return boundary;}
 
         void extendBoundary(const Eigen::Vector3d& point)
         {
@@ -51,7 +49,7 @@ namespace envire { namespace core
         }
 
         template<typename _Data>
-        boost::intrusive_ptr<BoundingVolume> intersection(const SpatialItem<_Data>& spatial_item) const
+        boost::shared_ptr<BoundingVolume> intersection(const SpatialItem<_Data>& spatial_item) const
         {
             return boundary->intersection(spatial_item.getBoundary());
         }
