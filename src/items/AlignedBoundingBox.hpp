@@ -10,6 +10,9 @@ namespace envire { namespace core
 
     class AlignedBoundingBox : public BoundingVolume
     {
+    public:
+        typedef boost::shared_ptr<AlignedBoundingBox> Ptr;
+
     protected:
         Eigen::AlignedBox<double,3> box;
 
