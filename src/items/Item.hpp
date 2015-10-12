@@ -3,7 +3,8 @@
 
 #include "ItemBase.hpp"
 #include <class_loader/class_loader.h>
-#include <utility>                                                              
+#include <utility>
+#include <envire_core/serialization/SerializationRegistration.hpp>
 
 /**
  * ** Envire marcos **
@@ -16,29 +17,32 @@
  * Example usage in *.hpp:
  *      class VectorPlugin : public Item<Eigen::Vector3d>
  *      {
- *          ENVIRE_PLUGIN_HEADER(VectorPlugin)
+ *          ENVIRE_PLUGIN_HEADER(VectorPlugin, Eigen::Vector3d)
  *
  *          [...]
  *      }
  */
-#define ENVIRE_PLUGIN_HEADER( _classname ) \
+#define ENVIRE_PLUGIN_HEADER( _classname, _datatype ) \
     protected: \
     static const std::string class_name; \
     public:\
     const std::string& getClassName() const { return class_name; } \
-    typedef boost::intrusive_ptr<_classname> Ptr; \
-    private:
+    typedef boost::shared_ptr<_classname> Ptr; \
+    private: \
+    ENVIRE_SERIALIZATION_HEADER(_datatype)
 
 /**
  * The ENVIRE_REGISTER_PLUGIN macro exports the given class as plugin.
  * The class must be inherited from envire::core::ItemBase.
  *
  * Example usage in *.cpp:
- *      ENVIRE_REGISTER_PLUGIN(ClassName)
+ *      ENVIRE_REGISTER_PLUGIN(ClassName, DataType)
  */
-#define ENVIRE_REGISTER_PLUGIN( _classname ) \
+#define ENVIRE_REGISTER_PLUGIN( _classname, _datatype ) \
 const std::string _classname::class_name = #_classname; \
-CLASS_LOADER_REGISTER_CLASS(_classname, envire::core::ItemBase);
+CLASS_LOADER_REGISTER_CLASS(_classname, envire::core::ItemBase); \
+ENVIRE_REGISTER_SERIALIZATION(_classname, _datatype)
+
 
 /**
  * The ENVIRE_PLUGIN macro defines the complete plugin class.
@@ -51,9 +55,9 @@ CLASS_LOADER_REGISTER_CLASS(_classname, envire::core::ItemBase);
 #define ENVIRE_PLUGIN( _classname, _datatype ) \
 class _classname : public envire::core::Item<_datatype> \
 { \
-    ENVIRE_PLUGIN_HEADER(_classname) \
+    ENVIRE_PLUGIN_HEADER( _classname, _datatype ) \
 }; \
-ENVIRE_REGISTER_PLUGIN( _classname )
+ENVIRE_REGISTER_PLUGIN( _classname, _datatype )
 
 
 namespace envire { namespace core
@@ -66,6 +70,9 @@ namespace envire { namespace core
     template<class _ItemData>
     class Item : public ItemBase
     {
+    public:
+        typedef boost::shared_ptr< Item<_ItemData> > Ptr;
+
     protected:
 
         _ItemData user_data;
@@ -96,6 +103,16 @@ namespace envire { namespace core
         *
         */
         _ItemData& getData() { return this->user_data; }
+
+    private:
+        friend class boost::serialization::access;
+
+        template <typename Archive>
+        void serialize(Archive &ar, const unsigned int version)
+        {
+            ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(envire::core::ItemBase);
+            ar & BOOST_SERIALIZATION_NVP(user_data);
+        }
 
     };
 
