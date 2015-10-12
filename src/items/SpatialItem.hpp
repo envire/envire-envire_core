@@ -16,6 +16,10 @@ namespace envire { namespace core
     template<class _ItemData>
     class SpatialItem : public Item<_ItemData>
     {
+
+    public:
+        typedef boost::shared_ptr< SpatialItem<_ItemData> > Ptr;
+
     protected:
         boost::shared_ptr<BoundingVolume> boundary;
 
