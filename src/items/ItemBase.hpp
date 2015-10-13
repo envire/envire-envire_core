@@ -22,7 +22,9 @@ namespace envire { namespace core
     class ItemBase
     {
     public:
-        template<class T> using PtrType = boost::shared_ptr<T>;
+        template<class T> 
+        using PtrType = boost::shared_ptr<T>;
+        
         typedef PtrType<ItemBase> Ptr;
 
     protected:
@@ -65,7 +67,7 @@ namespace envire { namespace core
         void setID(const boost::uuids::uuid& id) { this->uuid = id; }
 
         /**@brief getID
-        *
+        *TARGET
         * Returns the unique identifier of the item
         *
         */
@@ -107,19 +109,55 @@ namespace envire { namespace core
         }
     };
 
-    BOOST_SERIALIZATION_ASSUME_ABSTRACT(envire::core::ItemBase)
+    BOOST_SERIALIZATION_ASSUME_ABSTRACT(envire::core::ItemBase);
     
-      
-    /**A functor that can be used to down cast from ItemBase*/
-    template<class TARGET>
-    struct ItemBaseCaster
+
+    struct ItemBaseCaster 
     {
+        template <class TARGET>
         ItemBase::PtrType<TARGET> operator()(ItemBase::Ptr p)
         {
-            static_assert(std::is_base_of<ItemBase, TARGET>::value, "TARGET needs to be a base class of ItemBase");
-            return ItemBase::PtrType<TARGET>(p);
+            return boost::dynamic_pointer_cast<TARGET>(p);
         }
     };
+    
+    
+//     struct ItemBaseCaster 
+//     {
+//         template<class TARGET>
+//         ItemBase::PtrType<TARGET> operator()(ItemBase::Ptr p)
+//         {
+//             return boost::dynamic_pointer_cast<TARGET>(p);
+//         }
+//     };
+      
+//     struct ItemBaseCaster {
+//     template<class> struct result;
+// 
+//     template<class F, class T>
+//     struct result<F(T)> {
+//         typedef ItemBase::PtrType<T> type;
+//     };
+// 
+//     template<class TARGET>
+//     ItemBase::PtrType<TARGET> operator()(ItemBase::Ptr p)
+//     {
+//       // static_assert(std::is_base_of<ItemBase, TARGET>::value, "TARGET needs to be a base class of ItemBase");
+//         
+//     }
+//};
+    
+    /**A functor that can be used to down cast from ItemBase*/
+//     template<class TARGET>
+//     struct ItemBaseCaster
+//     {
+//         typedef ItemBase::PtrType<TARGET> result_type;
+//         result_type operator()(ItemBase::Ptr p)
+//         {
+//            
+//             
+//         }
+//     };
 
 }}
 

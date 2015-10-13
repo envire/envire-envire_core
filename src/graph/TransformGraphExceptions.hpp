@@ -67,7 +67,7 @@ namespace envire { namespace core
         virtual char const * what() const throw() { return msg.c_str(); }
         const std::string msg;
     };
-    
+
     class FrameStillConnectedException : public std::exception
     {
     public:
@@ -78,6 +78,15 @@ namespace envire { namespace core
         virtual char const * what() const throw() { return msg.c_str(); }
         const std::string msg;
     };   
+        
+    class NoItemsOfTypeInFrameException : public std::exception
+    {
+    public:
+        NoItemsOfTypeInFrameException(const FrameId& name, const std::string& type_name) :
+          msg("There are no items of type '" + type_name + "' in frame '" + name + "'") {}
+        virtual char const * what() const throw() { return msg.c_str(); }
+        const std::string msg;
+    };
     
 
 
