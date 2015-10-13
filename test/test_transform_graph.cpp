@@ -77,7 +77,15 @@ BOOST_AUTO_TEST_CASE(simple_add_item_test)
     g.addItemToFrame(a, item);
 
     using Iterator = TransformGraph::ItemIterator<StringItem::Ptr>;
-    std::pair<Iterator, Iterator> res = g.getItems<StringItem::Ptr>(a);
+    Iterator begin, end;
+    boost::tie(begin, end) = g.getItems<StringItem::Ptr>(a);
+    
+
+    for(; begin != end; ++begin)
+    {
+        std::cout << (*begin)->getData() << std::endl;
+    }
+    
     
    // boost::transform_iterator<ItemBaseCaster, std::vector<ItemBase::Ptr>::iterator, StringItem::Ptr> it;
     

@@ -111,12 +111,12 @@ namespace envire { namespace core
 
     BOOST_SERIALIZATION_ASSUME_ABSTRACT(envire::core::ItemBase);
     
-
+    template <class TARGET>
     struct ItemBaseCaster 
     {
-        template <class TARGET>
-        ItemBase::PtrType<TARGET> operator()(ItemBase::Ptr p)
+        ItemBase::PtrType<TARGET> operator()(const ItemBase::Ptr p) const
         {
+            //FIXME static_assert that TARGET is ItemBase::PtrType<X>
             return boost::dynamic_pointer_cast<TARGET>(p);
         }
     };

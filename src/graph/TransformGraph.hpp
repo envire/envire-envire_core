@@ -159,7 +159,7 @@ namespace envire { namespace core
         /**Transform iterator used to down cast from ItemBase to @p T while
          * iterating */
         template<class T>
-        using ItemIterator = boost::transform_iterator<ItemBaseCaster, std::vector<ItemBase::Ptr>::const_iterator, T>;
+        using ItemIterator = boost::transform_iterator<ItemBaseCaster<typename T::element_type>, std::vector<ItemBase::Ptr>::const_iterator, T>;
         
         /**Returns all items of type @p T that are stored in @p frame.
          * @throw UnknownFrameException if the @p frame id is invalid.
@@ -240,12 +240,9 @@ namespace envire { namespace core
         auto begin = items.at(std::type_index(typeid(T))).begin();
         auto end = items.at(std::type_index(typeid(T))).end();
         
-       // auto begin = (*this)[frame].frame.items[std::type_index(typeid(T))].begin();
-       // auto end = (*this)[frame].frame.items[std::type_index(typeid(T))].end();
-        ItemIterator<T> beginIt(begin, ItemBaseCaster()); 
-        ItemIterator<T> endIt(end, ItemBaseCaster()); 
-//         auto beginIt = boost::make_transform_iterator(begin, ItemBaseCaster());
-     //   auto endIt = boost::make_transform_iterator(end, ItemBaseCaster());
+        //T::element_type only works if T is a shared_ptr
+        ItemIterator<T> beginIt(begin, ItemBaseCaster<typename T::element_type>()); 
+        ItemIterator<T> endIt(end, ItemBaseCaster<typename T::element_type>()); 
         return std::make_pair(beginIt, endIt);
     }
     
