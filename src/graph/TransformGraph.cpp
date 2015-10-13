@@ -250,37 +250,37 @@ vertex_descriptor TransformGraph::add_vertex(const FrameId& frameId)
 
 void TransformGraph::removeFrame(const FrameId& frame)
 {
-    vertex_descriptor desc = vertex(frame);
-    if(desc == null_vertex())
-    {
-        throw UnknownFrameException(frame);
-    }
-    if(boost::degree(desc, *this) > 0)
-    {
-        throw FrameStillConnectedException(frame);
-    }
-    
-    //explicitly remove all items from the frame to cause ItemRemovedEvents
-    vector<ItemBase::Ptr>& items = (*this)[frame].frame.items;
-    for(ItemBase::Ptr item : items)
-    {
-        //note: calling removeItemFromFrame() in here is very inefficient.
-        //      If this becomes a performance problem one could just generate
-        //      the events directly in the loop.
-        //      It was not done this way because it would lower the cohesion
-        removeItemFromFrame(frame, item);
-    }
-    
-    boost::remove_vertex(frame, *this);
-    //HACK this is a workaround for bug https://svn.boost.org/trac/boost/ticket/9493
-    //It should be removed as soon as the bug is fixed in boost.
-    //If the bug is fixed also remove the #define private protected in TransformTreeTypes
-    map_type::iterator it = _map.find(frame);
-    if(it != _map.end())
-    {
-        _map.erase(it);
-    }
-    notify(FrameRemovedEvent(frame));
+//     vertex_descriptor desc = vertex(frame);
+//     if(desc == null_vertex())
+//     {
+//         throw UnknownFrameException(frame);
+//     }
+//     if(boost::degree(desc, *this) > 0)
+//     {
+//         throw FrameStillConnectedException(frame);
+//     }
+//     
+//     //explicitly remove all items from the frame to cause ItemRemovedEvents
+//     vector<ItemBase::Ptr>& items = (*this)[frame].frame.items;
+//     for(ItemBase::Ptr item : items)
+//     {
+//         //note: calling removeItemFromFrame() in here is very inefficient.
+//         //      If this becomes a performance problem one could just generate
+//         //      the events directly in the loop.
+//         //      It was not done this way because it would lower the cohesion
+//         removeItemFromFrame(frame, item);
+//     }
+//     
+//     boost::remove_vertex(frame, *this);
+//     //HACK this is a workaround for bug https://svn.boost.org/trac/boost/ticket/9493
+//     //It should be removed as soon as the bug is fixed in boost.
+//     //If the bug is fixed also remove the #define private protected in TransformTreeTypes
+//     map_type::iterator it = _map.find(frame);
+//     if(it != _map.end())
+//     {
+//         _map.erase(it);
+//     }
+//     notify(FrameRemovedEvent(frame));
 }
 
 const envire::core::Frame& TransformGraph::getFrame(const FrameId& frame) const
@@ -320,48 +320,24 @@ void TransformGraph::updateTransform(edge_descriptor ed, const Transform& tf)
     boost::put(&TransformProperty::transform, *this, ed, tf);
 }
 
-void TransformGraph::addItemToFrame(const FrameId& frame, ItemBase::Ptr item)
-{
-    if(vertex(frame) == null_vertex())
-    {
-        throw UnknownFrameException(frame);
-    }
-    
-    (*this)[frame].frame.items.push_back(item);
-    notify(ItemAddedEvent(frame, item));
-}
 
 void TransformGraph::removeItemFromFrame(const FrameId& frame, ItemBase::Ptr item)
 {
-    if(vertex(frame) == null_vertex())
-    {
-        throw UnknownFrameException(frame);
-    }
-    vector<ItemBase::Ptr>& items = (*this)[frame].frame.items;
-    auto it = std::find(items.begin(), items.end(), item);
-    if(it == items.end())
-    {
-        throw UnknownItemException(frame, item);
-    }
-    items.erase(it);
-    notify(ItemRemovedEvent(frame, item));
+//     if(vertex(frame) == null_vertex())
+//     {
+//         throw UnknownFrameException(frame);
+//     }
+//     vector<ItemBase::Ptr>& items = (*this)[frame].frame.items;
+//     auto it = std::find(items.begin(), items.end(), item);
+//     if(it == items.end())
+//     {
+//         throw UnknownItemException(frame, item);
+//     }
+//     items.erase(it);
+//     notify(ItemRemovedEvent(frame, item));
 }
 
-const std::vector<ItemBase::Ptr>& TransformGraph::getItems(const FrameId& frame) const
-{
-    //FIXME if item events should be added later this method needs to change because it provides a way
-    //to modify items without the event system noticing
-    if(vertex(frame) == null_vertex())
-    {
-        throw UnknownFrameException(frame);
-    }
-    return (*this)[frame].frame.items;
-}
 
-const std::vector<ItemBase::Ptr>& TransformGraph::getItems(const vertex_descriptor desc) const
-{
-    return graph()[desc].frame.items;void disconnectFrame(const FrameId& frame);
-}
 
 const envire::core::FrameId& TransformGraph::getFrameId(const vertex_descriptor vertex) const
 {

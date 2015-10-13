@@ -5,7 +5,9 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <vector>
 #include <string>
-
+#include <unordered_map>
+#include <typeindex>
+    
 #include "ItemBase.hpp"
 #include "RandomGenerator.hpp"
 
@@ -19,7 +21,10 @@ namespace envire { namespace core
     public:
         FrameId name; /** Frame name */
         boost::uuids::uuid uuid; /** Unique Identifier */
-        std::vector< ItemBase::Ptr > items; /** List of items in the node */
+
+        using ItemList = std::vector<ItemBase::Ptr>;
+        //contains all items that have been added to the frame sorted by type
+        std::unordered_map<std::type_index, ItemList> items;
 
     public:
         Frame(const FrameId& _name): 

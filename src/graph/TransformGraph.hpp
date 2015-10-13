@@ -15,12 +15,15 @@
 #include <boost/uuid/uuid.hpp>
 #include <cassert>
 #include <string>
+#include <typeindex>
+#include <typeinfo>
 
 
 #include "TransformGraphTypes.hpp"
 #include "TransformGraphExceptions.hpp"
 #include "TransformGraphVisitors.hpp"
 #include <envire_core/events/GraphEventPublisher.hpp>
+#include <boost/iterator/transform_iterator.hpp>
 
 
 namespace envire { namespace core
@@ -110,12 +113,7 @@ namespace envire { namespace core
         
         /** @return the frame id of the specified @p vertex */
         const envire::core::FrameId& getFrameId(const vertex_descriptor vertex) const;
-        
-        /** Adds @p item to the item list of the specified frame 
-         *  Causes ItemAddedEvent.
-         *  @throw UnknownFrameException if the frame id is invalid **/
-        void addItemToFrame(const FrameId& frame, ItemBase::Ptr item);
-        
+                       
         /** Removes @p item from @p frame.
          *  Causes ItemRemovedEvent.
          * @throw UnknownFrameException if the frame does not exist.
@@ -137,11 +135,6 @@ namespace envire { namespace core
          *                                     frame. */
         void removeFrame(const FrameId& frame);
         
-        /** @return a list of items that are attached to the specified @p frame.
-         *  @throw UnknownFrameException if the @p frame id is invalid.*/
-        const std::vector<ItemBase::Ptr>& getItems(const FrameId& frame) const;
-        const std::vector<ItemBase::Ptr>& getItems(const vertex_descriptor desc) const;
-        
         /**Builds a tree containing all vertices that are accessible starting
          * from @p root.  */
         VertexMap getTree(const vertex_descriptor root) const;
@@ -152,7 +145,29 @@ namespace envire { namespace core
 
         vertices_size_type num_vertices() const;
         edges_size_type num_edges() const;
+        
+         /** Adds @p item to the item list of the specified frame 
+         *  Causes ItemAddedEvent.
+         *  @throw UnknownFrameException if the frame id is invalid
+         *  @param T type of the item that should be added. The item has to 
+         *           be a subclass of ItemBase */
+        template<class T>
+        void addItemToFrame(const FrameId& frame, ItemBase::PtrType<T> item);
+        
 
+        /**Transform iterator used to down cast from ItemBase to @p T while
+         * iterating */
+        template<class T>
+        using ItemIterator = boost::transform_iterator<ItemBaseCaster<T>, std::vector<ItemBase::Ptr>::iterator>;
+        
+        /**Returns all items of type @p T that are stored in @p frame.
+         * @throw UnknownFrameException if the @p frame id is invalid.
+         * @return a pair iterators [begin, end] */
+        template<class T>
+        std::pair<ItemIterator<T>, ItemIterator<T>> getItems(const FrameId& frame) const;
+        template<class T>
+        std::pair<ItemIterator<T>, ItemIterator<T>> getItems(const vertex_descriptor frame) const;
+        
     protected:
         using EdgePair = std::pair<edge_descriptor, bool>;
       
@@ -189,5 +204,40 @@ namespace envire { namespace core
         /**Sets the transform value and causes transformModified event. */
         void updateTransform(edge_descriptor ed, const Transform& tf);
     };
+    
+    template <class T>
+    void TransformGraph::addItemToFrame(const FrameId& frame, ItemBase::PtrType<T> item)
+    {
+        //FIXME static assert to ensure T derives ItemBase
+        (*this)[frame].frame.items[std::type_index(typeid(T))].push_back(item);
+        //FIXME event
+        //notify(ItemAddedEvent(frame, item));
+    }
+    
+    template<class T>
+    std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> TransformGraph::getItems(const FrameId& frame) const
+    {
+        //FIXME maybe return const_iterators to keep the user from modifying items?
+        if(vertex(frame) == null_vertex())
+        {
+            throw UnknownFrameException(frame);
+        }
+        std::unordered_map<std::type_index, Frame::ItemList>& items = (*this)[frame].frame.items;
+        items[std::type_index(typeid(T))];
+        auto begin = items[std::type_index(typeid(T))].begin();
+        auto end = items[std::type_index(typeid(T))].end();
+        
+       // auto begin = (*this)[frame].frame.items[std::type_index(typeid(T))].begin();
+       // auto end = (*this)[frame].frame.items[std::type_index(typeid(T))].end();
+        auto beginIt = boost::make_transform_iterator(begin, ItemBaseCaster<T>());
+        auto endIt = boost::make_transform_iterator(end, ItemBaseCaster<T>());
+        return std::make_pair(beginIt, endIt);
+    }
+    
+    template<class T>
+    std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> TransformGraph::getItems(const vertex_descriptor frame) const
+    {
+        throw "NOT IMPLEMENTED";
+    }    
 }}
 #endif

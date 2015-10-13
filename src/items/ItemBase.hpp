@@ -11,6 +11,7 @@
 #include <boost/serialization/binary_object.hpp>
 #include <base/Time.hpp>
 #include <string>
+#include <type_traits>
 
 namespace envire { namespace core
 {
@@ -21,7 +22,8 @@ namespace envire { namespace core
     class ItemBase
     {
     public:
-        typedef boost::shared_ptr<ItemBase> Ptr;
+        template<class T> using PtrType = boost::shared_ptr<T>;
+        typedef PtrType<ItemBase> Ptr;
 
     protected:
 
@@ -106,6 +108,18 @@ namespace envire { namespace core
     };
 
     BOOST_SERIALIZATION_ASSUME_ABSTRACT(envire::core::ItemBase)
+    
+      
+    /**A functor that can be used to down cast from ItemBase*/
+    template<class TARGET>
+    struct ItemBaseCaster
+    {
+        ItemBase::PtrType<TARGET> operator()(ItemBase::Ptr p)
+        {
+            static_assert(std::is_base_of<ItemBase, TARGET>::value, "TARGET needs to be a base class of ItemBase");
+            return ItemBase::PtrType<TARGET>(p);
+        }
+    };
 
 }}
 
