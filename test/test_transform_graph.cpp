@@ -73,175 +73,260 @@ BOOST_AUTO_TEST_CASE(simple_add_item_test)
     BOOST_CHECK(begin != end);
     BOOST_CHECK((*begin)->getData().compare(text) == 0);
 
-    ItemBase::PtrType<string> p;
-    g.addItemToFrame(a, p);
+}
+
+BOOST_AUTO_TEST_CASE(add_multiple_items_test)
+{
+    FrameId a = "frame_a";
+    struct DataA 
+    {
+        DataA(const string& value) : value(value){}
+        string value;
+    };
+    struct DataB
+    {
+        DataB(const int value) : value(value){}
+        int value;
+    };
+    
+    TransformGraph g;
+    g.addFrame(a);
+
+
+    Item<DataA>::Ptr a1(new Item<DataA>("Grandpa, why don't you tell a story?"));
+    Item<DataA>::Ptr a2(new Item<DataA>("Yeah Grandpa, you lived a long and interesting life."));
+    Item<DataA>::Ptr a3(new Item<DataA>("That's a lie and you know it"));
+    
+    Item<DataB>::Ptr b1(new Item<DataB>(42));
+    Item<DataB>::Ptr b2(new Item<DataB>(21));
+    Item<DataB>::Ptr b3(new Item<DataB>(84));
+    
+    g.addItemToFrame(a, a1);
+    g.addItemToFrame(a, a2);
+    g.addItemToFrame(a, a3);
+    g.addItemToFrame(a, b1);
+    g.addItemToFrame(a, b2);
+    g.addItemToFrame(a, b3);
+    
+    using AIterator = TransformGraph::ItemIterator<Item<DataA>::Ptr>;
+    using BIterator = TransformGraph::ItemIterator<Item<DataB>::Ptr>;
+    
+    AIterator aBegin, aEnd;
+    boost::tie(aBegin, aEnd) = g.getItems<Item<DataA>::Ptr>(a);
+    BOOST_CHECK(aBegin != aEnd);
+    BOOST_CHECK((*aBegin)->getData().value.compare(a1->getData().value) == 0);
+    ++aBegin;
+    BOOST_CHECK((*aBegin)->getData().value.compare(a2->getData().value) == 0);
+    ++aBegin;
+    BOOST_CHECK((*aBegin)->getData().value.compare(a3->getData().value) == 0);
+    ++aBegin;
+    BOOST_CHECK(aBegin == aEnd);
+    
+    BIterator bBegin, bEnd;
+    boost::tie(bBegin, bEnd) = g.getItems<Item<DataB>::Ptr>(a);
+    BOOST_CHECK(bBegin != bEnd);
+    BOOST_CHECK((*bBegin)->getData().value == 42);
+    ++bBegin;
+    BOOST_CHECK((*bBegin)->getData().value == 21);
+    ++bBegin;
+    BOOST_CHECK((*bBegin)->getData().value == 84);
+    ++bBegin;
+    BOOST_CHECK(bBegin == bEnd);
+}
+
+BOOST_AUTO_TEST_CASE(add_item_to_invalid_frame)
+{
+//TODO
+}
+
+BOOST_AUTO_TEST_CASE(simple_remove_item_from_frame_test)
+{
+    using Iterator = TransformGraph::ItemIterator<Item<string>::Ptr>;
+    Iterator i;
+    FrameId frame = "frame";
+    TransformGraph g;
+    g.addFrame(frame);
+    const string text("Good news everyone!");
+    Item<string>::Ptr item(new Item<string>(text));
+    g.addItemToFrame(frame, item);
+    
+    g.removeItemFromFrame(frame, item);
+    using Iterator = TransformGraph::ItemIterator<Item<string>::Ptr>;
+    Iterator begin, end;
+    boost::tie(begin, end) = g.getItems<Item<string>::Ptr>(frame);
+    BOOST_CHECK(begin == end);   
+}
+
+BOOST_AUTO_TEST_CASE(remove_item_that_has_never_been_added_test)
+{
+    
 }
 
 BOOST_AUTO_TEST_CASE(remove_transform_event_test)
 {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     TransformGraph tree;
-//     Transform tf;
-//     tf.transform.translation << 42, 21, -42;
-//     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
-//     tree.addTransform(a, b, tf);
-//     std::shared_ptr<Dispatcher> d(new Dispatcher());
-//     tree.subscribe(d);  
-//     tree.removeTransform(a, b);
-//     BOOST_CHECK(d->transformRemovedEvents.size() == 2);
-//     BOOST_CHECK(d->transformRemovedEvents[0].origin == a);
-//     BOOST_CHECK(d->transformRemovedEvents[0].target == b);
-//     BOOST_CHECK(d->transformRemovedEvents[1].origin == b);
-//     BOOST_CHECK(d->transformRemovedEvents[1].target == a);
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    TransformGraph tree;
+    Transform tf;
+    tf.transform.translation << 42, 21, -42;
+    tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
+    tree.addTransform(a, b, tf);
+    std::shared_ptr<Dispatcher> d(new Dispatcher());
+    tree.subscribe(d);  
+    tree.removeTransform(a, b);
+    BOOST_CHECK(d->transformRemovedEvents.size() == 2);
+    BOOST_CHECK(d->transformRemovedEvents[0].origin == a);
+    BOOST_CHECK(d->transformRemovedEvents[0].target == b);
+    BOOST_CHECK(d->transformRemovedEvents[1].origin == b);
+    BOOST_CHECK(d->transformRemovedEvents[1].target == a);
 }
 
 BOOST_AUTO_TEST_CASE(simple_remove_transform_test)
 {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     TransformGraph tree;
-//     Transform tf;
-//     tf.transform.translation << 42, 21, -42;
-//     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
-//     tree.addTransform(a, b, tf);
-// 
-//     tree.removeTransform(b, a);
-//     BOOST_CHECK(tree.num_edges() == 0);
-//     BOOST_CHECK(tree.num_vertices() == 2); //vertices are still there, just not connected anymore
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    TransformGraph tree;
+    Transform tf;
+    tf.transform.translation << 42, 21, -42;
+    tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
+    tree.addTransform(a, b, tf);
+
+    tree.removeTransform(b, a);
+    BOOST_CHECK(tree.num_edges() == 0);
+    BOOST_CHECK(tree.num_vertices() == 2); //vertices are still there, just not connected anymore
 }
 
 BOOST_AUTO_TEST_CASE(remove_existing_but_unconnected_test)
 {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     FrameId c = "frame_c";
-//     TransformGraph tree;
-//     Transform tf;
-//     tree.addTransform(a, b, tf);
-//     tree.addTransform(a, c, tf);
-//     BOOST_CHECK_THROW(tree.removeTransform(b, c), UnknownTransformException);
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    TransformGraph tree;
+    Transform tf;
+    tree.addTransform(a, b, tf);
+    tree.addTransform(a, c, tf);
+    BOOST_CHECK_THROW(tree.removeTransform(b, c), UnknownTransformException);
 }
 
 BOOST_AUTO_TEST_CASE(complex_remove_transform_test)
 {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     FrameId c = "frame_c";
-//     TransformGraph tree;
-//     Transform tf;
-//     tf.transform.translation << 42, 21, -42;
-//     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
-//     tree.addTransform(a, b, tf);
-//     tree.addTransform(a, c, tf);
-// 
-//     tree.removeTransform(b, a);
-//     BOOST_CHECK(tree.num_edges() == 2);
-//     BOOST_CHECK(tree.num_vertices() == 3);
-//     BOOST_CHECK_NO_THROW(tree.getFrame(a));
-//     BOOST_CHECK_NO_THROW(tree.getFrame(c));
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    TransformGraph tree;
+    Transform tf;
+    tf.transform.translation << 42, 21, -42;
+    tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
+    tree.addTransform(a, b, tf);
+    tree.addTransform(a, c, tf);
+
+    tree.removeTransform(b, a);
+    BOOST_CHECK(tree.num_edges() == 2);
+    BOOST_CHECK(tree.num_vertices() == 3);
+    BOOST_CHECK_NO_THROW(tree.getFrame(a));
+    BOOST_CHECK_NO_THROW(tree.getFrame(c));
 }
 
 BOOST_AUTO_TEST_CASE(simple_modify_transform_test)
 {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     TransformGraph tree;
-//     Transform tf;
-//     tf.transform.translation << 42, 21, -42;
-//     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
-//     BOOST_CHECK_NO_THROW(tree.addTransform(a, b, tf));
-// 
-//     Transform tf2;
-//     tf2.transform.translation << 0, 1, 2;
-//     tf2.transform.orientation = base::AngleAxisd(0.42, base::Vector3d::UnitY());
-//     tree.updateTransform(b, a, tf2);
-//     Transform readBa = tree.getTransform(b, a);
-//     Transform readAb = tree.getTransform(a, b);
-//     BOOST_CHECK(compareTransform(readBa, tf2));
-// 
-//     Transform tf2Inv = tf2;
-//     tf2Inv.setTransform(tf2.transform.inverse());
-//     BOOST_CHECK(compareTransform(readAb, tf2Inv));
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    TransformGraph tree;
+    Transform tf;
+    tf.transform.translation << 42, 21, -42;
+    tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
+    BOOST_CHECK_NO_THROW(tree.addTransform(a, b, tf));
+
+    Transform tf2;
+    tf2.transform.translation << 0, 1, 2;
+    tf2.transform.orientation = base::AngleAxisd(0.42, base::Vector3d::UnitY());
+    tree.updateTransform(b, a, tf2);
+    Transform readBa = tree.getTransform(b, a);
+    Transform readAb = tree.getTransform(a, b);
+    BOOST_CHECK(compareTransform(readBa, tf2));
+
+    Transform tf2Inv = tf2;
+    tf2Inv.setTransform(tf2.transform.inverse());
+    BOOST_CHECK(compareTransform(readAb, tf2Inv));
 }
 
 BOOST_AUTO_TEST_CASE(update_transform_on_empty_tree_test)
 {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     TransformGraph tree;
-//     Transform tf;
-//     BOOST_CHECK_THROW(tree.updateTransform(a, b, tf), UnknownFrameException);
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    TransformGraph tree;
+    Transform tf;
+    BOOST_CHECK_THROW(tree.updateTransform(a, b, tf), UnknownFrameException);
 }
 
 BOOST_AUTO_TEST_CASE(update_transform_invalid_test)
 {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     FrameId c = "frame_c";
-//     TransformGraph tree;
-//     Transform tf;
-//     tree.addTransform(a, b, tf);
-//     BOOST_CHECK_THROW(tree.updateTransform(a, c, tf), UnknownFrameException);
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    TransformGraph tree;
+    Transform tf;
+    tree.addTransform(a, b, tf);
+    BOOST_CHECK_THROW(tree.updateTransform(a, c, tf), UnknownFrameException);
 }
 
 BOOST_AUTO_TEST_CASE(remove_transform_on_empty_tree_test)
 {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     TransformGraph tree;
-//     BOOST_CHECK_THROW(tree.removeTransform(a, b), UnknownTransformException);
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    TransformGraph tree;
+    BOOST_CHECK_THROW(tree.removeTransform(a, b), UnknownTransformException);
 }
 
 BOOST_AUTO_TEST_CASE(remove_transform_invalid_test)
 {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     FrameId c = "frame_c";
-//     TransformGraph tree;
-//     Transform tf;
-//     tree.addTransform(a, b, tf);
-//     BOOST_CHECK_THROW(tree.removeTransform(a, c), UnknownTransformException);
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    TransformGraph tree;
+    Transform tf;
+    tree.addTransform(a, b, tf);
+    BOOST_CHECK_THROW(tree.removeTransform(a, c), UnknownTransformException);
 }
 
 BOOST_AUTO_TEST_CASE(get_invalid_transform_test)
 {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     FrameId c = "frame_c";
-//     TransformGraph tree;
-//     Transform tf;
-//     tf.transform.translation << 42, 21, -42;
-//     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
-//     BOOST_CHECK_NO_THROW(tree.addTransform(a, b, tf));
-//     BOOST_CHECK_THROW(tree.getTransform(a, c), UnknownTransformException);
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    TransformGraph tree;
+    Transform tf;
+    tf.transform.translation << 42, 21, -42;
+    tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
+    BOOST_CHECK_NO_THROW(tree.addTransform(a, b, tf));
+    BOOST_CHECK_THROW(tree.getTransform(a, c), UnknownTransformException);
 }
 
 BOOST_AUTO_TEST_CASE(get_edge_on_empty_tree_test)
 {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     TransformGraph tree;
-//     BOOST_CHECK_THROW(tree.getEdge(a, b), UnknownTransformException);
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    TransformGraph tree;
+    BOOST_CHECK_THROW(tree.getEdge(a, b), UnknownTransformException);
 }
 
 BOOST_AUTO_TEST_CASE(disconnect_frame_test)
 {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     FrameId c = "frame_c";
-//     TransformGraph tree;
-//     Transform tf;
-//     tree.addTransform(a, b, tf);
-//     tree.addTransform(a, c, tf);
-//     tree.disconnectFrame(a);
-//     BOOST_CHECK_THROW(tree.getTransform(a, b), UnknownTransformException);
-//     BOOST_CHECK_THROW(tree.getTransform(b, a), UnknownTransformException);
-//     BOOST_CHECK_THROW(tree.getTransform(a, c), UnknownTransformException);
-//     BOOST_CHECK_THROW(tree.getTransform(c, a), UnknownTransformException); 
-//     
-//     FrameId d = "frame_d";
-//     BOOST_CHECK_THROW(tree.disconnectFrame(d), UnknownFrameException);
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    TransformGraph tree;
+    Transform tf;
+    tree.addTransform(a, b, tf);
+    tree.addTransform(a, c, tf);
+    tree.disconnectFrame(a);
+    BOOST_CHECK_THROW(tree.getTransform(a, b), UnknownTransformException);
+    BOOST_CHECK_THROW(tree.getTransform(b, a), UnknownTransformException);
+    BOOST_CHECK_THROW(tree.getTransform(a, c), UnknownTransformException);
+    BOOST_CHECK_THROW(tree.getTransform(c, a), UnknownTransformException); 
+    
+    FrameId d = "frame_d";
+    BOOST_CHECK_THROW(tree.disconnectFrame(d), UnknownFrameException);
     
 }
 

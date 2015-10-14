@@ -44,7 +44,11 @@ namespace envire { namespace core
     class TransformGraph : public LabeledTransformGraph, public GraphEventPublisher
     {
     public:
-
+        /**Transform iterator used to down cast from ItemBase to @p T while
+         * iterating */
+        template<class T>
+        using ItemIterator = boost::transform_iterator<ItemBaseCaster<typename T::element_type>, std::vector<ItemBase::Ptr>::const_iterator, T>;
+        
         /***************************************************
          * Methods Naming convention
          * Overloading boost methods uses delimited separated
@@ -117,12 +121,32 @@ namespace envire { namespace core
         /** @return the frame id of the specified @p vertex */
         const envire::core::FrameId& getFrameId(const vertex_descriptor vertex) const;
                        
-        /** Removes @p item from @p frame.
+        /**Removes @p item from @p frame.
          *  Causes ItemRemovedEvent.
          * @throw UnknownFrameException if the frame does not exist.
          * @throw UnknownItemException if the item is not part of the frame's
-         *                             item list.  */ 
-        void removeItemFromFrame(const FrameId& frame, ItemBase::Ptr item);
+         *                             item list.
+         * @param T should be ItemBase::PtrType<X> where X is derived from ItemBase
+         * @note Invalidates all iterators of type ItemIterator<ItemBase::PtrType<T>> for the
+         *       specified @p frame.
+         * @return A pair of iterators. The first one points to the element that
+         *         comes after @p item and the second one points to the end of the
+         *         list.*/ 
+        template <class T>
+        std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>>
+        removeItemFromFrame(const FrameId& frameId, ItemIterator<T> item);
+        
+        /**Searches for @p item in @p frame and removes it if present.
+         * Causes ItemRemovedEvent.
+         * @throw UnknownFrameException if the @ frame does not exist.
+         * @throw UnknownItemException if the @p frame does not contain the @p item.
+         * @note Invalidates all iterators of type ItemIterator<ItemBase::PtrType<T>> for the
+         *       specified @p frame.
+         *       I.e. you cannot iterate over all items and use this method at the same time.
+         * */
+        template <class T>
+        void removeItemFromFrame(const FrameId& frameId, ItemBase::PtrType<T> item);
+        
         
         /**Disconnects @p frame from the Graph.
          * I.e. all transformations from and to @p frame will be removed.
@@ -157,16 +181,11 @@ namespace envire { namespace core
         template<class T>
         void addItemToFrame(const FrameId& frame, T item);
         
-
-        /**Transform iterator used to down cast from ItemBase to @p T while
-         * iterating */
-        template<class T>
-        using ItemIterator = boost::transform_iterator<ItemBaseCaster<typename T::element_type>, std::vector<ItemBase::Ptr>::const_iterator, T>;
-        
         /**Returns all items of type @p T that are stored in @p frame.
          * @throw UnknownFrameException if the @p frame id is invalid.
          * @throw NoItemsOfTypeInFrameException if no items of the given type exist in the frame.
          * @return a pair iterators [begin, end] */
+        //FIXME document type constraints for T
         template<class T>
         const std::pair<ItemIterator<T>, ItemIterator<T>> getItems(const FrameId& frame) const;
         template<class T>
@@ -204,7 +223,18 @@ namespace envire { namespace core
         const Transform getTransform(const FrameId& origin, const FrameId& target,
                                     const vertex_descriptor originVertex,
                                     const vertex_descriptor targetVertex) const;
-
+//     if(vertex(frame) == null_vertex())
+//     {
+//         throw UnknownFrameException(frame);
+//     }
+//     vector<ItemBase::Ptr>& items = (*this)[frame].frame.items;
+//     auto it = std::find(items.begin(), items.end(), item);
+//     if(it == items.end())
+//     {
+//         throw UnknownItemException(frame, item);
+//     }
+//     items.erase(it);
+//     notify(ItemRemovedEvent(frame, item));
         /**Sets the transform value and causes transformModified event. */
         void updateTransform(edge_descriptor ed, const Transform& tf);
         
@@ -265,8 +295,76 @@ namespace envire { namespace core
     template<class T>
     const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> TransformGraph::getItems(const vertex_descriptor frame) const
     {
+        //FIXME implement
         checkItemType<T>();
         throw "NOT IMPLEMENTED";
     }    
+    
+    template <class T>
+    std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>>
+    TransformGraph::removeItemFromFrame(const FrameId& frameId, ItemIterator<T> item)
+    {
+        checkItemType<T>();
+        
+        if(vertex(frameId) == null_vertex())
+        {
+            throw UnknownFrameException(frameId);
+        }
+        
+        Frame& frame = (*this)[frameId].frame;
+        const std::type_index key(typeid(T));
+        auto mapEntry = frame.items.find(key);
+        if(mapEntry == frame.items.end())
+        {
+          //FIXME exception type und so
+           // throw UnknownItemException(frame, item);
+        }
+        std::vector<ItemBase::Ptr>& items = mapEntry->second;
+        std::vector<ItemBase::Ptr>::const_iterator baseIterator = item.base();
+        //HACK This is a workaround for gcc bug 57158 which is still present as of gcc 4.8.4.
+        //     In C++11 the parameter type of vector::erase changed from iterator
+        //     to const_iterator (which is exactly what we need), but  gcc has not
+        //     yet implemented that change. 
+        std::vector<ItemBase::Ptr>::iterator nonConstBaseIterator = items.begin() + (baseIterator - items.cbegin()); //vector iterator const cast hack
+        std::vector<ItemBase::Ptr>::const_iterator next = items.erase(nonConstBaseIterator);
+        //FIXME event
+        //     notify(ItemRemovedEvent(frame, item));
+        ItemIterator<T> nextIt(next, ItemBaseCaster<typename T::element_type>()); 
+        ItemIterator<T> endIt(items.cend(), ItemBaseCaster<typename T::element_type>()); 
+        return std::make_pair(nextIt, endIt);
+    }
+    
+    template <class T>
+    void TransformGraph::removeItemFromFrame(const FrameId& frameId, ItemBase::PtrType<T> item)
+    {
+        static_assert(std::is_base_of<ItemBase, T>::value,
+            "T does not derive from ItemBase"); 
+        
+        if(vertex(frameId) == null_vertex())
+        {
+            throw UnknownFrameException(frameId);
+        }
+        
+        Frame& frame = (*this)[frameId].frame;
+        const std::type_index key(typeid(ItemBase::PtrType<T>));
+        auto mapEntry = frame.items.find(key);
+        if(mapEntry == frame.items.end())
+        {
+          //FIXME exception type und so
+           // throw UnknownItemException(frame, item);
+          throw "alles kaputt!!!";
+        }
+        std::vector<ItemBase::Ptr>& items = mapEntry->second;
+        auto searchResult = std::find(items.begin(), items.end(), item);
+        if(searchResult == items.end())
+        {
+          //FIXME exception
+           // throw UnknownItemException(frame, item);
+        }
+        items.erase(searchResult);
+        //FIXME event
+        //notify(ItemRemovedEvent(frame, item));
+    }
+    
 }}
 #endif
