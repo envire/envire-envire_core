@@ -316,8 +316,7 @@ namespace envire { namespace core
         auto mapEntry = frame.items.find(key);
         if(mapEntry == frame.items.end())
         {
-          //FIXME exception type und so
-           // throw UnknownItemException(frame, item);
+            throw NoItemsOfTypeInFrameException(frameId, key.name());
         }
         std::vector<ItemBase::Ptr>& items = mapEntry->second;
         std::vector<ItemBase::Ptr>::const_iterator baseIterator = item.base();
@@ -350,7 +349,7 @@ namespace envire { namespace core
         auto mapEntry = frame.items.find(key);
         if(mapEntry == frame.items.end())
         {
-            throw UnknownItemException(frameId, item->getID());
+            throw NoItemsOfTypeInFrameException(frameId, key.name());
         }
         std::vector<ItemBase::Ptr>& items = mapEntry->second;
         auto searchResult = std::find(items.begin(), items.end(), item);

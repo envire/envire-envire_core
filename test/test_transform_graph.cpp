@@ -173,12 +173,39 @@ BOOST_AUTO_TEST_CASE(remove_item_with_type_that_has_never_been_added_test)
     FrameId frame = "frame";
     TransformGraph g;
     g.addFrame(frame);
-    const string text("Good news everyone!");
+    const string text("Everyone, I Have A Very Dramatic Announcement.");
     Item<string>::Ptr item(new Item<string>(text));
     g.addItemToFrame(frame, item);
     
     Item<int>::Ptr itemWithUnknownType(new Item<int>(42));
-    BOOST_CHECK_THROW(g.removeItemFromFrame(frame, itemWithUnknownType), UnknownItemException);
+    BOOST_CHECK_THROW(g.removeItemFromFrame(frame, itemWithUnknownType), NoItemsOfTypeInFrameException);
+}
+
+
+BOOST_AUTO_TEST_CASE(remove_multiple_items_from_frame_test)
+{
+    FrameId frame = "frame";
+    TransformGraph g;
+    g.addFrame(frame);
+    const string text("This Concept Of ‘Wuv’ Confused And Infuriates Us!");
+    
+    for(int i = 0; i < 42; ++i)
+    {
+        Item<string>::Ptr item(new Item<string>(text));
+        g.addItemToFrame(frame, item);
+    }
+    using Iterator = TransformGraph::ItemIterator<Item<string>::Ptr>;
+    Iterator begin, end;
+    boost::tie(begin, end) = g.getItems<Item<string>::Ptr>(frame);
+    
+    BOOST_CHECK(end - begin == 42);//check if there are really 42 items in the vector now
+    for(; begin != end;)
+    {
+        boost::tie(begin, end) = g.removeItemFromFrame(frame, begin);
+    }
+    BOOST_CHECK(begin == end);
+    boost::tie(begin, end) = g.getItems<Item<string>::Ptr>(frame);
+    BOOST_CHECK(begin == end);
 }
 
 
