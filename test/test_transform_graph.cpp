@@ -141,8 +141,6 @@ BOOST_AUTO_TEST_CASE(add_item_to_invalid_frame)
 
 BOOST_AUTO_TEST_CASE(simple_remove_item_from_frame_test)
 {
-    using Iterator = TransformGraph::ItemIterator<Item<string>::Ptr>;
-    Iterator i;
     FrameId frame = "frame";
     TransformGraph g;
     g.addFrame(frame);
@@ -159,8 +157,30 @@ BOOST_AUTO_TEST_CASE(simple_remove_item_from_frame_test)
 
 BOOST_AUTO_TEST_CASE(remove_item_that_has_never_been_added_test)
 {
+    FrameId frame = "frame";
+    TransformGraph g;
+    g.addFrame(frame);
+    const string text("Good news everyone!");
+    Item<string>::Ptr item(new Item<string>(text));
+    g.addItemToFrame(frame, item);
     
+    Item<string>::Ptr neverAddedItem(new Item<string>("This Item has never been added to the graph"));
+    BOOST_CHECK_THROW(g.removeItemFromFrame(frame, neverAddedItem), UnknownItemException);
 }
+
+BOOST_AUTO_TEST_CASE(remove_item_with_type_that_has_never_been_added_test)
+{
+    FrameId frame = "frame";
+    TransformGraph g;
+    g.addFrame(frame);
+    const string text("Good news everyone!");
+    Item<string>::Ptr item(new Item<string>(text));
+    g.addItemToFrame(frame, item);
+    
+    Item<int>::Ptr itemWithUnknownType(new Item<int>(42));
+    BOOST_CHECK_THROW(g.removeItemFromFrame(frame, itemWithUnknownType), UnknownItemException);
+}
+
 
 BOOST_AUTO_TEST_CASE(remove_transform_event_test)
 {

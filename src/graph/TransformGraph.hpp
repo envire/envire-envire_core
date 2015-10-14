@@ -350,16 +350,13 @@ namespace envire { namespace core
         auto mapEntry = frame.items.find(key);
         if(mapEntry == frame.items.end())
         {
-          //FIXME exception type und so
-           // throw UnknownItemException(frame, item);
-          throw "alles kaputt!!!";
+            throw UnknownItemException(frameId, item->getID());
         }
         std::vector<ItemBase::Ptr>& items = mapEntry->second;
         auto searchResult = std::find(items.begin(), items.end(), item);
         if(searchResult == items.end())
         {
-          //FIXME exception
-           // throw UnknownItemException(frame, item);
+            throw UnknownItemException(frameId, item->getID());
         }
         items.erase(searchResult);
         //FIXME event

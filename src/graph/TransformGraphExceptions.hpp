@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <string>
 #include <envire_core/items/Frame.hpp>
+#include <boost/uuid/uuid.hpp>
 
 namespace envire { namespace core
 {
@@ -61,8 +62,8 @@ namespace envire { namespace core
     class UnknownItemException : public std::exception
     {
     public:
-        UnknownItemException(const FrameId& name, ItemBase::Ptr item) :
-          msg("The item with uuid '" + item->getIDString() + 
+        UnknownItemException(const FrameId& name, const boost::uuids::uuid& uuid) :
+          msg("The item with uuid '" + boost::uuids::to_string(uuid) + 
               "' is not part of frame '" + name + "'") {}
         virtual char const * what() const throw() { return msg.c_str(); }
         const std::string msg;
