@@ -54,50 +54,27 @@ public:
     }
 };
 
-using StringItem = Item<string>;
-
-struct functor
-{  
-  typedef int first_argument_type;
-  typedef bool result_type;
-  bool operator()(int a)
-  {
-    return true;
-  }
-};
 
 BOOST_AUTO_TEST_CASE(simple_add_item_test)
 {
     FrameId a = "frame_a";
+    const string text("I am so smart, S M A T");
     
     TransformGraph g;
     g.addFrame(a);
     
-    StringItem::Ptr item(new StringItem("I am so smart, S M A T"));
+
+    Item<string>::Ptr item(new Item<string>(text));
     g.addItemToFrame(a, item);
 
-    using Iterator = TransformGraph::ItemIterator<StringItem::Ptr>;
+    using Iterator = TransformGraph::ItemIterator<Item<string>::Ptr>;
     Iterator begin, end;
-    boost::tie(begin, end) = g.getItems<StringItem::Ptr>(a);
-    
+    boost::tie(begin, end) = g.getItems<Item<string>::Ptr>(a);
+    BOOST_CHECK(begin != end);
+    BOOST_CHECK((*begin)->getData().compare(text) == 0);
 
-    for(; begin != end; ++begin)
-    {
-        std::cout << (*begin)->getData() << std::endl;
-    }
-    
-    
-   // boost::transform_iterator<ItemBaseCaster, std::vector<ItemBase::Ptr>::iterator, StringItem::Ptr> it;
-    
-    
-   // boost::transform_iterator<functor, std::vector<int>::iterator> it;
-    
-   // TransformGraph::ItemIterator<StringItem::Ptr> it;
-  //  Iterator begin, end;
-  //  const std::pair<Iterator, Iterator> p = g.getItems<StringItem::Ptr>(a);
-  //  boost::bind(begin, end) = 
-
-    
+    ItemBase::PtrType<string> p;
+    g.addItemToFrame(a, p);
 }
 
 BOOST_AUTO_TEST_CASE(remove_transform_event_test)

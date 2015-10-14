@@ -33,6 +33,7 @@ rock_library(envire_core
             serialization/SerializationRegistration.hpp
             serialization/ItemHeader.hpp
             serialization/Eigen.hpp
+            util/MetaProgramming.hpp
     SOURCES items/ItemBase.cpp
             items/AlignedBoundingBox.cpp
             items/DummyItem.cpp
@@ -48,3 +49,5 @@ rock_library(envire_core
 install(FILES
     all
     DESTINATION include/envire_core)
+
+add_subdirectory(util)

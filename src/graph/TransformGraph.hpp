@@ -17,6 +17,7 @@
 #include <string>
 #include <typeindex>
 #include <typeinfo>
+#include <type_traits>
 
 
 #include "TransformGraphTypes.hpp"
@@ -25,6 +26,7 @@
 #include <envire_core/events/GraphEventPublisher.hpp>
 #define BOOST_RESULT_OF_USE_DECLTYPE
 #include <boost/iterator/transform_iterator.hpp>
+#include <envire_core/util/MetaProgramming.hpp>
 
 
 namespace envire { namespace core
@@ -205,15 +207,29 @@ namespace envire { namespace core
 
         /**Sets the transform value and causes transformModified event. */
         void updateTransform(edge_descriptor ed, const Transform& tf);
+        
+    private:
+      /**Ensures that T is ItemBase::PtrType<X> where X derives from ItemBase  */
+      template <class T>
+      static void checkItemType();
+        
     };
+    
+    template <class T>
+    void TransformGraph::checkItemType()
+    {
+        using ItemType = typename extract_value_type<T>::value_type;
+        static_assert(std::is_same<T, ItemBase::PtrType<ItemType>>::value,
+            "Item should be of type ItemBase::PtrType<T>");
+        static_assert(std::is_base_of<ItemBase, ItemType>::value,
+            "Item is of type ItemBase::PtrType<T> but T does not derive from ItemBase"); 
+    }
+
     
     template <class T>
     void TransformGraph::addItemToFrame(const FrameId& frame, T item)
     {
-        std::cerr << "adding typename: " << std::type_index(typeid(T)).name() << std::endl;
-        std::cerr << "adding hash: " << std::type_index(typeid(T)).hash_code() << std::endl;
-        //FIXME static assert T is ItemBase::PtrType and T derives from ItemBase
-        //FIXME static assert to ensure T derives ItemBase
+        checkItemType<T>();
         (*this)[frame].frame.items[std::type_index(typeid(T))].push_back(item);
         //FIXME event
         //notify(ItemAddedEvent(frame, item));
@@ -222,13 +238,13 @@ namespace envire { namespace core
     template<class T>
     const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> TransformGraph::getItems(const FrameId& frame) const
     {
+        checkItemType<T>();
+        
         if(vertex(frame) == null_vertex())
         {
             throw UnknownFrameException(frame);
         }
-        std::cerr << "searching typename: " << std::type_index(typeid(T)).name() << std::endl;
-        std::cerr << "searching hash: " << std::type_index(typeid(T)).hash_code() << std::endl;
-        
+
         const std::unordered_map<std::type_index, Frame::ItemList>& items = (*this)[frame].frame.items;
         const std::type_index key(typeid(T));
         
@@ -249,6 +265,7 @@ namespace envire { namespace core
     template<class T>
     const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> TransformGraph::getItems(const vertex_descriptor frame) const
     {
+        checkItemType<T>();
         throw "NOT IMPLEMENTED";
     }    
 }}
