@@ -153,10 +153,7 @@ BOOST_AUTO_TEST_CASE(simple_remove_item_from_frame_test)
     g.addItemToFrame(frame, item);
     
     g.removeItemFromFrame(frame, item);
-    using Iterator = TransformGraph::ItemIterator<Item<string>::Ptr>;
-    Iterator begin, end;
-    boost::tie(begin, end) = g.getItems<Item<string>::Ptr>(frame);
-    BOOST_CHECK(begin == end);   
+    BOOST_CHECK_THROW(g.getItems<Item<string>::Ptr>(frame), NoItemsOfTypeInFrameException);
 }
 
 BOOST_AUTO_TEST_CASE(remove_item_that_has_never_been_added_test)
@@ -208,8 +205,7 @@ BOOST_AUTO_TEST_CASE(remove_multiple_items_from_frame_test)
         boost::tie(begin, end) = g.removeItemFromFrame(frame, begin);
     }
     BOOST_CHECK(begin == end);
-    boost::tie(begin, end) = g.getItems<Item<string>::Ptr>(frame);
-    BOOST_CHECK(begin == end);
+    BOOST_CHECK_THROW(g.getItems<Item<string>::Ptr>(frame), NoItemsOfTypeInFrameException);
 }
 
 BOOST_AUTO_TEST_CASE(get_first_item_test)
@@ -802,7 +798,6 @@ BOOST_AUTO_TEST_CASE(add_item_event_test)
 
 BOOST_AUTO_TEST_CASE(remove_item_event_test)
 {
-  //TODO
     TransformGraph graph;
     FrameId a("a");
     FrameId b("b");
@@ -836,6 +831,19 @@ BOOST_AUTO_TEST_CASE(remove_item_event_test)
     BOOST_CHECK(d->itemRemovedEvents.size() == 3);
     BOOST_CHECK(d->itemRemovedEvents[2].frame == b);
     BOOST_CHECK(d->itemRemovedEvents[2].item == item2);
+}
+
+BOOST_AUTO_TEST_CASE(contains_item_test)
+{
+    TransformGraph graph;
+    FrameId a("a");
+    Item<string>::Ptr item(new Item<string>("For a moment, nothing happened. Then, after a second or so, nothing continued to happen."));
+    
+    BOOST_CHECK_THROW(graph.containsItems<Item<string>::Ptr>(a), UnknownFrameException)
+    graph.addFrame(a);
+    graph.addItemToFrame(a, item);
+    BOOST_CHECK(graph.containsItems<Item<string>::Ptr>(a));
+    BOOST_CHECK(!graph.containsItems<Item<int>::Ptr>(a));
 }
 
 BOOST_AUTO_TEST_CASE(get_transform_between_unconnected_trees)

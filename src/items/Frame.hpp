@@ -15,7 +15,10 @@ namespace envire { namespace core
 {
     using FrameId = std::string;
     
-    //TODO comment
+    /**A Frame is attached to each vertex in the TransformGraph.
+     * It holds a lists of arbitrary items organized by item type. 
+     * The Frame itself is a POD. The logic for manipulating Frames is part of
+     * the TransformGraph. */
     class Frame
     {
     public:
@@ -23,8 +26,8 @@ namespace envire { namespace core
         boost::uuids::uuid uuid; /** Unique Identifier */
 
         using ItemList = std::vector<ItemBase::Ptr>;
+                using ItemMap = std::unordered_map<std::type_index, ItemList>;
         //contains all items that have been added to the frame sorted by type
-        using ItemMap = std::unordered_map<std::type_index, ItemList>;
         ItemMap items;
 
     public:

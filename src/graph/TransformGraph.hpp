@@ -1,16 +1,11 @@
 /**\file TransformTree.hpp
  *
- * This class provided stores and manages the transformation tree
+ * This class provided stores and manages the transformation graph
  *
  * @author Javier Hidalgo Carrio et. al (see THANKS  for the full Author list)
  * See LICENSE for the license information
- *
  */
-
-
-#ifndef __ENVIRE_CORE_TRANSFORM_GRAPH__
-#define __ENVIRE_CORE_TRANSFORM_GRAPH__
-
+#pragma once
 
 #include <boost/uuid/uuid.hpp>
 #include <cassert>
@@ -37,11 +32,17 @@ namespace envire { namespace core
      * A tree-like graph structure.
      * Each vertex contains a labeled Frame. The label must be unique.
      *
-     * @warning Do **not** manipulate the tree directly using boost functions.
+     * @warning Do **not** manipulate the graph directly using boost functions.
      *          If you do that you will **break** the event system.
+     *          I.e. others will not be notified about the changes to the graph.
      *          Instead use the methods provided by this class for manipulation.
-     *          I.e. do not modify transforms, frames or items directly!!!!
-     *          
+     * 
+     * @see test/transform_graph_test.cpp for usage examples.     
+     *
+     * Methods Naming convention
+     * Overloading boost methods uses delimited separated
+     * words, new methods use Camel Case separated words
+     *    
     */
     class TransformGraph : public LabeledTransformGraph, public GraphEventPublisher
     {
@@ -50,13 +51,7 @@ namespace envire { namespace core
          * iterating */
         template<class T>
         using ItemIterator = boost::transform_iterator<ItemBaseCaster<typename T::element_type>, std::vector<ItemBase::Ptr>::const_iterator, T>;
-        
-        /***************************************************
-         * Methods Naming convention
-         * Overloading boost methods uses delimited separated
-         * words, new methods use Camel Case separated words
-         ***************************************************/
-    
+
         TransformGraph(envire::core::Environment const &environment = Environment());
         
         
@@ -112,7 +107,7 @@ namespace envire { namespace core
         
 
         /** @return the edge between frame @p origin and @p target
-         * @throw UnknownTransformException if there is no such edge  */
+         *  @throw UnknownTransformException if there is no such edge  */
         edge_descriptor getEdge(const FrameId& origin, const FrameId& target) const;
 
         /** @return a reference to the frame identified by the id.
@@ -191,8 +186,8 @@ namespace envire { namespace core
         /**Returns all items of type @p T that are stored in @p frame.
          * @throw UnknownFrameException if the @p frame id is invalid.
          * @throw NoItemsOfTypeInFrameException if no items of the given type exist in the frame.
+         * @param T has to be of type ItemBase::PtrType<X> where X derives from ItemBase.
          * @return a pair iterators [begin, end] */
-        //FIXME document type constraints for T
         template<class T>
         const std::pair<ItemIterator<T>, ItemIterator<T>> getItems(const FrameId& frame) const;
         template<class T>
@@ -203,6 +198,11 @@ namespace envire { namespace core
          * @throw NoItemsOfTypeInFrameException if no items of type @p T exist in the frame.*/
         template <class T>
         const T getFirstItem(const FrameId& frame) const;
+        
+        /** @return true if the @p frame contains at least on item of type @p T
+         *  @throw UnknownFrameException if the @p frame id is invalid.*/
+        template <class T>
+        bool containsItems(const FrameId& frame) const;
         
         
     protected:
@@ -246,10 +246,9 @@ namespace envire { namespace core
         getItemsInternal(const vertex_descriptor frame, const FrameId& frameId) const;
         
     private:
-      /**Ensures that T is ItemBase::PtrType<X> where X derives from ItemBase  */
-      template <class T>
-      static void checkItemType();
-        
+        /**Ensures that T is ItemBase::PtrType<X> where X derives from ItemBase  */
+        template <class T>
+        static void checkItemType();
     };
     
     template <class T>
@@ -305,7 +304,8 @@ namespace envire { namespace core
     const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> 
     TransformGraph::getItemsInternal(const vertex_descriptor frame, const FrameId& frameId) const
     {
-        const std::unordered_map<std::type_index, Frame::ItemList>& items = graph()[frame].frame.items;
+        // T has to be ItemBase::PtrType<X> where X derives ItemBase for this method to work
+        const Frame::ItemMap& items = graph()[frame].frame.items;
         const std::type_index key(typeid(T));
         
         if(items.find(key) == items.end())
@@ -315,13 +315,12 @@ namespace envire { namespace core
         
         auto begin = items.at(std::type_index(typeid(T))).begin();
         auto end = items.at(std::type_index(typeid(T))).end();
+        assert(begin != end); //if a list exists it should not be empty
         
-        //T::element_type only works if T is a shared_ptr
         ItemIterator<T> beginIt(begin, ItemBaseCaster<typename T::element_type>()); 
         ItemIterator<T> endIt(end, ItemBaseCaster<typename T::element_type>()); 
         return std::make_pair(beginIt, endIt);        
     }
-    
     
     template <class T>
     const T TransformGraph::getFirstItem(const FrameId& frame) const
@@ -365,7 +364,7 @@ namespace envire { namespace core
         }
         std::vector<ItemBase::Ptr>& items = mapEntry->second;
         std::vector<ItemBase::Ptr>::const_iterator baseIterator = item.base();
-        //HACK This is a workaround for gcc bug 57158 which is still present as of gcc 4.8.4.
+        //HACK This is a workaround for gcc bug 57158.
         //     In C++11 the parameter type of vector::erase changed from iterator
         //     to const_iterator (which is exactly what we need), but  gcc has not
         //     yet implemented that change. 
@@ -377,6 +376,16 @@ namespace envire { namespace core
         notify(ItemRemovedEvent(frameId, baseItem));
         ItemIterator<T> nextIt(next, ItemBaseCaster<typename T::element_type>()); 
         ItemIterator<T> endIt(items.cend(), ItemBaseCaster<typename T::element_type>()); 
+        
+        //remove the map entry if there are no more values in the vector
+        if(nextIt == endIt)
+        {
+          frame.items.erase(key);
+          //it is ok to remove the vector even though we are returning iterators
+          //to the vector because both of them point to end() anyway (i.e. they
+          //are invalid anyway).
+        }
+        
         return std::make_pair(nextIt, endIt);
     }
     
@@ -405,10 +414,28 @@ namespace envire { namespace core
             throw UnknownItemException(frameId, item->getID());
         }
         items.erase(searchResult);
+        //remove the map entry if it does not contain any more items
+        if(items.size() <= 0)
+        {
+            frame.items.erase(key);
+        }
         //FIXME events should somhow carry the type info
         ItemBase::Ptr baseItem = boost::dynamic_pointer_cast<ItemBase>(item);
         notify(ItemRemovedEvent(frameId, baseItem));
+    }   
+    
+    template <class T>
+    bool TransformGraph::containsItems(const FrameId& frameId) const
+    {
+        checkItemType<T>();
+        if(vertex(frameId) == null_vertex())
+        {
+            throw UnknownFrameException(frameId);
+        }  
+        const Frame& frame = (*this)[frameId].frame;
+        const std::type_index key(typeid(T));
+        auto mapEntry = frame.items.find(key);
+        return mapEntry != frame.items.end();
     }
     
 }}
-#endif
