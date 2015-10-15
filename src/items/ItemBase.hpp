@@ -120,45 +120,6 @@ namespace envire { namespace core
             return boost::dynamic_pointer_cast<TARGET>(p);
         }
     };
-    
-    
-//     struct ItemBaseCaster 
-//     {
-//         template<class TARGET>
-//         ItemBase::PtrType<TARGET> operator()(ItemBase::Ptr p)
-//         {
-//             return boost::dynamic_pointer_cast<TARGET>(p);
-//         }
-//     };
-      
-//     struct ItemBaseCaster {
-//     template<class> struct result;
-// 
-//     template<class F, class T>
-//     struct result<F(T)> {
-//         typedef ItemBase::PtrType<T> type;
-//     };
-// 
-//     template<class TARGET>
-//     ItemBase::PtrType<TARGET> operator()(ItemBase::Ptr p)
-//     {
-//       // static_assert(std::is_base_of<ItemBase, TARGET>::value, "TARGET needs to be a base class of ItemBase");
-//         
-//     }
-//};
-    
-    /**A functor that can be used to down cast from ItemBase*/
-//     template<class TARGET>
-//     struct ItemBaseCaster
-//     {
-//         typedef ItemBase::PtrType<TARGET> result_type;
-//         result_type operator()(ItemBase::Ptr p)
-//         {
-//            
-//             
-//         }
-//     };
-
 }}
 
 #endif
