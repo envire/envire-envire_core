@@ -17,7 +17,7 @@ namespace envire { namespace core
     class TransformAlreadyExistsException : public std::exception
     {
     public:
-        TransformAlreadyExistsException(const FrameId& nameA, const FrameId& nameB) :
+        explicit TransformAlreadyExistsException(const FrameId& nameA, const FrameId& nameB) :
           msg("Transform between " + nameA + " and " + nameB + " already exists") {}
         virtual char const * what() const throw() { return msg.c_str(); }
         const std::string msg;
@@ -26,7 +26,7 @@ namespace envire { namespace core
     class UnknownTransformException : public std::exception
     {
     public:
-      UnknownTransformException(const FrameId& nameA, const FrameId& nameB) :
+      explicit UnknownTransformException(const FrameId& nameA, const FrameId& nameB) :
           msg("Transform between " + nameA + " and " + nameB + " doesn't exists") {}
         virtual char const * what() const throw() { return msg.c_str(); }
         const std::string msg;
@@ -35,7 +35,7 @@ namespace envire { namespace core
     class UnknownFrameException : public std::exception
     {
     public:
-        UnknownFrameException(const FrameId& name) :
+        explicit UnknownFrameException(const FrameId& name) :
           msg("Frame " + name + " doesn't exist") {}
         virtual char const * what() const throw() { return msg.c_str(); }
         const std::string msg;
@@ -44,7 +44,7 @@ namespace envire { namespace core
     class FoundFrameException : public std::exception
     {
     public:
-        FoundFrameException(const FrameId& name) :
+        explicit FoundFrameException(const FrameId& name) :
           msg("Found Frame " + name) {}
         virtual char const * what() const throw() { return msg.c_str(); }
         const std::string msg;
@@ -53,7 +53,7 @@ namespace envire { namespace core
     class FrameAlreadyExistsException : public std::exception
     {
     public:
-        FrameAlreadyExistsException(const FrameId& name) :
+        explicit FrameAlreadyExistsException(const FrameId& name) :
           msg("Frame " + name + " already exists") {}
         virtual char const * what() const throw() { return msg.c_str(); }
         const std::string msg;
@@ -62,7 +62,7 @@ namespace envire { namespace core
     class UnknownItemException : public std::exception
     {
     public:
-        UnknownItemException(const FrameId& name, const boost::uuids::uuid& uuid) :
+        explicit UnknownItemException(const FrameId& name, const boost::uuids::uuid& uuid) :
           msg("The item with uuid '" + boost::uuids::to_string(uuid) + 
               "' is not part of frame '" + name + "'") {}
         virtual char const * what() const throw() { return msg.c_str(); }
@@ -72,7 +72,7 @@ namespace envire { namespace core
     class FrameStillConnectedException : public std::exception
     {
     public:
-        FrameStillConnectedException(const FrameId& name) :
+        explicit FrameStillConnectedException(const FrameId& name) :
           msg("Frame " + name + " is stil connected to the graph. All transforms"
               " coming from or leading to this frame need to be removed"
               " before removing the frame") {}
@@ -83,7 +83,7 @@ namespace envire { namespace core
     class NoItemsOfTypeInFrameException : public std::exception
     {
     public:
-        NoItemsOfTypeInFrameException(const FrameId& name, const std::string& type_name) :
+        explicit NoItemsOfTypeInFrameException(const FrameId& name, const std::string& type_name) :
           msg("There are no items of type '" + type_name + "' in frame '" + name + "'") {}
         virtual char const * what() const throw() { return msg.c_str(); }
         const std::string msg;

@@ -7,7 +7,7 @@ namespace envire { namespace core
     class FrameRemovedEvent : public GraphEvent
     {
     public:
-      FrameRemovedEvent(const FrameId& removedFrame) :
+      explicit FrameRemovedEvent(const FrameId& removedFrame) :
         GraphEvent(GraphEvent::FRAME_REMOVED), removedFrame(removedFrame){}
       FrameId removedFrame;
     };
