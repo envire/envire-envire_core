@@ -198,6 +198,13 @@ namespace envire { namespace core
         template<class T>
         const std::pair<ItemIterator<T>, ItemIterator<T>> getItems(const vertex_descriptor frame) const;
         
+        /**Convenience method that returns the first item of type @p T from @p frame.
+         * @throw UnknownFrameException if the @p frame id is invalid.
+         * @throw NoItemsOfTypeInFrameException if no items of type @p T exist in the frame.*/
+        template <class T>
+        const T getFirstItem(const FrameId& frame) const;
+        
+        
     protected:
         using EdgePair = std::pair<edge_descriptor, bool>;
       
@@ -305,6 +312,28 @@ namespace envire { namespace core
         ItemIterator<T> beginIt(begin, ItemBaseCaster<typename T::element_type>()); 
         ItemIterator<T> endIt(end, ItemBaseCaster<typename T::element_type>()); 
         return std::make_pair(beginIt, endIt);
+    }
+    
+    template <class T>
+    const T TransformGraph::getFirstItem(const FrameId& frame) const
+    {
+        checkItemType<T>();
+        if(vertex(frame) == null_vertex())
+        {
+            throw UnknownFrameException(frame);
+        }
+        const std::unordered_map<std::type_index, Frame::ItemList>& items = (*this)[frame].frame.items;
+        const std::type_index key(typeid(T));
+        if(items.find(key) == items.end())
+        {
+            throw NoItemsOfTypeInFrameException(frame, typeid(T).name());
+        }
+        const Frame::ItemList& list = items.at(std::type_index(typeid(T)));
+        assert(list.size() > 0); //if everything is implemented correctly empty lists can never exist in the map
+        T casted = boost::dynamic_pointer_cast<typename T::element_type>(list.front());
+        //the cast can only fail if there is a programming error somewhere in here...
+        assert(nullptr != casted.get());
+        return casted;
     }
     
     template<class T>

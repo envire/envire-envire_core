@@ -212,6 +212,33 @@ BOOST_AUTO_TEST_CASE(remove_multiple_items_from_frame_test)
     BOOST_CHECK(begin == end);
 }
 
+BOOST_AUTO_TEST_CASE(get_first_item_test)
+{
+    FrameId frame = "Saturn";
+    TransformGraph g;
+    g.addFrame(frame);
+    const string text("Ford... you're turning into a penguin. Stop it.");
+    Item<string>::Ptr item(new Item<string>(text));
+    g.addItemToFrame(frame, item);
+    
+    Item<string>::Ptr retItem = g.getFirstItem<Item<string>::Ptr>(frame);
+    BOOST_CHECK(retItem == item);
+}
+
+BOOST_AUTO_TEST_CASE(get_first_item_on_empty_frame_test)
+{
+    FrameId frame = "Saturn";
+    TransformGraph g;
+    g.addFrame(frame);
+    BOOST_CHECK_THROW(g.getFirstItem<Item<string>::Ptr>(frame), NoItemsOfTypeInFrameException);
+}
+
+BOOST_AUTO_TEST_CASE(get_first_item_on_empty_graph_test)
+{
+    FrameId frame = "blaa";
+    TransformGraph g;
+    BOOST_CHECK_THROW(g.getFirstItem<Item<string>::Ptr>(frame), UnknownFrameException);
+}
 
 BOOST_AUTO_TEST_CASE(remove_transform_event_test)
 {
