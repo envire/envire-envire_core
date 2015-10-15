@@ -27,6 +27,8 @@
 #define BOOST_RESULT_OF_USE_DECLTYPE
 #include <boost/iterator/transform_iterator.hpp>
 #include <envire_core/util/MetaProgramming.hpp>
+#include <envire_core/events/ItemAddedEvent.hpp>
+#include <envire_core/events/ItemRemovedEvent.hpp>
 
 
 namespace envire { namespace core
@@ -272,12 +274,14 @@ namespace envire { namespace core
         }
 
         (*this)[frame].frame.items[std::type_index(typeid(T))].push_back(item);
-        //FIXME event
-        //notify(ItemAddedEvent(frame, item));
+        //FIXME events should somhow carry the type info
+        ItemBase::Ptr baseItem = boost::dynamic_pointer_cast<ItemBase>(item);
+        notify(ItemAddedEvent(frame, baseItem));
     }
     
     template<class T>
-    const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> TransformGraph::getItems(const FrameId& frame) const
+    const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>>
+    TransformGraph::getItems(const FrameId& frame) const
     {
         checkItemType<T>();
         
@@ -304,7 +308,8 @@ namespace envire { namespace core
     }
     
     template<class T>
-    const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> TransformGraph::getItems(const vertex_descriptor frame) const
+    const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> 
+    TransformGraph::getItems(const vertex_descriptor frame) const
     {
         //FIXME implement
         checkItemType<T>();
@@ -336,9 +341,11 @@ namespace envire { namespace core
         //     to const_iterator (which is exactly what we need), but  gcc has not
         //     yet implemented that change. 
         std::vector<ItemBase::Ptr>::iterator nonConstBaseIterator = items.begin() + (baseIterator - items.cbegin()); //vector iterator const cast hack
+        ItemBase::Ptr deletedItem = *nonConstBaseIterator;//backup item so we can notify the user
         std::vector<ItemBase::Ptr>::const_iterator next = items.erase(nonConstBaseIterator);
-        //FIXME event
-        //     notify(ItemRemovedEvent(frame, item));
+        //FIXME events should somhow carry the type info
+        ItemBase::Ptr baseItem = boost::dynamic_pointer_cast<ItemBase>(deletedItem);
+        notify(ItemRemovedEvent(frameId, baseItem));
         ItemIterator<T> nextIt(next, ItemBaseCaster<typename T::element_type>()); 
         ItemIterator<T> endIt(items.cend(), ItemBaseCaster<typename T::element_type>()); 
         return std::make_pair(nextIt, endIt);
@@ -369,8 +376,9 @@ namespace envire { namespace core
             throw UnknownItemException(frameId, item->getID());
         }
         items.erase(searchResult);
-        //FIXME event
-        //notify(ItemRemovedEvent(frame, item));
+        //FIXME events should somhow carry the type info
+        ItemBase::Ptr baseItem = boost::dynamic_pointer_cast<ItemBase>(item);
+        notify(ItemRemovedEvent(frameId, baseItem));
     }
     
 }}

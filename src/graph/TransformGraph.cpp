@@ -9,8 +9,6 @@
 #include <envire_core/events/TransformAddedEvent.hpp>
 #include <envire_core/events/TransformRemovedEvent.hpp>
 #include <envire_core/events/TransformModifiedEvent.hpp>
-#include <envire_core/events/ItemAddedEvent.hpp>
-#include <envire_core/events/ItemRemovedEvent.hpp>
 #include <envire_core/events/FrameAddedEvent.hpp>
 #include <envire_core/events/FrameRemovedEvent.hpp>
 #include <type_traits> //For is_same()
