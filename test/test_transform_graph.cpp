@@ -402,15 +402,18 @@ BOOST_AUTO_TEST_CASE(clear_frame_test)
 
 BOOST_AUTO_TEST_CASE(remove_frame_test)
 {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     FrameId c = "frame_c";
-//     TransformGraph graph;
-//     Transform tf;
-//     graph.addTransform(a, b, tf);
-//     graph.addTransform(a, c, tf);
-//     
-//     BOOST_CHECK_THROW(graph.removeFrame(a), FrameStillConnectedException);
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    TransformGraph graph;
+    Transform tf;
+    graph.addTransform(a, b, tf);
+    graph.addTransform(a, c, tf);
+    
+    BOOST_CHECK_THROW(graph.removeFrame(a), FrameStillConnectedException);
+    graph.disconnectFrame(a);
+    graph.removeFrame(a);
+    BOOST_CHECK_THROW(graph.getFrame(a), UnknownFrameException);
 }
 
 BOOST_AUTO_TEST_CASE(get_edge_invalid_test)
