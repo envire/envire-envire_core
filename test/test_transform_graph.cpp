@@ -136,7 +136,11 @@ BOOST_AUTO_TEST_CASE(add_multiple_items_test)
 
 BOOST_AUTO_TEST_CASE(add_item_to_invalid_frame)
 {
-//TODO
+    FrameId a = "frame_a";
+    const string text("I am so smart, S M A T");
+    TransformGraph g;
+    Item<string>::Ptr item(new Item<string>(text));
+    BOOST_CHECK_THROW(g.addItemToFrame(a, item), UnknownFrameException); 
 }
 
 BOOST_AUTO_TEST_CASE(simple_remove_item_from_frame_test)
@@ -375,6 +379,25 @@ BOOST_AUTO_TEST_CASE(disconnect_frame_test)
     FrameId d = "frame_d";
     BOOST_CHECK_THROW(tree.disconnectFrame(d), UnknownFrameException);
     
+}
+
+
+BOOST_AUTO_TEST_CASE(clear_frame_test)
+{
+    FrameId frame = "frame";
+    TransformGraph g;
+    g.addFrame(frame);
+    const string text("424242");
+    
+    for(int i = 0; i < 3; ++i)
+    {
+        Item<string>::Ptr item(new Item<string>(text));
+        g.addItemToFrame(frame, item);
+    }
+    g.clearFrame(frame);
+    using Iterator = TransformGraph::ItemIterator<Item<string>::Ptr>;
+    Iterator begin, end;
+    BOOST_CHECK_THROW(g.getItems<Item<string>::Ptr>(frame), NoItemsOfTypeInFrameException);
 }
 
 BOOST_AUTO_TEST_CASE(remove_frame_test)

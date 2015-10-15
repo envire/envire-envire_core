@@ -248,43 +248,52 @@ vertex_descriptor TransformGraph::add_vertex(const FrameId& frameId)
     return v;
 }
 
+void TransformGraph::clearFrame(const FrameId& frame)
+{
+    if(vertex(frame) == null_vertex())
+    {
+        throw UnknownFrameException(frame);
+    }    
+    auto& items = (*this)[frame].frame.items;
+    
+    for(Frame::ItemMap::iterator it = items.begin(); it != items.end();)
+    {
+        Frame::ItemList& list = it->second;
+        for(auto it = list.begin(); it != list.end();)
+        {
+            ItemBase::Ptr removedItem = *it;
+            it = list.erase(it);
+            notify(ItemRemovedEvent(frame, removedItem));
+        }
+        it = items.erase(it);
+    }
+}
+
 void TransformGraph::removeFrame(const FrameId& frame)
 {
-//     vertex_descriptor desc = vertex(frame);
-//     if(desc == null_vertex())
-//     {
-//         throw UnknownFrameException(frame);
-//     }
-//     if(boost::degree(desc, *this) > 0)
-//     {
-//         throw FrameStillConnectedException(frame);
-//     }
-//     
-//     //explicitly remove all items from the frame to cause ItemRemovedEvents
-//     auto& items = (*this)[frame].frame.items;
-//     for(auto itemPair : items)
-//     {
-//         Frame::ItemList& list = items.second;
-//         for(ItemBase::Ptr item : list)
-//         {
-//             //note: calling removeItemFromFrame() in here is very inefficient.
-//             //      If this becomes a performance problem one could just generate
-//             //      the events directly in the loop.
-//             //      It was not done this way because it would lower the cohesion
-//             removeItemFromFrame(frame, item);
-//         }
-//     }
-//     
-//     boost::remove_vertex(frame, *this);
-//     //HACK this is a workaround for bug https://svn.boost.org/trac/boost/ticket/9493
-//     //It should be removed as soon as the bug is fixed in boost.
-//     //If the bug is fixed also remove the #define private protected in TransformTreeTypes.hpp
-//     map_type::iterator it = _map.find(frame);
-//     if(it != _map.end())
-//     {
-//         _map.erase(it);
-//     }
-//     notify(FrameRemovedEvent(frame));
+    vertex_descriptor desc = vertex(frame);
+    if(desc == null_vertex())
+    {
+        throw UnknownFrameException(frame);
+    }
+    if(boost::degree(desc, *this) > 0)
+    {
+        throw FrameStillConnectedException(frame);
+    }
+    
+    //explicitly remove all items from the frame to cause ItemRemovedEvents
+    clearFrame(frame);
+    
+    boost::remove_vertex(frame, *this);
+    //HACK this is a workaround for bug https://svn.boost.org/trac/boost/ticket/9493
+    //It should be removed as soon as the bug is fixed in boost.
+    //If the bug is fixed also remove the #define private protected in TransformTreeTypes.hpp
+    map_type::iterator it = _map.find(frame);
+    if(it != _map.end())
+    {
+        _map.erase(it);
+    }
+    notify(FrameRemovedEvent(frame));
 }
 
 const envire::core::Frame& TransformGraph::getFrame(const FrameId& frame) const

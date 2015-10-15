@@ -24,7 +24,8 @@ namespace envire { namespace core
 
         using ItemList = std::vector<ItemBase::Ptr>;
         //contains all items that have been added to the frame sorted by type
-        std::unordered_map<std::type_index, ItemList> items;
+        using ItemMap = std::unordered_map<std::type_index, ItemList>;
+        ItemMap items;
 
     public:
         Frame(const FrameId& _name): 

@@ -156,11 +156,16 @@ namespace envire { namespace core
         /**Removes @p frame from the Graph.
          * A frame can only be removed if there are no transforms connected to
          * or coming from that frame.
-         * @throw UnknownFrameException of the frame does not exist.
+         * @throw UnknownFrameException if the frame does not exist.
          * @ŧhrow FrameStillConnectedException if there are still transforms
          *                                     coming from or leading to this
          *                                     frame. */
         void removeFrame(const FrameId& frame);
+        
+        /**Removes all items from @p frame.
+         * Causes ItemRemovedEvent for each item that is removd.
+         * @throw UnknownFrameException if the frame does not exist.    */
+        void clearFrame(const FrameId& frame);
         
         /**Builds a tree containing all vertices that are accessible starting
          * from @p root.  */
@@ -260,6 +265,12 @@ namespace envire { namespace core
     void TransformGraph::addItemToFrame(const FrameId& frame, T item)
     {
         checkItemType<T>();
+        
+        if(vertex(frame) == null_vertex())
+        {
+            throw UnknownFrameException(frame);
+        }
+
         (*this)[frame].frame.items[std::type_index(typeid(T))].push_back(item);
         //FIXME event
         //notify(ItemAddedEvent(frame, item));
