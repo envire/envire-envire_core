@@ -237,20 +237,13 @@ namespace envire { namespace core
         const Transform getTransform(const FrameId& origin, const FrameId& target,
                                     const vertex_descriptor originVertex,
                                     const vertex_descriptor targetVertex) const;
-//     if(vertex(frame) == null_vertex())
-//     {
-//         throw UnknownFrameException(frame);
-//     }
-//     vector<ItemBase::Ptr>& items = (*this)[frame].frame.items;
-//     auto it = std::find(items.begin(), items.end(), item);
-//     if(it == items.end())
-//     {
-//         throw UnknownItemException(frame, item);
-//     }
-//     items.erase(it);
-//     notify(ItemRemovedEvent(frame, item));
+
         /**Sets the transform value and causes transformModified event. */
         void updateTransform(edge_descriptor ed, const Transform& tf);
+        
+        template<class T>
+        const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> 
+        getItemsInternal(const vertex_descriptor frame, const FrameId& frameId) const;
         
     private:
       /**Ensures that T is ItemBase::PtrType<X> where X derives from ItemBase  */
@@ -291,18 +284,33 @@ namespace envire { namespace core
     TransformGraph::getItems(const FrameId& frame) const
     {
         checkItemType<T>();
-        
-        if(vertex(frame) == null_vertex())
+        const vertex_descriptor desc = vertex(frame);
+        if(desc == null_vertex())
         {
             throw UnknownFrameException(frame);
         }
 
-        const std::unordered_map<std::type_index, Frame::ItemList>& items = (*this)[frame].frame.items;
+        return getItemsInternal<T>(desc, frame);
+    }
+    
+    template<class T>
+    const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> 
+    TransformGraph::getItems(const vertex_descriptor frame) const
+    {
+        checkItemType<T>();
+        return getItemsInternal<T>(frame, getFrameId(frame));
+    }  
+    
+    template<class T>
+    const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> 
+    TransformGraph::getItemsInternal(const vertex_descriptor frame, const FrameId& frameId) const
+    {
+        const std::unordered_map<std::type_index, Frame::ItemList>& items = graph()[frame].frame.items;
         const std::type_index key(typeid(T));
         
         if(items.find(key) == items.end())
         {
-            throw NoItemsOfTypeInFrameException(frame, typeid(T).name());
+            throw NoItemsOfTypeInFrameException(frameId, typeid(T).name());
         }
         
         auto begin = items.at(std::type_index(typeid(T))).begin();
@@ -311,8 +319,9 @@ namespace envire { namespace core
         //T::element_type only works if T is a shared_ptr
         ItemIterator<T> beginIt(begin, ItemBaseCaster<typename T::element_type>()); 
         ItemIterator<T> endIt(end, ItemBaseCaster<typename T::element_type>()); 
-        return std::make_pair(beginIt, endIt);
+        return std::make_pair(beginIt, endIt);        
     }
+    
     
     template <class T>
     const T TransformGraph::getFirstItem(const FrameId& frame) const
@@ -334,16 +343,7 @@ namespace envire { namespace core
         //the cast can only fail if there is a programming error somewhere in here...
         assert(nullptr != casted.get());
         return casted;
-    }
-    
-    template<class T>
-    const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> 
-    TransformGraph::getItems(const vertex_descriptor frame) const
-    {
-        //FIXME implement
-        checkItemType<T>();
-        throw "NOT IMPLEMENTED";
-    }    
+    }  
     
     template <class T>
     std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>>
