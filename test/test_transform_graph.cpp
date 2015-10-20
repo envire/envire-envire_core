@@ -178,7 +178,10 @@ BOOST_AUTO_TEST_CASE(simple_remove_item_from_frame_test)
     g.addItemToFrame(frame, item);
     
     g.removeItemFromFrame(frame, item);
-    BOOST_CHECK_THROW(g.getItems<Item<string>::Ptr>(frame), NoItemsOfTypeInFrameException);
+    using Iterator = TransformGraph::ItemIterator<Item<string>::Ptr>;
+    Iterator begin, end;
+    boost::tie(begin, end) = g.getItems<Item<string>::Ptr>(frame);
+    BOOST_CHECK(begin == end);
 }
 
 BOOST_AUTO_TEST_CASE(remove_item_that_has_never_been_added_test)
@@ -230,7 +233,9 @@ BOOST_AUTO_TEST_CASE(remove_multiple_items_from_frame_test)
         boost::tie(begin, end) = g.removeItemFromFrame(frame, begin);
     }
     BOOST_CHECK(begin == end);
-    BOOST_CHECK_THROW(g.getItems<Item<string>::Ptr>(frame), NoItemsOfTypeInFrameException);
+    boost::tie(begin, end) = g.getItems<Item<string>::Ptr>(frame);
+    BOOST_CHECK(begin == end);
+   
 }
 
 BOOST_AUTO_TEST_CASE(get_first_item_test)
@@ -252,7 +257,7 @@ BOOST_AUTO_TEST_CASE(get_first_item_on_empty_frame_test)
     TransformGraph g;
     g.addFrame(frame);
     BOOST_CHECK_THROW(g.getFirstItem<Item<string>::Ptr>(frame), NoItemsOfTypeInFrameException);
-}
+}   
 
 BOOST_AUTO_TEST_CASE(get_first_item_on_empty_graph_test)
 {
@@ -282,7 +287,7 @@ BOOST_AUTO_TEST_CASE(remove_transform_event_test)
 BOOST_AUTO_TEST_CASE(simple_remove_transform_test)
 {
     FrameId a = "frame_a";
-    FrameId b = "frame_b";
+    FrameId b = "frame_b";   
     TransformGraph tree;
     Transform tf;
     tf.transform.translation << 42, 21, -42;
@@ -444,7 +449,8 @@ BOOST_AUTO_TEST_CASE(clear_frame_test)
     g.clearFrame(frame);
     using Iterator = TransformGraph::ItemIterator<Item<string>::Ptr>;
     Iterator begin, end;
-    BOOST_CHECK_THROW(g.getItems<Item<string>::Ptr>(frame), NoItemsOfTypeInFrameException);
+    boost::tie(begin, end) = g.getItems<Item<string>::Ptr>(frame);
+    BOOST_CHECK(begin == end);
 }
 
 BOOST_AUTO_TEST_CASE(remove_frame_test)

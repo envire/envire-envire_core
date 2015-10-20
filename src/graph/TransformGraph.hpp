@@ -185,9 +185,9 @@ namespace envire { namespace core
         
         /**Returns all items of type @p T that are stored in @p frame.
          * @throw UnknownFrameException if the @p frame id is invalid.
-         * @throw NoItemsOfTypeInFrameException if no items of the given type exist in the frame.
          * @param T has to be of type ItemBase::PtrType<X> where X derives from ItemBase.
-         * @return a pair iterators [begin, end] */
+         * @return a pair iterators [begin, end]. If no items of type @p T
+         *         exist, both iterators are equal and invalid */
         template<class T>
         const std::pair<ItemIterator<T>, ItemIterator<T>> getItems(const FrameId& frame) const;
         template<class T>
@@ -310,7 +310,8 @@ namespace envire { namespace core
         
         if(items.find(key) == items.end())
         {
-            throw NoItemsOfTypeInFrameException(frameId, typeid(T).name());
+            ItemIterator<T> invalid;
+            return std::make_pair(invalid, invalid);
         }
         
         auto begin = items.at(std::type_index(typeid(T))).begin();
