@@ -23,7 +23,10 @@ public:
     vector<TransformModifiedEvent> transformModifiedEvents;
     vector<TransformRemovedEvent> transformRemovedEvents;
     vector<FrameAddedEvent> frameAddedEvents;
-
+    
+    Dispatcher(TransformGraph& graph) : GraphEventDispatcher(graph) {}
+    virtual ~Dispatcher() {}
+    
     virtual void transformAdded(const TransformAddedEvent& e)
     {
         transformAddedEvents.push_back(e);
@@ -52,6 +55,10 @@ struct ItemEventSubscriber : public GraphItemEventDispatcher<Item<string>::Ptr>,
     vector<TypedItemAddedEvent<Item<int>::Ptr>> intItemAddedEvents;
     vector<TypedItemAddedEvent<Item<float>::Ptr>> floatItemAddedEvents; 
 
+    ItemEventSubscriber(TransformGraph& graph) : 
+      GraphItemEventDispatcher<Item<string>::Ptr>(graph),
+      GraphItemEventDispatcher<Item<int>::Ptr>(graph),
+      GraphItemEventDispatcher<Item<float>::Ptr>(graph) {}
 
     virtual void itemAdded(const TypedItemAddedEvent<Item<string>::Ptr>& event)
     {
@@ -258,20 +265,18 @@ BOOST_AUTO_TEST_CASE(remove_transform_event_test)
 {
     FrameId a = "frame_a";
     FrameId b = "frame_b";
-    TransformGraph tree;
+    TransformGraph graph;
     Transform tf;
     tf.transform.translation << 42, 21, -42;
     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
-    tree.addTransform(a, b, tf);
-    Dispatcher d;
-    tree.subscribe(&d);  
-    tree.removeTransform(a, b);
-    tree.unsubscribe(&d);
-    BOOST_CHECK(d->transformRemovedEvents.size() == 2);
-    BOOST_CHECK(d->transformRemovedEvents[0].origin == a);
-    BOOST_CHECK(d->transformRemovedEvents[0].target == b);
-    BOOST_CHECK(d->transformRemovedEvents[1].origin == b);
-    BOOST_CHECK(d->transformRemovedEvents[1].target == a);
+    graph.addTransform(a, b, tf);
+    Dispatcher d(graph);
+    graph.removeTransform(a, b);
+    BOOST_CHECK(d.transformRemovedEvents.size() == 2);
+    BOOST_CHECK(d.transformRemovedEvents[0].origin == a);
+    BOOST_CHECK(d.transformRemovedEvents[0].target == b);
+    BOOST_CHECK(d.transformRemovedEvents[1].origin == b);
+    BOOST_CHECK(d.transformRemovedEvents[1].target == a);
 }
 
 BOOST_AUTO_TEST_CASE(simple_remove_transform_test)
@@ -476,23 +481,21 @@ BOOST_AUTO_TEST_CASE(frame_added_event_test)
     FrameId b = "frame_b";
     TransformGraph graph;
     Transform tf;  
-    Dispatcher d;
-    graph.subscribe(&d);
+    Dispatcher d(graph);
     graph.addFrame(a);
-    graph.unsubscribe(&d);
-    BOOST_CHECK(d->frameAddedEvents.size() == 1);
-    BOOST_CHECK(d->frameAddedEvents[0].addedFrame == a);
+    BOOST_CHECK(d.frameAddedEvents.size() == 1);
+    BOOST_CHECK(d.frameAddedEvents[0].addedFrame == a);
     
     graph.addTransform(a, b, tf);
-    BOOST_CHECK(d->frameAddedEvents.size() == 2);
-    BOOST_CHECK(d->frameAddedEvents[1].addedFrame == b);
+    BOOST_CHECK(d.frameAddedEvents.size() == 2);
+    BOOST_CHECK(d.frameAddedEvents[1].addedFrame == b);
 
     FrameId c = "frame_c";
     FrameId e = "frame_d";
     graph.addTransform(c, e, tf);
-    BOOST_CHECK(d->frameAddedEvents.size() == 4);
-    BOOST_CHECK(d->frameAddedEvents[2].addedFrame == c);
-    BOOST_CHECK(d->frameAddedEvents[3].addedFrame == e);
+    BOOST_CHECK(d.frameAddedEvents.size() == 4);
+    BOOST_CHECK(d.frameAddedEvents[2].addedFrame == c);
+    BOOST_CHECK(d.frameAddedEvents[3].addedFrame == e);
     
     BOOST_CHECK_THROW(graph.addFrame(a), FrameAlreadyExistsException);
 }
@@ -501,28 +504,27 @@ BOOST_AUTO_TEST_CASE(modify_transform_event_test)
 {
     FrameId a = "frame_a";
     FrameId b = "frame_b";
-    TransformGraph tree;
+    TransformGraph graph;
     Transform tf;
     tf.transform.translation << 42, 21, -42;
     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
-    tree.addTransform(a, b, tf);
+    graph.addTransform(a, b, tf);
 
-    std::shared_ptr<Dispatcher> d(new Dispatcher());
-    tree.subscribe(d);
+    Dispatcher d(graph);
     Transform tf2;
     tf2.transform.translation << 0, 1, 2; 
     tf2.transform.orientation = base::AngleAxisd(0.42, base::Vector3d::UnitY());
-    tree.updateTransform(a, b, tf2);
-    BOOST_CHECK(d->transformModifiedEvents.size() == 1);
+    graph.updateTransform(a, b, tf2);
+    BOOST_CHECK(d.transformModifiedEvents.size() == 1);
     Transform tf2Inv = tf2;
     tf2Inv.setTransform(tf2.transform.inverse());
     Transform tfInv = tf;
     tfInv.setTransform(tf.transform.inverse());
     
-    BOOST_CHECK(d->transformModifiedEvents[0].origin == a);
-    BOOST_CHECK(d->transformModifiedEvents[0].target == b);
-    BOOST_CHECK(d->transformModifiedEvents[0].edge == tree.getEdge(a, b));
-    BOOST_CHECK(d->transformModifiedEvents[0].inverseEdge == tree.getEdge(b, a));
+    BOOST_CHECK(d.transformModifiedEvents[0].origin == a);
+    BOOST_CHECK(d.transformModifiedEvents[0].target == b);
+    BOOST_CHECK(d.transformModifiedEvents[0].edge == graph.getEdge(a, b));
+    BOOST_CHECK(d.transformModifiedEvents[0].inverseEdge == graph.getEdge(b, a));
 }
 
 BOOST_AUTO_TEST_CASE(operations_with_transform)
@@ -659,25 +661,24 @@ BOOST_AUTO_TEST_CASE(simple_add_transform_event_test)
 {
     FrameId a = "frame_a";
     FrameId b = "frame_b";
-    TransformGraph tree;
+    TransformGraph graph;
     Transform tf;
     tf.transform.translation << 42, 21, -42;
     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
 
-    std::shared_ptr<Dispatcher> d(new Dispatcher());
+    Dispatcher d(graph);
 
-    tree.subscribe(d);
-    tree.addTransform(a, b, tf);
-    BOOST_CHECK(d->transformAddedEvents.size() == 2);
-    edge_descriptor aToB = tree.getEdge(a, b);
-    BOOST_CHECK(d->transformAddedEvents[0].edge == aToB);
-    edge_descriptor bToA = tree.getEdge(b, a);
-    BOOST_CHECK(d->transformAddedEvents[1].edge == bToA);
+    graph.addTransform(a, b, tf);
+    BOOST_CHECK(d.transformAddedEvents.size() == 2);
+    edge_descriptor aToB = graph.getEdge(a, b);
+    BOOST_CHECK(d.transformAddedEvents[0].edge == aToB);
+    edge_descriptor bToA = graph.getEdge(b, a);
+    BOOST_CHECK(d.transformAddedEvents[1].edge == bToA);
     //annoying amount of checks because there is no operator== in eigen
-    BOOST_CHECK(compareTransform(d->transformAddedEvents[0].transform, tf));
+    BOOST_CHECK(compareTransform(d.transformAddedEvents[0].transform, tf));
     Transform invTf = tf;
     invTf.setTransform(tf.transform.inverse());
-    BOOST_CHECK(compareTransform(d->transformAddedEvents[1].transform, invTf));
+    BOOST_CHECK(compareTransform(d.transformAddedEvents[1].transform, invTf));
 }
 
 
@@ -801,31 +802,24 @@ BOOST_AUTO_TEST_CASE(add_item_event_test)
     Item<int>::Ptr item2(new Item<int>(42));
     Item<float>::Ptr item3(new Item<float>(21.0f)); 
     
-    std::shared_ptr<ItemEventSubscriber> sub(new ItemEventSubscriber());
-    
-    graph.subscribe(std::dynamic_pointer_cast<GraphItemEventDispatcher<Item<string>::Ptr>>(sub));
-    graph.subscribe(std::dynamic_pointer_cast<GraphItemEventDispatcher<Item<int>::Ptr>>(sub));
-    graph.subscribe(std::dynamic_pointer_cast<GraphItemEventDispatcher<Item<float>::Ptr>>(sub));
-    
+    ItemEventSubscriber sub(graph);
+
     graph.addItemToFrame(a, item1);
     graph.addItemToFrame(b, item2);
     graph.addItemToFrame(a, item3);
     
-    graph.unsubscribe(std::dynamic_pointer_cast<GraphItemEventDispatcher<Item<string>::Ptr>>(sub));
-    graph.unsubscribe(std::dynamic_pointer_cast<GraphItemEventDispatcher<Item<int>::Ptr>>(sub));
-    graph.unsubscribe(std::dynamic_pointer_cast<GraphItemEventDispatcher<Item<float>::Ptr>>(sub));  
+
     
+    BOOST_CHECK(sub.floatItemAddedEvents.size() == 1);
+    BOOST_CHECK(sub.intItemAddedEvents.size() == 1);
+    BOOST_CHECK(sub.stringItemAddedEvents.size() == 1);   
     
-    BOOST_CHECK(sub->floatItemAddedEvents.size() == 1);
-    BOOST_CHECK(sub->intItemAddedEvents.size() == 1);
-    BOOST_CHECK(sub->stringItemAddedEvents.size() == 1);   
-    
-    BOOST_CHECK(sub->floatItemAddedEvents.front().frame == a);
-    BOOST_CHECK(sub->intItemAddedEvents.front().frame == b);
-    BOOST_CHECK(sub->stringItemAddedEvents.front().frame == a);
-    BOOST_CHECK(sub->stringItemAddedEvents.front().item == item1);
-    BOOST_CHECK(sub->intItemAddedEvents.front().item == item2);
-    BOOST_CHECK(sub->floatItemAddedEvents.front().item == item3);
+    BOOST_CHECK(sub.floatItemAddedEvents.front().frame == a);
+    BOOST_CHECK(sub.intItemAddedEvents.front().frame == b);
+    BOOST_CHECK(sub.stringItemAddedEvents.front().frame == a);
+    BOOST_CHECK(sub.stringItemAddedEvents.front().item == item1);
+    BOOST_CHECK(sub.intItemAddedEvents.front().item == item2);
+    BOOST_CHECK(sub.floatItemAddedEvents.front().item == item3);
 }
 
 BOOST_AUTO_TEST_CASE(multiple_item_event_destructor_test)
@@ -834,24 +828,19 @@ BOOST_AUTO_TEST_CASE(multiple_item_event_destructor_test)
                                  public GraphItemEventDispatcher<Item<int>::Ptr>,
                                  public GraphItemEventDispatcher<Item<float>::Ptr>
     {
-        TransformGraph graph;
-
-        ItemEventSubscriber()
+        ItemEventSubscriber(TransformGraph& graph) : 
+        GraphItemEventDispatcher<Item<string>::Ptr>(graph),
+        GraphItemEventDispatcher<Item<int>::Ptr>(graph),
+        GraphItemEventDispatcher<Item<float>::Ptr>(graph)
         {
-            graph.subscribe((GraphItemEventDispatcher<Item<int>::Ptr>*)this);
-            graph.subscribe((GraphItemEventDispatcher<Item<float>::Ptr>*)this);
-            graph.subscribe((GraphItemEventDispatcher<Item<string>::Ptr>*)this);
         }
         
-        ~ItemEventSubscriber()
+        virtual ~ItemEventSubscriber()
         {
-          //FIXME geht das?
-            graph.unsubscribe(this);
-            graph.unsubscribe(this);
-            graph.unsubscribe(this);
         }
     };
-    ItemEventSubscriber s;
+    TransformGraph g;
+    ItemEventSubscriber s(g);
 }
 
 
@@ -875,22 +864,22 @@ BOOST_AUTO_TEST_CASE(remove_item_event_test)
 //     graph.addItemToFrame(a, item3);
 // 
 //     graph.removeItemFromFrame(a, item1);
-//     BOOST_CHECK(d->itemRemovedEvents.size() == 1);
-//     BOOST_CHECK(d->itemRemovedEvents[0].frame == a);
-//     BOOST_CHECK(d->itemRemovedEvents[0].item == item1);
+//     BOOST_CHECK(d.itemRemovedEvents.size() == 1);
+//     BOOST_CHECK(d.itemRemovedEvents[0].frame == a);
+//     BOOST_CHECK(d.itemRemovedEvents[0].item == item1);
 // 
 //     graph.removeItemFromFrame(a, item3);
-//     BOOST_CHECK(d->itemRemovedEvents.size() == 2);
-//     BOOST_CHECK(d->itemRemovedEvents[1].frame == a);
-//     BOOST_CHECK(d->itemRemovedEvents[1].item == item3);
+//     BOOST_CHECK(d.itemRemovedEvents.size() == 2);
+//     BOOST_CHECK(d.itemRemovedEvents[1].frame == a);
+//     BOOST_CHECK(d.itemRemovedEvents[1].item == item3);
 //     
 //     using Iterator = TransformGraph::ItemIterator<Item<int>::Ptr>;
 //     Iterator begin, end;
 //     boost::tie(begin, end) = graph.getItems<Item<int>::Ptr>(b);
 //     graph.removeItemFromFrame(b, begin);
-//     BOOST_CHECK(d->itemRemovedEvents.size() == 3);
-//     BOOST_CHECK(d->itemRemovedEvents[2].frame == b);
-//     BOOST_CHECK(d->itemRemovedEvents[2].item == item2);
+//     BOOST_CHECK(d.itemRemovedEvents.size() == 3);
+//     BOOST_CHECK(d.itemRemovedEvents[2].frame == b);
+//     BOOST_CHECK(d.itemRemovedEvents[2].item == item2);
 }
 
 BOOST_AUTO_TEST_CASE(contains_item_test)

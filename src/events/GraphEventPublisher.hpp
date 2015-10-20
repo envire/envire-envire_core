@@ -1,5 +1,5 @@
 /*
- * FrameEventPublisher.hpp
+ * GraphEventPublisher.hpp
  *
  *  Created on: Sep 16, 2015
  *      Author: aboeckmann
@@ -7,15 +7,12 @@
 
 #pragma once
 #include <vector>
-#include <cassert>
-#include <memory>
-
 #include "GraphEvent.hpp"
-#include "GraphEventSubscriber.hpp"
 
 namespace envire { namespace core
 {
     class GraphEvent;
+    class GraphEventSubscriber;
 
     /**
      * Base class for frame-event publishers.

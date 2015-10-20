@@ -41,6 +41,7 @@ rock_library(envire_core
             plugin/ClassLoader.cpp
             events/GraphEventPublisher.cpp
             events/GraphEventDispatcher.cpp
+            events/GraphEventSubscriber.cpp
             graph/TransformGraph.cpp
             serialization/Serialization.cpp
     DEPS_CMAKE Boost

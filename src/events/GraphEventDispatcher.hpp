@@ -13,6 +13,7 @@ namespace envire { namespace core
     class ItemRemovedEvent;
     class FrameAddedEvent;
     class FrameRemovedEvent;
+    class GraphEventPublisher;
 
     /**
      * A GraphEventSubscriber that parses the event and calls different methods
@@ -25,6 +26,7 @@ namespace envire { namespace core
     class GraphEventDispatcher : public GraphEventSubscriber
     {
     public:
+        GraphEventDispatcher(GraphEventPublisher& publisher);
         virtual ~GraphEventDispatcher() {}
         virtual void notifyTreeEvent(const GraphEvent& event);
 

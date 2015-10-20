@@ -1,5 +1,6 @@
 #pragma once
 #include "GraphEventSubscriber.hpp"
+#include "GraphEventPublisher.hpp"
 #include "ItemAddedEvent.hpp"
 #include <envire_core/util/MetaProgramming.hpp>
 #include <typeindex>
@@ -7,8 +8,7 @@
 
 namespace envire { namespace core
 {
-
-    /**
+     /**
      * A special GraphEventSubscriber that is responsible for handling
      * item events in a type safe way.
      * @param T The type if the item that you care about.
@@ -18,8 +18,9 @@ namespace envire { namespace core
     class GraphItemEventDispatcher : public GraphEventSubscriber
     {
     public:
-        GraphItemEventDispatcher() :  itemType(typeid(ItemType)) {}
-        
+        GraphItemEventDispatcher(GraphEventPublisher& publisher) :
+            GraphEventSubscriber(publisher), itemType(typeid(ItemType)){}
+
         virtual ~GraphItemEventDispatcher() {}
         
         void notifyTreeEvent(const GraphEvent& event)
@@ -37,6 +38,7 @@ namespace envire { namespace core
                 }
                     break;
                 case GraphEvent::ITEM_REMOVED_FROM_FRAME:  
+                    //TODO
                     break;
                 default:
                   //don't care about anything else

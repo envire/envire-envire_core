@@ -1,12 +1,13 @@
 /*
- * TreeEventPublisher.cpp
+ * GraphEventPublisher.cpp
  *
  *  Created on: Sep 16, 2015
  *      Author: aboeckmann
  */
 #include <algorithm>
 #include "GraphEventPublisher.hpp"
-
+#include "GraphEventSubscriber.hpp"
+#include <cassert>
 
 using namespace envire::core;
 using namespace std;

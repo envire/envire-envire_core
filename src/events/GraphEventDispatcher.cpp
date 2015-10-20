@@ -12,6 +12,10 @@
 
 using namespace envire::core;
 
+GraphEventDispatcher::GraphEventDispatcher(GraphEventPublisher& publisher): GraphEventSubscriber(publisher)
+{}
+
+
 void GraphEventDispatcher::notifyTreeEvent(const GraphEvent& event)
 {
     switch(event.type)
