@@ -275,7 +275,7 @@ namespace envire { namespace core
         (*this)[frame].frame.items[std::type_index(typeid(T))].push_back(item);
         //FIXME events should somhow carry the type info
         ItemBase::Ptr baseItem = boost::dynamic_pointer_cast<ItemBase>(item);
-        notify(ItemAddedEvent(frame, baseItem));
+        notify(ItemAddedEvent(frame, baseItem, std::type_index(typeid(T))));
     }
     
     template<class T>

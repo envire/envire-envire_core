@@ -28,6 +28,7 @@ rock_library(envire_core
             events/ItemRemovedEvent.hpp
             events/FrameAddedEvent.hpp
             events/FrameRemovedEvent.hpp
+            events/GraphItemEventDispatcher.hpp
             serialization/Serialization.hpp
             serialization/SerializationHandle.hpp
             serialization/SerializationRegistration.hpp

@@ -27,5 +27,6 @@
 #include "events/ItemAddedEvent.hpp"
 #include "events/ItemRemovedEvent.hpp"
 #include "events/FrameAddedEvent.hpp"
+#include "events/GraphItemEventDispatcher.hpp"
 
 #endif // ENVIRE_CORE_H
