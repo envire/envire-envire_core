@@ -372,19 +372,20 @@ namespace envire { namespace core
         std::vector<ItemBase::Ptr>::iterator nonConstBaseIterator = items.begin() + (baseIterator - items.cbegin()); //vector iterator const cast hack
         ItemBase::Ptr deletedItem = *nonConstBaseIterator;//backup item so we can notify the user
         std::vector<ItemBase::Ptr>::const_iterator next = items.erase(nonConstBaseIterator);
-        //FIXME events should somhow carry the type info
+
         ItemBase::Ptr baseItem = boost::dynamic_pointer_cast<ItemBase>(deletedItem);
-        notify(ItemRemovedEvent(frameId, baseItem));
+        notify(ItemRemovedEvent(frameId, baseItem, key));
+        
         ItemIterator<T> nextIt(next, ItemBaseCaster<typename T::element_type>()); 
         ItemIterator<T> endIt(items.cend(), ItemBaseCaster<typename T::element_type>()); 
         
         //remove the map entry if there are no more values in the vector
         if(nextIt == endIt)
         {
+          //erase invalidates the iterators that we are about to return, but
+          //that doesnt matter because it only happens when they both point
+          //to end() anyway.
           frame.items.erase(key);
-          //it is ok to remove the vector even though we are returning iterators
-          //to the vector because both of them point to end() anyway (i.e. they
-          //are invalid anyway).
         }
         
         return std::make_pair(nextIt, endIt);
@@ -420,9 +421,8 @@ namespace envire { namespace core
         {
             frame.items.erase(key);
         }
-        //FIXME events should somhow carry the type info
         ItemBase::Ptr baseItem = boost::dynamic_pointer_cast<ItemBase>(item);
-        notify(ItemRemovedEvent(frameId, baseItem));
+        notify(ItemRemovedEvent(frameId, baseItem, key));
     }   
     
     template <class T>

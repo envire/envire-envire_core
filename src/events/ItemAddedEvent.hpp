@@ -19,7 +19,7 @@ namespace envire { namespace core
       std::type_index itemType; /**<Actual type of the item, can be used for downcasting */
     };
     
-    //FIXME comments
+    //a type safe version of the above event
     template <class T>
     struct TypedItemAddedEvent 
     {

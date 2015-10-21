@@ -256,12 +256,13 @@ void TransformGraph::clearFrame(const FrameId& frame)
     
     for(Frame::ItemMap::iterator it = items.begin(); it != items.end();)
     {
+        std::type_index key = it->first;
         Frame::ItemList& list = it->second;
         for(auto it = list.begin(); it != list.end();)
         {
             ItemBase::Ptr removedItem = *it;
             it = list.erase(it);
-            notify(ItemRemovedEvent(frame, removedItem));
+            notify(ItemRemovedEvent(frame, removedItem, key));
         }
         it = items.erase(it);
     }
@@ -284,7 +285,6 @@ void TransformGraph::removeFrame(const FrameId& frame)
     
     boost::remove_vertex(frame, *this);
     //HACK this is a workaround for bug https://svn.boost.org/trac/boost/ticket/9493
-    //It should be removed as soon as the bug is fixed in boost.
     //If the bug is fixed also remove the #define private protected in TransformTreeTypes.hpp
     map_type::iterator it = _map.find(frame);
     if(it != _map.end())

@@ -47,6 +47,8 @@ public:
     }
 };
 
+
+//a simple item event subscriber that logs all events
 struct ItemEventSubscriber : public GraphItemEventDispatcher<Item<string>::Ptr>,
                              public GraphItemEventDispatcher<Item<int>::Ptr>,
                              public GraphItemEventDispatcher<Item<float>::Ptr>
@@ -54,6 +56,9 @@ struct ItemEventSubscriber : public GraphItemEventDispatcher<Item<string>::Ptr>,
     vector<TypedItemAddedEvent<Item<string>::Ptr>> stringItemAddedEvents;
     vector<TypedItemAddedEvent<Item<int>::Ptr>> intItemAddedEvents;
     vector<TypedItemAddedEvent<Item<float>::Ptr>> floatItemAddedEvents; 
+    vector<TypedItemRemovedEvent<Item<string>::Ptr>> stringItemRemovedEvents;
+    vector<TypedItemRemovedEvent<Item<int>::Ptr>> intItemRemovedEvents;
+    vector<TypedItemRemovedEvent<Item<float>::Ptr>> floatItemRemovedEvents; 
 
     ItemEventSubscriber(TransformGraph& graph) : 
       GraphItemEventDispatcher<Item<string>::Ptr>(graph),
@@ -74,6 +79,22 @@ struct ItemEventSubscriber : public GraphItemEventDispatcher<Item<string>::Ptr>,
     {
         floatItemAddedEvents.push_back(event);
     }
+    
+    virtual void itemRemoved(const TypedItemRemovedEvent<Item<string>::Ptr>& event)
+    {
+        stringItemRemovedEvents.push_back(event);
+    }
+    
+    virtual void itemRemoved(const TypedItemRemovedEvent<Item<int>::Ptr>& event)
+    {
+        intItemRemovedEvents.push_back(event);
+    }
+    
+    virtual void itemRemoved(const TypedItemRemovedEvent<Item<float>::Ptr>& event)
+    {
+        floatItemRemovedEvents.push_back(event);
+    }
+    
 };
 
 
@@ -852,40 +873,38 @@ BOOST_AUTO_TEST_CASE(multiple_item_event_destructor_test)
 
 BOOST_AUTO_TEST_CASE(remove_item_event_test)
 {
-  //FIXME remove item event test
-//     TransformGraph graph;
-//     FrameId a("a");
-//     FrameId b("b");
-//     Transform tf;
-//     
-//     graph.addTransform(a, b, tf);
-//     Item<string>::Ptr item1(new Item<string>("The ships hung in the sky in much the same way that bricks don't."));
-//     Item<int>::Ptr item2(new Item<int>(42));
-//     Item<float>::Ptr item3(new Item<float>(21.0f)); 
-//     
-//     std::shared_ptr<Dispatcher> d(new Dispatcher());
-//     graph.subscribe(d);
-//     graph.addItemToFrame(a, item1);
-//     graph.addItemToFrame(b, item2);
-//     graph.addItemToFrame(a, item3);
-// 
-//     graph.removeItemFromFrame(a, item1);
-//     BOOST_CHECK(d.itemRemovedEvents.size() == 1);
-//     BOOST_CHECK(d.itemRemovedEvents[0].frame == a);
-//     BOOST_CHECK(d.itemRemovedEvents[0].item == item1);
-// 
-//     graph.removeItemFromFrame(a, item3);
-//     BOOST_CHECK(d.itemRemovedEvents.size() == 2);
-//     BOOST_CHECK(d.itemRemovedEvents[1].frame == a);
-//     BOOST_CHECK(d.itemRemovedEvents[1].item == item3);
-//     
-//     using Iterator = TransformGraph::ItemIterator<Item<int>::Ptr>;
-//     Iterator begin, end;
-//     boost::tie(begin, end) = graph.getItems<Item<int>::Ptr>(b);
-//     graph.removeItemFromFrame(b, begin);
-//     BOOST_CHECK(d.itemRemovedEvents.size() == 3);
-//     BOOST_CHECK(d.itemRemovedEvents[2].frame == b);
-//     BOOST_CHECK(d.itemRemovedEvents[2].item == item2);
+    TransformGraph graph;
+    FrameId a("a");
+    FrameId b("b");
+    Transform tf;
+    
+    graph.addTransform(a, b, tf);
+    Item<string>::Ptr item1(new Item<string>("The ships hung in the sky in much the same way that bricks don't."));
+    Item<int>::Ptr item2(new Item<int>(42));
+    Item<float>::Ptr item3(new Item<float>(21.0f)); 
+    
+    ItemEventSubscriber sub(graph);
+    graph.addItemToFrame(a, item1);
+    graph.addItemToFrame(b, item2);
+    graph.addItemToFrame(a, item3);
+    
+    graph.removeItemFromFrame(a, item1);
+    BOOST_CHECK(sub.stringItemRemovedEvents.size() == 1);
+    BOOST_CHECK(sub.stringItemRemovedEvents.front().frame == a);
+    BOOST_CHECK(sub.stringItemRemovedEvents.front().item == item1);
+
+    graph.removeItemFromFrame(a, item3);
+    BOOST_CHECK(sub.floatItemRemovedEvents.size() == 1);
+    BOOST_CHECK(sub.floatItemRemovedEvents.front().frame == a);
+    BOOST_CHECK(sub.floatItemRemovedEvents.front().item == item3);
+    
+    using Iterator = TransformGraph::ItemIterator<Item<int>::Ptr>;
+    Iterator begin, end;
+    boost::tie(begin, end) = graph.getItems<Item<int>::Ptr>(b);
+    graph.removeItemFromFrame(b, begin);
+    BOOST_CHECK(sub.intItemRemovedEvents.size() == 1);
+    BOOST_CHECK(sub.intItemRemovedEvents.front().frame == b);
+    BOOST_CHECK(sub.intItemRemovedEvents.front().item == item2);
 }
 
 BOOST_AUTO_TEST_CASE(contains_item_test)

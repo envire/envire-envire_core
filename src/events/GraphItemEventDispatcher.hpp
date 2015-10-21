@@ -2,6 +2,7 @@
 #include "GraphEventSubscriber.hpp"
 #include "GraphEventPublisher.hpp"
 #include "ItemAddedEvent.hpp"
+#include "ItemRemovedEvent.hpp"
 #include <envire_core/util/MetaProgramming.hpp>
 #include <typeindex>
 
@@ -17,6 +18,7 @@ namespace envire { namespace core
     template <class T>
     class GraphItemEventDispatcher : public GraphEventSubscriber
     {
+        using Type = typename extract_value_type<T>::value_type;
     public:
         GraphItemEventDispatcher(GraphEventPublisher& publisher) :
             GraphEventSubscriber(publisher), itemType(typeid(ItemType)){}
@@ -32,13 +34,18 @@ namespace envire { namespace core
                     const ItemAddedEvent& itemEvent = dynamic_cast<const ItemAddedEvent&>(event);
                     if(itemEvent.itemType == itemType)
                     {
-                        using Type = typename extract_value_type<T>::value_type;
                         itemAdded(TypedItemAddedEvent<T>(itemEvent.frame, boost::dynamic_pointer_cast<Type>(itemEvent.item)));
                     }
                 }
                     break;
                 case GraphEvent::ITEM_REMOVED_FROM_FRAME:  
-                    //TODO
+                {
+                    const ItemRemovedEvent itemEvent =  dynamic_cast<const ItemRemovedEvent&>(event);
+                    if(itemEvent.itemType == itemType)
+                    {
+                        itemRemoved(TypedItemRemovedEvent<T>(itemEvent.frame, boost::dynamic_pointer_cast<Type>(itemEvent.item)));
+                    }
+                }
                     break;
                 default:
                   //don't care about anything else
@@ -48,6 +55,7 @@ namespace envire { namespace core
         
     protected:
         virtual void itemAdded(const TypedItemAddedEvent<T>& event) {}
+        virtual void itemRemoved(const TypedItemRemovedEvent<T>& event) {}
         //TODO itemRemoved
         
     private:
