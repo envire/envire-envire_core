@@ -35,6 +35,12 @@ void GraphEventDispatcher::notifyTreeEvent(const GraphEvent& event)
     case GraphEvent::FRAME_REMOVED:
         frameRemoved(dynamic_cast<const FrameRemovedEvent&>(event));
         break;
+    case GraphEvent::ITEM_ADDED_TO_FRAME:
+        itemAdded(dynamic_cast<const ItemAddedEvent&>(event));
+        break;
+    case GraphEvent::ITEM_REMOVED_FROM_FRAME:
+        itemRemoved(dynamic_cast<const ItemRemovedEvent&>(event));
+        break;
     default:
       break;
     //no default case because we only handle basic event types here. Item events are handled
