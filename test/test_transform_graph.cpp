@@ -426,6 +426,57 @@ BOOST_AUTO_TEST_CASE(get_invalid_transform_test)
     BOOST_CHECK_THROW(tree.getTransform(a, c), UnknownTransformException);
 }
 
+BOOST_AUTO_TEST_CASE(get_transform_with_descriptor_without_edges_test)
+{
+    TransformGraph g;
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    Transform tf;
+    g.addTransform(a, b, tf);
+    g.disconnectFrame(a);
+    vertex_descriptor aDesc = g.vertex(a);
+    vertex_descriptor bDesc = g.vertex(b);
+    
+    BOOST_CHECK_THROW(g.getTransform(aDesc, bDesc), UnknownTransformException);
+}
+
+BOOST_AUTO_TEST_CASE(update_transform_with_descriptors_on_disconnected_graph_test)
+{
+    TransformGraph g;
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    Transform tf;
+    g.addTransform(a, b, tf);
+    g.disconnectFrame(a);
+    vertex_descriptor aDesc = g.vertex(a);
+    vertex_descriptor bDesc = g.vertex(b);
+    //test on totally disconnected graph
+    BOOST_CHECK_THROW(g.updateTransform(aDesc, bDesc, tf), UnknownTransformException);
+    
+    //test on partially disconnected graph
+    FrameId c = "frame_c";
+    g.addTransform(a, c, tf);
+    BOOST_CHECK_THROW(g.updateTransform(aDesc, bDesc, tf), UnknownTransformException);
+    
+}
+
+
+BOOST_AUTO_TEST_CASE(get_transform_with_descriptors_test)
+{
+    TransformGraph g;
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    Transform tf;
+    tf.transform.translation << 42, 21, 10;
+    tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
+    g.addTransform(a, b, tf);
+    vertex_descriptor aDesc = g.vertex(a);
+    vertex_descriptor bDesc = g.vertex(b);  
+    Transform tf2 = g.getTransform(aDesc, bDesc);
+    BOOST_CHECK(compareTransform(tf, tf2));
+    
+}
+
 BOOST_AUTO_TEST_CASE(get_edge_on_empty_tree_test)
 {
     FrameId a = "frame_a";
@@ -814,6 +865,43 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     std::unordered_set<vertex_descriptor>& eChildren2 = parentToChildren[graph.vertex(e)];
     BOOST_CHECK(eChildren2.find(graph.vertex(f)) != eChildren2.end());
     BOOST_CHECK(eChildren2.find(graph.vertex(g)) != eChildren2.end());
+}
+
+BOOST_AUTO_TEST_CASE(simple_get_tree_with_frameId_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+
+    
+    Transform tf;
+    TransformGraph graph;
+    graph.addTransform(a, b, tf);
+    graph.addTransform(a, c, tf);
+    VertexMap tree = graph.getTree(a);
+    BOOST_CHECK(tree.size() == 1);
+    BOOST_CHECK(tree[graph.vertex(a)].size() == 2);
+}
+
+BOOST_AUTO_TEST_CASE(simple_get_tree_with_invalid_frameId_test)
+{
+    FrameId a = "frame_a";
+    TransformGraph graph;
+    BOOST_CHECK_THROW(graph.getTree(a), UnknownFrameException);
+}
+
+BOOST_AUTO_TEST_CASE(remove_unknown_frame_test)
+{
+    FrameId a = "frame_a";
+    TransformGraph graph;
+    BOOST_CHECK_THROW(graph.removeFrame(a), UnknownFrameException);
+}
+
+BOOST_AUTO_TEST_CASE(clear_unknown_frame_test)
+{
+    FrameId a = "frame_a";
+    TransformGraph graph;
+    BOOST_CHECK_THROW(graph.clearFrame(a), UnknownFrameException);
 }
 
 BOOST_AUTO_TEST_CASE(add_item_event_test)
