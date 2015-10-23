@@ -241,6 +241,8 @@ namespace envire { namespace core
         /**Sets the transform value and causes transformModified event. */
         void updateTransform(edge_descriptor ed, const Transform& tf);
         
+        /** @return A range that contains all items of type @p T in frame @p frame
+         **/
         template<class T>
         const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> 
         getItemsInternal(const vertex_descriptor frame, const FrameId& frameId) const;
@@ -249,6 +251,12 @@ namespace envire { namespace core
         /**Ensures that T is ItemBase::PtrType<X> where X derives from ItemBase  */
         template <class T>
         static void checkItemType();
+        
+        /** @throw UnknownFrameException if the frame does not exist */
+        void checkFrameValid(const FrameId& frame) const;
+        /**Gets the vertex corresponding to @p frame.
+         * @throw UnknownFrameException if the frame does not exist */
+        vertex_descriptor getVertex(const FrameId& frame) const;
     };
     
     template <class T>
@@ -266,14 +274,9 @@ namespace envire { namespace core
     void TransformGraph::addItemToFrame(const FrameId& frame, T item)
     {
         checkItemType<T>();
-        
-        if(vertex(frame) == null_vertex())
-        {
-            throw UnknownFrameException(frame);
-        }
+        checkFrameValid(frame);
 
         (*this)[frame].frame.items[std::type_index(typeid(T))].push_back(item);
-        //FIXME events should somhow carry the type info
         ItemBase::Ptr baseItem = boost::dynamic_pointer_cast<ItemBase>(item);
         notify(ItemAddedEvent(frame, baseItem, std::type_index(typeid(T))));
     }
@@ -350,12 +353,8 @@ namespace envire { namespace core
     TransformGraph::removeItemFromFrame(const FrameId& frameId, ItemIterator<T> item)
     {
         checkItemType<T>();
-        
-        if(vertex(frameId) == null_vertex())
-        {
-            throw UnknownFrameException(frameId);
-        }
-        
+        checkFrameValid(frameId);
+
         Frame& frame = (*this)[frameId].frame;
         const std::type_index key(typeid(T));
         auto mapEntry = frame.items.find(key);
@@ -397,10 +396,7 @@ namespace envire { namespace core
         static_assert(std::is_base_of<ItemBase, T>::value,
             "T does not derive from ItemBase"); 
         
-        if(vertex(frameId) == null_vertex())
-        {
-            throw UnknownFrameException(frameId);
-        }
+        checkFrameValid(frameId);
         
         Frame& frame = (*this)[frameId].frame;
         const std::type_index key(typeid(ItemBase::PtrType<T>));
@@ -429,10 +425,7 @@ namespace envire { namespace core
     bool TransformGraph::containsItems(const FrameId& frameId) const
     {
         checkItemType<T>();
-        if(vertex(frameId) == null_vertex())
-        {
-            throw UnknownFrameException(frameId);
-        }  
+        checkFrameValid(frameId);
         const Frame& frame = (*this)[frameId].frame;
         const std::type_index key(typeid(T));
         auto mapEntry = frame.items.find(key);

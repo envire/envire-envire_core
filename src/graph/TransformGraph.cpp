@@ -146,17 +146,8 @@ const Transform TransformGraph::getTransform(const vertex_descriptor origin, con
 void TransformGraph::updateTransform(const FrameId& origin, const FrameId& target,
                                     const Transform& tf)
 {
-    const vertex_descriptor originVertex = vertex(origin);
-    if(originVertex == null_vertex())
-    {
-        throw UnknownFrameException(origin);
-    }
-    
-    const vertex_descriptor targetVertex = vertex(target);
-    if(targetVertex == null_vertex())
-    {
-        throw UnknownFrameException(target);
-    }    
+    const vertex_descriptor originVertex = getVertex(origin);//will throw
+    const vertex_descriptor targetVertex = getVertex(target); //will throw
     return updateTransform(originVertex, targetVertex, tf);
 }
 
@@ -248,10 +239,7 @@ vertex_descriptor TransformGraph::add_vertex(const FrameId& frameId)
 
 void TransformGraph::clearFrame(const FrameId& frame)
 {
-    if(vertex(frame) == null_vertex())
-    {
-        throw UnknownFrameException(frame);
-    }    
+    checkFrameValid(frame);
     auto& items = (*this)[frame].frame.items;
     
     for(Frame::ItemMap::iterator it = items.begin(); it != items.end();)
@@ -270,11 +258,7 @@ void TransformGraph::clearFrame(const FrameId& frame)
 
 void TransformGraph::removeFrame(const FrameId& frame)
 {
-    vertex_descriptor desc = vertex(frame);
-    if(desc == null_vertex())
-    {
-        throw UnknownFrameException(frame);
-    }
+    vertex_descriptor desc = getVertex(frame); //will throw
     if(boost::degree(desc, *this) > 0)
     {
         throw FrameStillConnectedException(frame);
@@ -296,10 +280,7 @@ void TransformGraph::removeFrame(const FrameId& frame)
 
 const envire::core::Frame& TransformGraph::getFrame(const FrameId& frame) const
 {
-    if(vertex(frame) == null_vertex())
-    {
-        throw UnknownFrameException(frame);
-    }
+    checkFrameValid(frame);
     return (*this)[frame].frame;
 }
 
@@ -347,25 +328,33 @@ VertexMap TransformGraph::getTree(const vertex_descriptor root) const
 
 VertexMap TransformGraph::getTree(const FrameId rootId) const
 {
-    const vertex_descriptor root = vertex(rootId);
-    if(root == null_vertex())
-    {
-        throw UnknownFrameException(rootId);
-    }
+    const vertex_descriptor root = getVertex(rootId);
     return getTree(root);
 }
 
 void TransformGraph::disconnectFrame(const FrameId& frame)
 {
-    vertex_descriptor desc = vertex(frame);
-    if(desc != null_vertex())
-    {
-        boost::clear_vertex(desc, *this);
-    }
-    else
+    vertex_descriptor desc = getVertex(frame);
+    boost::clear_vertex(desc, *this);
+
+}
+
+void TransformGraph::checkFrameValid(const FrameId& frame) const
+{
+    if(vertex(frame) == null_vertex())
     {
         throw UnknownFrameException(frame);
     }
+}
+
+vertex_descriptor TransformGraph::getVertex(const FrameId& frame) const
+{
+    vertex_descriptor desc = vertex(frame);
+    if(desc == null_vertex())
+    {
+        throw UnknownFrameException(frame);
+    }
+    return desc;
 }
 
 
