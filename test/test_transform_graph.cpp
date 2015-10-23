@@ -348,6 +348,7 @@ BOOST_AUTO_TEST_CASE(complex_remove_transform_test)
     BOOST_CHECK(tree.num_edges() == 2);
     BOOST_CHECK(tree.num_vertices() == 3);
     BOOST_CHECK_NO_THROW(tree.getFrame(a));
+    BOOST_CHECK_NO_THROW(tree.getFrame(b));
     BOOST_CHECK_NO_THROW(tree.getFrame(c));
 }
 
