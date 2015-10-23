@@ -56,7 +56,6 @@ namespace envire { namespace core
     protected:
         virtual void itemAdded(const TypedItemAddedEvent<T>& event) {}
         virtual void itemRemoved(const TypedItemRemovedEvent<T>& event) {}
-        //TODO itemRemoved
         
     private:
         using ItemType = T;
