@@ -16,7 +16,7 @@ GraphEventDispatcher::GraphEventDispatcher(GraphEventPublisher& publisher): Grap
 {}
 
 
-void GraphEventDispatcher::notifyTreeEvent(const GraphEvent& event)
+void GraphEventDispatcher::notifyGraphEvent(const GraphEvent& event)
 {
     switch(event.type)
     {

@@ -30,7 +30,7 @@ namespace envire { namespace core
     public:
         GraphEventDispatcher(GraphEventPublisher& publisher);
         virtual ~GraphEventDispatcher() {}
-        virtual void notifyTreeEvent(const GraphEvent& event);
+        virtual void notifyGraphEvent(const GraphEvent& event);
 
     protected:
         virtual void transformAdded(const TransformAddedEvent& e) {}

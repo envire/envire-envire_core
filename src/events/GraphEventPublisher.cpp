@@ -34,7 +34,7 @@ void GraphEventPublisher::notify(const GraphEvent& e)
     {
         for(GraphEventSubscriber* pSubscriber : subscribers)
         {
-            pSubscriber->notifyTreeEvent(e);
+            pSubscriber->notifyGraphEvent(e);
         }
     }
 }

@@ -25,7 +25,7 @@ namespace envire { namespace core
 
         virtual ~GraphItemEventDispatcher() {}
         
-        void notifyTreeEvent(const GraphEvent& event)
+        void notifyGraphEvent(const GraphEvent& event)
         {
             switch(event.type)
             {

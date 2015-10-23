@@ -15,7 +15,7 @@ namespace envire { namespace core
         /**create a new subscriber that automatically subscribes to the publisher */
         GraphEventSubscriber(GraphEventPublisher& publisher);
         /**This method is called by the publisher whenever a new event occurs */
-        virtual void notifyTreeEvent(const GraphEvent& event) = 0;
+        virtual void notifyGraphEvent(const GraphEvent& event) = 0;
         virtual ~GraphEventSubscriber();
     private:
       GraphEventPublisher& publisher;
