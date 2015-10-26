@@ -199,6 +199,8 @@ namespace envire { namespace core
          * @throw std::out_of_range if @p i is out of range*/
         template <class T>
         const T getItem(const FrameId& frame, const int i) const;
+        template <class T>
+        const T getItem(const vertex_descriptor frame, const int i) const;
         
         
         
@@ -341,23 +343,28 @@ namespace envire { namespace core
     const T TransformGraph::getItem(const FrameId& frame, const int i) const
     {
         checkItemType<T>();
-        if(vertex(frame) == null_vertex())
-        {
-            throw UnknownFrameException(frame);
-        }
-        const std::unordered_map<std::type_index, Frame::ItemList>& items = (*this)[frame].frame.items;
+        const vertex_descriptor vd = getVertex(frame); //may throw
+        return getItem<T>(vd, i);
+
+    }
+    
+    template <class T>
+    const T TransformGraph::getItem(const vertex_descriptor frame, const int i) const
+    {
+        checkItemType<T>();
+        const std::unordered_map<std::type_index, Frame::ItemList>& items = graph()[frame].frame.items;
         const std::type_index key(typeid(T));
         if(items.find(key) == items.end())
         {
-            throw NoItemsOfTypeInFrameException(frame, typeid(T).name());
+            throw NoItemsOfTypeInFrameException(getFrameId(frame), typeid(T).name());
         }
         const Frame::ItemList& list = items.at(std::type_index(typeid(T)));
         assert(list.size() > 0); //if everything is implemented correctly empty lists can never exist in the map
         T casted = boost::dynamic_pointer_cast<typename T::element_type>(list.at(i)); //list.at(i) may throw std::out_of_range
         //the cast can only fail if there is a programming error somewhere in here...
         assert(nullptr != casted.get());
-        return casted;
-    }  
+        return casted; 
+    }
     
     template <class T>
     std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>>
