@@ -9,8 +9,6 @@
 #include <envire_core/events/TransformAddedEvent.hpp>
 #include <envire_core/events/TransformRemovedEvent.hpp>
 #include <envire_core/events/TransformModifiedEvent.hpp>
-#include <envire_core/events/ItemAddedEvent.hpp>
-#include <envire_core/events/ItemRemovedEvent.hpp>
 #include <envire_core/events/FrameAddedEvent.hpp>
 #include <envire_core/events/FrameRemovedEvent.hpp>
 #include <type_traits> //For is_same()
@@ -148,17 +146,8 @@ const Transform TransformGraph::getTransform(const vertex_descriptor origin, con
 void TransformGraph::updateTransform(const FrameId& origin, const FrameId& target,
                                     const Transform& tf)
 {
-    const vertex_descriptor originVertex = vertex(origin);
-    if(originVertex == null_vertex())
-    {
-        throw UnknownFrameException(origin);
-    }
-    
-    const vertex_descriptor targetVertex = vertex(target);
-    if(targetVertex == null_vertex())
-    {
-        throw UnknownFrameException(target);
-    }    
+    const vertex_descriptor originVertex = getVertex(origin);//will throw
+    const vertex_descriptor targetVertex = getVertex(target); //will throw
     return updateTransform(originVertex, targetVertex, tf);
 }
 
@@ -248,33 +237,39 @@ vertex_descriptor TransformGraph::add_vertex(const FrameId& frameId)
     return v;
 }
 
+void TransformGraph::clearFrame(const FrameId& frame)
+{
+    checkFrameValid(frame);
+    auto& items = (*this)[frame].frame.items;
+    
+    for(Frame::ItemMap::iterator it = items.begin(); it != items.end();)
+    {
+        std::type_index key = it->first;
+        Frame::ItemList& list = it->second;
+        for(auto it = list.begin(); it != list.end();)
+        {
+            ItemBase::Ptr removedItem = *it;
+            it = list.erase(it);
+            notify(ItemRemovedEvent(frame, removedItem, key));
+        }
+        it = items.erase(it);
+    }
+}
+
 void TransformGraph::removeFrame(const FrameId& frame)
 {
-    vertex_descriptor desc = vertex(frame);
-    if(desc == null_vertex())
-    {
-        throw UnknownFrameException(frame);
-    }
+    vertex_descriptor desc = getVertex(frame); //will throw
     if(boost::degree(desc, *this) > 0)
     {
         throw FrameStillConnectedException(frame);
     }
     
     //explicitly remove all items from the frame to cause ItemRemovedEvents
-    vector<ItemBase::Ptr>& items = (*this)[frame].frame.items;
-    for(ItemBase::Ptr item : items)
-    {
-        //note: calling removeItemFromFrame() in here is very inefficient.
-        //      If this becomes a performance problem one could just generate
-        //      the events directly in the loop.
-        //      It was not done this way because it would lower the cohesion
-        removeItemFromFrame(frame, item);
-    }
+    clearFrame(frame);
     
     boost::remove_vertex(frame, *this);
     //HACK this is a workaround for bug https://svn.boost.org/trac/boost/ticket/9493
-    //It should be removed as soon as the bug is fixed in boost.
-    //If the bug is fixed also remove the #define private protected in TransformTreeTypes
+    //If the bug is fixed also remove the #define private protected in TransformTreeTypes.hpp
     map_type::iterator it = _map.find(frame);
     if(it != _map.end())
     {
@@ -285,10 +280,7 @@ void TransformGraph::removeFrame(const FrameId& frame)
 
 const envire::core::Frame& TransformGraph::getFrame(const FrameId& frame) const
 {
-    if(vertex(frame) == null_vertex())
-    {
-        throw UnknownFrameException(frame);
-    }
+    checkFrameValid(frame);
     return (*this)[frame].frame;
 }
 
@@ -320,49 +312,6 @@ void TransformGraph::updateTransform(edge_descriptor ed, const Transform& tf)
     boost::put(&TransformProperty::transform, *this, ed, tf);
 }
 
-void TransformGraph::addItemToFrame(const FrameId& frame, ItemBase::Ptr item)
-{
-    if(vertex(frame) == null_vertex())
-    {
-        throw UnknownFrameException(frame);
-    }
-    
-    (*this)[frame].frame.items.push_back(item);
-    notify(ItemAddedEvent(frame, item));
-}
-
-void TransformGraph::removeItemFromFrame(const FrameId& frame, ItemBase::Ptr item)
-{
-    if(vertex(frame) == null_vertex())
-    {
-        throw UnknownFrameException(frame);
-    }
-    vector<ItemBase::Ptr>& items = (*this)[frame].frame.items;
-    auto it = std::find(items.begin(), items.end(), item);
-    if(it == items.end())
-    {
-        throw UnknownItemException(frame, item);
-    }
-    items.erase(it);
-    notify(ItemRemovedEvent(frame, item));
-}
-
-const std::vector<ItemBase::Ptr>& TransformGraph::getItems(const FrameId& frame) const
-{
-    //FIXME if item events should be added later this method needs to change because it provides a way
-    //to modify items without the event system noticing
-    if(vertex(frame) == null_vertex())
-    {
-        throw UnknownFrameException(frame);
-    }
-    return (*this)[frame].frame.items;
-}
-
-const std::vector<ItemBase::Ptr>& TransformGraph::getItems(const vertex_descriptor desc) const
-{
-    return graph()[desc].frame.items;void disconnectFrame(const FrameId& frame);
-}
-
 const envire::core::FrameId& TransformGraph::getFrameId(const vertex_descriptor vertex) const
 {
     return getFrame(vertex).getName();
@@ -379,25 +328,33 @@ VertexMap TransformGraph::getTree(const vertex_descriptor root) const
 
 VertexMap TransformGraph::getTree(const FrameId rootId) const
 {
-    const vertex_descriptor root = vertex(rootId);
-    if(root == null_vertex())
-    {
-        throw UnknownFrameException(rootId);
-    }
+    const vertex_descriptor root = getVertex(rootId);
     return getTree(root);
 }
 
 void TransformGraph::disconnectFrame(const FrameId& frame)
 {
-    vertex_descriptor desc = vertex(frame);
-    if(desc != null_vertex())
-    {
-        boost::clear_vertex(desc, *this);
-    }
-    else
+    vertex_descriptor desc = getVertex(frame);
+    boost::clear_vertex(desc, *this);
+
+}
+
+void TransformGraph::checkFrameValid(const FrameId& frame) const
+{
+    if(vertex(frame) == null_vertex())
     {
         throw UnknownFrameException(frame);
     }
+}
+
+vertex_descriptor TransformGraph::getVertex(const FrameId& frame) const
+{
+    vertex_descriptor desc = vertex(frame);
+    if(desc == null_vertex())
+    {
+        throw UnknownFrameException(frame);
+    }
+    return desc;
 }
 
 

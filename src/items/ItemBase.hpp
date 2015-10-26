@@ -11,6 +11,7 @@
 #include <boost/serialization/binary_object.hpp>
 #include <base/Time.hpp>
 #include <string>
+#include <type_traits>
 
 namespace envire { namespace core
 {
@@ -21,7 +22,10 @@ namespace envire { namespace core
     class ItemBase
     {
     public:
-        typedef boost::shared_ptr<ItemBase> Ptr;
+        template<class T> 
+        using PtrType = boost::shared_ptr<T>;
+        
+        typedef PtrType<ItemBase> Ptr;
 
     protected:
 
@@ -63,7 +67,7 @@ namespace envire { namespace core
         void setID(const boost::uuids::uuid& id) { this->uuid = id; }
 
         /**@brief getID
-        *
+        *TARGET
         * Returns the unique identifier of the item
         *
         */
@@ -105,8 +109,17 @@ namespace envire { namespace core
         }
     };
 
-    BOOST_SERIALIZATION_ASSUME_ABSTRACT(envire::core::ItemBase)
-
+    BOOST_SERIALIZATION_ASSUME_ABSTRACT(envire::core::ItemBase);
+    
+    template <class TARGET>
+    struct ItemBaseCaster 
+    {
+        ItemBase::PtrType<TARGET> operator()(const ItemBase::Ptr p) const
+        {
+            //FIXME static_assert that TARGET is ItemBase::PtrType<X>
+            return boost::dynamic_pointer_cast<TARGET>(p);
+        }
+    };
 }}
 
 #endif

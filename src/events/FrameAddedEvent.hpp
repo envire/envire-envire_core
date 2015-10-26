@@ -7,7 +7,7 @@ namespace envire { namespace core
     class FrameAddedEvent : public GraphEvent
     {
     public:
-      FrameAddedEvent(const FrameId& addedFrame) :
+      explicit FrameAddedEvent(const FrameId& addedFrame) :
         GraphEvent(GraphEvent::FRAME_ADDED), addedFrame(addedFrame){}
       FrameId addedFrame;
     };

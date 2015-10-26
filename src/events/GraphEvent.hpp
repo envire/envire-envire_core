@@ -19,7 +19,7 @@ namespace envire { namespace core
             FRAME_ADDED,
             FRAME_REMOVED
         };
-        GraphEvent(const Type type) : type(type) {}
+        explicit GraphEvent(const Type type) : type(type) {}
         virtual ~GraphEvent() {}
 
         Type type;

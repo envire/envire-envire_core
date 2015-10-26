@@ -38,7 +38,7 @@ namespace envire { namespace core
     {
         Frame frame;
         FrameProperty() : frame("envire::core::frame::default_name"){}
-        FrameProperty(const FrameId& frameId): frame(frameId){}
+        explicit FrameProperty(const FrameId& frameId): frame(frameId){}
     };
 
     /**@brief Transform Property

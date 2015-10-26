@@ -5,7 +5,9 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <vector>
 #include <string>
-
+#include <unordered_map>
+#include <typeindex>
+    
 #include "ItemBase.hpp"
 #include "RandomGenerator.hpp"
 
@@ -13,13 +15,20 @@ namespace envire { namespace core
 {
     using FrameId = std::string;
     
-    //TODO comment
+    /**A Frame is attached to each vertex in the TransformGraph.
+     * It holds a lists of arbitrary items organized by item type. 
+     * The Frame itself is a POD. The logic for manipulating Frames is part of
+     * the TransformGraph. */
     class Frame
     {
     public:
         FrameId name; /** Frame name */
         boost::uuids::uuid uuid; /** Unique Identifier */
-        std::vector< ItemBase::Ptr > items; /** List of items in the node */
+
+        using ItemList = std::vector<ItemBase::Ptr>;
+                using ItemMap = std::unordered_map<std::type_index, ItemList>;
+        //contains all items that have been added to the frame sorted by type
+        ItemMap items;
 
     public:
         Frame(const FrameId& _name): 

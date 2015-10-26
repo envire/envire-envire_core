@@ -17,11 +17,11 @@ rock_testsuite(test_suite suite.cpp
 find_package(Boost COMPONENTS unit_test_framework system filesystem)
 target_link_libraries(test_suite ${Boost_LIBRARIES})
 
-rock_testsuite(timing suite.cpp
-    graph_performance_test.cpp
-    DEPS_CMAKE Boost
-    DEPS envire_core)
-target_link_libraries(timing ${Boost_LIBRARIES})
+#rock_testsuite(timing suite.cpp
+#    graph_performance_test.cpp
+#    DEPS_CMAKE Boost
+#    DEPS envire_core)
+#target_link_libraries(timing ${Boost_LIBRARIES})
 
 rock_testsuite(test_dummy suite.cpp
     test_dummy_graph.cpp

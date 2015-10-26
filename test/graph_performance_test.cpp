@@ -25,7 +25,7 @@ void addTransforms()
     
     Transform tf;
     auto start = chrono::steady_clock::now();
-    for(int i = 0; i < ids.size() - size_t(1); ++i)
+    for(size_t i = 0; i < ids.size() - size_t(1); ++i)
     {
         graph.addTransform(ids[i], ids[i + 1], tf);
     }
@@ -39,13 +39,13 @@ void getTransform()
 {
     TransformGraph graph;    
     Transform tf;
-    for(int i = 0; i < ids.size() - size_t(1); ++i)
+    for(size_t i = 0; i < ids.size() - 1; ++i)
     {
         graph.addTransform(ids[i], ids[i + 1], tf);
     }    
 
     auto start = chrono::steady_clock::now();
-    for(int i = 0; i < ids.size() - size_t(1); ++i)
+    for(size_t i = 0; i < ids.size() - 1; ++i)
     {
         graph.getTransform(ids[i], ids[i + 1]);
     }    
@@ -58,13 +58,13 @@ void getTransform1(const int len)
 {
     TransformGraph graph;    
     Transform tf;
-    for(int i = 0; i < ids.size() - size_t(1); ++i)
+    for(size_t i = 0; i < ids.size() - 1; ++i)
     {
         graph.addTransform(ids[i], ids[i + 1], tf);
     }  
     
     auto start = chrono::steady_clock::now();
-    for(int i = 0; i < ids.size() - size_t(len + 1); ++i)
+    for(size_t i = 0; i < ids.size() - len + 1; ++i)
     {
         graph.getTransform(ids[i], ids[i + len]);
     }    

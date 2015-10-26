@@ -28,17 +28,20 @@ rock_library(envire_core
             events/ItemRemovedEvent.hpp
             events/FrameAddedEvent.hpp
             events/FrameRemovedEvent.hpp
+            events/GraphItemEventDispatcher.hpp
             serialization/Serialization.hpp
             serialization/SerializationHandle.hpp
             serialization/SerializationRegistration.hpp
             serialization/ItemHeader.hpp
             serialization/Eigen.hpp
+            util/MetaProgramming.hpp
     SOURCES items/ItemBase.cpp
             items/AlignedBoundingBox.cpp
             items/DummyItem.cpp
             plugin/ClassLoader.cpp
             events/GraphEventPublisher.cpp
             events/GraphEventDispatcher.cpp
+            events/GraphEventSubscriber.cpp
             graph/TransformGraph.cpp
             serialization/Serialization.cpp
     DEPS_CMAKE Boost
@@ -48,3 +51,5 @@ rock_library(envire_core
 install(FILES
     all
     DESTINATION include/envire_core)
+
+add_subdirectory(util)

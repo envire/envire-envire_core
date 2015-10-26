@@ -35,7 +35,7 @@ ClassLoader::~ClassLoader()
     {
         loaders.clear();
     }
-    catch(class_loader::LibraryUnloadException e)
+    catch(class_loader::LibraryUnloadException& e)
     {
          std::cerr << "got exception: " << e.what() << std::endl;
     }
