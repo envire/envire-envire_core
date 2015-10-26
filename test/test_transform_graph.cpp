@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(remove_multiple_items_from_frame_test)
    
 }
 
-BOOST_AUTO_TEST_CASE(get_first_item_test)
+BOOST_AUTO_TEST_CASE(get_item_test)
 {
     FrameId frame = "Saturn";
     TransformGraph g;
@@ -268,23 +268,33 @@ BOOST_AUTO_TEST_CASE(get_first_item_test)
     Item<string>::Ptr item(new Item<string>(text));
     g.addItemToFrame(frame, item);
     
-    Item<string>::Ptr retItem = g.getFirstItem<Item<string>::Ptr>(frame);
+    Item<string>::Ptr retItem = g.getItem<Item<string>::Ptr>(frame, 0);
     BOOST_CHECK(retItem == item);
 }
 
-BOOST_AUTO_TEST_CASE(get_first_item_on_empty_frame_test)
+BOOST_AUTO_TEST_CASE(get_item_on_empty_frame_test)
 {
     FrameId frame = "Saturn";
     TransformGraph g;
     g.addFrame(frame);
-    BOOST_CHECK_THROW(g.getFirstItem<Item<string>::Ptr>(frame), NoItemsOfTypeInFrameException);
+    BOOST_CHECK_THROW(g.getItem<Item<string>::Ptr>(frame, 42), NoItemsOfTypeInFrameException);
+}   
+
+BOOST_AUTO_TEST_CASE(get_item_wrong_index_test)
+{
+    FrameId frame = "Mars";
+    TransformGraph g;
+    g.addFrame(frame);
+    Item<string>::Ptr item(new Item<string>("Arthur: If I asked you where the hell we were, would I regret it? -- Ford: We're safe"));
+    g.addItemToFrame(frame, item);
+    BOOST_CHECK_THROW(g.getItem<Item<string>::Ptr>(frame, 42), std::out_of_range);
 }   
 
 BOOST_AUTO_TEST_CASE(get_first_item_on_empty_graph_test)
 {
     FrameId frame = "blaa";
     TransformGraph g;
-    BOOST_CHECK_THROW(g.getFirstItem<Item<string>::Ptr>(frame), UnknownFrameException);
+    BOOST_CHECK_THROW(g.getItem<Item<string>::Ptr>(frame, 11), UnknownFrameException);
 }
 
 BOOST_AUTO_TEST_CASE(remove_transform_event_test)
@@ -548,11 +558,11 @@ BOOST_AUTO_TEST_CASE(check_item_existence_example)
   Item<Sensor>::Ptr item2(new Item<Sensor>());
   g.addItemToFrame(frame, item2);
   
-  bool contains = g.containsItems<Item<string>::Ptr>(frame);
+//  bool contains = g.containsItems<Item<string>::Ptr>(frame);
   
-  using Iterator = TransformGraph::ItemIterator<Item<Joint>::Ptr>;
-  Iterator begin, end;
-  boost:tie(begin, end) = g.getItems<Item<Joint>::Ptr>(frame);
+  //using Iterator = TransformGraph::ItemIterator<Item<Joint>::Ptr>;
+  //Iterator begin, end;
+  //boost:tie(begin, end) = g.getItems<Item<Joint>::Ptr>(frame);
 
 }
 

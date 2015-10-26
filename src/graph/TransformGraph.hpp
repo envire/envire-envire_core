@@ -193,11 +193,14 @@ namespace envire { namespace core
         template<class T>
         const std::pair<ItemIterator<T>, ItemIterator<T>> getItems(const vertex_descriptor frame) const;
         
-        /**Convenience method that returns the first item of type @p T from @p frame.
+        /**Convenience method that returns the @p i'th item of type @p T from @p frame.
          * @throw UnknownFrameException if the @p frame id is invalid.
-         * @throw NoItemsOfTypeInFrameException if no items of type @p T exist in the frame.*/
+         * @throw NoItemsOfTypeInFrameException if no items of type @p T exist in the frame.
+         * @throw std::out_of_range if @p i is out of range*/
         template <class T>
-        const T getFirstItem(const FrameId& frame) const;
+        const T getItem(const FrameId& frame, const int i) const;
+        
+        
         
         /** @return true if the @p frame contains at least on item of type @p T
          *  @throw UnknownFrameException if the @p frame id is invalid.*/
@@ -333,7 +336,7 @@ namespace envire { namespace core
     }
     
     template <class T>
-    const T TransformGraph::getFirstItem(const FrameId& frame) const
+    const T TransformGraph::getItem(const FrameId& frame, const int i) const
     {
         checkItemType<T>();
         if(vertex(frame) == null_vertex())
@@ -348,7 +351,7 @@ namespace envire { namespace core
         }
         const Frame::ItemList& list = items.at(std::type_index(typeid(T)));
         assert(list.size() > 0); //if everything is implemented correctly empty lists can never exist in the map
-        T casted = boost::dynamic_pointer_cast<typename T::element_type>(list.front());
+        T casted = boost::dynamic_pointer_cast<typename T::element_type>(list.at(i)); //list.at(i) may throw std::out_of_range
         //the cast can only fail if there is a programming error somewhere in here...
         assert(nullptr != casted.get());
         return casted;

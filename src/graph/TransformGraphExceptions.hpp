@@ -89,8 +89,6 @@ namespace envire { namespace core
         const std::string msg;
     };
     
-
-
 }}
 
 
