@@ -204,6 +204,12 @@ namespace envire { namespace core
         template <class T>
         bool containsItems(const FrameId& frame) const;
         
+        /** @return the number if items of type @p T in @p frame.
+         *  @throw UnknownFrameException if the @p frame id is invalid.*/
+        template <class T>
+        size_t getItemCount(const FrameId& frame) const;
+        template <class T>
+        size_t getItemCount(const vertex_descriptor vd) const;        
         
     protected:
         using EdgePair = std::pair<edge_descriptor, bool>;
@@ -430,6 +436,31 @@ namespace envire { namespace core
         const std::type_index key(typeid(T));
         auto mapEntry = frame.items.find(key);
         return mapEntry != frame.items.end();
+    }
+    
+    template <class T>
+    size_t TransformGraph::getItemCount(const FrameId& frameId) const
+    {
+        checkItemType<T>();
+        vertex_descriptor vd = getVertex(frameId);
+        return getItemCount<T>(vd);
+    }
+    
+    template <class T>
+    size_t TransformGraph::getItemCount(const vertex_descriptor vd) const
+    {
+        checkItemType<T>();
+        const Frame& frame = graph()[vd].frame;
+        const std::type_index key(typeid(T));
+        auto mapEntry = frame.items.find(key);
+        if(mapEntry == frame.items.end())
+        {
+            return 0;
+        }
+        else
+        {
+            return mapEntry->second.size();
+        }
     }
     
 }}

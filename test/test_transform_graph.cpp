@@ -1054,5 +1054,30 @@ BOOST_AUTO_TEST_CASE(get_transform_between_unconnected_trees)
     BOOST_CHECK_THROW(graph.getTransform(a, c), UnknownTransformException);
 }
 
-
+BOOST_AUTO_TEST_CASE(item_count_test)
+{
+    TransformGraph graph;
+    FrameId frame("frame");  
+    FrameId unknownFrame("unknown frame");  
+    graph.addFrame(frame);
+    vertex_descriptor vertex = graph.vertex(frame);
+    Item<int>::Ptr i(new Item<int>(42));
+    Item<int>::Ptr j(new Item<int>(21));
+    Item<int>::Ptr k(new Item<int>(11));
+    
+    BOOST_CHECK(graph.getItemCount<Item<int>::Ptr>(frame) == 0);
+    BOOST_CHECK(graph.getItemCount<Item<int>::Ptr>(vertex) == 0);
+    BOOST_CHECK_THROW(graph.getItemCount<Item<int>::Ptr>(unknownFrame), UnknownFrameException);
+    
+    graph.addItemToFrame(frame, i);
+    BOOST_CHECK(graph.getItemCount<Item<int>::Ptr>(frame) == 1);
+    BOOST_CHECK(graph.getItemCount<Item<int>::Ptr>(vertex) == 1);
+    
+    graph.addItemToFrame(frame, j);
+    BOOST_CHECK(graph.getItemCount<Item<int>::Ptr>(frame) == 2);
+    BOOST_CHECK(graph.getItemCount<Item<int>::Ptr>(vertex) == 2);
+    
+    BOOST_CHECK(graph.getItemCount<Item<float>::Ptr>(vertex) == 0);
+    
+}
 
