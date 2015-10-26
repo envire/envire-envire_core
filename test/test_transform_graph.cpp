@@ -526,6 +526,37 @@ BOOST_AUTO_TEST_CASE(clear_frame_test)
     BOOST_CHECK(begin == end);
 }
 
+
+struct Joint
+{
+  Joint(int a) : a(a) {}
+  int a;
+};
+struct Sensor
+{
+};
+
+
+BOOST_AUTO_TEST_CASE(check_item_existence_example)
+{
+  TransformGraph g;
+  FrameId frame = "frame";
+  g.addFrame(frame);
+  
+  Item<Joint>::Ptr item(new Item<Joint>(42));
+  g.addItemToFrame(frame, item);
+  Item<Sensor>::Ptr item2(new Item<Sensor>());
+  g.addItemToFrame(frame, item2);
+  
+  bool contains = g.containsItems<Item<string>::Ptr>(frame);
+  
+  using Iterator = TransformGraph::ItemIterator<Item<Joint>::Ptr>;
+  Iterator begin, end;
+  boost:tie(begin, end) = g.getItems<Item<Joint>::Ptr>(frame);
+
+}
+
+
 BOOST_AUTO_TEST_CASE(remove_frame_test)
 {
     FrameId a = "frame_a";
