@@ -206,6 +206,8 @@ namespace envire { namespace core
          *  @throw UnknownFrameException if the @p frame id is invalid.*/
         template <class T>
         bool containsItems(const FrameId& frame) const;
+        template <class T>
+        bool containsItems(const vertex_descriptor frame) const;
         
         /** @return the number if items of type @p T in @p frame.
          *  @throw UnknownFrameException if the @p frame id is invalid.*/
@@ -434,11 +436,18 @@ namespace envire { namespace core
     bool TransformGraph::containsItems(const FrameId& frameId) const
     {
         checkItemType<T>();
-        checkFrameValid(frameId);
-        const Frame& frame = (*this)[frameId].frame;
+        const vertex_descriptor vd = getVertex(frameId); //may throw
+        return containsItems<T>(vd);
+    }
+    
+    template <class T>
+    bool TransformGraph::containsItems(const vertex_descriptor vertex) const
+    {
+        checkItemType<T>();
+        const Frame& frame = graph()[vertex].frame;
         const std::type_index key(typeid(T));
         auto mapEntry = frame.items.find(key);
-        return mapEntry != frame.items.end();
+        return mapEntry != frame.items.end();     
     }
     
     template <class T>
