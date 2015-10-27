@@ -15,6 +15,8 @@ using namespace envire::core;
 GraphEventDispatcher::GraphEventDispatcher(GraphEventPublisher* pPublisher): GraphEventSubscriber(pPublisher)
 {}
 
+GraphEventDispatcher::GraphEventDispatcher()
+{}
 
 void GraphEventDispatcher::notifyGraphEvent(const GraphEvent& event)
 {
