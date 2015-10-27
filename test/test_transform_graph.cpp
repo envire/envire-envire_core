@@ -1115,11 +1115,40 @@ BOOST_AUTO_TEST_CASE(get_path_test)
     
     const vector<FrameId> path = graph.getPath(A, D);
     
-    for(const FrameId& id : path)
-    {
-        std::cout << id << std::endl;
-    }
+    BOOST_CHECK(path[0] == A);
+    BOOST_CHECK(path[1] == B);
+    BOOST_CHECK(path[2] == C);
+    BOOST_CHECK(path[3] == D);
+}
+
+BOOST_AUTO_TEST_CASE(get_path_invalid_frame_test)
+{
+    TransformGraph graph;
+    FrameId A("A");
+    FrameId B("B");
+    
+    graph.addFrame(A);
+    BOOST_CHECK_THROW(graph.getPath(A, B), UnknownFrameException);
+    BOOST_CHECK_THROW(graph.getPath(B, A), UnknownFrameException);
+}
+
+BOOST_AUTO_TEST_CASE(get_empty_path_test)
+{
+    TransformGraph graph;
+    FrameId A("A");
+    FrameId B("B");
+    FrameId C("C");
+    Transform tf;
+    
+    graph.addTransform(A, B, tf);
+    graph.addFrame(C);
+    const vector<FrameId> path = graph.getPath(A, C);
+    BOOST_CHECK(path.size() == 0);
+    
+    
+    
     
 }
+
 
 
