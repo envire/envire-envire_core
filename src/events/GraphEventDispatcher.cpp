@@ -12,7 +12,7 @@
 
 using namespace envire::core;
 
-GraphEventDispatcher::GraphEventDispatcher(GraphEventPublisher& publisher): GraphEventSubscriber(publisher)
+GraphEventDispatcher::GraphEventDispatcher(GraphEventPublisher* pPublisher): GraphEventSubscriber(pPublisher)
 {}
 
 

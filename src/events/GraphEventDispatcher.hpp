@@ -28,7 +28,10 @@ namespace envire { namespace core
     class GraphEventDispatcher : public GraphEventSubscriber
     {
     public:
-        GraphEventDispatcher(GraphEventPublisher& publisher);
+        GraphEventDispatcher(GraphEventPublisher* pPublisher);
+        
+        /**creates a dispatcher that is not subscribed to anything */
+        GraphEventDispatcher();
         virtual ~GraphEventDispatcher() {}
         virtual void notifyGraphEvent(const GraphEvent& event);
 

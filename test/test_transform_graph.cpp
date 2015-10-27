@@ -24,7 +24,7 @@ public:
     vector<TransformRemovedEvent> transformRemovedEvents;
     vector<FrameAddedEvent> frameAddedEvents;
     
-    Dispatcher(TransformGraph& graph) : GraphEventDispatcher(graph) {}
+    Dispatcher(TransformGraph& graph) : GraphEventDispatcher(&graph) {}
     virtual ~Dispatcher() {}
     
     virtual void transformAdded(const TransformAddedEvent& e)
@@ -61,9 +61,9 @@ struct ItemEventSubscriber : public GraphItemEventDispatcher<Item<string>::Ptr>,
     vector<TypedItemRemovedEvent<Item<float>::Ptr>> floatItemRemovedEvents; 
 
     ItemEventSubscriber(TransformGraph& graph) : 
-      GraphItemEventDispatcher<Item<string>::Ptr>(graph),
-      GraphItemEventDispatcher<Item<int>::Ptr>(graph),
-      GraphItemEventDispatcher<Item<float>::Ptr>(graph) {}
+      GraphItemEventDispatcher<Item<string>::Ptr>(&graph),
+      GraphItemEventDispatcher<Item<int>::Ptr>(&graph),
+      GraphItemEventDispatcher<Item<float>::Ptr>(&graph) {}
 
     virtual void itemAdded(const TypedItemAddedEvent<Item<string>::Ptr>& event)
     {
@@ -986,9 +986,9 @@ BOOST_AUTO_TEST_CASE(multiple_item_event_destructor_test)
                                  public GraphItemEventDispatcher<Item<float>::Ptr>
     {
         ItemEventSubscriber(TransformGraph& graph) : 
-        GraphItemEventDispatcher<Item<string>::Ptr>(graph),
-        GraphItemEventDispatcher<Item<int>::Ptr>(graph),
-        GraphItemEventDispatcher<Item<float>::Ptr>(graph)
+        GraphItemEventDispatcher<Item<string>::Ptr>(&graph),
+        GraphItemEventDispatcher<Item<int>::Ptr>(&graph),
+        GraphItemEventDispatcher<Item<float>::Ptr>(&graph)
         {
         }
         

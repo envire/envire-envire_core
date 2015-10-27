@@ -1,13 +1,31 @@
 #include "GraphEventSubscriber.hpp"
 #include "GraphEventPublisher.hpp"
+#include <cassert>
+
 using namespace envire::core;
-GraphEventSubscriber::GraphEventSubscriber(envire::core::GraphEventPublisher& publisher) :
-    publisher(publisher)
+
+GraphEventSubscriber::GraphEventSubscriber(envire::core::GraphEventPublisher* pPublisher) :
+    pPublisher(pPublisher)
 {
-    publisher.subscribe(this);
+    subscribe(pPublisher);
 }
+
+GraphEventSubscriber::GraphEventSubscriber() : pPublisher(nullptr)
+{
+}
+
+void GraphEventSubscriber::subscribe(GraphEventPublisher* pPublisher)
+{
+    assert(pPublisher != nullptr);
+    pPublisher->subscribe(this);
+}
+
 
 GraphEventSubscriber::~GraphEventSubscriber()
 {
-    publisher.unsubscribe(this);
+    if(nullptr != pPublisher)
+    {
+      pPublisher->unsubscribe(this);
+      pPublisher = nullptr;
+    }
 }

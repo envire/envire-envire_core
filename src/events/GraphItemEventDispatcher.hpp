@@ -20,8 +20,11 @@ namespace envire { namespace core
     {
         using Type = typename extract_value_type<T>::value_type;
     public:
-        GraphItemEventDispatcher(GraphEventPublisher& publisher) :
-            GraphEventSubscriber(publisher), itemType(typeid(ItemType)){}
+        GraphItemEventDispatcher(GraphEventPublisher* pPublisher) :
+            GraphEventSubscriber(pPublisher), itemType(typeid(ItemType)){}
+        
+        /**Create a dispatcher that is not subscribed to anything, yet*/
+        GraphItemEventDispatcher() : GraphEventSubscriber(), itemType(typeid(ItemType)) {}
 
         virtual ~GraphItemEventDispatcher() {}
         
