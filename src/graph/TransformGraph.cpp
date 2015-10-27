@@ -326,6 +326,33 @@ VertexMap TransformGraph::getTree(const vertex_descriptor root) const
     return map;
 }
 
+vector<FrameId> TransformGraph::getPath(FrameId origin, FrameId target)
+{
+    vertex_descriptor fromDesc = getVertex(origin); //may throw
+    vertex_descriptor toDesc = getVertex(target); //may throw
+  
+    vector<FrameId> path;
+    envire::core::TransformGraphBFSVisitor <vertex_descriptor>visit(toDesc, this->graph());
+    try
+    {
+        boost::breadth_first_search(this->graph(), fromDesc, visitor(visit));
+
+    }catch(const FoundFrameException &e)
+    {
+        std::deque<vertex_descriptor>::iterator it = visit.tree->begin();
+        for (; (it+1) != visit.tree->end(); ++it)
+        {
+            path.push_back(getFrameId(*it));
+        }
+    }
+    if(path.size() > 0)
+    {
+        path.push_back(target);
+    }
+    return path;
+}
+
+
 VertexMap TransformGraph::getTree(const FrameId rootId) const
 {
     const vertex_descriptor root = getVertex(rootId);

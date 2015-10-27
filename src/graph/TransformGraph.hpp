@@ -171,7 +171,12 @@ namespace envire { namespace core
          * from @p root.
          * @throw UnknownFrameException if the frame does not exist */
         VertexMap getTree(const FrameId rootId) const;
-
+        
+        /**Returns the shortest path from @p origin to @p target.
+         * Returns an empty vector if the path doesn't exist.
+         * @throw UnknownFrameException if @p orign or @p target don't exist */
+        std::vector<FrameId> getPath(FrameId origin, FrameId target);
+        
         vertices_size_type num_vertices() const;
         edges_size_type num_edges() const;
         

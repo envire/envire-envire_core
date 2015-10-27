@@ -1091,3 +1091,35 @@ BOOST_AUTO_TEST_CASE(item_count_test)
     
 }
 
+BOOST_AUTO_TEST_CASE(get_path_test)
+{
+    TransformGraph graph;
+    FrameId A("A");
+    FrameId B("B");
+    FrameId C("C");
+    FrameId D("D");
+    FrameId E("E");
+    FrameId F("F");
+    FrameId G("G");
+    
+    Transform tf;
+    
+    graph.addTransform(A, B, tf);
+    graph.addTransform(B, C, tf);
+    graph.addTransform(B, F, tf);
+    graph.addTransform(A, E, tf);
+    graph.addTransform(E, C, tf);
+    graph.addTransform(C, D, tf);
+    graph.addTransform(D, G, tf);
+    graph.addTransform(C, F, tf);
+    
+    const vector<FrameId> path = graph.getPath(A, D);
+    
+    for(const FrameId& id : path)
+    {
+        std::cout << id << std::endl;
+    }
+    
+}
+
+
