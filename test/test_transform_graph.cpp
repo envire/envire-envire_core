@@ -860,7 +860,6 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
 
     //use a as root
     VertexMap tree = graph.getTree(graph.vertex(a));
-    std::cout<<"tree size is "<<tree.size()<<"\n";
     BOOST_CHECK(tree.size() == 7);
     BOOST_CHECK(tree[graph.vertex(a)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(c)].children.size() == 2);
