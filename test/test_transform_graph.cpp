@@ -932,6 +932,15 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_with_invalid_frameId_test)
     BOOST_CHECK_THROW(graph.getTree(a), UnknownFrameException);
 }
 
+BOOST_AUTO_TEST_CASE(get_tree_without_transforms)
+{
+    FrameId a = "frame_a";
+    TransformGraph graph;
+    graph.addFrame(a);
+    VertexMap tree = graph.getTree(a);
+    BOOST_CHECK(tree.empty());
+}
+
 BOOST_AUTO_TEST_CASE(remove_unknown_frame_test)
 {
     FrameId a = "frame_a";
