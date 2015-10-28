@@ -66,9 +66,18 @@ namespace envire { namespace core
     typedef LabeledTransformGraph::degree_size_type degree_size_type;
     typedef LabeledTransformGraph::out_edge_iterator out_edge_iterator;
     typedef LabeledTransformGraph::in_edge_iterator in_edge_iterator;
-    
-    /**A map that shows the parent->children relation between vertices in a tree.
-       The key is the parent.*/
-    using VertexMap = std::unordered_map<vertex_descriptor, std::unordered_set<vertex_descriptor>>;
+
+    /** Structure to store the parent and children relation for a vertex in a tree.
+     */
+    struct VertexInfo
+    {
+        vertex_descriptor parent;
+        std::unordered_set<vertex_descriptor> children;
+    };
+
+    /**A map that shows the vertex information (parent and children) of the vertices in a tree.
+       The key is the vertex descriptor.*/
+    using VertexMap = std::unordered_map<vertex_descriptor, VertexInfo>;
+
 }}
 #endif /* SRC_TRANSFORMTREETYPES_HPP_ */
