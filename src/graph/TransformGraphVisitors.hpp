@@ -70,21 +70,28 @@ namespace envire { namespace core
         boost::shared_ptr< std::unordered_map<Vertex, Vertex> > parent;
         boost::shared_ptr< std::deque<Vertex> > tree; /** tree from origin tree[0] to target tree[n] */
     };
-    
-        
+
+
     /**Visits every node in bfs order and stores the search tree in the provided map */
-    struct TreeBuilderVisitor : public boost::default_bfs_visitor 
+    struct TreeBuilderVisitor : public boost::default_bfs_visitor
     {
-        TreeBuilderVisitor(VertexMap& parentToChildren) : parentToChildren(parentToChildren) {}
-        
+        TreeBuilderVisitor(VertexRelationMap& tree) : tree(tree) {}
+
         template <typename Edge, typename Graph>
         void tree_edge(Edge e, const Graph &g)
         {
-            parentToChildren[boost::source(e, g)].insert(boost::target(e, g));
+            vertex_descriptor source = boost::source(e,g);
+            vertex_descriptor target = boost::target(e,g);
+
+            /** Insert children **/
+            tree[source].children.insert(target);
+
+            /** Insert parent **/
+            tree[target].parent = source;
         }
-        VertexMap& parentToChildren;
+        VertexRelationMap& tree;
     };
-    
+
 
 
     /** TESTING BOOST CODE **/

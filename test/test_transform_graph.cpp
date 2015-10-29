@@ -844,40 +844,40 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     FrameId a = "frame_a";
     FrameId b = "frame_b";
     FrameId c = "frame_c";
-    FrameId d = "frame_d";  
-    FrameId e = "frame_e";  
-    FrameId f = "frame_f";  
-    FrameId g = "frame_g";  
-    
+    FrameId d = "frame_d";
+    FrameId e = "frame_e";
+    FrameId f = "frame_f";
+    FrameId g = "frame_g";
+
     Transform tf;
-    
+
     graph.addTransform(a, b, tf);
     graph.addTransform(a, c, tf);
     graph.addTransform(c, d, tf);
     graph.addTransform(c, e, tf);
     graph.addTransform(e, f, tf);
     graph.addTransform(e, g, tf);
-    
+
     //use a as root
-    VertexMap parentToChildren = graph.getTree(graph.vertex(a));
-    BOOST_CHECK(parentToChildren.size() == 3); 
-    BOOST_CHECK(parentToChildren[graph.vertex(a)].size() == 2);
-    BOOST_CHECK(parentToChildren[graph.vertex(c)].size() == 2);
-    BOOST_CHECK(parentToChildren[graph.vertex(e)].size() == 2);
-    BOOST_CHECK(parentToChildren.find(graph.vertex(b)) == parentToChildren.end());
-    BOOST_CHECK(parentToChildren.find(graph.vertex(d)) == parentToChildren.end());
-    BOOST_CHECK(parentToChildren.find(graph.vertex(f)) == parentToChildren.end());
-    BOOST_CHECK(parentToChildren.find(graph.vertex(g)) == parentToChildren.end());
-    std::unordered_set<vertex_descriptor>& aChildren = parentToChildren[graph.vertex(a)];
+    VertexRelationMap tree = graph.getTree(graph.vertex(a));
+    BOOST_CHECK(tree.size() == 7);
+    BOOST_CHECK(tree[graph.vertex(a)].children.size() == 2);
+    BOOST_CHECK(tree[graph.vertex(c)].children.size() == 2);
+    BOOST_CHECK(tree[graph.vertex(e)].children.size() == 2);
+    BOOST_CHECK(tree[graph.vertex(b)].parent == graph.vertex(a));
+    BOOST_CHECK(tree[graph.vertex(d)].parent == graph.vertex(c));
+    BOOST_CHECK(tree[graph.vertex(f)].parent == graph.vertex(e));
+    BOOST_CHECK(tree[graph.vertex(g)].parent == graph.vertex(e));
+    std::unordered_set<vertex_descriptor>& aChildren = tree[graph.vertex(a)].children;
     BOOST_CHECK(aChildren.find(graph.vertex(b)) != aChildren.end());
     BOOST_CHECK(aChildren.find(graph.vertex(c)) != aChildren.end());
-    std::unordered_set<vertex_descriptor>& cChildren = parentToChildren[graph.vertex(c)];
+    std::unordered_set<vertex_descriptor>& cChildren = tree[graph.vertex(c)].children;
     BOOST_CHECK(cChildren.find(graph.vertex(d)) != cChildren.end());
     BOOST_CHECK(cChildren.find(graph.vertex(e)) != cChildren.end());
-    std::unordered_set<vertex_descriptor>& eChildren = parentToChildren[graph.vertex(e)];
+    std::unordered_set<vertex_descriptor>& eChildren = tree[graph.vertex(e)].children;
     BOOST_CHECK(eChildren.find(graph.vertex(f)) != eChildren.end());
     BOOST_CHECK(eChildren.find(graph.vertex(g)) != eChildren.end());
-    
+
      /*       d
      *        |
      *        c
@@ -887,24 +887,24 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
      *    b   f   g
      * Now use d as root node
      */
-    parentToChildren = graph.getTree(graph.vertex(d));
-    BOOST_CHECK(parentToChildren.size() == 4); 
-    BOOST_CHECK(parentToChildren[graph.vertex(d)].size() == 1);
-    BOOST_CHECK(parentToChildren[graph.vertex(c)].size() == 2);
-    BOOST_CHECK(parentToChildren[graph.vertex(e)].size() == 2);
-    BOOST_CHECK(parentToChildren[graph.vertex(a)].size() == 1);
-    BOOST_CHECK(parentToChildren.find(graph.vertex(b)) == parentToChildren.end());
-    BOOST_CHECK(parentToChildren.find(graph.vertex(f)) == parentToChildren.end());
-    BOOST_CHECK(parentToChildren.find(graph.vertex(g)) == parentToChildren.end());
-    
-    std::unordered_set<vertex_descriptor>& aChildren2 = parentToChildren[graph.vertex(a)];
+    tree = graph.getTree(graph.vertex(d));
+    BOOST_CHECK(tree.size() == 7);
+    BOOST_CHECK(tree[graph.vertex(d)].children.size() == 1);
+    BOOST_CHECK(tree[graph.vertex(c)].children.size() == 2);
+    BOOST_CHECK(tree[graph.vertex(e)].children.size() == 2);
+    BOOST_CHECK(tree[graph.vertex(a)].children.size() == 1);
+    BOOST_CHECK(tree[graph.vertex(b)].parent == graph.vertex(a));
+    BOOST_CHECK(tree[graph.vertex(f)].parent == graph.vertex(e));
+    BOOST_CHECK(tree[graph.vertex(g)].parent == graph.vertex(e));
+
+    std::unordered_set<vertex_descriptor>& aChildren2 = tree[graph.vertex(a)].children;
     BOOST_CHECK(aChildren2.find(graph.vertex(b)) != aChildren2.end());
-    std::unordered_set<vertex_descriptor>& cChildren2 = parentToChildren[graph.vertex(c)];
+    std::unordered_set<vertex_descriptor>& cChildren2 = tree[graph.vertex(c)].children;
     BOOST_CHECK(cChildren2.find(graph.vertex(a)) != cChildren2.end());
     BOOST_CHECK(cChildren2.find(graph.vertex(e)) != cChildren2.end());
-    std::unordered_set<vertex_descriptor>& dChildren = parentToChildren[graph.vertex(d)];
+    std::unordered_set<vertex_descriptor>& dChildren = tree[graph.vertex(d)].children;
     BOOST_CHECK(dChildren.find(graph.vertex(c)) != aChildren.end());
-    std::unordered_set<vertex_descriptor>& eChildren2 = parentToChildren[graph.vertex(e)];
+    std::unordered_set<vertex_descriptor>& eChildren2 = tree[graph.vertex(e)].children;
     BOOST_CHECK(eChildren2.find(graph.vertex(f)) != eChildren2.end());
     BOOST_CHECK(eChildren2.find(graph.vertex(g)) != eChildren2.end());
 }
@@ -915,14 +915,17 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_with_frameId_test)
     FrameId b = "frame_b";
     FrameId c = "frame_c";
 
-    
+
     Transform tf;
     TransformGraph graph;
     graph.addTransform(a, b, tf);
     graph.addTransform(a, c, tf);
-    VertexMap tree = graph.getTree(a);
-    BOOST_CHECK(tree.size() == 1);
-    BOOST_CHECK(tree[graph.vertex(a)].size() == 2);
+    VertexRelationMap tree = graph.getTree(a);
+    BOOST_CHECK(tree.size() == 3);
+    BOOST_CHECK(tree[graph.vertex(a)].children.size() == 2);
+    BOOST_CHECK(tree[graph.vertex(b)].parent == graph.vertex(a));
+    BOOST_CHECK(tree[graph.vertex(c)].parent == graph.vertex(a));
+    BOOST_CHECK(tree[graph.vertex(a)].parent == TransformGraph::null_vertex());
 }
 
 BOOST_AUTO_TEST_CASE(simple_get_tree_with_invalid_frameId_test)
@@ -937,7 +940,7 @@ BOOST_AUTO_TEST_CASE(get_tree_without_transforms)
     FrameId a = "frame_a";
     TransformGraph graph;
     graph.addFrame(a);
-    VertexMap tree = graph.getTree(a);
+    VertexRelationMap tree = graph.getTree(a);
     BOOST_CHECK(tree.empty());
 }
 

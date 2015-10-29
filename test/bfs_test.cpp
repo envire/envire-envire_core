@@ -13,11 +13,11 @@
 #include <iostream>
 
 using namespace boost;
-template < typename TimeMap, typename VertexMap >
+template < typename TimeMap, typename VertexRelationMap >
 class bfs_time_visitor:public default_bfs_visitor {
   typedef typename property_traits < TimeMap >::value_type T;
 public:
-  bfs_time_visitor(TimeMap tmap, VertexMap v, T & t):m_timemap(tmap), vertex_to_search(v), m_time(t)
+  bfs_time_visitor(TimeMap tmap, VertexRelationMap v, T & t):m_timemap(tmap), vertex_to_search(v), m_time(t)
     {
         vertex_map.insert(std::pair<long unsigned int, const char>(0, 'r'));
         vertex_map.insert(std::pair<long unsigned int, const char>(1, 's'));
@@ -55,8 +55,8 @@ public:
    template < typename Edge, typename Graph >
     void tree_edge(Edge e, const Graph & g)
   {
-      VertexMap source_vertex = boost::source(e, g);
-      VertexMap target_vertex = boost::target(e, g);
+      VertexRelationMap source_vertex = boost::source(e, g);
+      VertexRelationMap target_vertex = boost::target(e, g);
 
       std::cout<<"EDGE: "<<vertex_map[source_vertex]<<"->"<<vertex_map[target_vertex]<<"\n";
 
@@ -64,7 +64,7 @@ public:
 
 
   TimeMap m_timemap;
-  VertexMap vertex_to_search;
+  VertexRelationMap vertex_to_search;
   T & m_time;
   std::map<long unsigned int, const char> vertex_map;
 
