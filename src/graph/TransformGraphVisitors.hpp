@@ -75,7 +75,7 @@ namespace envire { namespace core
     /**Visits every node in bfs order and stores the search tree in the provided map */
     struct TreeBuilderVisitor : public boost::default_bfs_visitor
     {
-        TreeBuilderVisitor(VertexMap& tree) : tree(tree) {}
+        TreeBuilderVisitor(VertexRelationMap& tree) : tree(tree) {}
 
         template <typename Edge, typename Graph>
         void tree_edge(Edge e, const Graph &g)
@@ -89,7 +89,7 @@ namespace envire { namespace core
             /** Insert parent **/
             tree[target].parent = source;
         }
-        VertexMap& tree;
+        VertexRelationMap& tree;
     };
 
 

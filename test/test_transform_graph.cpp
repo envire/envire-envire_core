@@ -859,7 +859,7 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     graph.addTransform(e, g, tf);
 
     //use a as root
-    VertexMap tree = graph.getTree(graph.vertex(a));
+    VertexRelationMap tree = graph.getTree(graph.vertex(a));
     BOOST_CHECK(tree.size() == 7);
     BOOST_CHECK(tree[graph.vertex(a)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(c)].children.size() == 2);
@@ -920,7 +920,7 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_with_frameId_test)
     TransformGraph graph;
     graph.addTransform(a, b, tf);
     graph.addTransform(a, c, tf);
-    VertexMap tree = graph.getTree(a);
+    VertexRelationMap tree = graph.getTree(a);
     BOOST_CHECK(tree.size() == 3);
     BOOST_CHECK(tree[graph.vertex(a)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(b)].parent == graph.vertex(a));
@@ -940,7 +940,7 @@ BOOST_AUTO_TEST_CASE(get_tree_without_transforms)
     FrameId a = "frame_a";
     TransformGraph graph;
     graph.addFrame(a);
-    VertexMap tree = graph.getTree(a);
+    VertexRelationMap tree = graph.getTree(a);
     BOOST_CHECK(tree.empty());
 }
 

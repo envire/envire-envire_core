@@ -69,7 +69,7 @@ namespace envire { namespace core
 
     /** Structure to store the parent and children relation for a vertex in a tree.
      */
-    struct VertexInfo
+    struct VertexRelation
     {
         vertex_descriptor parent;
         std::unordered_set<vertex_descriptor> children;
@@ -77,7 +77,7 @@ namespace envire { namespace core
 
     /**A map that shows the vertex information (parent and children) of the vertices in a tree.
        The key is the vertex descriptor.*/
-    using VertexMap = std::unordered_map<vertex_descriptor, VertexInfo>;
+    using VertexRelationMap = std::unordered_map<vertex_descriptor, VertexRelation>;
 
 }}
 #endif /* SRC_TRANSFORMTREETYPES_HPP_ */

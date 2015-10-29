@@ -166,11 +166,11 @@ namespace envire { namespace core
         
         /**Builds a tree containing all vertices that are accessible starting
          * from @p root.  */
-        VertexMap getTree(const vertex_descriptor root) const;
+        VertexRelationMap getTree(const vertex_descriptor root) const;
         /**Builds a tree containing all vertices that are accessible starting
          * from @p root.
          * @throw UnknownFrameException if the frame does not exist */
-        VertexMap getTree(const FrameId rootId) const;
+        VertexRelationMap getTree(const FrameId rootId) const;
         
         /**Returns the shortest path from @p origin to @p target.
          * Returns an empty vector if the path doesn't exist.
