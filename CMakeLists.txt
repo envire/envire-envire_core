@@ -5,6 +5,17 @@ set(ROCK_USE_CXX11 TRUE)
 find_package(Rock)
 set(ROCK_TEST_ENABLED ON)
 
+option(COVERAGE "Enable code coverage. run 'make test && make coverage' to generate the coverage report. The report will be in ${CMAKE_BINARY_DIR}/cov" OFF)
+option(ENABLE_PLUGINS "Enable the plugin system. Disable this to get rid of the dependency to the class_loader" ON)
+
+if(ENABLE_PLUGINS)
+  #this definition is used in the source to include/exclude the plugin headers
+  message(STATUS "Plugin system enabled")
+  add_definitions(-DCMAKE_ENABLE_PLUGINS)
+else()
+  message("Plugin system disabled")
+endif()
+
 if(COVERAGE)
     if(CMAKE_BUILD_TYPE MATCHES Debug)
         add_definitions(-fprofile-arcs -ftest-coverage)
@@ -26,5 +37,5 @@ endif()
 
 rock_init(envire_core 0.1)
 rock_standard_layout()
-option(COVERAGE "Enabled code coverage" OFF)
+
 
