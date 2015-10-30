@@ -203,9 +203,9 @@ namespace envire { namespace core
          * @throw NoItemsOfTypeInFrameException if no items of type @p T exist in the frame.
          * @throw std::out_of_range if @p i is out of range*/
         template <class T>
-        const T getItem(const FrameId& frame, const int i) const;
+        const T getItem(const FrameId& frame, const int i = 0) const;
         template <class T>
-        const T getItem(const vertex_descriptor frame, const int i) const;
+        const T getItem(const vertex_descriptor frame, const int i = 0) const;
         
         
         
