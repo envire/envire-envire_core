@@ -1,13 +1,12 @@
 find_package(Boost COMPONENTS serialization)
 
-rock_library(envire_core
-    HEADERS items/ItemBase.hpp
+
+set(headers items/ItemBase.hpp
             items/Item.hpp
             items/Frame.hpp
             items/Transform.hpp
             items/Environment.hpp
             items/AlignedBoundingBox.hpp
-            items/DummyItem.hpp
             items/RandomGenerator.hpp
             items/SpatialItem.hpp
             items/BoundingVolume.hpp
@@ -16,7 +15,6 @@ rock_library(envire_core
             graph/TransformGraphExceptions.hpp
             graph/TransformGraphVisitors.hpp
             graph/GraphViz.hpp
-            plugin/ClassLoader.hpp
             events/GraphEvent.hpp
             events/GraphEventSubscriber.hpp
             events/GraphEventDispatcher.hpp
@@ -34,22 +32,38 @@ rock_library(envire_core
             serialization/SerializationRegistration.hpp
             serialization/ItemHeader.hpp
             serialization/Eigen.hpp
-            util/MetaProgramming.hpp
-    SOURCES items/ItemBase.cpp
+            util/MetaProgramming.hpp)
+            
+set(sources items/ItemBase.cpp
             items/AlignedBoundingBox.cpp
-            items/DummyItem.cpp
-            plugin/ClassLoader.cpp
             events/GraphEventPublisher.cpp
             events/GraphEventDispatcher.cpp
             events/GraphEventSubscriber.cpp
             graph/TransformGraph.cpp
-            serialization/Serialization.cpp
+            serialization/Serialization.cpp)
+            
+set(deps_pkg_config base-types)
+
+if(ENABLE_PLUGINS)
+
+  set(headers ${headers}
+              plugin/ClassLoader.hpp
+              plugin/Plugin.hpp)          
+  set(sources ${sources}
+              plugin/ClassLoader.cpp)
+  set(deps_pkg_config ${deps_pkg_config} class_loader)
+  
+endif()
+
+             
+
+rock_library(envire_core
+    HEADERS ${headers}
+    SOURCES ${sources}
     DEPS_CMAKE Boost
-    DEPS_PKGCONFIG base-types class_loader)
+    DEPS_PKGCONFIG ${deps_pkg_config})
 
 
 install(FILES
     all
     DESTINATION include/envire_core)
-
-add_subdirectory(util)

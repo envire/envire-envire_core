@@ -1,5 +1,4 @@
-#ifndef __ENVIRE_CORE_CLASS_LOADER__
-#define __ENVIRE_CORE_CLASS_LOADER__
+#pragma once
 
 #include <map>
 #include <string>
@@ -73,4 +72,3 @@ namespace envire
 
 }
 
-#endif
