@@ -1,5 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include <envire_core/all>
+
 #include <vector>
 #include <string>
 
@@ -859,7 +860,8 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     graph.addTransform(e, g, tf);
 
     //use a as root
-    VertexRelationMap tree = graph.getTree(graph.vertex(a));
+    TreeView view = graph.getTree(graph.vertex(a));
+    VertexRelationMap& tree = view.tree;
     BOOST_CHECK(tree.size() == 7);
     BOOST_CHECK(tree[graph.vertex(a)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(c)].children.size() == 2);
@@ -887,7 +889,8 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
      *    b   f   g
      * Now use d as root node
      */
-    tree = graph.getTree(graph.vertex(d));
+    view = graph.getTree(graph.vertex(d));
+    tree = view.tree;
     BOOST_CHECK(tree.size() == 7);
     BOOST_CHECK(tree[graph.vertex(d)].children.size() == 1);
     BOOST_CHECK(tree[graph.vertex(c)].children.size() == 2);
@@ -920,7 +923,8 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_with_frameId_test)
     TransformGraph graph;
     graph.addTransform(a, b, tf);
     graph.addTransform(a, c, tf);
-    VertexRelationMap tree = graph.getTree(a);
+    TreeView view = graph.getTree(a);
+    VertexRelationMap& tree = view.tree;
     BOOST_CHECK(tree.size() == 3);
     BOOST_CHECK(tree[graph.vertex(a)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(b)].parent == graph.vertex(a));
@@ -940,9 +944,47 @@ BOOST_AUTO_TEST_CASE(get_tree_without_transforms)
     FrameId a = "frame_a";
     TransformGraph graph;
     graph.addFrame(a);
-    VertexRelationMap tree = graph.getTree(a);
-    BOOST_CHECK(tree.empty());
+    TreeView view = graph.getTree(a);
+    BOOST_CHECK(view.tree.empty());
 }
+
+BOOST_AUTO_TEST_CASE(non_tree_edges_test)
+{
+  
+  /*            A
+   *           /  \
+   *          B    D
+   *          |    |
+   *          C    |
+   *           \  /
+   *            E   
+   */ 
+  
+    FrameId a("A");
+    FrameId b("B");
+    FrameId c("C");
+    FrameId d("D");
+    FrameId e("E");
+    TransformGraph graph;
+    Transform tf;
+    graph.addTransform(a, b, tf);
+    graph.addTransform(a, d, tf);
+    graph.addTransform(b, c, tf);
+    graph.addTransform(c, e, tf);
+    graph.addTransform(d, e, tf);
+    
+    TreeView view = graph.getTree(a);
+    BOOST_CHECK(view.crossEdges.size() == 1);
+    
+    edge_descriptor edge = view.crossEdges[0];
+    vertex_descriptor source = graph.source(edge);
+    vertex_descriptor target = graph.target(edge);
+    BOOST_CHECK(graph.vertex(c) == source);
+    BOOST_CHECK(graph.vertex(e) == target);
+    
+    
+}
+
 
 BOOST_AUTO_TEST_CASE(remove_unknown_frame_test)
 {

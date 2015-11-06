@@ -166,11 +166,11 @@ namespace envire { namespace core
         
         /**Builds a tree containing all vertices that are accessible starting
          * from @p root.  */
-        VertexRelationMap getTree(const vertex_descriptor root) const;
+        TreeView getTree(const vertex_descriptor root) const;
         /**Builds a tree containing all vertices that are accessible starting
          * from @p root.
          * @throw UnknownFrameException if the frame does not exist */
-        VertexRelationMap getTree(const FrameId rootId) const;
+        TreeView getTree(const FrameId rootId) const;
         
         /**Returns the shortest path from @p origin to @p target.
          * Returns an empty vector if the path doesn't exist.
@@ -222,6 +222,9 @@ namespace envire { namespace core
         size_t getItemCount(const FrameId& frame) const;
         template <class T>
         size_t getItemCount(const vertex_descriptor vd) const;        
+        
+        const vertex_descriptor source(const edge_descriptor edge) const;
+        const vertex_descriptor target(const edge_descriptor edge) const;
         
     protected:
         using EdgePair = std::pair<edge_descriptor, bool>;
