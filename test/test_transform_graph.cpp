@@ -435,7 +435,7 @@ BOOST_AUTO_TEST_CASE(get_invalid_transform_test)
     tf.transform.translation << 42, 21, -42;
     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
     BOOST_CHECK_NO_THROW(tree.addTransform(a, b, tf));
-    BOOST_CHECK_THROW(tree.getTransform(a, c), UnknownTransformException);
+    BOOST_CHECK_THROW(tree.getTransform(a, c), UnknownFrameException);
 }
 
 BOOST_AUTO_TEST_CASE(get_transform_with_descriptor_without_edges_test)

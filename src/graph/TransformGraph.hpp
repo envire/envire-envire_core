@@ -101,7 +101,8 @@ namespace envire { namespace core
         void removeTransform(const FrameId& origin, const FrameId& target);
 
         /** @return the transform between a and b. Calculating it if necessary.
-         * @throw UnknownTransformException if the transformation doesn't exist*/
+         * @throw UnknownTransformException if the transformation doesn't exist
+         * @throw UnknownFrameException if the @p origin or @p target does not exist*/
         const Transform getTransform(const FrameId& origin, const FrameId& target) const;
         const Transform getTransform(const vertex_descriptor origin, const vertex_descriptor target) const;
         
@@ -249,15 +250,6 @@ namespace envire { namespace core
                                  const FrameId& originName,
                                  const FrameId& targetName);
         
-        /**returns the transform between origin and target.
-         * @throw UnknownTransformException if the transformation doesn't exist.
-         * @param origin Name of the origin frame (used in exception msg only)
-         * @param target Name of the target frame (used in exception msg only)
-         * @param originVertex vertex_descriptor of the origin frame
-         * @param targetVertex vertex_descriptor of the target frame */
-        const Transform getTransform(const FrameId& origin, const FrameId& target,
-                                    const vertex_descriptor originVertex,
-                                    const vertex_descriptor targetVertex) const;
 
         /**Sets the transform value and causes transformModified event. */
         void updateTransform(edge_descriptor ed, const Transform& tf);
