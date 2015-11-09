@@ -59,11 +59,11 @@ void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
 
     //check if there is an edge between the vertices.
     //If a->b exists, b->a also exist. Therefore we need to check only one direction
-//     EdgePair e = boost::edge(originDesc, targetDesc, *this);
-//     if(e.second)// edge already exists
-//     {
-//         throw TransformAlreadyExistsException(origin, target);
-//     }
+    EdgePair e = boost::edge(originDesc, targetDesc, *this);
+    if(e.second)// edge already exists
+    {
+        throw TransformAlreadyExistsException(origin, target);
+    }
     //we always add two edges, one for the transform and one for the inverse transform
     edge_descriptor originToTarget = add_edge(originDesc, targetDesc, tf, origin, target);
 
