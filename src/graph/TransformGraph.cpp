@@ -318,12 +318,12 @@ const envire::core::FrameId& TransformGraph::getFrameId(const vertex_descriptor 
 }
 
 
-VertexRelationMap TransformGraph::getTree(const vertex_descriptor root) const
+TreeView TransformGraph::getTree(const vertex_descriptor root) const
 {
-    VertexRelationMap map;
-    TreeBuilderVisitor visitor(map);
+    TreeView view;
+    TreeBuilderVisitor visitor(view);
     boost::breadth_first_search(*this, root, boost::visitor(visitor));
-    return map;
+    return view;
 }
 
 vector<FrameId> TransformGraph::getPath(FrameId origin, FrameId target)
@@ -353,7 +353,7 @@ vector<FrameId> TransformGraph::getPath(FrameId origin, FrameId target)
 }
 
 
-VertexRelationMap TransformGraph::getTree(const FrameId rootId) const
+TreeView TransformGraph::getTree(const FrameId rootId) const
 {
     const vertex_descriptor root = getVertex(rootId);
     return getTree(root);
@@ -384,4 +384,12 @@ vertex_descriptor TransformGraph::getVertex(const FrameId& frame) const
     return desc;
 }
 
+const vertex_descriptor TransformGraph::source(const edge_descriptor edge) const
+{
+    return boost::source(edge, graph());
+}
+const vertex_descriptor TransformGraph::target(const edge_descriptor edge) const
+{
+    return boost::target(edge, graph());
+}
 

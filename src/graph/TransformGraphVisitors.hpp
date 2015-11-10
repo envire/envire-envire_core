@@ -75,8 +75,10 @@ namespace envire { namespace core
     /**Visits every node in bfs order and stores the search tree in the provided map */
     struct TreeBuilderVisitor : public boost::default_bfs_visitor
     {
-        TreeBuilderVisitor(VertexRelationMap& tree) : tree(tree) {}
+        TreeBuilderVisitor(TreeView& view) : view(view) {}
 
+        /**This is invoked on each edge as it becomes a member of 
+         * the edges that form the search tree. */
         template <typename Edge, typename Graph>
         void tree_edge(Edge e, const Graph &g)
         {
@@ -84,12 +86,23 @@ namespace envire { namespace core
             vertex_descriptor target = boost::target(e,g);
 
             /** Insert children **/
-            tree[source].children.insert(target);
+            view.tree[source].children.insert(target);
 
             /** Insert parent **/
-            tree[target].parent = source;
+            view.tree[target].parent = source;
         }
-        VertexRelationMap& tree;
+        
+        /**This is only invoked on cross edges, not on back edges
+         * @see http://www.boost.org/doc/libs/1_59_0/libs/graph/doc/BFSVisitor.html
+         * @see http://www.boost.org/doc/libs/1_59_0/libs/graph/doc/breadth_first_search.html
+         */
+        template <typename Edge, typename Graph>
+        void gray_target(Edge e, Graph& g)
+        {
+            view.crossEdges.push_back(e);
+        }
+        
+        TreeView& view;
     };
 
 
