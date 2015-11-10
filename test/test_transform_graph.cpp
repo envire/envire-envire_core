@@ -681,6 +681,25 @@ BOOST_AUTO_TEST_CASE(simple_add_get_transform_test)
     BOOST_CHECK(compareTransform(readTfInv, invTf));
 }
 
+
+BOOST_AUTO_TEST_CASE(add_transform_existing_vertex_test)
+{ 
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    TransformGraph graph;
+    graph.addFrame(a);
+    graph.addFrame(b);
+    
+    vertex_descriptor aDesc = graph.vertex(a);
+    vertex_descriptor bDesc = graph.vertex(b);
+    
+    Transform tf;
+    graph.addTransform(aDesc, bDesc, tf);
+    BOOST_CHECK_NO_THROW(graph.getTransform(a, b));
+    
+    
+}
+
 BOOST_AUTO_TEST_CASE(complex_add_get_transform_test)
 {
 
