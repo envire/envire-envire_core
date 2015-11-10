@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
-#include <envire_core/all>
 #include <envire/Core.hpp>
+#include <envire_core/all>
 #include <chrono>
 #include <iostream>
 
@@ -139,8 +139,6 @@ const double newTranformSearch10000()
     graph.addFrame(root);
     addFourChildren(graph, root, 3);
     
-    GraphViz viz;
-    viz.write(graph, "test.dot");
     
     //we search from "4" to "4333" which is the rightmost child
     //according to the naming schema of addFourChildren()
@@ -155,12 +153,15 @@ const double newTranformSearch10000()
     return diff;  
 }
 
+
 /** same as addFourChildren() for the old envire. returns the rightmost child */
 envire::FrameNode* addFourChildrenOld(envire::Environment* env, envire::FrameNode* parent, const int i)
 {
   envire::FrameNode* target = NULL;
   if(i == 0)
+  {
       return parent;
+  }
   for(int j = 0; j < 4; ++j)
   {
       Affine3d transform(Translation3d( 0.0, 0.0, 0.5 ));
@@ -177,12 +178,12 @@ const double oldTransformSearch10000()
 {
     using namespace envire;
     boost::scoped_ptr<Environment> env(new Environment());
-    FrameNode* root = new FrameNode();
+    FrameNode* root = env->getRootNode();
     FrameNode* target = addFourChildrenOld(env.get(), root, 3);
     auto start = chrono::steady_clock::now();
     for(int i = 0; i < 10000; ++i)
     {
-        const auto transform = env->relativeTransform(root, target);
+      const auto transform = env->relativeTransform(target, root);
     }
     auto end = chrono::steady_clock::now();
     double diff = chrono::duration <double, milli> (end - start).count();
@@ -190,7 +191,145 @@ const double oldTransformSearch10000()
 }
 
 
+const double oldUpdateTransform10000()
+{
+    using namespace envire;
+    Environment* env = new Environment();
+    FrameNode* root = env->getRootNode();
+    FrameNode* other = new FrameNode();
+    env->addChild(root, other);
+    Affine3d transform(Translation3d( 0.0, 0.0, 0.5 ));
+    other->setTransform(transform);
+    auto start = chrono::steady_clock::now();
+    for(int i = 0; i < 10000; ++i)
+    {
+        other->setTransform(transform);
+    }
+    auto end = chrono::steady_clock::now();
+    double diff = chrono::duration <double, milli> (end - start).count();
+    return diff;     
+}
 
+const double newUpdateTransform10000()
+{
+    using namespace envire::core;
+    TransformGraph graph;
+    const FrameId root("4");
+    const FrameId other("other");
+    envire::core::Transform tf;
+    graph.addTransform(root, other, tf);
+    
+    auto start = chrono::steady_clock::now();
+    for(int i = 0; i < 10000; ++i)
+    {
+        graph.updateTransform(root, other, tf);
+    }
+    auto end = chrono::steady_clock::now();
+    double diff = chrono::duration <double, milli> (end - start).count();
+    return diff;      
+}
+
+const double oldGetTransform10000()
+{
+    using namespace envire;
+    Environment* env = new Environment();
+    FrameNode* root = env->getRootNode();
+    FrameNode* other = new FrameNode();
+    env->addChild(root, other);
+    Affine3d transform(Translation3d( 0.0, 0.0, 0.5 ));
+    other->setTransform(transform);
+    
+    
+    auto start = chrono::steady_clock::now();
+    for(int i = 0; i < 10000; ++i)
+    {
+        const envire::TransformWithUncertainty tf = other->getTransformWithUncertainty();
+    }
+    auto end = chrono::steady_clock::now();
+    double diff = chrono::duration <double, milli> (end - start).count();
+    return diff;       
+}
+
+const double newGetTransform10000()
+{
+    using namespace envire::core;
+    TransformGraph graph;
+    const FrameId roo("4");
+    const FrameId othe("other");
+    envire::core::Transform tf;
+    graph.addTransform(roo, othe, tf);
+    
+    vertex_descriptor root = graph.vertex(roo);
+    vertex_descriptor other = graph.vertex(othe);
+    
+    auto start = chrono::steady_clock::now();
+    for(int i = 0; i < 10000; ++i)
+    {
+        const envire::core::Transform tf = graph.getTransform(root, other);
+    }
+    auto end = chrono::steady_clock::now();
+    double diff = chrono::duration <double, milli> (end - start).count();
+    return diff;        
+}
+
+
+
+class MyMap : public envire::CartesianMap
+{
+public:
+  MyMap(const std::string& id) : CartesianMap(id) {}
+  virtual int getDimension() const override {return 42;}
+};
+
+const double newAddItemCartesianMap10000()
+{
+    using namespace envire::core;
+    using Item = Item<MyMap>;
+    
+    TransformGraph graph;
+    const FrameId root("4");
+    graph.addFrame(root);
+        
+    //create items beforehand, we dont want ti benchmark the item ctor
+    vector<Item::Ptr> items;
+    for(int i = 0; i < 10000; ++i)
+    {
+      items.emplace_back(new Item("bla")); //id is not used, therefore just use "bla"
+    }
+    
+    auto start = chrono::steady_clock::now();
+    for(int i = 0; i < 10000; ++i)
+    {
+        graph.addItemToFrame(root, items[i]);
+    }
+    auto end = chrono::steady_clock::now();
+    double diff = chrono::duration <double, milli> (end - start).count();
+    return diff;  
+}
+
+const double oldAddItemCartesianMap10000()
+{
+    using namespace envire;
+    Environment* env = new Environment();
+    FrameNode* root = env->getRootNode();
+    
+    //create items beforehand, we dont want ti benchmark the item ctor
+    vector<MyMap*> items;
+    for(int i = 0; i < 10000; ++i)
+    {
+      const string id = string("root/") + boost::lexical_cast<string>(i);
+      items.emplace_back(new MyMap(id)); //id is not used, therefore just use "bla"
+    }
+    
+    auto start = chrono::steady_clock::now();
+    for(int i = 0; i < 10000; ++i)
+    {
+        env->attachItem(items[i], root);
+    }
+    auto end = chrono::steady_clock::now();
+    double diff = chrono::duration <double, milli> (end - start).count();
+    return diff;  
+}
 
 
 
@@ -222,6 +361,31 @@ int main()
     const double newSearch = newTranformSearch10000();
     cout << "old: " << oldSearch << " millis, (" << oldSearch / 10000.0 << " millis/search)" << endl;
     cout << "new: " << newSearch << " millis, (" << newSearch / 10000.0 << " millis/search)" << endl;
+     
+    cout << "-------------------------" << endl;
+    cout << "Update transform 10000 times:" << endl;
+    cout << "-------------------------" << endl;  
+    const double oldUpdateTransform = oldUpdateTransform10000();
+    const double newUpdateTransform = newUpdateTransform10000();
+    cout << "old: " << oldUpdateTransform << " millis, (" << oldUpdateTransform / 10000.0 << " millis/update)" << endl;
+    cout << "new: " << newUpdateTransform << " millis, (" << newUpdateTransform / 10000.0 << " millis/update)" << endl;
     
+    cout << "-------------------------" << endl;
+    cout << "Get direct transform 10000 times:" << endl;
+    cout << "-------------------------" << endl;  
+    const double oldGet = oldGetTransform10000();
+    const double newGet = newGetTransform10000();
+    cout << "old: " << oldGet << " millis, (" << oldGet / 10000.0 << " millis/get)" << endl;
+    cout << "new: " << newGet << " millis, (" << newGet / 10000.0 << " millis/get)" << endl;
+   
+    cout << "-------------------------" << endl;
+    cout << "Add 10000 CartesianMaps to frame:" << endl;
+    cout << "-------------------------" << endl;  
+    const double oldAddItem = oldAddItemCartesianMap10000();
+    double newAddItem = newAddItemCartesianMap10000();
+    cout << "old: " << oldAddItem << " millis, (" << oldAddItem / 10000.0 << " millis/item)" << endl;
+    cout << "new: " << newAddItem << " millis, (" << newAddItem / 10000.0 << " millis/item)" << endl;
     
 }
+
+
