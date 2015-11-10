@@ -146,7 +146,7 @@ const double newTranformSearch10000()
     auto start = chrono::steady_clock::now();
     for(int i = 0; i < 10000; ++i)
     {
-        const envire::core::Transform tf = graph.getTransform("4", "4333");
+        volatile const envire::core::Transform tf = graph.getTransform("4", "4333");
     }
     auto end = chrono::steady_clock::now();
     double diff = chrono::duration <double, milli> (end - start).count();
@@ -183,7 +183,7 @@ const double oldTransformSearch10000()
     auto start = chrono::steady_clock::now();
     for(int i = 0; i < 10000; ++i)
     {
-      const auto transform = env->relativeTransform(target, root);
+      volatile const auto transform = env->relativeTransform(target, root);
     }
     auto end = chrono::steady_clock::now();
     double diff = chrono::duration <double, milli> (end - start).count();
@@ -243,7 +243,7 @@ const double oldGetTransform10000()
     auto start = chrono::steady_clock::now();
     for(int i = 0; i < 10000; ++i)
     {
-        const envire::TransformWithUncertainty tf = other->getTransformWithUncertainty();
+        volatile const envire::TransformWithUncertainty tf = other->getTransformWithUncertainty();
     }
     auto end = chrono::steady_clock::now();
     double diff = chrono::duration <double, milli> (end - start).count();
@@ -265,7 +265,7 @@ const double newGetTransform10000()
     auto start = chrono::steady_clock::now();
     for(int i = 0; i < 10000; ++i)
     {
-        const envire::core::Transform tf = graph.getTransform(root, other);
+        volatile const envire::core::Transform tf = graph.getTransform(root, other);
     }
     auto end = chrono::steady_clock::now();
     double diff = chrono::duration <double, milli> (end - start).count();
@@ -331,6 +331,47 @@ const double oldAddItemCartesianMap10000()
     return diff;  
 }
 
+const double oldGetItemCartesianMap10000()
+{
+    using namespace envire;
+    Environment* env = new Environment();
+    FrameNode* root = env->getRootNode();
+    MyMap* map = new MyMap("root/test");
+    env->attachItem(map, root);
+    
+    auto start = chrono::steady_clock::now();
+    for(int i = 0; i < 10000; ++i)
+    {
+        volatile EnvironmentItem::Ptr p = env->getItem("root/test");
+    }
+    auto end = chrono::steady_clock::now();
+    double diff = chrono::duration <double, milli> (end - start).count();
+    return diff;      
+}
+
+const double newGetItemCartesianMap10000()
+{
+    using namespace envire::core;
+    using Item = Item<MyMap>;
+    
+    TransformGraph graph;
+    const FrameId root("4");
+    graph.addFrame(root);
+    Item::Ptr item(new Item("bla"));
+    graph.addItemToFrame(root, item);
+    const vertex_descriptor rootV = graph.vertex(root);
+
+    auto start = chrono::steady_clock::now();
+    for(int i = 0; i < 10000; ++i)
+    {
+      volatile Item::Ptr result = graph.getItem<Item::Ptr>(rootV);
+    }
+    auto end = chrono::steady_clock::now();
+    double diff = chrono::duration <double, milli> (end - start).count();
+    return diff;   
+}
+
+
 
 
 
@@ -385,6 +426,17 @@ int main()
     double newAddItem = newAddItemCartesianMap10000();
     cout << "old: " << oldAddItem << " millis, (" << oldAddItem / 10000.0 << " millis/item)" << endl;
     cout << "new: " << newAddItem << " millis, (" << newAddItem / 10000.0 << " millis/item)" << endl;
+    
+    cout << "-------------------------" << endl;
+    cout << "Get 10000 CartesianMaps from frame:" << endl;
+    cout << "-------------------------" << endl;  
+    const double oldGetItem = oldGetItemCartesianMap10000();
+    double newGetItem = newGetItemCartesianMap10000();
+    cout << "old: " << oldGetItem << " millis, (" << oldGetItem / 10000.0 << " millis/item)" << endl;
+    cout << "new: " << newGetItem << " millis, (" << newGetItem / 10000.0 << " millis/item)" << endl;
+    
+    
+    
     
 }
 
