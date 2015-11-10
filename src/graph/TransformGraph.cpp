@@ -40,13 +40,26 @@ void TransformGraph::addFrame(const FrameId& frame)
     }
 }
 
+void TransformGraph::addTransform(const vertex_descriptor origin,
+                                  const vertex_descriptor target,
+                                  const Transform& tf)
+{
+    //just a convenience method, it is not actually faster because
+    //we need the FrameIds anyway to create the events
+    addTransform(getFrameId(origin), getFrameId(target), tf);
+}
+
 
 void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
                                  const Transform& tf)
 {
-    //try to find vertices
-    vertex_descriptor originDesc = vertex(origin);
-    vertex_descriptor targetDesc = vertex(target);
+    addTransform(origin, target, vertex(origin), vertex(target), tf);
+}
+
+void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
+                                  vertex_descriptor originDesc, vertex_descriptor targetDesc,
+                                  const Transform& tf)
+{
     //if they don't exist create them
     if(originDesc == null_vertex())
     {
@@ -71,6 +84,8 @@ void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
     invTf.setTransform(invTf.transform.inverse());
     edge_descriptor targetToOrigin = add_edge(targetDesc, originDesc, invTf, target, origin);
 }
+
+
 
 
 const Transform TransformGraph::getTransform(const FrameId& origin, const FrameId& target,

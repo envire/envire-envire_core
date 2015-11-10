@@ -74,6 +74,8 @@ namespace envire { namespace core
          * @throw TransformAlreadyExistsException if the transformation already exists.*/
         void addTransform(const FrameId& origin, const FrameId& target,
                           const Transform& tf);
+        void addTransform(const vertex_descriptor origin, const vertex_descriptor target,
+                          const Transform& tf);
 
         /**Updates the value of the transform from @p origin to
          * @p target and the inverse transformation according to @p tf.
@@ -267,6 +269,11 @@ namespace envire { namespace core
         template<class T>
         const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> 
         getItemsInternal(const vertex_descriptor frame, const FrameId& frameId) const;
+        
+        /**@see addTransform(origin, target, tf) */
+        void addTransform(const FrameId& origin, const FrameId& target,
+                          vertex_descriptor originDesc, vertex_descriptor targetDesc,
+                          const Transform& tf);
         
     private:
         /**Ensures that T is ItemBase::PtrType<X> where X derives from ItemBase  */
