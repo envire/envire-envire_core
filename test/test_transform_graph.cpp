@@ -866,6 +866,7 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     BOOST_CHECK(tree[graph.vertex(a)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(c)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(e)].children.size() == 2);
+    BOOST_CHECK(tree[graph.vertex(a)].parent == TransformGraph::null_vertex()); //check parent
     BOOST_CHECK(tree[graph.vertex(b)].parent == graph.vertex(a));
     BOOST_CHECK(tree[graph.vertex(d)].parent == graph.vertex(c));
     BOOST_CHECK(tree[graph.vertex(f)].parent == graph.vertex(e));
@@ -879,6 +880,15 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     std::unordered_set<vertex_descriptor>& eChildren = tree[graph.vertex(e)].children;
     BOOST_CHECK(eChildren.find(graph.vertex(f)) != eChildren.end());
     BOOST_CHECK(eChildren.find(graph.vertex(g)) != eChildren.end());
+
+
+    BOOST_CHECK(view.isRoot(graph.vertex(a)) == true); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(b)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(c)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(d)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(e)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(f)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(g)) == false); //check root
 
      /*       d
      *        |
@@ -896,6 +906,7 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     BOOST_CHECK(tree[graph.vertex(c)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(e)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(a)].children.size() == 1);
+    BOOST_CHECK(tree[graph.vertex(d)].parent == TransformGraph::null_vertex()); //check parent
     BOOST_CHECK(tree[graph.vertex(b)].parent == graph.vertex(a));
     BOOST_CHECK(tree[graph.vertex(f)].parent == graph.vertex(e));
     BOOST_CHECK(tree[graph.vertex(g)].parent == graph.vertex(e));
@@ -910,6 +921,15 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     std::unordered_set<vertex_descriptor>& eChildren2 = tree[graph.vertex(e)].children;
     BOOST_CHECK(eChildren2.find(graph.vertex(f)) != eChildren2.end());
     BOOST_CHECK(eChildren2.find(graph.vertex(g)) != eChildren2.end());
+
+    BOOST_CHECK(view.isRoot(graph.vertex(d)) == true); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(c)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(a)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(e)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(b)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(f)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(g)) == false); //check root
+
 }
 
 BOOST_AUTO_TEST_CASE(simple_get_tree_with_frameId_test)
