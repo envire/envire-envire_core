@@ -19,30 +19,33 @@ namespace envire { namespace core
         Transform() { this->transform.invalidateTransform(); };
         Transform(const base::Time &_time):time(_time)
         { this->transform.invalidateTransform(); };
+        Transform(const base::TransformWithCovariance &_twc):transform(_twc){};
         Transform(const base::Time &_time, const base::TransformWithCovariance &_twc):
             time(_time), transform(_twc){};
+        Transform(const base::Position &_translation, const base::Orientation &_orient):
+            transform(_translation, _orient){};
         Transform(const base::Time &_time, const base::Position &_translation, const base::Orientation &_orient, const base::Matrix6d &_cov):
             time(_time), transform(_translation, _orient, _cov){};
 
 
         Transform(const Transform &tf) : time(tf.time), transform(tf.transform) {}
-        
+
         Transform(Transform&& tf) : time(std::move(tf.time)),
                                     transform(std::move(tf.transform)) {}
-                                    
+
         Transform& operator=(const Transform& other)
         {
           time = other.time;
           transform = other.transform;
           return *this;
         }
-        
+
         Transform& operator=(Transform&& other)
         {
           time = std::move(other.time);
           transform = std::move(other.transform);
           return *this;
-        }        
+        }
 
         void setTransform(const base::TransformWithCovariance& tf)
         {
