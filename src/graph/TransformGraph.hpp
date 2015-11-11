@@ -228,6 +228,10 @@ namespace envire { namespace core
         const vertex_descriptor source(const edge_descriptor edge) const;
         const vertex_descriptor target(const edge_descriptor edge) const;
         
+        /**Gets the vertex corresponding to @p frame.
+         * @throw UnknownFrameException if the frame does not exist */
+        vertex_descriptor getVertex(const FrameId& frame) const;
+	
     protected:
         using EdgePair = std::pair<edge_descriptor, bool>;
       
@@ -282,9 +286,7 @@ namespace envire { namespace core
         
         /** @throw UnknownFrameException if the frame does not exist */
         void checkFrameValid(const FrameId& frame) const;
-        /**Gets the vertex corresponding to @p frame.
-         * @throw UnknownFrameException if the frame does not exist */
-        vertex_descriptor getVertex(const FrameId& frame) const;
+
     };
     
     template <class T>
