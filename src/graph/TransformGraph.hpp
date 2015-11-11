@@ -105,7 +105,13 @@ namespace envire { namespace core
          * @throw UnknownFrameException if the @p origin or @p target does not exist*/
         const Transform getTransform(const FrameId& origin, const FrameId& target) const;
         const Transform getTransform(const vertex_descriptor origin, const vertex_descriptor target) const;
-        
+
+         /** @return the transform between a and b. Calculating it if necessary.
+         * @throw UnknownTransformException if the transformation doesn't exist
+         * @throw UnknownFrameException if the @p origin or @p target does not exist*/
+        const Transform getTransform(const FrameId& origin, const FrameId& target, const TreeView &view) const;
+        const Transform getTransform(const vertex_descriptor origin, const vertex_descriptor target, const TreeView &view) const;
+
 
         /** @return the edge between frame @p origin and @p target
          *  @throw UnknownTransformException if there is no such edge  */
@@ -115,10 +121,10 @@ namespace envire { namespace core
          *  @throw UnknownFrameException if the frame id is invalid **/
         const envire::core::Frame& getFrame(const FrameId& frame) const;
         const envire::core::Frame& getFrame(const vertex_descriptor desc) const;
-        
+
         /** @return the frame id of the specified @p vertex */
         const envire::core::FrameId& getFrameId(const vertex_descriptor vertex) const;
-                       
+
         /**Removes @p item from @p frame.
          *  Causes ItemRemovedEvent.
          * @throw UnknownFrameException if the frame does not exist.
@@ -164,7 +170,7 @@ namespace envire { namespace core
          * Causes ItemRemovedEvent for each item that is removd.
          * @throw UnknownFrameException if the frame does not exist.    */
         void clearFrame(const FrameId& frame);
-        
+
         /**Builds a tree containing all vertices that are accessible starting
          * from @p root.  */
         TreeView getTree(const vertex_descriptor root) const;

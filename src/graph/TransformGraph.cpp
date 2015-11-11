@@ -139,6 +139,59 @@ const Transform TransformGraph::getTransform(const FrameId& origin, const FrameI
     return getTransform(originVertex, targetVertex);
 }
 
+const Transform TransformGraph::getTransform(const vertex_descriptor originVertex,
+                                             const vertex_descriptor targetVertex,
+                                             const TreeView &view) const
+{
+    /* An identity transformation **/
+    Transform tf(Eigen::Vector3d::Zero(), Eigen::Quaterniond::Identity());
+    if (originVertex == targetVertex)
+    {
+        return tf;
+    }
+
+    base::TransformWithCovariance origin_tf(base::Affine3d::Identity()); // An identity transformation
+
+    /** Get transformation from origin to the root **/
+    vertex_descriptor od = originVertex;
+    while(!view.isRoot(od))
+    {
+        EdgePair pair;
+        pair = boost::edge(od, view.tree.at(od).parent, *this);
+        if (pair.second)
+        {
+            origin_tf = origin_tf * (*this)[pair.first].transform.transform;
+        }
+        od = view.tree.at(od).parent;
+    }
+
+    base::TransformWithCovariance target_tf(base::Affine3d::Identity()); // An identity transformation
+
+    /** Get transformation from target to the root **/
+    vertex_descriptor td = targetVertex;
+    while(!view.isRoot(td))
+    {
+        EdgePair pair;
+        pair = boost::edge(td, view.tree.at(td).parent, *this);
+        if (pair.second)
+        {
+            target_tf = target_tf * (*this)[pair.first].transform.transform;
+        }
+        td = view.tree.at(td).parent;
+    }
+
+    tf.transform = origin_tf * target_tf.inverse();
+
+    return tf;
+}
+
+const Transform TransformGraph::getTransform(const FrameId& origin, const FrameId& target, const TreeView &view) const
+{
+    const vertex_descriptor originVertex = getVertex(origin);//will throw
+    const vertex_descriptor targetVertex = getVertex(target); //will throw
+    return getTransform(originVertex, targetVertex, view);
+}
+
 void TransformGraph::updateTransform(const FrameId& origin, const FrameId& target,
                                     const Transform& tf)
 {
