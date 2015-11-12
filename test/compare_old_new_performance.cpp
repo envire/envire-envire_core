@@ -153,6 +153,31 @@ const double newTranformSearch10000()
     return diff;  
 }
 
+/**Calculate the transform for a path of length 4 in a tree of depth 4 where
+   each vertex has 4 children. This method uses a priori tree */
+const double newTranformSearchUsingTree10000()
+{
+    using namespace envire::core;
+    TransformGraph graph;
+    const FrameId root("4");
+    graph.addFrame(root);
+    addFourChildren(graph, root, 3);
+
+    /** Build a tree view from the graph **/
+    envire::core::TreeView view = graph.getTree(root);
+
+    //we search from "4" to "4333" which is the rightmost child
+    //according to the naming schema of addFourChildren()
+    auto start = chrono::steady_clock::now();
+    for(int i = 0; i < 10000; ++i)
+    {
+        volatile const envire::core::Transform tf = graph.getTransform("4", "4333", view);
+    }
+    auto end = chrono::steady_clock::now();
+    double diff = chrono::duration <double, milli> (end - start).count();
+    return diff;  
+}
+
 
 /** same as addFourChildren() for the old envire. returns the rightmost child */
 envire::FrameNode* addFourChildrenOld(envire::Environment* env, envire::FrameNode* parent, const int i)
@@ -394,7 +419,7 @@ int main()
     cout << "old: " << oldChain << " millis, (" << oldChain / 10000.0 << " millis/frame)" << endl;
     cout << "new: " << newChain << " millis, (" << newChain / 10000.0 << " millis/frame)" << endl;
     cout << endl;
-    
+
     cout << "-------------------------" << endl;
     cout << "Calculate transform 10000 times:" << endl;
     cout << "-------------------------" << endl;  
@@ -402,7 +427,14 @@ int main()
     const double newSearch = newTranformSearch10000();
     cout << "old: " << oldSearch << " millis, (" << oldSearch / 10000.0 << " millis/search)" << endl;
     cout << "new: " << newSearch << " millis, (" << newSearch / 10000.0 << " millis/search)" << endl;
-     
+
+    cout << "-------------------------------------------------" << endl;
+    cout << "Calculate transform 10000 times using a tree view:" << endl;
+    cout << "-------------------------------------------------" << endl;
+    const double newTreeSearch = newTranformSearchUsingTree10000();
+    cout << "old: " << oldSearch << " millis, (" << oldSearch / 10000.0 << " millis/search)" << endl;
+    cout << "new: " << newTreeSearch << " millis, (" << newTreeSearch / 10000.0 << " millis/search)" << endl;
+
     cout << "-------------------------" << endl;
     cout << "Update transform 10000 times:" << endl;
     cout << "-------------------------" << endl;  
@@ -410,7 +442,7 @@ int main()
     const double newUpdateTransform = newUpdateTransform10000();
     cout << "old: " << oldUpdateTransform << " millis, (" << oldUpdateTransform / 10000.0 << " millis/update)" << endl;
     cout << "new: " << newUpdateTransform << " millis, (" << newUpdateTransform / 10000.0 << " millis/update)" << endl;
-    
+
     cout << "-------------------------" << endl;
     cout << "Get direct transform 10000 times:" << endl;
     cout << "-------------------------" << endl;  
@@ -418,7 +450,7 @@ int main()
     const double newGet = newGetTransform10000();
     cout << "old: " << oldGet << " millis, (" << oldGet / 10000.0 << " millis/get)" << endl;
     cout << "new: " << newGet << " millis, (" << newGet / 10000.0 << " millis/get)" << endl;
-   
+
     cout << "-------------------------" << endl;
     cout << "Add 10000 CartesianMaps to frame:" << endl;
     cout << "-------------------------" << endl;  
@@ -426,7 +458,7 @@ int main()
     double newAddItem = newAddItemCartesianMap10000();
     cout << "old: " << oldAddItem << " millis, (" << oldAddItem / 10000.0 << " millis/item)" << endl;
     cout << "new: " << newAddItem << " millis, (" << newAddItem / 10000.0 << " millis/item)" << endl;
-    
+
     cout << "-------------------------" << endl;
     cout << "Get 10000 CartesianMaps from frame:" << endl;
     cout << "-------------------------" << endl;  
@@ -434,10 +466,6 @@ int main()
     double newGetItem = newGetItemCartesianMap10000();
     cout << "old: " << oldGetItem << " millis, (" << oldGetItem / 10000.0 << " millis/item)" << endl;
     cout << "new: " << newGetItem << " millis, (" << newGetItem / 10000.0 << " millis/item)" << endl;
-    
-    
-    
-    
 }
 
 
