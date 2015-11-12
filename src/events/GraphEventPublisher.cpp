@@ -30,12 +30,9 @@ void GraphEventPublisher::unsubscribe(GraphEventSubscriber* pSubscriber)
 
 void GraphEventPublisher::notify(const GraphEvent& e)
 {
-    if(eventsEnabled)
+    for(GraphEventSubscriber* pSubscriber : subscribers)
     {
-        for(GraphEventSubscriber* pSubscriber : subscribers)
-        {
-            pSubscriber->notifyGraphEvent(e);
-        }
+        pSubscriber->notifyGraphEvent(e);
     }
 }
 
