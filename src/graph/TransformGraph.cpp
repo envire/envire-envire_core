@@ -143,11 +143,10 @@ const Transform TransformGraph::getTransform(const vertex_descriptor originVerte
                                              const vertex_descriptor targetVertex,
                                              const TreeView &view) const
 {
-    /* An identity transformation **/
-    Transform tf(Eigen::Vector3d::Zero(), Eigen::Quaterniond::Identity());
     if (originVertex == targetVertex)
     {
-        return tf;
+        /* An identity transformation **/
+        return Transform(Eigen::Vector3d::Zero(), Eigen::Quaterniond::Identity());
     }
 
     base::TransformWithCovariance origin_tf(base::Affine3d::Identity()); // An identity transformation
@@ -156,8 +155,7 @@ const Transform TransformGraph::getTransform(const vertex_descriptor originVerte
     vertex_descriptor od = originVertex;
     while(!view.isRoot(od))
     {
-        EdgePair pair;
-        pair = boost::edge(od, view.tree.at(od).parent, *this);
+        EdgePair pair(boost::edge(od, view.tree.at(od).parent, *this));
         if (pair.second)
         {
             origin_tf = origin_tf * (*this)[pair.first].transform.transform;
@@ -180,9 +178,7 @@ const Transform TransformGraph::getTransform(const vertex_descriptor originVerte
         td = view.tree.at(td).parent;
     }
 
-    tf.transform = origin_tf * target_tf.inverse();
-
-    return tf;
+    return origin_tf * target_tf.inverse();
 }
 
 const Transform TransformGraph::getTransform(const FrameId& origin, const FrameId& target, const TreeView &view) const
