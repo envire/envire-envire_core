@@ -420,9 +420,9 @@ int main()
     cout << "new: " << newChain << " millis, (" << newChain / 10000.0 << " millis/frame)" << endl;
     cout << endl;
 
-    cout << "-------------------------" << endl;
-    cout << "Calculate transform 10000 times:" << endl;
-    cout << "-------------------------" << endl;  
+    cout << "-----------------------------------------------------" << endl;
+    cout << "Calculate transform 10000 times directly in the graph:" << endl;
+    cout << "-----------------------------------------------------" << endl;  
     const double oldSearch = oldTransformSearch10000();
     const double newSearch = newTranformSearch10000();
     cout << "old: " << oldSearch << " millis, (" << oldSearch / 10000.0 << " millis/search)" << endl;
