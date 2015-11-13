@@ -21,9 +21,9 @@ using namespace std;
 TransformGraph::TransformGraph(envire::core::Environment const &environment) :
     LabeledTransformGraph (environment)
 {
-    static_assert(is_same<Base::graph_type::graph_type::graph_type::vertex_list_selector, boost::listS>::value,
+    static_assert(is_same<graph_type::graph_type::graph_type::vertex_list_selector, boost::listS>::value,
                   "vertex list type should be listS to ensure that vertex_descriptors remain valid");
-    static_assert(is_same<Base::graph_type::graph_type::graph_type::edge_list_selector, boost::listS>::value,
+    static_assert(is_same<graph_type::graph_type::graph_type::edge_list_selector, boost::listS>::value,
                   "edge list type should be listS to ensure that vertex_descriptors remain valid");
 }
 
