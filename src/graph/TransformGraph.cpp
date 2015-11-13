@@ -83,6 +83,12 @@ void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
     Transform invTf = tf;
     invTf.setTransform(invTf.transform.inverse());
     edge_descriptor targetToOrigin = add_edge(targetDesc, originDesc, invTf, target, origin);
+    
+    //note: we only need to add one of the edges to the tree, because the tree
+    //      does not care about the edge direction.
+    addEdgeToTreeViews(targetToOrigin);
+    
+    
 }
 
 
@@ -335,10 +341,36 @@ const envire::core::FrameId& TransformGraph::getFrameId(const vertex_descriptor 
 
 TreeView TransformGraph::getTree(const vertex_descriptor root) const
 {
+    //we are not derefering to getTree(vertex_descriptor, bool, TreeView&)
+    //in here because they are not const
     TreeView view;
     TreeBuilderVisitor visitor(view);
     boost::breadth_first_search(*this, root, boost::visitor(visitor));
     return view;
+}
+
+TreeView TransformGraph::getTree(const FrameId rootId) const
+{
+    const vertex_descriptor root = getVertex(rootId);
+    return getTree(root);
+}
+
+void TransformGraph::getTree(const vertex_descriptor root, const bool keepTreeUpdated, TreeView* outView)
+{
+    TreeBuilderVisitor visitor(*outView);
+    boost::breadth_first_search(*this, root, boost::visitor(visitor));
+    
+    if(keepTreeUpdated)
+    {
+      subscribedTreeViews.push_back(outView);
+      outView->setPublisher(this); //now the TreeView will automatically unsubscribe on destruction
+    }
+}
+
+void TransformGraph::getTree(const FrameId rootId, const bool keepTreeUpdated, TreeView* outView)
+{
+    const vertex_descriptor root = getVertex(rootId);
+    getTree(root, keepTreeUpdated, outView);
 }
 
 vector<FrameId> TransformGraph::getPath(FrameId origin, FrameId target)
@@ -365,13 +397,6 @@ vector<FrameId> TransformGraph::getPath(FrameId origin, FrameId target)
         path.push_back(target);
     }
     return path;
-}
-
-
-TreeView TransformGraph::getTree(const FrameId rootId) const
-{
-    const vertex_descriptor root = getVertex(rootId);
-    return getTree(root);
 }
 
 void TransformGraph::disconnectFrame(const FrameId& frame)
@@ -406,5 +431,63 @@ const vertex_descriptor TransformGraph::source(const edge_descriptor edge) const
 const vertex_descriptor TransformGraph::target(const edge_descriptor edge) const
 {
     return boost::target(edge, graph());
+}
+
+void TransformGraph::unsubscribeTreeView(TreeView* view)
+{
+  subscribedTreeViews.erase(std::remove(subscribedTreeViews.begin(),
+                                        subscribedTreeViews.end(), view),
+                            subscribedTreeViews.end());
+}
+
+void TransformGraph::addEdgeToTreeViews(edge_descriptor newEdge) const
+{
+  for(TreeView* view : subscribedTreeViews)
+  {
+    addEdgeToTreeView(newEdge, view);
+  }
+}
+
+void TransformGraph::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) const
+{
+  
+  //We only need to add the edge to the tree, if one of the two vertices is already part
+  //of the tree
+  
+  const vertex_descriptor src = source(newEdge);
+  const vertex_descriptor tar = target(newEdge);
+  const bool srcInView = view->tree.find(src) != view->tree.end();
+  const bool tarInView = view->tree.find(tar) != view->tree.end();
+  
+  
+  vertex_descriptor inView = null_vertex(); //the vertex that is already in the tree
+  vertex_descriptor notInView = null_vertex(); //the vertex that is not yet in the tree
+  
+  //this is a cross-edge, do not update the tree
+  if(srcInView && tarInView)
+  {
+    //If this method is called for edge and back-edge, the back-edge will be
+    //inserted into the cross-edges. Therefore do ***not*** call this method
+    //for both edges!
+    //FIXME cross-edges should be added to crossEdges
+    return;
+    
+  }
+  else if(srcInView && !tarInView)
+  {
+    inView = src;
+    notInView = tar;
+  }
+  else if(tarInView && !srcInView)
+  {
+    inView = tar;
+    notInView = src;
+  }
+  //FIXME there might be a whole tree connected to notInView which should
+  //be added to the tree
+  view->tree[inView].children.insert(notInView);
+  view->tree[notInView].parent = inView;
+  
+  
 }
 

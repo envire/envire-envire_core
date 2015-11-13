@@ -44,7 +44,8 @@ namespace envire { namespace core
      * words, new methods use Camel Case separated words
      *    
     */
-    class TransformGraph : public LabeledTransformGraph, public GraphEventPublisher
+    class TransformGraph : public LabeledTransformGraph, public GraphEventPublisher,
+                           public TreeUpdatePublisher
     {
     public:
         /**Transform iterator used to down cast from ItemBase to @p T while
@@ -102,7 +103,8 @@ namespace envire { namespace core
          * @throw UnknownTransformException if the transformation doesn't exist */
         void removeTransform(const FrameId& origin, const FrameId& target);
 
-        /** @return the transform between a and b. Calculating it if necessary.
+        /** @return the transform between @p origin and @p target.
+         *          Calculating it if necessary.
          * @throw UnknownTransformException if the transformation doesn't exist*/
         const Transform getTransform(const FrameId& origin, const FrameId& target) const;
         const Transform getTransform(const vertex_descriptor origin, const vertex_descriptor target) const;
@@ -166,13 +168,25 @@ namespace envire { namespace core
          * @throw UnknownFrameException if the frame does not exist.    */
         void clearFrame(const FrameId& frame);
         
-        /**Builds a tree containing all vertices that are accessible starting
+        /**Builds a TreeView containing all vertices that are accessible starting
          * from @p root.  */
         TreeView getTree(const vertex_descriptor root) const;
-        /**Builds a tree containing all vertices that are accessible starting
-         * from @p root.
+        
+        /**Builds a TreeView containing all vertices that are accessible starting
+         * from @p rootId.
          * @throw UnknownFrameException if the frame does not exist */
         TreeView getTree(const FrameId rootId) const;
+        
+        /**Builds a TreeView containing all vertices that are accessible starting
+         * from @p root and writes it to @p outView.
+         * if @p keepTreeUpdated is true, the TransformGraph will retain a pointer
+         * to @p outView and update it whenenver transformations are added or removed.
+         * If the TreeView is destroyed it will automatically unsubscribe from
+         * the graph. The view can also be unsubscribed manually by calling
+         * unsubscribeTreeView()*/
+        void getTree(const vertex_descriptor root, const bool keepTreeUpdated, TreeView* outView);
+        void getTree(const FrameId rootId, const bool keepTreeUpdated, TreeView* outView);
+        
         
         /**Returns the shortest path from @p origin to @p target.
          * Returns an empty vector if the path doesn't exist.
@@ -231,7 +245,10 @@ namespace envire { namespace core
         /**Gets the vertex corresponding to @p frame.
          * @throw UnknownFrameException if the frame does not exist */
         vertex_descriptor getVertex(const FrameId& frame) const;
-	
+        
+        /**Unsubscribe @p view from TreeView updates */
+        virtual void unsubscribeTreeView(TreeView* view);
+        
     protected:
         using EdgePair = std::pair<edge_descriptor, bool>;
       
@@ -279,6 +296,11 @@ namespace envire { namespace core
                           vertex_descriptor originDesc, vertex_descriptor targetDesc,
                           const Transform& tf);
         
+        /**Update all subscribed TreeViews with the new edge 
+         */
+        void addEdgeToTreeViews(edge_descriptor newEdge) const;
+        void addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) const;
+        
     private:
         /**Ensures that T is ItemBase::PtrType<X> where X derives from ItemBase  */
         template <class T>
@@ -286,6 +308,9 @@ namespace envire { namespace core
         
         /** @throw UnknownFrameException if the frame does not exist */
         void checkFrameValid(const FrameId& frame) const;
+        
+        /**TreeViews that need to be updated when the graph is modified */
+        std::vector<TreeView*> subscribedTreeViews;
 
     };
     
