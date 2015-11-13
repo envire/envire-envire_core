@@ -1312,6 +1312,26 @@ BOOST_AUTO_TEST_CASE(tree_view_cross_edge_test)
     BOOST_CHECK(tar == vD);
 }
 
+BOOST_AUTO_TEST_CASE(tree_edge_exists_test)
+{
+  //this tests an internal method
+    TransformGraph graph;
+    FrameId A("A");
+    FrameId B("B");
+    FrameId C("C");
+    Transform tf;
+    graph.addTransform(A, B, tf);
+    graph.addTransform(B, C, tf);
+    TreeView view = graph.getTree(A);
+    vertex_descriptor vA = graph.getVertex(A);
+    vertex_descriptor vB = graph.getVertex(B);
+    vertex_descriptor vC = graph.getVertex(C);
+    BOOST_CHECK(graph.edgeExists(vA, vB, &view));
+    BOOST_CHECK(graph.edgeExists(vB, vA, &view));
+    BOOST_CHECK(!graph.edgeExists(vA, vC, &view));
+    BOOST_CHECK(!graph.edgeExists(vC, vA, &view));
+}
+
 
 
 

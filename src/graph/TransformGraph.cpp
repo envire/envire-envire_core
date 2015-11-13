@@ -472,6 +472,12 @@ void TransformGraph::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) 
       //this is a cross edge
       view->crossEdges.push_back(newEdge);
     }
+    else
+    {
+      //addTransform() only calls this method once, therefore back-edges
+      //should never occur
+      assert(false);
+    }
     //otherwise it's a back-edge that can be ignored
     return;
     
@@ -506,7 +512,7 @@ void TransformGraph::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) 
 bool TransformGraph::edgeExists(const vertex_descriptor a, const vertex_descriptor b,
                                 const TreeView* view) const
 {
-  //an edge exists if either a is the parent of b and a.children contains b
+  //an edge exists if either a is the parent of b and aChildren contains b
   //or the other way around.
   
   const VertexRelation& aRelation = view->tree.at(a);
