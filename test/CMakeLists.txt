@@ -46,11 +46,18 @@ rock_executable(dijkstra_color_test dijkstra_color_test.cpp
     DEPS_CMAKE Boost
     DEPS envire_core)
     
-#rock_executable(performance_comapare compare_old_new_performance.cpp
-#    DEPS_CMAKE Boost
-#    DEPS envire_core
-#    DEPS_PKGCONFIG envire)
 
+
+#only enable the performance comparision when the old envire is installed
+pkg_check_modules(OLD_ENVIRE envire)
+if(OLD_ENVIRE_FOUND)
+    rock_executable(performance_comapare compare_old_new_performance.cpp
+        DEPS_CMAKE Boost
+        DEPS envire_core
+        DEPS_PKGCONFIG envire)
+else()
+    message(STATUS "envire not found ... NOT building the performance comparision test")
+endif()
 rock_executable(dijkstra_test dijkstra_test.cpp
     DEPS_CMAKE Boost
     DEPS envire_core)
