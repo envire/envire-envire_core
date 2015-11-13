@@ -7,19 +7,6 @@
 using namespace std;
 using namespace Eigen;
 
-/** 
- *  1.) add 100 children to root node.
- *  2.) create a chain of 100 children.
- *  3.) update each transform in the chain once.
- * 
- * 
- *  Repeat all tests several times and calc avg
- * 
- * 
- * */
-
-
-
 const double newAdd10000Children()
 {
     using namespace envire::core;
