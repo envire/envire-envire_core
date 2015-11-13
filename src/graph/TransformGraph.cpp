@@ -17,6 +17,10 @@ using namespace envire::core;
 using namespace std;
 
 
+TransformGraph::~TransformGraph()
+{
+}
+
 
 TransformGraph::TransformGraph(envire::core::Environment const &environment) :
     LabeledTransformGraph (environment)

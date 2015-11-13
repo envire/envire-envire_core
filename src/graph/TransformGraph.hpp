@@ -255,6 +255,8 @@ namespace envire { namespace core
         /**Unsubscribe @p view from TreeView updates */
         virtual void unsubscribeTreeView(TreeView* view);
         
+        virtual ~TransformGraph();
+        
     protected:
         using EdgePair = std::pair<edge_descriptor, bool>;
       

@@ -83,6 +83,7 @@ namespace envire { namespace core
     /**A class that notifies TreeViews about updates */
     struct TreeUpdatePublisher
     {
+        virtual ~TreeUpdatePublisher() {}
         /**Unsubscribe the view from the publisher */
         virtual void unsubscribeTreeView(TreeView* view) = 0;
     };
@@ -103,7 +104,7 @@ namespace envire { namespace core
        *has already been visited. */
       std::vector<edge_descriptor> crossEdges;
       
-      ~TreeView()
+      virtual ~TreeView()
       {
           if(nullptr != publisher)
           {
