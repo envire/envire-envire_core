@@ -1230,7 +1230,9 @@ BOOST_AUTO_TEST_CASE(tree_view_automatic_update_simple_test)
     graph.addTransform(A, B, tf);
 
     TreeView view;
+    TreeView bView; //view with root B
     graph.getTree(A, true, &view);
+    graph.getTree(B, true, &bView);
     
     graph.addTransform(A, C, tf);
     
@@ -1247,7 +1249,10 @@ BOOST_AUTO_TEST_CASE(tree_view_automatic_update_simple_test)
     BOOST_CHECK(view.tree[vC].children.size() == 0);
     BOOST_CHECK(view.tree[vC].parent = vA);
     
-    //unsubscribe and add another transform, check that the tree doesn't update
+    BOOST_CHECK(bView.tree[vA].children.size() == 1);
+    BOOST_CHECK(bView.tree[vA].children.find(vC) != view.tree[vA].children.end());
+    
+    //unsubscribe and add another transform, check that the view doesn't update
     graph.unsubscribeTreeView(&view);
     
     const FrameId D("D");
@@ -1255,6 +1260,14 @@ BOOST_AUTO_TEST_CASE(tree_view_automatic_update_simple_test)
     const vertex_descriptor vD = graph.getVertex(D);
     BOOST_CHECK(view.tree.find(vD) == view.tree.end());
     BOOST_CHECK(view.tree[vC].children.size() == 0);
+    
+    
+    //but bView should update since it is still subscribed
+    BOOST_CHECK(bView.tree[vC].children.size() == 1);
+    BOOST_CHECK(bView.tree.find(vD) != bView.tree.end());
+    BOOST_CHECK(bView.tree[vD].parent == vC);
+    BOOST_CHECK(bView.tree[vD].children.size() == 0);
+    
     
 }
 
