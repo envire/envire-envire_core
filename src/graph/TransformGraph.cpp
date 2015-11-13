@@ -86,7 +86,7 @@ void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
     
     //note: we only need to add one of the edges to the tree, because the tree
     //      does not care about the edge direction.
-    addEdgeToTreeViews(targetToOrigin);
+    addEdgeToTreeViews(originToTarget);
     
     
 }
@@ -463,13 +463,16 @@ void TransformGraph::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) 
   vertex_descriptor inView = null_vertex(); //the vertex that is already in the tree
   vertex_descriptor notInView = null_vertex(); //the vertex that is not yet in the tree
   
-  //this is a cross-edge, do not update the tree
+  //this is either a cross- or back-edge
   if(srcInView && tarInView)
   {
-    //If this method is called for edge and back-edge, the back-edge will be
-    //inserted into the cross-edges. Therefore do ***not*** call this method
-    //for both edges!
-    //FIXME cross-edges should be added to crossEdges
+    if(!edgeExists(src, tar, view))
+    {
+      //if both vertices are in the tree but there is no edge between them
+      //this is a cross edge
+      view->crossEdges.push_back(newEdge);
+    }
+    //otherwise it's a back-edge that can be ignored
     return;
     
   }
@@ -483,11 +486,46 @@ void TransformGraph::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) 
     inView = tar;
     notInView = src;
   }
+  else if(!srcInView && !tarInView)
+  {
+    //an edge was added to a different subtree that is not connected to this one
+    return;
+  }
+  else
+  {
+    //this should never happend if the above logic is correct
+    assert(false);
+  }
+  
   //FIXME there might be a whole tree connected to notInView which should
   //be added to the tree
   view->tree[inView].children.insert(notInView);
-  view->tree[notInView].parent = inView;
-  
-  
+  view->tree[notInView].parent = inView; 
 }
+
+bool TransformGraph::edgeExists(const vertex_descriptor a, const vertex_descriptor b,
+                                const TreeView* view) const
+{
+  //an edge exists if either a is the parent of b and a.children contains b
+  //or the other way around.
+  
+  const VertexRelation& aRelation = view->tree.at(a);
+  const VertexRelation& bRelation = view->tree.at(b);
+  
+  //If we assume that we made no mistake when populating the tree we could just 
+  //return (aRelation.parent == b || bRelation.parent == a)
+  //but using asserts is always better :D
+  
+  //the if will be optimized out if asserts are disabled
+  if(aRelation.parent == b) //b is parent of a
+  {
+    assert(bRelation.children.find(a) != bRelation.children.end());
+  }
+  else if(bRelation.parent == a) //a is parent of b
+  {
+    assert(aRelation.children.find(b) != aRelation.children.end());
+  }
+  return aRelation.parent == b || bRelation.parent == a;
+}
+
 

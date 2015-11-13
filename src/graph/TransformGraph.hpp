@@ -296,10 +296,22 @@ namespace envire { namespace core
                           vertex_descriptor originDesc, vertex_descriptor targetDesc,
                           const Transform& tf);
         
-        /**Update all subscribed TreeViews with the new edge 
+        /**Update all subscribed TreeViews with the new edge.
+         * @note When adding a new transform the back-edge is added to the graph
+         *       as well. I.e. for each transform two edges are added to the graph.
+         *       However only one of the edges should be added to the tree,
+         *       because the tree does not care about edge direction.
+         *       It does not matter whether you add the back-edge or the edge
+         *       to the tree as long as you do ***not*** add both.
          */
         void addEdgeToTreeViews(edge_descriptor newEdge) const;
         void addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) const;
+        
+        /**Returns true if an edge between a and b exists in @p view.
+         * @note only call this method if you are sure that both a and b
+         *       are part of the tree. Otherwise it will crash*/
+        bool edgeExists(const vertex_descriptor a, const vertex_descriptor b,
+                        const TreeView * view) const;
         
     private:
         /**Ensures that T is ItemBase::PtrType<X> where X derives from ItemBase  */
