@@ -119,6 +119,12 @@ namespace envire { namespace core
           publisher = pub;
       }
       
+      /**Notify the owner of the TreeView that the view has been updated */
+      void notifyUpdated() const
+      {
+      }
+      
+      
     protected:
       TreeUpdatePublisher* publisher = nullptr;
     };

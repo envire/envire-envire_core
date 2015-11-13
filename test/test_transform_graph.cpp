@@ -1314,7 +1314,6 @@ BOOST_AUTO_TEST_CASE(tree_view_cross_edge_test)
 
 BOOST_AUTO_TEST_CASE(tree_edge_exists_test)
 {
-  //this tests an internal method
     TransformGraph graph;
     FrameId A("A");
     FrameId B("B");
