@@ -22,7 +22,6 @@ namespace envire { namespace core
     {
     private:
       std::vector<GraphEventSubscriber*> subscribers;
-      bool eventsEnabled = true;/**<If false notify() has no effect */
 
     public:
         /**Subscribes the @param handler to all events by this event source */

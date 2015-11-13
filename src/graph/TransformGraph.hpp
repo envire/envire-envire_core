@@ -44,7 +44,8 @@ namespace envire { namespace core
      * words, new methods use Camel Case separated words
      *    
     */
-    class TransformGraph : public LabeledTransformGraph, public GraphEventPublisher
+    class TransformGraph : public LabeledTransformGraph, public GraphEventPublisher,
+                           public TreeUpdatePublisher
     {
     public:
         /**Transform iterator used to down cast from ItemBase to @p T while
@@ -73,6 +74,8 @@ namespace envire { namespace core
          *
          * @throw TransformAlreadyExistsException if the transformation already exists.*/
         void addTransform(const FrameId& origin, const FrameId& target,
+                          const Transform& tf);
+        void addTransform(const vertex_descriptor origin, const vertex_descriptor target,
                           const Transform& tf);
 
         /**Updates the value of the transform from @p origin to
@@ -170,14 +173,26 @@ namespace envire { namespace core
          * Causes ItemRemovedEvent for each item that is removd.
          * @throw UnknownFrameException if the frame does not exist.    */
         void clearFrame(const FrameId& frame);
-
-        /**Builds a tree containing all vertices that are accessible starting
+        
+        /**Builds a TreeView containing all vertices that are accessible starting
          * from @p root.  */
         TreeView getTree(const vertex_descriptor root) const;
-        /**Builds a tree containing all vertices that are accessible starting
-         * from @p root.
+        
+        /**Builds a TreeView containing all vertices that are accessible starting
+         * from @p rootId.
          * @throw UnknownFrameException if the frame does not exist */
         TreeView getTree(const FrameId rootId) const;
+        
+        /**Builds a TreeView containing all vertices that are accessible starting
+         * from @p root and writes it to @p outView.
+         * if @p keepTreeUpdated is true, the TransformGraph will retain a pointer
+         * to @p outView and update it whenenver transformations are added or removed.
+         * If the TreeView is destroyed it will automatically unsubscribe from
+         * the graph. The view can also be unsubscribed manually by calling
+         * unsubscribeTreeView()*/
+        void getTree(const vertex_descriptor root, const bool keepTreeUpdated, TreeView* outView);
+        void getTree(const FrameId rootId, const bool keepTreeUpdated, TreeView* outView);
+        
         
         /**Returns the shortest path from @p origin to @p target.
          * Returns an empty vector if the path doesn't exist.
@@ -233,6 +248,13 @@ namespace envire { namespace core
         const vertex_descriptor source(const edge_descriptor edge) const;
         const vertex_descriptor target(const edge_descriptor edge) const;
         
+        /**Gets the vertex corresponding to @p frame.
+         * @throw UnknownFrameException if the frame does not exist */
+        vertex_descriptor getVertex(const FrameId& frame) const;
+        
+        /**Unsubscribe @p view from TreeView updates */
+        virtual void unsubscribeTreeView(TreeView* view);
+        
     protected:
         using EdgePair = std::pair<edge_descriptor, bool>;
       
@@ -266,6 +288,28 @@ namespace envire { namespace core
         const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> 
         getItemsInternal(const vertex_descriptor frame, const FrameId& frameId) const;
         
+        /**@see addTransform(origin, target, tf) */
+        void addTransform(const FrameId& origin, const FrameId& target,
+                          vertex_descriptor originDesc, vertex_descriptor targetDesc,
+                          const Transform& tf);
+        
+        /**Update all subscribed TreeViews with the new edge.
+         * @note When adding a new transform the back-edge is added to the graph
+         *       as well. I.e. for each transform two edges are added to the graph.
+         *       However only one of the edges should be added to the tree,
+         *       because the tree does not care about edge direction.
+         *       It does not matter whether you add the back-edge or the edge
+         *       to the tree as long as you do ***not*** add both.
+         */
+        void addEdgeToTreeViews(edge_descriptor newEdge) const;
+        void addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) const;
+        
+        /**Returns true if an edge between a and b exists in @p view.
+         * @note only call this method if you are sure that both a and b
+         *       are part of the tree. Otherwise it will crash*/
+        bool edgeExists(const vertex_descriptor a, const vertex_descriptor b,
+                        const TreeView * view) const;
+        
     private:
         /**Ensures that T is ItemBase::PtrType<X> where X derives from ItemBase  */
         template <class T>
@@ -273,9 +317,10 @@ namespace envire { namespace core
         
         /** @throw UnknownFrameException if the frame does not exist */
         void checkFrameValid(const FrameId& frame) const;
-        /**Gets the vertex corresponding to @p frame.
-         * @throw UnknownFrameException if the frame does not exist */
-        vertex_descriptor getVertex(const FrameId& frame) const;
+        
+        /**TreeViews that need to be updated when the graph is modified */
+        std::vector<TreeView*> subscribedTreeViews;
+
     };
     
     template <class T>

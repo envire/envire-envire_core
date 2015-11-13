@@ -1,4 +1,5 @@
 #include <boost/test/unit_test.hpp>
+#define protected public
 #include <envire_core/all>
 
 #include <vector>
@@ -681,6 +682,25 @@ BOOST_AUTO_TEST_CASE(simple_add_get_transform_test)
     BOOST_CHECK(compareTransform(readTfInv, invTf));
 }
 
+
+BOOST_AUTO_TEST_CASE(add_transform_existing_vertex_test)
+{ 
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    TransformGraph graph;
+    graph.addFrame(a);
+    graph.addFrame(b);
+    
+    vertex_descriptor aDesc = graph.vertex(a);
+    vertex_descriptor bDesc = graph.vertex(b);
+    
+    Transform tf;
+    graph.addTransform(aDesc, bDesc, tf);
+    BOOST_CHECK_NO_THROW(graph.getTransform(a, b));
+    
+    
+}
+
 BOOST_AUTO_TEST_CASE(complex_add_get_transform_test)
 {
 
@@ -1290,11 +1310,119 @@ BOOST_AUTO_TEST_CASE(get_empty_path_test)
     graph.addFrame(C);
     const vector<FrameId> path = graph.getPath(A, C);
     BOOST_CHECK(path.size() == 0);
-    
-    
-    
-    
 }
+
+BOOST_AUTO_TEST_CASE(tree_view_automatic_update_simple_test)
+{
+    TransformGraph graph;
+    FrameId A("A");
+    FrameId B("B");
+    FrameId C("C");
+    Transform tf;
+     
+    graph.addTransform(A, B, tf);
+
+    TreeView view;
+    TreeView bView; //view with root B
+    graph.getTree(A, true, &view);
+    graph.getTree(B, true, &bView);
+    
+    graph.addTransform(A, C, tf);
+    
+    vertex_descriptor vA = graph.getVertex(A);
+    vertex_descriptor vB = graph.getVertex(B);
+    vertex_descriptor vC = graph.getVertex(C);
+    
+    BOOST_CHECK(view.tree[vA].children.size() == 2);
+    //vB is child of vA
+    BOOST_CHECK(view.tree[vA].children.find(vB) != view.tree[vA].children.end());
+    //vC is child of vA
+    BOOST_CHECK(view.tree[vA].children.find(vC) != view.tree[vA].children.end());
+    //vC has no children and her parent is vA
+    BOOST_CHECK(view.tree[vC].children.size() == 0);
+    BOOST_CHECK(view.tree[vC].parent = vA);
+    
+    BOOST_CHECK(bView.tree[vA].children.size() == 1);
+    BOOST_CHECK(bView.tree[vA].children.find(vC) != view.tree[vA].children.end());
+    
+    //unsubscribe and add another transform, check that the view doesn't update
+    graph.unsubscribeTreeView(&view);
+    
+    const FrameId D("D");
+    graph.addTransform(C, D, tf);
+    const vertex_descriptor vD = graph.getVertex(D);
+    BOOST_CHECK(view.tree.find(vD) == view.tree.end());
+    BOOST_CHECK(view.tree[vC].children.size() == 0);
+    
+    //but bView should update since it is still subscribed
+    BOOST_CHECK(bView.tree[vC].children.size() == 1);
+    BOOST_CHECK(bView.tree.find(vD) != bView.tree.end());
+    BOOST_CHECK(bView.tree[vD].parent == vC);
+    BOOST_CHECK(bView.tree[vD].children.size() == 0);
+}
+
+BOOST_AUTO_TEST_CASE(tree_view_cross_edge_test)
+{
+    TransformGraph graph;
+    FrameId A("A");
+    FrameId B("B");
+    FrameId C("C");
+    FrameId D("D");
+    Transform tf;
+     
+    /**      A
+     *      / \
+     *     B   C
+     *      \ /
+     *       D
+     */
+    graph.addTransform(A, B, tf);
+    
+    TreeView view;
+    graph.getTree(A, true, &view);
+    
+    graph.addTransform(A, C, tf);
+    graph.addTransform(B, D, tf);
+    graph.addTransform(C, D, tf);
+    
+    vertex_descriptor vB = graph.getVertex(B);
+    vertex_descriptor vC = graph.getVertex(C);
+    vertex_descriptor vD = graph.getVertex(D);
+    
+    //D should be a child of B but not of C because c->d is a cross-edge
+    BOOST_CHECK(view.tree[vB].children.size() == 1);
+    BOOST_CHECK(view.tree[vB].children.find(vD) != view.tree[vB].children.end());
+    BOOST_CHECK(view.tree.find(vC) != view.tree.end());
+    BOOST_CHECK(view.tree[vC].children.size() == 0);
+    BOOST_CHECK(view.tree[vD].parent == vB);
+    BOOST_CHECK(view.tree[vD].children.size() == 0);
+    //C -> D should be part of the cross edges
+    BOOST_CHECK(view.crossEdges.size() == 1);
+    const vertex_descriptor src = graph.source(view.crossEdges[0]);
+    const vertex_descriptor tar = graph.target(view.crossEdges[0]);
+    BOOST_CHECK(src == vC);
+    BOOST_CHECK(tar == vD);
+}
+
+BOOST_AUTO_TEST_CASE(tree_edge_exists_test)
+{
+    TransformGraph graph;
+    FrameId A("A");
+    FrameId B("B");
+    FrameId C("C");
+    Transform tf;
+    graph.addTransform(A, B, tf);
+    graph.addTransform(B, C, tf);
+    TreeView view = graph.getTree(A);
+    vertex_descriptor vA = graph.getVertex(A);
+    vertex_descriptor vB = graph.getVertex(B);
+    vertex_descriptor vC = graph.getVertex(C);
+    BOOST_CHECK(graph.edgeExists(vA, vB, &view));
+    BOOST_CHECK(graph.edgeExists(vB, vA, &view));
+    BOOST_CHECK(!graph.edgeExists(vA, vC, &view));
+    BOOST_CHECK(!graph.edgeExists(vC, vA, &view));
+}
+
 
 
 

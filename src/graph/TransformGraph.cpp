@@ -40,13 +40,26 @@ void TransformGraph::addFrame(const FrameId& frame)
     }
 }
 
+void TransformGraph::addTransform(const vertex_descriptor origin,
+                                  const vertex_descriptor target,
+                                  const Transform& tf)
+{
+    //just a convenience method, it is not actually faster because
+    //we need the FrameIds anyway to create the events
+    addTransform(getFrameId(origin), getFrameId(target), tf);
+}
+
 
 void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
                                  const Transform& tf)
 {
-    //try to find vertices
-    vertex_descriptor originDesc = vertex(origin);
-    vertex_descriptor targetDesc = vertex(target);
+    addTransform(origin, target, vertex(origin), vertex(target), tf);
+}
+
+void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
+                                  vertex_descriptor originDesc, vertex_descriptor targetDesc,
+                                  const Transform& tf)
+{
     //if they don't exist create them
     if(originDesc == null_vertex())
     {
@@ -70,7 +83,15 @@ void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
     Transform invTf = tf;
     invTf.setTransform(invTf.transform.inverse());
     edge_descriptor targetToOrigin = add_edge(targetDesc, originDesc, invTf, target, origin);
+    
+    //note: we only need to add one of the edges to the tree, because the tree
+    //      does not care about the edge direction.
+    addEdgeToTreeViews(originToTarget);
+    
+    
 }
+
+
 
 
 const Transform TransformGraph::getTransform(const vertex_descriptor originVertex,
@@ -365,10 +386,36 @@ const envire::core::FrameId& TransformGraph::getFrameId(const vertex_descriptor 
 
 TreeView TransformGraph::getTree(const vertex_descriptor root) const
 {
+    //we are not derefering to getTree(vertex_descriptor, bool, TreeView&)
+    //in here because they are not const
     TreeView view;
     TreeBuilderVisitor visitor(view);
     boost::breadth_first_search(*this, root, boost::visitor(visitor));
     return view;
+}
+
+TreeView TransformGraph::getTree(const FrameId rootId) const
+{
+    const vertex_descriptor root = getVertex(rootId);
+    return getTree(root);
+}
+
+void TransformGraph::getTree(const vertex_descriptor root, const bool keepTreeUpdated, TreeView* outView)
+{
+    TreeBuilderVisitor visitor(*outView);
+    boost::breadth_first_search(*this, root, boost::visitor(visitor));
+    
+    if(keepTreeUpdated)
+    {
+      subscribedTreeViews.push_back(outView);
+      outView->setPublisher(this); //now the TreeView will automatically unsubscribe on destruction
+    }
+}
+
+void TransformGraph::getTree(const FrameId rootId, const bool keepTreeUpdated, TreeView* outView)
+{
+    const vertex_descriptor root = getVertex(rootId);
+    getTree(root, keepTreeUpdated, outView);
 }
 
 vector<FrameId> TransformGraph::getPath(FrameId origin, FrameId target)
@@ -395,13 +442,6 @@ vector<FrameId> TransformGraph::getPath(FrameId origin, FrameId target)
         path.push_back(target);
     }
     return path;
-}
-
-
-TreeView TransformGraph::getTree(const FrameId rootId) const
-{
-    const vertex_descriptor root = getVertex(rootId);
-    return getTree(root);
 }
 
 void TransformGraph::disconnectFrame(const FrameId& frame)
@@ -437,4 +477,106 @@ const vertex_descriptor TransformGraph::target(const edge_descriptor edge) const
 {
     return boost::target(edge, graph());
 }
+
+void TransformGraph::unsubscribeTreeView(TreeView* view)
+{
+  subscribedTreeViews.erase(std::remove(subscribedTreeViews.begin(),
+                                        subscribedTreeViews.end(), view),
+                            subscribedTreeViews.end());
+}
+
+void TransformGraph::addEdgeToTreeViews(edge_descriptor newEdge) const
+{
+  for(TreeView* view : subscribedTreeViews)
+  {
+    addEdgeToTreeView(newEdge, view);
+  }
+}
+
+void TransformGraph::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) const
+{
+  
+  //We only need to add the edge to the tree, if one of the two vertices is already part
+  //of the tree
+  
+  const vertex_descriptor src = source(newEdge);
+  const vertex_descriptor tar = target(newEdge);
+  const bool srcInView = view->tree.find(src) != view->tree.end();
+  const bool tarInView = view->tree.find(tar) != view->tree.end();
+  
+  
+  vertex_descriptor inView = null_vertex(); //the vertex that is already in the tree
+  vertex_descriptor notInView = null_vertex(); //the vertex that is not yet in the tree
+  
+  //this is either a cross- or back-edge
+  if(srcInView && tarInView)
+  {
+    if(!edgeExists(src, tar, view))
+    {
+      //if both vertices are in the tree but there is no edge between them
+      //this is a cross edge
+      view->crossEdges.push_back(newEdge);
+    }
+    else
+    {
+      //addTransform() only calls this method once, therefore back-edges
+      //should never occur
+      assert(false);
+    }
+    //otherwise it's a back-edge that can be ignored
+    return;
+    
+  }
+  else if(srcInView && !tarInView)
+  {
+    inView = src;
+    notInView = tar;
+  }
+  else if(tarInView && !srcInView)
+  {
+    inView = tar;
+    notInView = src;
+  }
+  else if(!srcInView && !tarInView)
+  {
+    //an edge was added to a different subtree that is not connected to this one
+    return;
+  }
+  else
+  {
+    //this should never happend if the above logic is correct
+    assert(false);
+  }
+  
+  //FIXME there might be a whole tree connected to notInView which should
+  //be added to the tree
+  view->tree[inView].children.insert(notInView);
+  view->tree[notInView].parent = inView; 
+}
+
+bool TransformGraph::edgeExists(const vertex_descriptor a, const vertex_descriptor b,
+                                const TreeView* view) const
+{
+  //an edge exists if either a is the parent of b and aChildren contains b
+  //or the other way around.
+  
+  const VertexRelation& aRelation = view->tree.at(a);
+  const VertexRelation& bRelation = view->tree.at(b);
+  
+  //If we assume that we made no mistake when populating the tree we could just 
+  //return (aRelation.parent == b || bRelation.parent == a)
+  //but using asserts is always better :D
+  
+  //the if will be optimized out if asserts are disabled
+  if(aRelation.parent == b) //b is parent of a
+  {
+    assert(bRelation.children.find(a) != bRelation.children.end());
+  }
+  else if(bRelation.parent == a) //a is parent of b
+  {
+    assert(aRelation.children.find(b) != aRelation.children.end());
+  }
+  return aRelation.parent == b || bRelation.parent == a;
+}
+
 
