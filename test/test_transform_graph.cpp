@@ -436,7 +436,7 @@ BOOST_AUTO_TEST_CASE(get_invalid_transform_test)
     tf.transform.translation << 42, 21, -42;
     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
     BOOST_CHECK_NO_THROW(tree.addTransform(a, b, tf));
-    BOOST_CHECK_THROW(tree.getTransform(a, c), UnknownTransformException);
+    BOOST_CHECK_THROW(tree.getTransform(a, c), UnknownFrameException);
 }
 
 BOOST_AUTO_TEST_CASE(get_transform_with_descriptor_without_edges_test)
@@ -886,6 +886,7 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     BOOST_CHECK(tree[graph.vertex(a)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(c)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(e)].children.size() == 2);
+    BOOST_CHECK(tree[graph.vertex(a)].parent == TransformGraph::null_vertex()); //check parent
     BOOST_CHECK(tree[graph.vertex(b)].parent == graph.vertex(a));
     BOOST_CHECK(tree[graph.vertex(d)].parent == graph.vertex(c));
     BOOST_CHECK(tree[graph.vertex(f)].parent == graph.vertex(e));
@@ -899,6 +900,15 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     std::unordered_set<vertex_descriptor>& eChildren = tree[graph.vertex(e)].children;
     BOOST_CHECK(eChildren.find(graph.vertex(f)) != eChildren.end());
     BOOST_CHECK(eChildren.find(graph.vertex(g)) != eChildren.end());
+
+
+    BOOST_CHECK(view.isRoot(graph.vertex(a)) == true); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(b)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(c)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(d)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(e)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(f)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(g)) == false); //check root
 
      /*       d
      *        |
@@ -916,6 +926,7 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     BOOST_CHECK(tree[graph.vertex(c)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(e)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(a)].children.size() == 1);
+    BOOST_CHECK(tree[graph.vertex(d)].parent == TransformGraph::null_vertex()); //check parent
     BOOST_CHECK(tree[graph.vertex(b)].parent == graph.vertex(a));
     BOOST_CHECK(tree[graph.vertex(f)].parent == graph.vertex(e));
     BOOST_CHECK(tree[graph.vertex(g)].parent == graph.vertex(e));
@@ -930,6 +941,15 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     std::unordered_set<vertex_descriptor>& eChildren2 = tree[graph.vertex(e)].children;
     BOOST_CHECK(eChildren2.find(graph.vertex(f)) != eChildren2.end());
     BOOST_CHECK(eChildren2.find(graph.vertex(g)) != eChildren2.end());
+
+    BOOST_CHECK(view.isRoot(graph.vertex(d)) == true); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(c)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(a)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(e)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(b)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(f)) == false); //check root
+    BOOST_CHECK(view.isRoot(graph.vertex(g)) == false); //check root
+
 }
 
 BOOST_AUTO_TEST_CASE(simple_get_tree_with_frameId_test)
@@ -1132,10 +1152,82 @@ BOOST_AUTO_TEST_CASE(get_transform_between_unconnected_trees)
     FrameId c("c");
     FrameId d("d");
     Transform tf;
-    
+
     graph.addTransform(a, b, tf);
     graph.addTransform(c, d, tf);
     BOOST_CHECK_THROW(graph.getTransform(a, c), UnknownTransformException);
+}
+
+BOOST_AUTO_TEST_CASE(get_transform_using_a_tree)
+{
+
+    TransformGraph graph;
+    /*       a
+     *      / \
+     *     c   b
+     *   /  \
+     *  d   e
+     *    /  \
+     *   f   g
+     */
+
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    FrameId d = "frame_d";
+    FrameId e = "frame_e";
+    FrameId f = "frame_f";
+    FrameId g = "frame_g";
+
+    Transform tf;
+    tf.transform.translation << 1, 2, 1;
+    tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitZ());
+
+    graph.addTransform(a, b, tf);
+    graph.addTransform(a, c, tf);
+    graph.addTransform(c, d, tf);
+    graph.addTransform(c, e, tf);
+    graph.addTransform(e, f, tf);
+    graph.addTransform(e, g, tf);
+
+    //use a as root
+    TreeView view = graph.getTree(graph.vertex(a));
+
+    Transform tree_tf_a_f = graph.getTransform(a, f, view);
+    Transform graph_tf_a_f = graph.getTransform(a, f);
+
+    BOOST_TEST_MESSAGE(tree_tf_a_f.transform);
+    BOOST_TEST_MESSAGE(graph_tf_a_f.transform);
+
+    /** Compare transform cannot be used due to round-off errors **/
+    BOOST_CHECK(tree_tf_a_f.transform.translation.isApprox(graph_tf_a_f.transform.translation));
+    BOOST_CHECK(tree_tf_a_f.transform.orientation.isApprox(graph_tf_a_f.transform.orientation));
+
+    Transform tree_tf_d_g = graph.getTransform(d, g, view);
+    Transform graph_tf_d_g = graph.getTransform(d, g);
+
+    BOOST_TEST_MESSAGE(tree_tf_d_g.transform);
+    BOOST_TEST_MESSAGE(graph_tf_d_g.transform);
+
+    /** Compare transform cannot be used due to round-off errors **/
+    BOOST_CHECK(tree_tf_d_g.transform.translation.isApprox(graph_tf_d_g.transform.translation));
+    BOOST_CHECK(tree_tf_d_g.transform.orientation.isApprox(graph_tf_d_g.transform.orientation));
+
+    Transform tree_tf_f_g = graph.getTransform(f, g, view);
+    Transform graph_tf_f_g = graph.getTransform(f, g);
+
+    BOOST_TEST_MESSAGE(tree_tf_f_g.transform);
+    BOOST_TEST_MESSAGE(graph_tf_f_g.transform);
+
+    /** Compare transform cannot be used due to round-off errors **/
+    BOOST_CHECK(tree_tf_f_g.transform.translation.isMuchSmallerThan(0.01));
+    BOOST_CHECK(graph_tf_f_g.transform.translation.isApprox(Eigen::Vector3d::Zero()));
+    BOOST_CHECK(tree_tf_f_g.transform.orientation.isApprox(graph_tf_f_g.transform.orientation));
+
+    /** Identity **/
+    Transform tree_tf_f_f = graph.getTransform(f, f, view);
+    BOOST_CHECK(tree_tf_f_f.transform.translation.isApprox(Eigen::Vector3d::Zero()));
+    BOOST_CHECK(tree_tf_f_f.transform.orientation.isApprox(Eigen::Quaterniond::Identity()));
 }
 
 BOOST_AUTO_TEST_CASE(item_count_test)

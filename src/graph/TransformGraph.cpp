@@ -94,10 +94,13 @@ void TransformGraph::addTransform(const FrameId& origin, const FrameId& target,
 
 
 
-const Transform TransformGraph::getTransform(const FrameId& origin, const FrameId& target,
-                                             const vertex_descriptor originVertex,
+const Transform TransformGraph::getTransform(const vertex_descriptor originVertex,
                                              const vertex_descriptor targetVertex) const
 {
+    if(num_edges() == 0)
+    {
+        throw UnknownTransformException(getFrameId(originVertex), getFrameId(targetVertex));
+    }
     //direct edges
     EdgePair pair;
     pair = boost::edge(originVertex, targetVertex, *this);
@@ -111,7 +114,7 @@ const Transform TransformGraph::getTransform(const FrameId& origin, const FrameI
         // search algorithm result on segfault in case some of the vertices do not exist
         if (originVertex == null_vertex() || targetVertex == null_vertex())
         {
-            throw UnknownTransformException(origin, target);
+            throw UnknownTransformException(getFrameId(originVertex), getFrameId(targetVertex));
         }
 
         try
@@ -139,7 +142,7 @@ const Transform TransformGraph::getTransform(const FrameId& origin, const FrameI
         }
         else
         {
-            throw UnknownTransformException(origin, target);
+            throw UnknownTransformException(getFrameId(originVertex), getFrameId(targetVertex));
         }
     }
 
@@ -152,18 +155,60 @@ const Transform TransformGraph::getTransform(const FrameId& origin, const FrameI
     {
         throw UnknownTransformException(origin, target);
     }
-    return getTransform(origin, target, vertex(origin), vertex(target));
+    const vertex_descriptor originVertex = getVertex(origin);//will throw
+    const vertex_descriptor targetVertex = getVertex(target); //will throw   
+    return getTransform(originVertex, targetVertex);
 }
 
-const Transform TransformGraph::getTransform(const vertex_descriptor origin, const vertex_descriptor target) const
+const Transform TransformGraph::getTransform(const vertex_descriptor originVertex,
+                                             const vertex_descriptor targetVertex,
+                                             const TreeView &view) const
 {
-    if(num_edges() == 0)
+    if (originVertex == targetVertex)
     {
-        throw UnknownTransformException(getFrameId(origin),  getFrameId(target));
+        /* An identity transformation **/
+        return Transform(Eigen::Vector3d::Zero(), Eigen::Quaterniond::Identity());
     }
-    return getTransform(getFrameId(origin), getFrameId(target), origin, target);    
+
+    base::TransformWithCovariance origin_tf(base::Affine3d::Identity()); // An identity transformation
+
+    /** Get transformation from origin to the root **/
+    vertex_descriptor od = originVertex;
+    while(!view.isRoot(od))
+    {
+        EdgePair pair(boost::edge(od, view.tree.at(od).parent, *this));
+        if (pair.second)
+        {
+            origin_tf = origin_tf * (*this)[pair.first].transform.transform;
+        }
+        od = view.tree.at(od).parent;
+    }
+
+    base::TransformWithCovariance target_tf(base::Affine3d::Identity()); // An identity transformation
+
+    /** Get transformation from target to the root **/
+    vertex_descriptor td = targetVertex;
+    while(!view.isRoot(td))
+    {
+        EdgePair pair;
+        pair = boost::edge(td, view.tree.at(td).parent, *this);
+        if (pair.second)
+        {
+            target_tf = target_tf * (*this)[pair.first].transform.transform;
+        }
+        td = view.tree.at(td).parent;
+    }
+
+    return origin_tf * target_tf.inverse();
 }
- 
+
+const Transform TransformGraph::getTransform(const FrameId& origin, const FrameId& target, const TreeView &view) const
+{
+    const vertex_descriptor originVertex = getVertex(origin);//will throw
+    const vertex_descriptor targetVertex = getVertex(target); //will throw
+    return getTransform(originVertex, targetVertex, view);
+}
+
 void TransformGraph::updateTransform(const FrameId& origin, const FrameId& target,
                                     const Transform& tf)
 {

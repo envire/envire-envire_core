@@ -73,7 +73,7 @@ namespace envire { namespace core
         vertex_descriptor parent;
         std::unordered_set<vertex_descriptor> children;
     };
-    
+
     /**A map that shows the vertex information (parent and children) of the vertices in a tree.
        The key is the vertex descriptor.*/
     using VertexRelationMap = std::unordered_map<vertex_descriptor, VertexRelation>;
@@ -96,6 +96,7 @@ namespace envire { namespace core
     {
     public:
       VertexRelationMap tree;
+
       /*The edges, that had to be removed to create the tree.
        *I.e. All edges that lead to a vertex that has already been discovered.
        *This does **not** include back-edges. I.e. edges that lead to a vertex that
@@ -123,6 +124,15 @@ namespace envire { namespace core
       void notifyUpdated() const
       {
       }
+
+      bool isRoot(const vertex_descriptor vd) const
+      {
+          if (this->tree.at(vd).parent == LabeledTransformGraph::null_vertex())
+              return true;
+          else
+              return false;
+      }
+
       
       
     protected:
