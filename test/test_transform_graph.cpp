@@ -1423,6 +1423,48 @@ BOOST_AUTO_TEST_CASE(tree_edge_exists_test)
     BOOST_CHECK(!graph.edgeExists(vC, vA, &view));
 }
 
+BOOST_AUTO_TEST_CASE(tree_view_update_event_test)
+{
+    TransformGraph graph;
+    FrameId A("A");
+    FrameId B("B");
+    FrameId C("C");
+    Transform tf;
+    graph.addTransform(A, B, tf);
+    TreeView view;
+    bool updateCalled = false;
+    view.treeUpdated.connect([&updateCalled] () 
+      {
+          updateCalled = true;
+      });
+    graph.getTree(A, true, &view);
+    
+    graph.addTransform(B, C, tf);
+    BOOST_CHECK(updateCalled);    
+}
+
+BOOST_AUTO_TEST_CASE(tree_view_move_semantics_test)
+{
+    TransformGraph graph;
+    FrameId A("A");
+    FrameId B("B");
+    FrameId C("C");
+    Transform tf;
+    graph.addTransform(A, B, tf);
+    TreeView view;
+    bool updateCalled = false;
+    view.treeUpdated.connect([&updateCalled] () 
+      {
+          updateCalled = true;
+      });
+    graph.getTree(A, true, &view);
+    
+    TreeView newView = std::move(view);
+    BOOST_CHECK(view.publisher == nullptr);
+    graph.addTransform(B, C, tf);
+    BOOST_CHECK(updateCalled);    
+}
+
 
 
 

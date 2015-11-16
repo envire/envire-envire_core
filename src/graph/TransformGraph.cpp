@@ -411,8 +411,7 @@ void TransformGraph::getTree(const vertex_descriptor root, const bool keepTreeUp
     
     if(keepTreeUpdated)
     {
-      subscribedTreeViews.push_back(outView);
-      outView->setPublisher(this); //now the TreeView will automatically unsubscribe on destruction
+      subscribeTreeView(outView);
     }
 }
 
@@ -484,16 +483,25 @@ const vertex_descriptor TransformGraph::target(const edge_descriptor edge) const
 
 void TransformGraph::unsubscribeTreeView(TreeView* view)
 {
-  subscribedTreeViews.erase(std::remove(subscribedTreeViews.begin(),
-                                        subscribedTreeViews.end(), view),
-                            subscribedTreeViews.end());
+    subscribedTreeViews.erase(std::remove(subscribedTreeViews.begin(),
+                                          subscribedTreeViews.end(), view),
+                              subscribedTreeViews.end());
 }
+
+void TransformGraph::subscribeTreeView(TreeView* view)
+{
+    assert(view != nullptr);
+    subscribedTreeViews.push_back(view);
+    view->setPublisher(this); //now the TreeView will automatically unsubscribe on destruction
+}
+
 
 void TransformGraph::addEdgeToTreeViews(edge_descriptor newEdge) const
 {
   for(TreeView* view : subscribedTreeViews)
   {
     addEdgeToTreeView(newEdge, view);
+    view->treeUpdated();//notify owners of the view, that it has been updated.
   }
 }
 

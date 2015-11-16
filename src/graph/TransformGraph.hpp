@@ -18,12 +18,15 @@
 #include "TransformGraphTypes.hpp"
 #include "TransformGraphExceptions.hpp"
 #include "TransformGraphVisitors.hpp"
+#include "TreeView.hpp"
+
 #include <envire_core/events/GraphEventPublisher.hpp>
-#define BOOST_RESULT_OF_USE_DECLTYPE
+#define BOOST_RESULT_OF_USE_DECLTYPE //this is important for the transform_iterator
 #include <boost/iterator/transform_iterator.hpp>
 #include <envire_core/util/MetaProgramming.hpp>
 #include <envire_core/events/ItemAddedEvent.hpp>
 #include <envire_core/events/ItemRemovedEvent.hpp>
+
 
 
 namespace envire { namespace core
@@ -254,6 +257,11 @@ namespace envire { namespace core
         
         /**Unsubscribe @p view from TreeView updates */
         virtual void unsubscribeTreeView(TreeView* view);
+        
+        /**Subscribe @p view to TreeView updates.
+         * @note Make sure that the tree is not out of sync already when 
+         *       subscribing*/
+        virtual void subscribeTreeView(TreeView* view);
         
         virtual ~TransformGraph();
         

@@ -8,6 +8,7 @@
 #pragma once
 #include "TransformGraphExceptions.hpp"
 #include "TransformGraphTypes.hpp"
+#include "TreeView.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/graph/breadth_first_search.hpp>
 
