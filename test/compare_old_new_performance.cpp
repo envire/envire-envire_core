@@ -155,10 +155,12 @@ const double newTranformSearchUsingTree10000()
 
     //we search from "4" to "4333" which is the rightmost child
     //according to the naming schema of addFourChildren()
+    const vertex_descriptor from = graph.getVertex("4");
+    const vertex_descriptor to = graph.getVertex("4333");
     auto start = chrono::steady_clock::now();
     for(int i = 0; i < 10000; ++i)
     {
-        volatile const envire::core::Transform tf = graph.getTransform("4", "4333", view);
+        volatile const envire::core::Transform tf = graph.getTransform(from, to, view);
     }
     auto end = chrono::steady_clock::now();
     double diff = chrono::duration <double, milli> (end - start).count();
