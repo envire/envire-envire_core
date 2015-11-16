@@ -391,11 +391,11 @@ const envire::core::FrameId& TransformGraph::getFrameId(const vertex_descriptor 
 TreeView TransformGraph::getTree(const vertex_descriptor root) const
 {
     //we are not derefering to getTree(vertex_descriptor, bool, TreeView&)
-    //in here because they are not const
+    //in here because it is not const
     TreeView view;
     TreeBuilderVisitor visitor(view);
     boost::breadth_first_search(*this, root, boost::visitor(visitor));
-    return view;
+    return std::move(view);
 }
 
 TreeView TransformGraph::getTree(const FrameId rootId) const
