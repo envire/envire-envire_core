@@ -508,93 +508,94 @@ void TransformGraph::addEdgeToTreeViews(edge_descriptor newEdge) const
 void TransformGraph::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) const
 {
   
-  //We only need to add the edge to the tree, if one of the two vertices is already part
-  //of the tree
-  
-  const vertex_descriptor src = source(newEdge);
-  const vertex_descriptor tar = target(newEdge);
-  const bool srcInView = view->tree.find(src) != view->tree.end();
-  const bool tarInView = view->tree.find(tar) != view->tree.end();
-  
-  
-  vertex_descriptor inView = null_vertex(); //the vertex that is already in the tree
-  vertex_descriptor notInView = null_vertex(); //the vertex that is not yet in the tree
-  
-  //this is either a cross- or back-edge
-  if(srcInView && tarInView)
-  {
-    if(!edgeExists(src, tar, view))
+    //We only need to add the edge to the tree, if one of the two vertices is already part
+    //of the tree
+    
+    const vertex_descriptor src = source(newEdge);
+    const vertex_descriptor tar = target(newEdge);
+    const bool srcInView = view->tree.find(src) != view->tree.end();
+    const bool tarInView = view->tree.find(tar) != view->tree.end();
+    
+    
+    vertex_descriptor inView = null_vertex(); //the vertex that is already in the tree
+    vertex_descriptor notInView = null_vertex(); //the vertex that is not yet in the tree
+    
+    //this is either a cross- or back-edge
+    if(srcInView && tarInView)
     {
-      //if both vertices are in the tree but there is no edge between them
-      //this is a cross edge
-      view->crossEdges.push_back(newEdge);
+        if(!edgeExists(src, tar, view))
+        {
+            //if both vertices are in the tree but there is no edge between them
+            //this is a cross edge
+            view->crossEdges.push_back(newEdge);
+            return;
+        }
+        else
+        {
+            //otherwise it's a back-edge that can be ignored
+            //addTransform() only calls this method once, therefore back-edges
+            //should never occur
+            assert(false);
+            return;
+        }
+    }
+    else if(srcInView && !tarInView)
+    {
+        inView = src;
+        notInView = tar;
+    }
+    else if(tarInView && !srcInView)
+    {
+        inView = tar;
+        notInView = src;
+    }
+    else if(!srcInView && !tarInView)
+    {
+        //an edge was added to a different subtree that is not connected to this one
+        return;
     }
     else
     {
-      //addTransform() only calls this method once, therefore back-edges
-      //should never occur
-      assert(false);
+        //this should never happend if the above logic is correct
+        assert(false);
     }
-    //otherwise it's a back-edge that can be ignored
-    return;
-  }
-  else if(srcInView && !tarInView)
-  {
-    inView = src;
-    notInView = tar;
-  }
-  else if(tarInView && !srcInView)
-  {
-    inView = tar;
-    notInView = src;
-  }
-  else if(!srcInView && !tarInView)
-  {
-    //an edge was added to a different subtree that is not connected to this one
-    return;
-  }
-  else
-  {
-    //this should never happend if the above logic is correct
-    assert(false);
-  }
-  
-  //FIXME there might be a whole tree connected to notInView which should
-  //be added to the tree
-  view->tree[inView].children.insert(notInView);
-  view->tree[notInView].parent = inView; 
-  
-  //There are exactly two edges connected to the new vertex if it is only 
-  //connected to 'inView'.
-  //If there are more edges we need to follow them and add the whole graph
-  if(boost::degree(notInView, graph()) > 2)
-  {
-    /* (1) Create a filtered graph that does not contain the edges between
-     *     inView and notInView
-     * (2) Build a bfs tree starting from notInView on the filtered graph
-     * (3) merge the two trees
-     */
     
-    //the two edges that should be filtered
-    const FrameId id1 = getFrameId(inView);
-    const FrameId id2 = getFrameId(notInView);
+    //FIXME there might be a whole tree connected to notInView which should
+    //be added to the tree
+    view->tree[inView].children.insert(notInView);
+    view->tree[notInView].parent = inView; 
     
-    //create a filter that can be used to hide the two edges from the graph
-    EdgeFilter filter;
-    filter.edge1 = getEdge(id1, id2);
-    filter.edge2 = getEdge(id2, id1);
-    
-    //everything in this graph will be visible except edge1 and edge2
-    boost::filtered_graph<const TransformGraph, EdgeFilter> fg(*this, filter);
-    
-    //use TreeBuilderVisitor to generate a new tree starting from notInView.
-    //This tree will only contain vertices that are part of the sub tree that
-    //below notInView because the edges leading to inView are hidden by the filter
-    //and thus the bfs will not follow those edges.
-    //the visitor will add those edges directly to the view
-    TreeBuilderVisitor visitor(*view, *this);
-    boost::breadth_first_search(fg, notInView, boost::visitor(visitor));
-  }
+    //There are exactly two edges connected to the new vertex if it is only 
+    //connected to 'inView'.
+    //If there are more edges we need to follow them and add the whole graph
+    if(boost::degree(notInView, graph()) > 2)
+    {
+        /* (1) Create a filtered graph that does not contain the edges between
+        *     inView and notInView
+        * (2) Build a bfs tree starting from notInView on the filtered graph
+        * (3) merge the two trees
+        */
+        
+        //the two edges that should be filtered
+        const FrameId id1 = getFrameId(inView);
+        const FrameId id2 = getFrameId(notInView);
+        
+        //create a filter that can be used to hide the two edges from the graph
+        EdgeFilter filter;
+        filter.edge1 = getEdge(id1, id2);
+        filter.edge2 = getEdge(id2, id1);
+        
+        //everything in this graph will be visible except edge1 and edge2
+        boost::filtered_graph<const TransformGraph, EdgeFilter> fg(*this, filter);
+        
+        //use TreeBuilderVisitor to generate a new tree starting from notInView.
+        //This tree will only contain vertices that are part of the sub tree that
+        //below notInView because the edges leading to inView are hidden by the filter
+        //and thus the bfs will not follow those edges.
+        //the visitor will add those edges directly to the view
+        TreeBuilderVisitor visitor(*view, *this);
+        boost::breadth_first_search(fg, notInView, boost::visitor(visitor));
+    }
 }
 
 bool TransformGraph::edgeExists(const vertex_descriptor a, const vertex_descriptor b,

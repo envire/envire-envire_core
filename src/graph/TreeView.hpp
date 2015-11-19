@@ -77,6 +77,7 @@ namespace envire { namespace core
         {
             if(nullptr != publisher)
             {
+                //automatic unsubscribe
                 publisher->unsubscribeTreeView(this);
                 publisher = nullptr;
             }
@@ -106,10 +107,13 @@ namespace envire { namespace core
         
         VertexRelationMap tree;
 
-        /*The edges, that had to be removed to create the tree.
-        *I.e. All edges that lead to a vertex that has already been discovered.
-        *This does **not** include back-edges. I.e. edges that lead to a vertex that
-        *has already been visited. */
+        /* The edges, that had to be removed to create the tree.
+         * I.e. All edges that lead to a vertex that has already been discovered.
+         * This does **not** include back-edges. I.e. edges that lead to a vertex that
+         * has already been visited.
+         * @note The TransformGraph always contains two edges between connected nodes (the edge and the inverse edge)
+         *       However only one of them will be in the crossEdges. The other one automatically becomes a back-edge 
+         *       and is ignored. */
         std::vector<edge_descriptor> crossEdges;
         
     protected:
