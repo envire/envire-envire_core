@@ -131,9 +131,10 @@ const double newTranformSearch10000()
     //according to the naming schema of addFourChildren()
     
     auto start = chrono::steady_clock::now();
+    envire::core::Transform tf;
     for(int i = 0; i < 10000; ++i)
     {
-        volatile const envire::core::Transform tf = graph.getTransform("4", "4333");
+        tf = graph.getTransform("4", "4333");
     }
     auto end = chrono::steady_clock::now();
     double diff = chrono::duration <double, milli> (end - start).count();
@@ -158,9 +159,10 @@ const double newTranformSearchUsingTree10000()
     const vertex_descriptor from = graph.getVertex("4");
     const vertex_descriptor to = graph.getVertex("4333");
     auto start = chrono::steady_clock::now();
+    envire::core::Transform tf;
     for(int i = 0; i < 10000; ++i)
     {
-        volatile const envire::core::Transform tf = graph.getTransform(from, to, view);
+        tf = graph.getTransform(from, to, view);
     }
     auto end = chrono::steady_clock::now();
     double diff = chrono::duration <double, milli> (end - start).count();
@@ -195,9 +197,10 @@ const double oldTransformSearch10000()
     FrameNode* root = env->getRootNode();
     FrameNode* target = addFourChildrenOld(env.get(), root, 3);
     auto start = chrono::steady_clock::now();
+    envire::Transform tf;
     for(int i = 0; i < 10000; ++i)
     {
-      volatile const auto transform = env->relativeTransform(target, root);
+      tf = env->relativeTransform(target, root);
     }
     auto end = chrono::steady_clock::now();
     double diff = chrono::duration <double, milli> (end - start).count();
@@ -255,9 +258,10 @@ const double oldGetTransform10000()
     
     
     auto start = chrono::steady_clock::now();
+    envire::TransformWithUncertainty tf;
     for(int i = 0; i < 10000; ++i)
     {
-        volatile const envire::TransformWithUncertainty tf = other->getTransformWithUncertainty();
+        tf= other->getTransformWithUncertainty();
     }
     auto end = chrono::steady_clock::now();
     double diff = chrono::duration <double, milli> (end - start).count();
@@ -279,7 +283,7 @@ const double newGetTransform10000()
     auto start = chrono::steady_clock::now();
     for(int i = 0; i < 10000; ++i)
     {
-        volatile const envire::core::Transform tf = graph.getTransform(root, other);
+        tf = graph.getTransform(root, other);
     }
     auto end = chrono::steady_clock::now();
     double diff = chrono::duration <double, milli> (end - start).count();
