@@ -271,10 +271,17 @@ void TransformGraph::removeTransform(const FrameId& origin, const FrameId& targe
     {
         throw UnknownTransformException(origin, target);
     }
+    
     boost::remove_edge(originToTarget.first, *this);
     notify(TransformRemovedEvent(origin, target));
+    
     boost::remove_edge(targetToOrigin.first, *this);
     notify(TransformRemovedEvent(target, origin));
+    
+    //removing a transform might invalidate the TreeViews.
+    //This is a brute-force solution to the problem.
+    //FIXME update TreeViews when removing a transform instead of rebuilding them
+    rebuildTreeViews();
 }
 
 edge_descriptor TransformGraph::add_edge(const vertex_descriptor origin,
@@ -390,11 +397,8 @@ const envire::core::FrameId& TransformGraph::getFrameId(const vertex_descriptor 
 
 TreeView TransformGraph::getTree(const vertex_descriptor root) const
 {
-    //we are not derefering to getTree(vertex_descriptor, bool, TreeView&)
-    //in here because it is not const
-    TreeView view;
-    TreeBuilderVisitor visitor(view, *this);
-    boost::breadth_first_search(*this, root, boost::visitor(visitor));
+    TreeView view(root);
+    getTree(root, &view);
     return std::move(view);
 }
 
@@ -404,11 +408,33 @@ TreeView TransformGraph::getTree(const FrameId rootId) const
     return getTree(root);
 }
 
+void TransformGraph::getTree(const FrameId rootId, TreeView* outView) const
+{
+    vertex_descriptor root = getVertex(rootId);
+    getTree(root, outView);
+}
+
+void TransformGraph::getTree(const vertex_descriptor root, TreeView* outView) const
+{
+    outView->root = root;
+    
+    if(boost::degree(root, graph()) == 0)
+    {
+        //the TreeBuilderVisitor only looks at the edges, if there are no dges
+        //it wouldn't add the root node
+        outView->tree[root].parent = null_vertex();
+    }
+    else
+    {
+        TreeBuilderVisitor visitor(*outView, *this);
+        boost::breadth_first_search(*this, root, boost::visitor(visitor));
+    }
+}
+
+
 void TransformGraph::getTree(const vertex_descriptor root, const bool keepTreeUpdated, TreeView* outView)
 {
-    TreeBuilderVisitor visitor(*outView, *this);
-    boost::breadth_first_search(*this, root, boost::visitor(visitor));
-    
+    getTree(root, outView);    
     if(keepTreeUpdated)
     {
       subscribeTreeView(outView);
@@ -498,12 +524,14 @@ void TransformGraph::subscribeTreeView(TreeView* view)
 
 void TransformGraph::addEdgeToTreeViews(edge_descriptor newEdge) const
 {
-  for(TreeView* view : subscribedTreeViews)
-  {
-    addEdgeToTreeView(newEdge, view);
-    view->treeUpdated();//notify owners of the view, that it has been updated.
-  }
+    for(TreeView* view : subscribedTreeViews)
+    {
+        addEdgeToTreeView(newEdge, view);
+        view->treeUpdated();//notify owners of the view, that it has been updated.
+    }
 }
+
+
 
 void TransformGraph::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) const
 {
@@ -622,5 +650,17 @@ bool TransformGraph::edgeExists(const vertex_descriptor a, const vertex_descript
   }
   return aRelation.parent == b || bRelation.parent == a;
 }
+
+
+void TransformGraph::rebuildTreeViews() const
+{
+    for(TreeView* view : subscribedTreeViews)
+    {
+        view->clear();
+        getTree(view->root, view);
+        view->treeUpdated();//notify owners of the view, that it has been updated.
+    }
+}
+
 
 

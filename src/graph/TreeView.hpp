@@ -35,8 +35,10 @@ namespace envire { namespace core
     class TreeView
     {
     public:
-      
-        TreeView() {}
+             
+        TreeView(vertex_descriptor root) : root(root) {}
+        
+        TreeView() : root(boost::graph_traits<LabeledTransformGraph>::null_vertex()) {}
         
         /**Creates a copy ***without*** retaining the treeUpdated subscribers  */
         TreeView(const TreeView& other)
@@ -55,11 +57,13 @@ namespace envire { namespace core
             publisher = other.publisher;
             tree = other.tree;
             crossEdges = other.crossEdges;
+            root = other.root;
             return *this;
         }
         
         TreeView(TreeView&& other) noexcept : tree(std::move(other.tree)),
-                                              crossEdges(std::move(other.crossEdges))                     
+                                              crossEdges(std::move(other.crossEdges)),
+                                              root(std::move(other.root))
         {
             //if the other TreeView was subscribed, unsubscribe it and 
             //subscribe this instead
@@ -99,6 +103,13 @@ namespace envire { namespace core
                 return false;
         }
         
+        /**Removes all content from this TreeView */
+        void clear()
+        {
+            tree.clear();
+            crossEdges.clear();
+        }
+        
         /**This signal is invoked whenever the tree is updated by the TransformGraph
         * @note This is only the case if you requested an updating TreeView. 
         *       Otherwise this signal will never be invoked.
@@ -116,6 +127,9 @@ namespace envire { namespace core
          *       and is ignored. */
         std::vector<edge_descriptor> crossEdges;
         
+        /**The root node of this TreeView */
+        vertex_descriptor root;
+              
     protected:
         TreeUpdatePublisher* publisher = nullptr;/*< Used for automatic unsubscribing in dtor */
     };

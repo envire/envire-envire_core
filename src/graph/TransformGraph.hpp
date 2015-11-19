@@ -183,8 +183,11 @@ namespace envire { namespace core
         
         /**Builds a TreeView containing all vertices that are accessible starting
          * from @p rootId.
+         * @note The tree is ***not** updated when the Graph changes.
          * @throw UnknownFrameException if the frame does not exist */
         TreeView getTree(const FrameId rootId) const;
+        void getTree(const FrameId rootId, TreeView* outView) const;
+        void getTree(const vertex_descriptor root, TreeView* outView) const;
         
         /**Builds a TreeView containing all vertices that are accessible starting
          * from @p root and writes it to @p outView.
@@ -313,6 +316,9 @@ namespace envire { namespace core
          */
         void addEdgeToTreeViews(edge_descriptor newEdge) const;
         void addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) const;
+        
+        /**Rebuild all subscribed TreeViews */
+        void rebuildTreeViews() const;
         
         /**Returns true if an edge between a and b exists in @p view.
          * @note only call this method if you are sure that both a and b
