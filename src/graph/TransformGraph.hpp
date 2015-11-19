@@ -200,7 +200,7 @@ namespace envire { namespace core
         /**Returns the shortest path from @p origin to @p target.
          * Returns an empty vector if the path doesn't exist.
          * @throw UnknownFrameException if @p orign or @p target don't exist */
-        std::vector<FrameId> getPath(FrameId origin, FrameId target);
+        std::vector<FrameId> getPath(FrameId origin, FrameId target) const;
         
         vertices_size_type num_vertices() const;
         edges_size_type num_edges() const;
@@ -311,8 +311,8 @@ namespace envire { namespace core
          *       It does not matter whether you add the back-edge or the edge
          *       to the tree as long as you do ***not*** add both.
          */
-        void addEdgeToTreeViews(edge_descriptor newEdge);
-        void addEdgeToTreeView(edge_descriptor newEdge, TreeView* view);
+        void addEdgeToTreeViews(edge_descriptor newEdge) const;
+        void addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) const;
         
         /**Returns true if an edge between a and b exists in @p view.
          * @note only call this method if you are sure that both a and b

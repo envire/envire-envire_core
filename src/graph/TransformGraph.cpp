@@ -421,7 +421,7 @@ void TransformGraph::getTree(const FrameId rootId, const bool keepTreeUpdated, T
     getTree(root, keepTreeUpdated, outView);
 }
 
-vector<FrameId> TransformGraph::getPath(FrameId origin, FrameId target)
+vector<FrameId> TransformGraph::getPath(FrameId origin, FrameId target) const
 {
     vertex_descriptor fromDesc = getVertex(origin); //may throw
     vertex_descriptor toDesc = getVertex(target); //may throw
@@ -496,7 +496,7 @@ void TransformGraph::subscribeTreeView(TreeView* view)
 }
 
 
-void TransformGraph::addEdgeToTreeViews(edge_descriptor newEdge)
+void TransformGraph::addEdgeToTreeViews(edge_descriptor newEdge) const
 {
   for(TreeView* view : subscribedTreeViews)
   {
@@ -505,7 +505,7 @@ void TransformGraph::addEdgeToTreeViews(edge_descriptor newEdge)
   }
 }
 
-void TransformGraph::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view)
+void TransformGraph::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) const
 {
   
   //We only need to add the edge to the tree, if one of the two vertices is already part
@@ -585,7 +585,7 @@ void TransformGraph::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view)
     filter.edge2 = getEdge(id2, id1);
     
     //everything in this graph will be visible except edge1 and edge2
-    boost::filtered_graph<TransformGraph, EdgeFilter> fg(*this, filter);
+    boost::filtered_graph<const TransformGraph, EdgeFilter> fg(*this, filter);
     
     //use TreeBuilderVisitor to generate a new tree starting from notInView.
     //This tree will only contain vertices that are part of the sub tree that

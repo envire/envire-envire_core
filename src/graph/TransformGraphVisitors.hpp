@@ -92,8 +92,8 @@ namespace envire { namespace core
             //      Because the signature for source() and target() is different
             //      on filtered_graphs. Dunno why exactly that happens but using
             //      the original graph works fine :-)
-            vertex_descriptor source = boost::source(e, graph);
-            vertex_descriptor target = boost::target(e, graph);
+            const vertex_descriptor source = boost::source(e, graph);
+            const vertex_descriptor target = boost::target(e, graph);
 
             /** Insert children **/
             view.tree[source].children.insert(target);
