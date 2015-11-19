@@ -76,15 +76,24 @@ namespace envire { namespace core
     /**Visits every node in bfs order and stores the search tree in the provided map */
     struct TreeBuilderVisitor : public boost::default_bfs_visitor
     {
-        TreeBuilderVisitor(TreeView& view) : view(view) {}
+        /** @param view The TreeView that should be filled
+         *  @param graph The graph that is visited. The reference to the graph
+         *               is needed to get the source and target of an edge.*/
+        TreeBuilderVisitor(TreeView& view, const LabeledTransformGraph& graph) :
+            view(view), graph(graph) {}
 
         /**This is invoked on each edge as it becomes a member of 
          * the edges that form the search tree. */
         template <typename Edge, typename Graph>
         void tree_edge(Edge e, const Graph &g)
         {
-            vertex_descriptor source = boost::source(e,g);
-            vertex_descriptor target = boost::target(e,g);
+            //note: graph is used in here instead of g because otherwise
+            //      the visitor wouldn't work with boost::filtered_graph.
+            //      Because the signature for source() and target() is different
+            //      on filtered_graphs. Dunno why exactly that happens but using
+            //      the original graph works fine :-)
+            vertex_descriptor source = boost::source(e, graph);
+            vertex_descriptor target = boost::target(e, graph);
 
             /** Insert children **/
             view.tree[source].children.insert(target);
@@ -104,8 +113,25 @@ namespace envire { namespace core
         }
         
         TreeView& view;
+        const LabeledTransformGraph& graph;
     };
 
+    
+    /**A predicate that can be used to remove two edges from a graph.
+     * Should be used with boost::filtered_grapg*/
+    class EdgeFilter
+    {
+    public:
+      EdgeFilter() {}//needed by boost, dunno why
+      
+      bool operator()(const edge_descriptor& e) const 
+      {
+          return e != edge1 && e != edge2;
+      }
+      //the edges that should be removed
+      edge_descriptor edge1;
+      edge_descriptor edge2;
+  };
 
 
     /** TESTING BOOST CODE **/
@@ -117,6 +143,8 @@ namespace envire { namespace core
         TransformGraphBFSRecorderVisitor(Visitor record_vis):boost::bfs_visitor<Visitor>(record_vis){ }
 
     };
+    
+    
 
 }}
 

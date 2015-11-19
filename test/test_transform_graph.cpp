@@ -1465,6 +1465,88 @@ BOOST_AUTO_TEST_CASE(tree_view_move_semantics_test)
     BOOST_CHECK(updateCalled);    
 }
 
+BOOST_AUTO_TEST_CASE(tree_view_add_sub_tree_test)
+{
+    //merge two trees
+    
+    /*     A                         E
+     *    / \                       /
+     *   B   C                     F
+     *        \                   /
+     *         D  --merge here-- G
+     *                            \ 
+     *                             H
+     */ 
+    
+    TransformGraph graph;
+    FrameId A("Arthur Dent");
+    FrameId B("Prosser");
+    FrameId C("Ford Prefect");
+    FrameId D("Lady Cynthia Fitzmelton");
+    FrameId E("The barman");
+    FrameId F("Prostetnic Vogon Jeltz");
+    FrameId G("Zaphod Beebleborx");
+    FrameId H("Tricial McMillian");
+    Transform tf;
+    
+    //prepare graph (see picture above)
+    graph.addTransform(A, B, tf);
+    graph.addTransform(A, C, tf);
+    graph.addTransform(C, D, tf);
+    
+    graph.addTransform(E, F, tf);
+    graph.addTransform(F, G, tf);
+    graph.addTransform(G, H, tf);
+    
+    TreeView view;
+    graph.getTree(A, true, &view);
+    
+    vertex_descriptor vA = graph.getVertex(A);
+    vertex_descriptor vB = graph.getVertex(B);
+    vertex_descriptor vC = graph.getVertex(C);
+    vertex_descriptor vD = graph.getVertex(D);
+    vertex_descriptor vE = graph.getVertex(E);
+    vertex_descriptor vF = graph.getVertex(F);
+    vertex_descriptor vG = graph.getVertex(G);
+    vertex_descriptor vH = graph.getVertex(H);
+    
+    BOOST_CHECK(view.tree.find(vG) == view.tree.end());
+    BOOST_CHECK(view.tree.find(vF) == view.tree.end());
+    BOOST_CHECK(view.tree.find(vE) == view.tree.end());
+    BOOST_CHECK(view.tree.find(vH) == view.tree.end());
+    
+    //now add the transform that triggers the tree update
+    graph.addTransform(D, G, tf);
+    
+    BOOST_CHECK(view.tree.find(vG) != view.tree.end());
+    BOOST_CHECK(view.tree.find(vF) != view.tree.end());
+    BOOST_CHECK(view.tree.find(vE) != view.tree.end());
+    BOOST_CHECK(view.tree.find(vH) != view.tree.end());
+    
+    BOOST_CHECK(view.tree[vD].children.size() == 1);
+    BOOST_CHECK(view.tree[vD].children.find(vG) != view.tree[vD].children.end());
+    BOOST_CHECK(view.tree[vG].parent == vD);
+    
+    BOOST_CHECK(view.tree[vG].children.size() == 2);
+    BOOST_CHECK(view.tree[vG].children.find(vH) != view.tree[vG].children.end());
+    BOOST_CHECK(view.tree[vG].children.find(vF) != view.tree[vG].children.end());
+    
+    BOOST_CHECK(view.tree[vF].parent == vG);
+    BOOST_CHECK(view.tree[vH].parent == vG);
+    
+    BOOST_CHECK(view.tree[vE].parent == vF);
+    BOOST_CHECK(view.tree[vE].children.size() == 0);
+    
+    BOOST_CHECK(view.tree[vA].children.size() == 2);
+    BOOST_CHECK(view.tree[vA].children.find(vB) != view.tree[vA].children.end());
+    BOOST_CHECK(view.tree[vA].children.find(vC) != view.tree[vA].children.end());
+    
+    BOOST_CHECK(view.tree[vC].parent == vA);
+    
+    BOOST_CHECK(view.crossEdges.size() == 0);
+    
+}
+
 
 
 

@@ -12,10 +12,10 @@
 #include <envire_core/events/FrameAddedEvent.hpp>
 #include <envire_core/events/FrameRemovedEvent.hpp>
 #include <type_traits> //For is_same()
+#include <boost/graph/filtered_graph.hpp>
 
 using namespace envire::core;
 using namespace std;
-
 
 TransformGraph::~TransformGraph()
 {
@@ -393,7 +393,7 @@ TreeView TransformGraph::getTree(const vertex_descriptor root) const
     //we are not derefering to getTree(vertex_descriptor, bool, TreeView&)
     //in here because it is not const
     TreeView view;
-    TreeBuilderVisitor visitor(view);
+    TreeBuilderVisitor visitor(view, *this);
     boost::breadth_first_search(*this, root, boost::visitor(visitor));
     return std::move(view);
 }
@@ -406,7 +406,7 @@ TreeView TransformGraph::getTree(const FrameId rootId) const
 
 void TransformGraph::getTree(const vertex_descriptor root, const bool keepTreeUpdated, TreeView* outView)
 {
-    TreeBuilderVisitor visitor(*outView);
+    TreeBuilderVisitor visitor(*outView, *this);
     boost::breadth_first_search(*this, root, boost::visitor(visitor));
     
     if(keepTreeUpdated)
@@ -496,7 +496,7 @@ void TransformGraph::subscribeTreeView(TreeView* view)
 }
 
 
-void TransformGraph::addEdgeToTreeViews(edge_descriptor newEdge) const
+void TransformGraph::addEdgeToTreeViews(edge_descriptor newEdge)
 {
   for(TreeView* view : subscribedTreeViews)
   {
@@ -505,7 +505,7 @@ void TransformGraph::addEdgeToTreeViews(edge_descriptor newEdge) const
   }
 }
 
-void TransformGraph::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) const
+void TransformGraph::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view)
 {
   
   //We only need to add the edge to the tree, if one of the two vertices is already part
@@ -537,7 +537,6 @@ void TransformGraph::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) 
     }
     //otherwise it's a back-edge that can be ignored
     return;
-    
   }
   else if(srcInView && !tarInView)
   {
@@ -564,6 +563,38 @@ void TransformGraph::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) 
   //be added to the tree
   view->tree[inView].children.insert(notInView);
   view->tree[notInView].parent = inView; 
+  
+  //There are exactly two edges connected to the new vertex if it is only 
+  //connected to 'inView'.
+  //If there are more edges we need to follow them and add the whole graph
+  if(boost::degree(notInView, graph()) > 2)
+  {
+    /* (1) Create a filtered graph that does not contain the edges between
+     *     inView and notInView
+     * (2) Build a bfs tree starting from notInView on the filtered graph
+     * (3) merge the two trees
+     */
+    
+    //the two edges that should be filtered
+    const FrameId id1 = getFrameId(inView);
+    const FrameId id2 = getFrameId(notInView);
+    
+    //create a filter that can be used to hide the two edges from the graph
+    EdgeFilter filter;
+    filter.edge1 = getEdge(id1, id2);
+    filter.edge2 = getEdge(id2, id1);
+    
+    //everything in this graph will be visible except edge1 and edge2
+    boost::filtered_graph<TransformGraph, EdgeFilter> fg(*this, filter);
+    
+    //use TreeBuilderVisitor to generate a new tree starting from notInView.
+    //This tree will only contain vertices that are part of the sub tree that
+    //below notInView because the edges leading to inView are hidden by the filter
+    //and thus the bfs will not follow those edges.
+    //the visitor will add those edges directly to the view
+    TreeBuilderVisitor visitor(*view, *this);
+    boost::breadth_first_search(fg, notInView, boost::visitor(visitor));
+  }
 }
 
 bool TransformGraph::edgeExists(const vertex_descriptor a, const vertex_descriptor b,

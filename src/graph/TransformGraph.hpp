@@ -311,8 +311,8 @@ namespace envire { namespace core
          *       It does not matter whether you add the back-edge or the edge
          *       to the tree as long as you do ***not*** add both.
          */
-        void addEdgeToTreeViews(edge_descriptor newEdge) const;
-        void addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) const;
+        void addEdgeToTreeViews(edge_descriptor newEdge);
+        void addEdgeToTreeView(edge_descriptor newEdge, TreeView* view);
         
         /**Returns true if an edge between a and b exists in @p view.
          * @note only call this method if you are sure that both a and b

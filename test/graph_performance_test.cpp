@@ -55,11 +55,11 @@ void getTransform()
 }
 
 void getTransform1(const int len)
-{
+{ 
     TransformGraph graph;    
     Transform tf;
     for(size_t i = 0; i < ids.size() - 1; ++i)
-    {
+    { 
         graph.addTransform(ids[i], ids[i + 1], tf);
     }  
     
