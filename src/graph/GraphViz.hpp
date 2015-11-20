@@ -52,11 +52,11 @@ namespace envire { namespace core
         template <class _Edge>
         void operator()(std::ostream &out, const _Edge& e) const
         {
-//             out << "[label=\"" << tf[e].time.toString(::base::Time::Seconds) <<
-//                 boost::format("\\nt: (%.1f %.1f %.1f)\\nr: (%.1f %.1f %.1f %.1f)") % tf[e].transform.translation.x() % tf[e].transform.translation.y() % tf[e].transform.translation.z()
-//                 % tf[e].transform.orientation.w() % tf[e].transform.orientation.x() % tf[e].transform.orientation.y() % tf[e].transform.orientation.z()
-//                 << "\""
-//                 << ",shape=ellipse,color=red,style=filled,fillcolor=lightcoral]";
+            out << "[label=\"" << tf[e].time.toString(::base::Time::Seconds) <<
+                boost::format("\\nt: (%.1f %.1f %.1f)\\nr: (%.1f %.1f %.1f %.1f)") % tf[e].transform.translation.x() % tf[e].transform.translation.y() % tf[e].transform.translation.z()
+                % tf[e].transform.orientation.w() % tf[e].transform.orientation.x() % tf[e].transform.orientation.y() % tf[e].transform.orientation.z()
+                << "\""
+                << ",shape=ellipse,color=red,style=filled,fillcolor=lightcoral]";
         }
     private:
         _Transform tf;

@@ -109,7 +109,7 @@ void addFourChildren(envire::core::TransformGraph& graph, const envire::core::Fr
   for(int j = 0; j < 4; ++j)
   {
       envire::core::Transform tf;
-      tf.setTransform(base::Affine3d::Identity());
+      tf.setTransform(base::TransformWithCovariance::Identity());
       const envire::core::FrameId newId = id + boost::lexical_cast<envire::core::FrameId>(j);
       graph.addTransform(id, newId, tf);
       addFourChildren(graph, newId, i - 1);

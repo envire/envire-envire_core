@@ -128,10 +128,10 @@ const Transform TransformGraph::getTransform(const vertex_descriptor originVerte
         }catch(const FoundFrameException &e)
         {
             //std::cout<< e.what() << std::endl;
-            base::Affine3d& trans(tf.transform);
+            base::TransformWithCovariance &trans(tf.transform);
 
             /** Compute the transformation **/
-            trans = base::Affine3d::Identity();
+            trans.setTransform (base::Affine3d::Identity());
             std::deque<vertex_descriptor>::iterator it = visit.tree->begin();
             for (; (it+1) != visit.tree->end(); ++it)
             {
@@ -139,8 +139,8 @@ const Transform TransformGraph::getTransform(const vertex_descriptor originVerte
                 trans = trans * (*this)[pair.first].transform.transform;
             }
         }
-        
-        if(!tf.transform.matrix().hasNaN())
+
+        if(tf.transform.hasValidTransform())
         {
             return tf;
         }
@@ -171,10 +171,10 @@ const Transform TransformGraph::getTransform(const vertex_descriptor originVerte
     if (originVertex == targetVertex)
     {
         /* An identity transformation **/
-        return Transform(Eigen::Affine3d::Identity());
+        return Transform(Eigen::Vector3d::Zero(), Eigen::Quaterniond::Identity());
     }
 
-    base::Affine3d origin_tf(base::Affine3d::Identity()); // An identity transformation
+    base::TransformWithCovariance origin_tf(base::Affine3d::Identity()); // An identity transformation
 
     /** Get transformation from origin to the root **/
     vertex_descriptor od = originVertex;
@@ -188,7 +188,7 @@ const Transform TransformGraph::getTransform(const vertex_descriptor originVerte
         od = view.tree.at(od).parent;
     }
 
-    base::Affine3d target_tf(base::Affine3d::Identity()); // An identity transformation
+    base::TransformWithCovariance target_tf(base::Affine3d::Identity()); // An identity transformation
 
     /** Get transformation from target to the root **/
     vertex_descriptor td = targetVertex;
