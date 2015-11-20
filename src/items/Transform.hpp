@@ -13,19 +13,26 @@ namespace envire { namespace core
     {
     public:
         base::Time time; /** Timestamp */
-        base::TransformWithCovariance transform; /** the transformation */
+        base::Affine3d transform; /** the transformation */
 
     public:
-        Transform() { this->transform.invalidateTransform(); };
-        Transform(const base::Time &_time):time(_time)
-        { this->transform.invalidateTransform(); };
-        Transform(const base::TransformWithCovariance &_twc):transform(_twc){};
-        Transform(const base::Time &_time, const base::TransformWithCovariance &_twc):
+        Transform() : transform(base::Quaterniond(base::Vector4d::Ones() * base::NaN<double>()))
+        {};
+        
+        Transform(const base::Time &_time) : time(_time),
+            transform(base::Quaterniond(base::Vector4d::Ones() * base::NaN<double>()))
+        {};
+        
+        Transform(const base::Affine3d &_twc):transform(_twc){};
+        
+        Transform(const base::Time &_time, const base::Affine3d &_twc):
             time(_time), transform(_twc){};
-        Transform(const base::Position &_translation, const base::Orientation &_orient):
-            transform(_translation, _orient){};
-        Transform(const base::Time &_time, const base::Position &_translation, const base::Orientation &_orient, const base::Matrix6d &_cov):
-            time(_time), transform(_translation, _orient, _cov){};
+            
+ //       Transform(const base::Position &_translation, const base::Orientation &_orient):
+   //         transform(_translation, _orient){};
+            
+  //      Transform(const base::Time &_time, const base::Position &_translation, const base::Orientation &_orient, const base::Matrix6d &_cov):
+    //      time(_time), transform(_translation, _orient, _cov){};
 
 
         Transform(const Transform &tf) : time(tf.time), transform(tf.transform) {}
@@ -47,23 +54,23 @@ namespace envire { namespace core
           return *this;
         }
 
-        void setTransform(const base::TransformWithCovariance& tf)
+        void setTransform(const base::Affine3d& tf)
         {
-            this->transform = tf;
+            transform = tf;
         }
 
         Transform operator*(const Transform &tf) const
         {
             base::Time last_time;
-            if(this->time > tf.time)
+            if(time > tf.time)
             {
-                last_time = this->time;
+                last_time = time;
             }
             else
             {
                 last_time = tf.time;
             }
-            return Transform(this->time, this->transform*tf.transform);
+            return Transform(time, transform*tf.transform);
         }
 
     };
