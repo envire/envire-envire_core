@@ -1573,6 +1573,11 @@ BOOST_AUTO_TEST_CASE(tree_view_automatic_update_remove_test)
     graph.addTransform(B, C, tf);
 
     TreeView view;
+    bool updateCalled = false;
+    view.treeUpdated.connect([&updateCalled] () 
+      {
+          updateCalled = true;
+      });
     graph.getTree(A, true, &view);
     
     graph.removeTransform(A, B);
@@ -1587,6 +1592,7 @@ BOOST_AUTO_TEST_CASE(tree_view_automatic_update_remove_test)
     BOOST_CHECK(view.tree.find(vC) == view.tree.end());
     BOOST_CHECK(view.tree[vA].children.size() == 0);
     BOOST_CHECK(view.tree[vA].parent == graph.null_vertex());
+    BOOST_CHECK(updateCalled);
 
 }
 
