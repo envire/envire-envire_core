@@ -66,6 +66,9 @@ namespace envire { namespace core
     typedef LabeledTransformGraph::degree_size_type degree_size_type;
     typedef LabeledTransformGraph::out_edge_iterator out_edge_iterator;
     typedef LabeledTransformGraph::in_edge_iterator in_edge_iterator;
+    
+    /**A Path between two frames. [0] is the origin, [n] the target of the path. */
+    typedef std::vector<FrameId> Path;
 
 }}
 #endif /* SRC_TRANSFORMTREETYPES_HPP_ */

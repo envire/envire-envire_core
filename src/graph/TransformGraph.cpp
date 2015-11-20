@@ -447,12 +447,12 @@ void TransformGraph::getTree(const FrameId rootId, const bool keepTreeUpdated, T
     getTree(root, keepTreeUpdated, outView);
 }
 
-vector<FrameId> TransformGraph::getPath(FrameId origin, FrameId target) const
+Path TransformGraph::getPath(FrameId origin, FrameId target) const
 {
     vertex_descriptor fromDesc = getVertex(origin); //may throw
     vertex_descriptor toDesc = getVertex(target); //may throw
   
-    vector<FrameId> path;
+    Path path;
     envire::core::TransformGraphBFSVisitor <vertex_descriptor>visit(toDesc, this->graph());
     try
     {
