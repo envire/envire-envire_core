@@ -15,6 +15,7 @@ set(headers items/ItemBase.hpp
             graph/TransformGraphExceptions.hpp
             graph/TransformGraphVisitors.hpp
             graph/GraphViz.hpp
+            graph/TreeView.hpp
             events/GraphEvent.hpp
             events/GraphEventSubscriber.hpp
             events/GraphEventDispatcher.hpp
