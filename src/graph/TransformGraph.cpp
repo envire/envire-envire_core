@@ -111,7 +111,7 @@ const Transform TransformGraph::getTransform(const vertex_descriptor originVerte
     if(!pair.second)
     {
         /** It is not a direct edge transformation **/
-        Transform tf;
+        Transform tf(base::Position::Zero(), base::Orientation::Identity()); //start with identity transform
         envire::core::TransformGraphBFSVisitor <vertex_descriptor>visit(targetVertex, this->graph());
 
         // check whether the vertices exist in the graph
@@ -127,27 +127,19 @@ const Transform TransformGraph::getTransform(const vertex_descriptor originVerte
 
         }catch(const FoundFrameException &e)
         {
-            //std::cout<< e.what() << std::endl;
             base::TransformWithCovariance &trans(tf.transform);
 
             /** Compute the transformation **/
-            trans.setTransform (base::Affine3d::Identity());
             std::deque<vertex_descriptor>::iterator it = visit.tree->begin();
             for (; (it+1) != visit.tree->end(); ++it)
             {
                 pair = boost::edge(*it, *(it+1), graph());
                 trans = trans * (*this)[pair.first].transform.transform;
             }
-        }
-
-        if(tf.transform.hasValidTransform())
-        {
             return tf;
         }
-        else
-        {
-            throw UnknownTransformException(getFrameId(originVertex), getFrameId(targetVertex));
-        }
+        //ending up here means, that the breadth_first_search could not find a path from origin to target
+        throw UnknownTransformException(getFrameId(originVertex), getFrameId(targetVertex));
     }
 
     return (*this)[pair.first].transform;
