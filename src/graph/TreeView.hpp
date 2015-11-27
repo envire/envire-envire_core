@@ -7,6 +7,7 @@ namespace envire { namespace core
      */
     struct VertexRelation
     {
+        VertexRelation* parentRelation; /**<can be NULL */
         vertex_descriptor parent;
         std::unordered_set<vertex_descriptor> children;
     };
@@ -97,10 +98,7 @@ namespace envire { namespace core
 
         bool isRoot(const vertex_descriptor vd) const
         {
-            if (this->tree.at(vd).parent == LabeledTransformGraph::null_vertex())
-                return true;
-            else
-                return false;
+            return vd == root;
         }
         
         /**Removes all content from this TreeView */

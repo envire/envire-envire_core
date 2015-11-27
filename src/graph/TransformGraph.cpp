@@ -174,33 +174,37 @@ const Transform TransformGraph::getTransform(const vertex_descriptor originVerte
         return Transform(Eigen::Vector3d::Zero(), Eigen::Quaterniond::Identity());
     }
 
-    base::TransformWithCovariance origin_tf(base::Affine3d::Identity()); // An identity transformation
+    base::TransformWithCovariance origin_tf = base::TransformWithCovariance::Identity(); // An identity transformation
 
     /** Get transformation from origin to the root **/
     vertex_descriptor od = originVertex;
+    const VertexRelation* odRelation = &view.tree.at(od);
     while(!view.isRoot(od))
     {
-        EdgePair pair(boost::edge(od, view.tree.at(od).parent, *this));
+        EdgePair pair(boost::edge(od, odRelation->parent, *this));
         if (pair.second)
         {
             origin_tf = origin_tf * (*this)[pair.first].transform.transform;
         }
-        od = view.tree.at(od).parent;
+        od = odRelation->parent;
+        odRelation = odRelation->parentRelation;
     }
 
-    base::TransformWithCovariance target_tf(base::Affine3d::Identity()); // An identity transformation
+    base::TransformWithCovariance target_tf = base::TransformWithCovariance::Identity(); // An identity transformation
 
     /** Get transformation from target to the root **/
     vertex_descriptor td = targetVertex;
+    const VertexRelation* tdRelation = &view.tree.at(td);
     while(!view.isRoot(td))
     {
         EdgePair pair;
-        pair = boost::edge(td, view.tree.at(td).parent, *this);
+        pair = boost::edge(td, tdRelation->parent, *this);
         if (pair.second)
         {
             target_tf = target_tf * (*this)[pair.first].transform.transform;
         }
-        td = view.tree.at(td).parent;
+        td = tdRelation->parent;
+        tdRelation = tdRelation->parentRelation;
     }
 
     return origin_tf * target_tf.inverse();
@@ -423,6 +427,7 @@ void TransformGraph::getTree(const vertex_descriptor root, TreeView* outView) co
         //the TreeBuilderVisitor only looks at the edges, if there are no dges
         //it wouldn't add the root node
         outView->tree[root].parent = null_vertex();
+        outView->tree[root].parentRelation = nullptr;
     }
     else
     {
@@ -592,6 +597,7 @@ void TransformGraph::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) 
     //be added to the tree
     view->tree[inView].children.insert(notInView);
     view->tree[notInView].parent = inView; 
+    view->tree[notInView].parentRelation = &view->tree[inView]; 
     
     //There are exactly two edges connected to the new vertex if it is only 
     //connected to 'inView'.

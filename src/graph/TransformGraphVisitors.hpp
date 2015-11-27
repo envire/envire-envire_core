@@ -100,6 +100,7 @@ namespace envire { namespace core
 
             /** Insert parent **/
             view.tree[target].parent = source;
+            view.tree[target].parentRelation = &view.tree[source];
         }
         
         /**This is only invoked on cross edges, not on back edges
