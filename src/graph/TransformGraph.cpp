@@ -209,6 +209,12 @@ const Transform TransformGraph::getTransform(const FrameId& origin, const FrameI
     return getTransform(originVertex, targetVertex, view);
 }
 
+const Transform TransformGraph::getTransform(edge_descriptor edge) const
+{
+    return (*this)[edge].transform;
+}
+
+
 void TransformGraph::updateTransform(const FrameId& origin, const FrameId& target,
                                     const Transform& tf)
 {
@@ -364,21 +370,22 @@ const envire::core::Frame& TransformGraph::getFrame(const vertex_descriptor desc
 
 edge_descriptor TransformGraph::getEdge(const FrameId& origin, const FrameId& target) const
 {
-    vertex_descriptor originDesc = vertex(origin);
-    vertex_descriptor targetDesc = vertex(target);
+    vertex_descriptor originDesc = getVertex(origin); //throws
+    vertex_descriptor targetDesc = getVertex(target);
+    return getEdge(originDesc, targetDesc);
+}
 
-    if(originDesc == null_vertex() || targetDesc == null_vertex())
-    {//boost segfaults if one of them is null
-        throw UnknownTransformException(origin, target);
-    }
-
-    EdgePair e = boost::edge(originDesc, targetDesc, graph());
+edge_descriptor TransformGraph::getEdge(const vertex_descriptor origin,
+                                        const vertex_descriptor target) const
+{
+    EdgePair e = boost::edge(origin, target, graph());
     if(!e.second)
     {
-        throw UnknownTransformException(origin, target);
+        throw UnknownTransformException(getFrameId(origin), getFrameId(target));
     }
     return e.first;
 }
+
 
 void TransformGraph::updateTransform(edge_descriptor ed, const Transform& tf)
 {
@@ -660,5 +667,25 @@ void TransformGraph::rebuildTreeViews() const
     }
 }
 
+bool TransformGraph::containsItems(const vertex_descriptor vertex, const type_index& type) const
+{
+  const Frame& frame = graph()[vertex].frame;
+
+  auto mapEntry = frame.items.find(type);
+  return mapEntry != frame.items.end();     
+}
+
+
+const Frame::ItemList& TransformGraph::getItems(const vertex_descriptor frame,
+                                                const std::type_index& type) const
+{
+    const Frame::ItemMap& items = graph()[frame].frame.items;
+    
+    if(items.find(type) == items.end())
+    {
+        throw NoItemsOfTypeInFrameException(getFrameId(frame), type.name());
+    }
+    return items.at(type);   
+}
 
 

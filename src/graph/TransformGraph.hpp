@@ -117,11 +117,14 @@ namespace envire { namespace core
          * @throw UnknownFrameException if the @p origin or @p target does not exist*/
         const Transform getTransform(const FrameId& origin, const FrameId& target, const TreeView &view) const;
         const Transform getTransform(const vertex_descriptor origin, const vertex_descriptor target, const TreeView &view) const;
-
+        /** @return the transform between source(edge) and target(edge) */
+        const Transform getTransform(const edge_descriptor edge) const;
 
         /** @return the edge between frame @p origin and @p target
+         *  @throw UnknownFrameException If @p orign or @p target do not exist.
          *  @throw UnknownTransformException if there is no such edge  */
         edge_descriptor getEdge(const FrameId& origin, const FrameId& target) const;
+        edge_descriptor getEdge(const vertex_descriptor origin, const vertex_descriptor target) const;
 
         /** @return a reference to the frame identified by the id.
          *  @throw UnknownFrameException if the frame id is invalid **/
@@ -225,6 +228,12 @@ namespace envire { namespace core
         const std::pair<ItemIterator<T>, ItemIterator<T>> getItems(const FrameId& frame) const;
         template<class T>
         const std::pair<ItemIterator<T>, ItemIterator<T>> getItems(const vertex_descriptor frame) const;
+        /** @return a list of all items of @p tyoe in @p frame
+         *  @throw NoItemsOfTypeInFrameException if no items of the type are in the frame*/
+        const envire::core::Frame::ItemList& getItems(const vertex_descriptor frame,
+                                                      const std::type_index& type) const;
+        
+        
         
         /**Convenience method that returns the @p i'th item of type @p T from @p frame.
          * @throw UnknownFrameException if the @p frame id is invalid.
@@ -237,12 +246,14 @@ namespace envire { namespace core
         
         
         
-        /** @return true if the @p frame contains at least on item of type @p T
+        /** @return true if the @p frame contains at least one item of type @p T
          *  @throw UnknownFrameException if the @p frame id is invalid.*/
         template <class T>
         bool containsItems(const FrameId& frame) const;
         template <class T>
         bool containsItems(const vertex_descriptor frame) const;
+        /** @return true if @p frame contains at least one item of @p type */
+        bool containsItems(const vertex_descriptor frame, const std::type_index& type) const;
         
         /** @return the number if items of type @p T in @p frame.
          *  @throw UnknownFrameException if the @p frame id is invalid.*/
@@ -518,10 +529,8 @@ namespace envire { namespace core
     bool TransformGraph::containsItems(const vertex_descriptor vertex) const
     {
         checkItemType<T>();
-        const Frame& frame = graph()[vertex].frame;
-        const std::type_index key(typeid(T));
-        auto mapEntry = frame.items.find(key);
-        return mapEntry != frame.items.end();     
+        const std::type_index type(typeid(T));
+        return containsItems(vertex, type);
     }
     
     template <class T>
