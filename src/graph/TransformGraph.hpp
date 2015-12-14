@@ -366,10 +366,10 @@ namespace envire { namespace core
     {
         checkItemType<T>();
         checkFrameValid(frame);
-
-        (*this)[frame].frame.items[std::type_index(typeid(T))].push_back(item);
+        std::type_index i(typeid(T));
+        (*this)[frame].frame.items[i].push_back(item);
         ItemBase::Ptr baseItem = boost::dynamic_pointer_cast<ItemBase>(item);
-        notify(ItemAddedEvent(frame, baseItem, std::type_index(typeid(T))));
+        notify(ItemAddedEvent(frame, baseItem, i));
     }
     
     template<class T>
