@@ -24,11 +24,14 @@
 #define private protected
 #include <boost/graph/labeled_graph.hpp>
 #undef private
+
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <cassert>
 #include <boost/signals2.hpp>
+#include <boost/functional/hash.hpp> 
+#include <functional> //to be able to provide custom hash functions for std maps
 
 namespace envire { namespace core
 {
@@ -67,8 +70,26 @@ namespace envire { namespace core
     typedef LabeledTransformGraph::out_edge_iterator out_edge_iterator;
     typedef LabeledTransformGraph::in_edge_iterator in_edge_iterator;
     
-    /**A Path between two frames. [0] is the origin, [n] the target of the path. */
+    /**A Path between two frames. Index 0 is the origin, index n the target of the path. */
     typedef std::vector<FrameId> Path;
+    
+    /**A hash function for the edge_descriptor.
+     * @see http://stackoverflow.com/questions/15902134/removing-edges-temporarily-from-a-boost-graph*/
+    template <class GRAPH>
+    struct EdgeHash : std::unary_function<edge_descriptor, std::size_t> 
+    {
+        EdgeHash(const std::shared_ptr<GRAPH> graph) : graph(graph){}
 
+        std::size_t operator()(edge_descriptor const& e) const {
+        std::size_t hash = 1338;
+        //Each edge is uniquely defined by it's source and target.
+        //Thus we can use those vertex_descriptors to create the hash
+        //value of the edge
+        boost::hash_combine(hash, boost::source(e, **graph));
+        boost::hash_combine(hash, boost::target(e, **graph));
+        return hash;
+      }
+      const std::shared_ptr<GRAPH> graph;
+    }; 
 }}
 #endif /* SRC_TRANSFORMTREETYPES_HPP_ */
