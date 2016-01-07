@@ -30,6 +30,8 @@ namespace envire { namespace core
 
         };
 
+        virtual ~SpatialItem() {}
+
         void setBoundary(const boost::shared_ptr<BoundingVolume>& boundary) {this->boundary = boundary;}
 
         boost::shared_ptr<BoundingVolume> getBoundary() {return boundary;}

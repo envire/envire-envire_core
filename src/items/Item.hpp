@@ -39,6 +39,8 @@ namespace envire { namespace core
             user_data_ptr = &user_data;
         }; 
 
+        virtual ~Item() {}
+
         /**@brief setData
         *
         * Sets the user data
