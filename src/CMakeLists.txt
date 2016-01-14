@@ -33,6 +33,7 @@ set(headers items/ItemBase.hpp
             serialization/SerializationRegistration.hpp
             serialization/ItemHeader.hpp
             serialization/Eigen.hpp
+            serialization/BinaryBufferHelper.hpp
             util/MetaProgramming.hpp)
             
 set(sources items/ItemBase.cpp
