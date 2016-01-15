@@ -13,31 +13,31 @@
 * Example usage in *.hpp:
 *      class VectorPlugin : public Item<Eigen::Vector3d>
 *      {
-*          ENVIRE_PLUGIN_HEADER(VectorPlugin, Eigen::Vector3d)
+*          ENVIRE_PLUGIN_HEADER(VectorPlugin)
 *
 *          [...]
 *      }
 */
-#define ENVIRE_PLUGIN_HEADER( _classname, _datatype ) \
+#define ENVIRE_PLUGIN_HEADER( _classname ) \
     protected: \
     static const std::string class_name; \
     public:\
     const std::string& getClassName() const { return class_name; } \
     typedef boost::shared_ptr<_classname> Ptr; \
     private: \
-    ENVIRE_SERIALIZATION_HEADER(_datatype)
+    ENVIRE_SERIALIZATION_HEADER(TemplateType)
 
 /**
 * The ENVIRE_REGISTER_PLUGIN macro exports the given class as plugin.
-* The class must be inherited from envire::core::ItemBase.
+* The class must be inherited from envire::core::Item.
 *
 * Example usage in *.cpp:
-*      ENVIRE_REGISTER_PLUGIN(ClassName, DataType)
+*      ENVIRE_REGISTER_PLUGIN(ClassName)
 */
-#define ENVIRE_REGISTER_PLUGIN( _classname, _datatype ) \
+#define ENVIRE_REGISTER_PLUGIN( _classname ) \
 const std::string _classname::class_name = #_classname; \
 CLASS_LOADER_REGISTER_CLASS(_classname, envire::core::ItemBase); \
-ENVIRE_REGISTER_SERIALIZATION(_classname, _datatype)
+ENVIRE_REGISTER_SERIALIZATION(_classname, _classname::TemplateType)
 
 
 /**
@@ -51,7 +51,7 @@ ENVIRE_REGISTER_SERIALIZATION(_classname, _datatype)
 #define ENVIRE_PLUGIN( _classname, _datatype ) \
 class _classname : public envire::core::Item<_datatype> \
 { \
-    ENVIRE_PLUGIN_HEADER( _classname, _datatype ) \
+    ENVIRE_PLUGIN_HEADER( _classname ) \
 }; \
-ENVIRE_REGISTER_PLUGIN( _classname, _datatype )
+ENVIRE_REGISTER_PLUGIN( _classname )
 

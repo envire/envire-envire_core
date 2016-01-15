@@ -21,6 +21,7 @@ namespace envire { namespace core
     {
     public:
         typedef boost::shared_ptr< Item<_ItemData> > Ptr;
+        typedef _ItemData TemplateType;
 
     protected:
 
