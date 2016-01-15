@@ -39,53 +39,70 @@ namespace envire { namespace core
 
         void extendBoundary(const Eigen::Vector3d& point)
         {
+            checkBoundingVolume();
             boundary->extend(point);
         }
 
         template<typename _Data>
         void extendBoundary(const SpatialItem<_Data>& spatial_item)
         {
+            checkBoundingVolume();
             boundary->extend(spatial_item.getBoundary());
         }
 
         template<typename _Data>
         bool intersects(const SpatialItem<_Data>& spatial_item) const
         {
+            checkBoundingVolume();
             return boundary->intersects(spatial_item.getBoundary());
         }
 
         template<typename _Data>
         boost::shared_ptr<BoundingVolume> intersection(const SpatialItem<_Data>& spatial_item) const
         {
+            checkBoundingVolume();
             return boundary->intersection(spatial_item.getBoundary());
         }
 
         bool contains(const Eigen::Vector3d& point) const
         {
+            checkBoundingVolume();
             return boundary->contains(point);
         }
 
         template<typename _Data>
         bool contains(const SpatialItem<_Data>& spatial_item) const
         {
+            checkBoundingVolume();
             return boundary->contains(spatial_item.getBoundary());
         }
 
         double exteriorDistance(const Eigen::Vector3d& point) const
         {
+            checkBoundingVolume();
             return boundary->exteriorDistance(point);
         }
 
         template<typename _Data>
         double exteriorDistance(const SpatialItem<_Data>& spatial_item) const
         {
+            checkBoundingVolume();
             return boundary->exteriorDistance(spatial_item.getBoundary());
         }
 
         Eigen::Vector3d centerOfBoundary() const
         {
+            checkBoundingVolume();
             return boundary->center();
         }
+
+    protected:
+        void checkBoundingVolume() const
+        {
+            if(boundary.get() == NULL)
+                throw std::runtime_error("BoundingVolume is not available!");
+        }
+
 
     };
 
