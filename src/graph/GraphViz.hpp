@@ -21,19 +21,10 @@ namespace envire { namespace core
         template <class _Vertex>
         void operator()(std::ostream &out, const _Vertex& n) const
         {
-            if(f[n].name.find("camera") != std::string::npos)
-            {
-                out << "[shape=record, label=\"<f0> " << f[n].name <<
-                    "|<f1>" << f[n].items.size()<<"\""
-                    <<",style=filled,fillcolor=orange]";
-
-            }
-            else
-            {
-                out << "[shape=record, label=\"<f0> " << f[n].name <<
-                    "|<f1>" << f[n].items.size()<<"\""
-                    <<",style=filled,fillcolor=lightblue]";
-            }
+            const Frame& frame = f[n];
+            out << "[shape=record, label=\"" << frame.name <<
+                " | " << frame.items.size()<<"\""
+                <<",style=filled,fillcolor=lightblue]";
         }
 
     private:
