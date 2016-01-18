@@ -7,6 +7,6 @@ using boost::uuids::uuid;
 BOOST_AUTO_TEST_CASE(uuid_test)
 {
     Frame f("bla");
-    BOOST_ASSERT(f.uuid.version() == uuid::version_random_number_based);
-    BOOST_ASSERT(!f.uuid.is_nil());
+    BOOST_CHECK(f.uuid.version() == uuid::version_random_number_based);
+    BOOST_CHECK(!f.uuid.is_nil());
 }
