@@ -15,6 +15,8 @@
 
 namespace envire { namespace core
 {
+    using FrameId = std::string;
+
     /**@class ItemBase
     *
     * ItemBase class
@@ -33,7 +35,7 @@ namespace envire { namespace core
 
         boost::uuids::uuid uuid; /** Unique Identifier */
 
-        std::string frame_name; /** Frame name in which the Item is located */
+        FrameId frame_name; /** Frame name in which the Item is located */
 
         // TBD: do we want/need this pointer?
         void* user_data_ptr; /** Pointer to the user data */

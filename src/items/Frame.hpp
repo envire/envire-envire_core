@@ -13,8 +13,6 @@
 
 namespace envire { namespace core
 {
-    using FrameId = std::string;
-    
     /**A Frame is attached to each vertex in the TransformGraph.
      * It holds a lists of arbitrary items organized by item type. 
      * The Frame itself is a POD. The logic for manipulating Frames is part of
