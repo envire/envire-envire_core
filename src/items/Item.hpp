@@ -32,15 +32,39 @@ namespace envire { namespace core
         Item() : ItemBase()
         {
             user_data_ptr = &user_data;
-        };
+        }
+
+        Item(const Item<_ItemData>& item) :  ItemBase(item), user_data(item.user_data)
+        {
+            user_data_ptr = &this->user_data;
+        }
+
+        Item(Item<_ItemData>&& item) :  ItemBase(item), user_data(std::move(item.user_data))
+        {
+            user_data_ptr = &this->user_data;
+        }
 
         template <typename... Ts>
-        Item(Ts&&... args) : user_data(std::forward<Ts>(args)...)
+        Item(Ts&&... args) : ItemBase(), user_data(std::forward<Ts>(args)...)
         {
             user_data_ptr = &user_data;
-        }; 
+        }
 
         virtual ~Item() {}
+
+        Item<_ItemData>& operator=(const Item<_ItemData>& item)
+        {
+            ItemBase::operator=(item);
+            user_data = item.user_data;
+            return *this;
+        }
+
+        Item<_ItemData>& operator=(Item<_ItemData>&& item)
+        {
+            ItemBase::operator=(item);
+            user_data = std::move(item.user_data);
+            return *this;
+        }
 
         /**@brief setData
         *

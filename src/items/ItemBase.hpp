@@ -43,7 +43,12 @@ namespace envire { namespace core
     public:
 
         ItemBase();
+        ItemBase(const ItemBase& item);
+        ItemBase(ItemBase&& item);
         virtual ~ItemBase() {}
+
+        ItemBase& operator=(const ItemBase& item);
+        ItemBase& operator=(ItemBase&& item);
 
         /**@brief setTime
         *
