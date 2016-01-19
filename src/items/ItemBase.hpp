@@ -12,6 +12,7 @@
 #include <base/Time.hpp>
 #include <string>
 #include <type_traits>
+#include <typeindex>
 
 namespace envire { namespace core
 {
@@ -99,6 +100,8 @@ namespace envire { namespace core
         *
         */
         virtual std::string getClassName() const { return "UnknownItem"; }
+
+        virtual std::type_index getTypeIndex() const = 0;
 
         void* getRawData() const { return user_data_ptr; }
 

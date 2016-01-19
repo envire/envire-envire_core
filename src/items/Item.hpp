@@ -80,6 +80,11 @@ namespace envire { namespace core
         */
         _ItemData& getData() { return this->user_data; }
 
+        virtual std::type_index getTypeIndex() const
+        {
+            return std::type_index(typeid(envire::core::Item<_ItemData>));
+        }
+
     private:
         friend class boost::serialization::access;
 
