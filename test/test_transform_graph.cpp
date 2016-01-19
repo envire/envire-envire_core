@@ -495,7 +495,7 @@ BOOST_AUTO_TEST_CASE(get_edge_on_empty_tree_test)
     FrameId a = "frame_a";
     FrameId b = "frame_b";
     TransformGraph tree;
-    BOOST_CHECK_THROW(tree.getEdge(a, b), UnknownTransformException);
+    BOOST_CHECK_THROW(tree.getEdge(a, b), UnknownFrameException);
 }
 
 BOOST_AUTO_TEST_CASE(disconnect_frame_test)
@@ -848,6 +848,34 @@ BOOST_AUTO_TEST_CASE(graphviz_test)
     GraphViz viz;
     viz.write(graph, "transformGraph_graphviz_test.dot");
 }
+
+BOOST_AUTO_TEST_CASE(complex_graphviz_test)
+{
+    TransformGraph graph;
+    
+    const FrameId a = "frame_a";
+    const FrameId b = "frame_b";
+    const FrameId c = "frame_c";
+    Transform aToB;
+    aToB.transform.translation << 1, 2, 3;
+    Transform bToC;
+    bToC.transform.translation << 42, 44, -3;
+    
+    graph.addTransform(a, b, aToB);
+    graph.addTransform(b, c, bToC);
+    
+    Item<string>::Ptr item1(new Item<string>("So say we all!"));
+    Item<int>::Ptr item2(new Item<int>(42));
+    Item<float>::Ptr item3(new Item<float>(21.0f)); 
+    
+    graph.addItemToFrame(a, item1);
+    graph.addItemToFrame(a, item2);
+    graph.addItemToFrame(a, item3);
+    
+    GraphViz viz;
+    viz.write(graph, "transformGraph_complex_graphviz_test.dot");
+}
+
 
 
 BOOST_AUTO_TEST_CASE(simple_get_tree_test)
