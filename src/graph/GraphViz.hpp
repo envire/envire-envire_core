@@ -36,8 +36,8 @@ namespace envire { namespace core
                 std::string typeName = demangledTypeName(itemPair.first);
                 //all types in the graph are stored as shared pointers, but
                 //the user does not care about it and it clutters the output
-                typeName = stripSharedPtr(typeName);
-                //typeName = escapeLabel(typeName);
+                //typeName = stripSharedPtr(typeName);
+                typeName = escapeLabel(typeName);
                 out << "| {" << typeName  << "|" << itemPair.second.size() << "}";
             }
             out << "}\"" << ",style=filled,fillcolor=lightblue]";
