@@ -19,10 +19,8 @@
 *      }
 */
 #define ENVIRE_PLUGIN_HEADER( _classname ) \
-    protected: \
-    static const std::string class_name; \
-    public:\
-    const std::string& getClassName() const { return class_name; } \
+    public: \
+    virtual std::string getClassName() const { return #_classname; } \
     typedef boost::shared_ptr<_classname> Ptr; \
     private: \
     ENVIRE_SERIALIZATION_HEADER(TemplateType)
@@ -35,7 +33,6 @@
 *      ENVIRE_REGISTER_PLUGIN(ClassName)
 */
 #define ENVIRE_REGISTER_PLUGIN( _classname ) \
-const std::string _classname::class_name = #_classname; \
 CLASS_LOADER_REGISTER_CLASS(_classname, envire::core::ItemBase); \
 ENVIRE_REGISTER_SERIALIZATION(_classname, _classname::TemplateType)
 

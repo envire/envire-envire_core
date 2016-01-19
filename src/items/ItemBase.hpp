@@ -40,8 +40,6 @@ namespace envire { namespace core
         // TBD: do we want/need this pointer?
         void* user_data_ptr; /** Pointer to the user data */
 
-        static const std::string class_name; /** Name of the inherited class */
-
     public:
 
         ItemBase();
@@ -100,7 +98,7 @@ namespace envire { namespace core
         * Returns the class name of the item
         *
         */
-        virtual const std::string& getClassName() const { return class_name; }
+        virtual std::string getClassName() const { return "UnknownItem"; }
 
         void* getRawData() const { return user_data_ptr; }
 
