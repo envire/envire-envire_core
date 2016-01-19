@@ -5,6 +5,8 @@
 
 #include <envire_core/graph/TransformGraph.hpp>
 #include <boost/graph/graphviz.hpp>
+#include <boost/algorithm/string.hpp>
+#include <cxxabi.h> // for name demangling
 
 
 namespace envire { namespace core
@@ -22,12 +24,59 @@ namespace envire { namespace core
         void operator()(std::ostream &out, const _Vertex& n) const
         {
             const Frame& frame = f[n];
-            out << "[shape=record, label=\"" << frame.name <<
-                " | " << frame.items.size()<<"\""
-                <<",style=filled,fillcolor=lightblue]";
+            
+            //example output line:
+            //label="{{frame_a | 3} | {boost::shared_ptr\<envire::core::Item\<float\> \>|1}| {boost::shared_ptr\<envire::core::Item\<int\> \>|1}| {boost::shared_ptr\<envire::core::Item\<std::string\> \>|1}}", 
+            
+            out << "[shape=record, label=\"{{" << frame.name <<
+                   "|" << frame.calculateTotalItemCount() << "}";
+                
+            for(const auto& itemPair : frame.items)
+            {
+                std::string typeName = demangledTypeName(itemPair.first);
+                //all types in the graph are stored as shared pointers, but
+                //the user does not care about it and it clutters the output
+                typeName = stripSharedPtr(typeName);
+                //typeName = escapeLabel(typeName);
+                out << "| {" << typeName  << "|" << itemPair.second.size() << "}";
+            }
+            out << "}\"" << ",style=filled,fillcolor=lightblue]";
         }
 
     private:
+      
+      std::string demangledTypeName(const std::type_index& type) const
+      {
+        char* p_nice_name = abi::__cxa_demangle(type.name(),NULL,NULL,NULL);
+        std::string result(p_nice_name);
+        free(p_nice_name);
+        return result;  
+      }
+      
+      /**escapes angle braces because they are not valid dot labels */
+      std::string escapeLabel(const std::string& label) const
+      {
+        const std::string one = boost::replace_all_copy(label, "<", "\\<");
+        const std::string two = boost::replace_all_copy(one, ">", "\\>");
+        return two;
+      }
+      
+      /**
+       * Expects input of the format
+       * "boost::shared_ptr<STUFF>"
+       * and returns "STUFF"
+       */
+      std::string stripSharedPtr(const std::string& input) const 
+      {
+        if(boost::starts_with(input, "boost::shared_ptr<"))
+        {
+          std::string output = boost::erase_first_copy(input, "boost::shared_ptr<");
+          output = boost::erase_last_copy(output, ">");
+          return output;
+        }
+        return input;
+      }
+      
         _Frame f;
 
     };

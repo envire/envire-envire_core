@@ -24,7 +24,7 @@ namespace envire { namespace core
         boost::uuids::uuid uuid; /** Unique Identifier */
 
         using ItemList = std::vector<ItemBase::Ptr>;
-                using ItemMap = std::unordered_map<std::type_index, ItemList>;
+        using ItemMap = std::unordered_map<std::type_index, ItemList>;
         //contains all items that have been added to the frame sorted by type
         ItemMap items;
 
@@ -45,6 +45,18 @@ namespace envire { namespace core
         * Returns the frame name of the item
         */
         const FrameId& getName() const { return this->name; }
+        
+        /**Returns the total number of items in this frame */
+        int calculateTotalItemCount() const 
+        {
+            int count = 0;
+            for(const auto& itemPair : items)
+            {
+              count += itemPair.second.size();
+            }
+            return count;
+        }
+        
     };
 }}
 #endif
