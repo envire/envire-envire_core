@@ -255,12 +255,17 @@ namespace envire { namespace core
         /** @return true if @p frame contains at least one item of @p type */
         bool containsItems(const vertex_descriptor frame, const std::type_index& type) const;
         
-        /** @return the number if items of type @p T in @p frame.
+        /** @return the number of items of type @p T in @p frame.
          *  @throw UnknownFrameException if the @p frame id is invalid.*/
         template <class T>
         size_t getItemCount(const FrameId& frame) const;
         template <class T>
         size_t getItemCount(const vertex_descriptor vd) const;        
+
+        /** @return the number of all items independent of their type in @p frame.
+         *  @throw UnknownFrameException if the @p frame id is invalid.*/
+        size_t getItemCount(const FrameId& frame) const;
+        size_t getItemCount(const vertex_descriptor vd) const;
         
         const vertex_descriptor source(const edge_descriptor edge) const;
         const vertex_descriptor target(const edge_descriptor edge) const;
