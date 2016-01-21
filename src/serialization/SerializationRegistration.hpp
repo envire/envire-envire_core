@@ -2,7 +2,6 @@
 
 #include "SerializationHandle.hpp"
 #include "Serialization.hpp"
-#include "Eigen.hpp"
 #include <envire_core/items/ItemBase.hpp>
 
 #include <boost/serialization/shared_ptr.hpp>
