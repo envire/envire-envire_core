@@ -26,6 +26,7 @@
 #include <envire_core/util/MetaProgramming.hpp>
 #include <envire_core/events/ItemAddedEvent.hpp>
 #include <envire_core/events/ItemRemovedEvent.hpp>
+#include <envire_core/serialization/BoostTypes.hpp>
 
 
 
@@ -358,6 +359,39 @@ namespace envire { namespace core
         
         /**TreeViews that need to be updated when the graph is modified */
         std::vector<TreeView*> subscribedTreeViews;
+
+        /**Grants access to boost serialization */
+        friend class boost::serialization::access;
+
+        /**Unserializes this class*/
+        template <typename Archive>
+        void load(Archive &ar, const unsigned int version)
+        {
+            ar >> boost::serialization::make_nvp("directed_graph", _graph);
+
+            // regenerate mapping of the labeled graph
+            boost::graph_traits<TransformGraphBase>::vertex_iterator it, end;
+            for (boost::tie( it, end ) = boost::vertices(_graph); it != end; ++it)
+            {
+                _map[_graph[*it].frame.name] = *it;
+            }
+        }
+
+        /**Serializes this class. Only the directed graph is serialized,
+         * subscribers are excluded and the mapping of the labeled graph
+         * is regenerated. */
+        template <typename Archive>
+        void save(Archive &ar, const unsigned int version) const
+        {
+            ar << boost::serialization::make_nvp("directed_graph", _graph);
+        }
+
+        /**Splits boost serialize into a load and save method */
+        template <typename Archive>
+        void serialize(Archive &ar, const unsigned int version)
+        {
+            boost::serialization::split_member(ar, *this, version);
+        }
 
     };
     
