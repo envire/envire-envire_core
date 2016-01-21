@@ -271,8 +271,8 @@ namespace envire { namespace core
 
         /** @return the number of all items independent of their type in @p frame.
          *  @throw UnknownFrameException if the @p frame id is invalid.*/
-        size_t getItemCount(const FrameId& frame) const;
-        size_t getItemCount(const vertex_descriptor vd) const;
+        size_t getTotalItemCount(const FrameId& frame) const;
+        size_t getTotalItemCount(const vertex_descriptor vd) const;
         
         const vertex_descriptor source(const edge_descriptor edge) const;
         const vertex_descriptor target(const edge_descriptor edge) const;

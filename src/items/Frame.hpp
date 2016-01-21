@@ -50,9 +50,9 @@ namespace envire { namespace core
         const FrameId& getName() const { return this->name; }
         
         /**Returns the total number of items in this frame */
-        int calculateTotalItemCount() const 
+        std::size_t calculateTotalItemCount() const 
         {
-            int count = 0;
+            std::size_t count = 0;
             for(const auto& itemPair : items)
             {
               count += itemPair.second.size();

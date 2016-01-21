@@ -123,8 +123,8 @@ BOOST_AUTO_TEST_CASE(transform_graph_serialization_binary)
     graph.addItemToFrame(b, vector_plugin_b);
 
     // check if it was added correctly
-    BOOST_CHECK(graph.getItemCount(a) == 1);
-    BOOST_CHECK(graph.getItemCount(b) == 1);
+    BOOST_CHECK(graph.getTotalItemCount(a) == 1);
+    BOOST_CHECK(graph.getTotalItemCount(b) == 1);
 
     // serialize graph to string stream
     std::stringstream stream;
@@ -147,8 +147,8 @@ BOOST_AUTO_TEST_CASE(transform_graph_serialization_binary)
     BOOST_CHECK(graph.graph()[boost::graph_bundle].name == graph_2.graph()[boost::graph_bundle].name);
 
     // check if frames are available
-    BOOST_CHECK(graph_2.getItemCount(a) == graph.getItemCount(a));
-    BOOST_CHECK(graph_2.getItemCount(b) == graph.getItemCount(b));
+    BOOST_CHECK(graph_2.getTotalItemCount(a) == graph.getTotalItemCount(a));
+    BOOST_CHECK(graph_2.getTotalItemCount(b) == graph.getTotalItemCount(b));
 
     // check if items are the same
     using Iterator = TransformGraph::ItemIterator<Item<Eigen::Vector3d>::Ptr>;

@@ -507,18 +507,15 @@ vertex_descriptor TransformGraph::getVertex(const FrameId& frame) const
     return desc;
 }
 
-size_t TransformGraph::getItemCount(const FrameId& frame) const
+size_t TransformGraph::getTotalItemCount(const FrameId& frame) const
 {
-    return getItemCount(getVertex(frame));
+    return getTotalItemCount(getVertex(frame));
 }
 
-size_t TransformGraph::getItemCount(const vertex_descriptor vd) const
+size_t TransformGraph::getTotalItemCount(const vertex_descriptor vd) const
 {
     const Frame& frame = graph()[vd].frame;
-    std::size_t item_count = 0;
-    for(Frame::ItemMap::const_iterator it = frame.items.begin(); it != frame.items.end(); it++)
-        item_count += it->second.size();
-    return item_count;
+    return frame.calculateTotalItemCount();
 }
 
 const vertex_descriptor TransformGraph::source(const edge_descriptor edge) const
