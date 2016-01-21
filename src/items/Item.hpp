@@ -86,8 +86,10 @@ namespace envire { namespace core
         }
 
     private:
+        /**Grants access to boost serialization */
         friend class boost::serialization::access;
 
+        /**Serializes the members of this class*/
         template <typename Archive>
         void serialize(Archive &ar, const unsigned int version)
         {
