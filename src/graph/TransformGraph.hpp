@@ -210,6 +210,12 @@ namespace envire { namespace core
         
         vertices_size_type num_vertices() const;
         edges_size_type num_edges() const;
+
+         /** Adds @p item to the item list in the frame of item
+         *  Causes ItemAddedEvent.
+         *  @throw UnknownFrameException if the frame id is invalid
+         *  @param item that should be added. The item provides the frame to which it will be added */
+        void addItem(ItemBase::Ptr item);
         
          /** Adds @p item to the item list of the specified frame 
          *  Causes ItemAddedEvent.

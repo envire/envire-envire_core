@@ -308,6 +308,11 @@ edges_size_type TransformGraph::num_edges() const
     return boost::num_edges(*this);
 }
 
+void TransformGraph::addItem(ItemBase::Ptr item)
+{
+    addItemToFrame(item->getFrame(), item);
+}
+
 vertex_descriptor TransformGraph::add_vertex(const FrameId& frameId)
 {
     FrameProperty node_prop(frameId);
