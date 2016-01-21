@@ -3,6 +3,9 @@
 
 #include <vector>
 #include <string>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/nvp.hpp>
+#include <envire_core/serialization/BaseTypes.hpp>
 
 #include <base/Time.hpp>
 #include <base/TransformWithCovariance.hpp>
@@ -64,6 +67,18 @@ namespace envire { namespace core
                 last_time = tf.time;
             }
             return Transform(this->time, this->transform*tf.transform);
+        }
+
+    private:
+        /**Grants access to boost serialization */
+        friend class boost::serialization::access;
+
+        /**Serializes the members of this class*/
+        template <typename Archive>
+        void serialize(Archive &ar, const unsigned int version)
+        {
+            ar & boost::serialization::make_nvp("time", time.microseconds);
+            ar & BOOST_SERIALIZATION_NVP(transform);
         }
 
     };
