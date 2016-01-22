@@ -77,7 +77,7 @@ namespace envire { namespace core
         * Returns the unique identifier of the item
         *
         */
-        const boost::uuids::uuid getID() const { return this->uuid; }
+        const boost::uuids::uuid& getID() const { return this->uuid; }
         const std::string getIDString() const { return boost::uuids::to_string(this->uuid); }
 
         /**@brief setFrame
