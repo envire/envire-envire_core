@@ -104,7 +104,7 @@ namespace boost { namespace serialization
         }
     }
 
-    /**Unserializes envire::core::Frame::ItemMap. Usses envire::core::Serialization
+    /**Unserializes envire::core::Frame::ItemMap. Uses envire::core::Serialization
      * to correctly unserialize ItemBase types. The type_index is retrieve from the
      * first Item in each ItemList */
     template<class Archive>
