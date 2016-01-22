@@ -11,12 +11,11 @@
 #ifndef SRC_TRANSFORMTREETYPES_HPP_
 #define SRC_TRANSFORMTREETYPES_HPP_
 
-
 #include <envire_core/items/Frame.hpp> /** Frames are for the Vertex **/
 #include <envire_core/items/Transform.hpp> /** Transform are the Edges **/
 #include <envire_core/items/Environment.hpp> /** Environment is the graph property **/
-
-#include <boost/graph/directed_graph.hpp>
+#include <envire_core/serialization/BaseTypes.hpp>
+#include <envire_core/serialization/BoostTypes.hpp>
 
 //HACK to gain access to private members in labeled_graph
 //This is necessary because there is a bug in boost and a workaround needs to be
@@ -92,4 +91,28 @@ namespace envire { namespace core
       const std::shared_ptr<GRAPH> graph;
     }; 
 }}
+
+namespace boost { namespace serialization
+{
+    /**Serialization of class FrameProperty */
+    template<typename _Archive>
+    inline void serialize(
+        _Archive & ar,
+        envire::core::FrameProperty& frame_property,
+        const unsigned int version)
+    {
+        ar & boost::serialization::make_nvp("frame", frame_property.frame);
+    }
+
+    /**Serialization of class TransformProperty */
+    template<typename _Archive>
+    inline void serialize(
+        _Archive & ar,
+        envire::core::TransformProperty& transform_property,
+        const unsigned int version)
+    {
+        ar & boost::serialization::make_nvp("transform", transform_property.transform);
+    }
+}}
+
 #endif /* SRC_TRANSFORMTREETYPES_HPP_ */

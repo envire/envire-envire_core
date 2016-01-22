@@ -8,11 +8,11 @@
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/export.hpp>
 #include <boost/serialization/nvp.hpp>
-#include <boost/serialization/binary_object.hpp>
 #include <base/Time.hpp>
 #include <string>
 #include <type_traits>
 #include <typeindex>
+#include <envire_core/serialization/BoostTypes.hpp>
 
 namespace envire { namespace core
 {
@@ -106,17 +106,20 @@ namespace envire { namespace core
         void* getRawData() const { return user_data_ptr; }
 
     private:
+        /**Grands access to boost serialization */
         friend class boost::serialization::access;
 
+        /**Serializes the members of this class*/
         template <typename Archive>
         void serialize(Archive &ar, const unsigned int version)
         {
             ar & boost::serialization::make_nvp("time", time.microseconds);
-            ar & boost::serialization::make_nvp("uuid", boost::serialization::make_binary_object(uuid.data, uuid.size()));
+            ar & BOOST_SERIALIZATION_NVP(uuid);
             ar & BOOST_SERIALIZATION_NVP(frame_name);
         }
     };
 
+    /**Mark this class as abstract class */
     BOOST_SERIALIZATION_ASSUME_ABSTRACT(envire::core::ItemBase);
     
     template <class TARGET>

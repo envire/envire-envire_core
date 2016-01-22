@@ -308,6 +308,11 @@ edges_size_type TransformGraph::num_edges() const
     return boost::num_edges(*this);
 }
 
+void TransformGraph::addItem(ItemBase::Ptr item)
+{
+    addItemToFrame(item->getFrame(), item);
+}
+
 vertex_descriptor TransformGraph::add_vertex(const FrameId& frameId)
 {
     FrameProperty node_prop(frameId);
@@ -500,6 +505,17 @@ vertex_descriptor TransformGraph::getVertex(const FrameId& frame) const
         throw UnknownFrameException(frame);
     }
     return desc;
+}
+
+size_t TransformGraph::getTotalItemCount(const FrameId& frame) const
+{
+    return getTotalItemCount(getVertex(frame));
+}
+
+size_t TransformGraph::getTotalItemCount(const vertex_descriptor vd) const
+{
+    const Frame& frame = graph()[vd].frame;
+    return frame.calculateTotalItemCount();
 }
 
 const vertex_descriptor TransformGraph::source(const edge_descriptor edge) const

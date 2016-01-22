@@ -26,6 +26,7 @@
 #include <envire_core/util/MetaProgramming.hpp>
 #include <envire_core/events/ItemAddedEvent.hpp>
 #include <envire_core/events/ItemRemovedEvent.hpp>
+#include <envire_core/serialization/BoostTypes.hpp>
 
 
 
@@ -210,6 +211,12 @@ namespace envire { namespace core
         
         vertices_size_type num_vertices() const;
         edges_size_type num_edges() const;
+
+         /** Adds @p item to the item list in the frame of item
+         *  Causes ItemAddedEvent.
+         *  @throw UnknownFrameException if the frame id is invalid
+         *  @param item that should be added. The item provides the frame to which it will be added */
+        void addItem(ItemBase::Ptr item);
         
          /** Adds @p item to the item list of the specified frame 
          *  Causes ItemAddedEvent.
@@ -255,12 +262,17 @@ namespace envire { namespace core
         /** @return true if @p frame contains at least one item of @p type */
         bool containsItems(const vertex_descriptor frame, const std::type_index& type) const;
         
-        /** @return the number if items of type @p T in @p frame.
+        /** @return the number of items of type @p T in @p frame.
          *  @throw UnknownFrameException if the @p frame id is invalid.*/
         template <class T>
         size_t getItemCount(const FrameId& frame) const;
         template <class T>
         size_t getItemCount(const vertex_descriptor vd) const;        
+
+        /** @return the number of all items independent of their type in @p frame.
+         *  @throw UnknownFrameException if the @p frame id is invalid.*/
+        size_t getTotalItemCount(const FrameId& frame) const;
+        size_t getTotalItemCount(const vertex_descriptor vd) const;
         
         const vertex_descriptor source(const edge_descriptor edge) const;
         const vertex_descriptor target(const edge_descriptor edge) const;
@@ -347,6 +359,23 @@ namespace envire { namespace core
         
         /**TreeViews that need to be updated when the graph is modified */
         std::vector<TreeView*> subscribedTreeViews;
+
+        /**Grants access to boost serialization */
+        friend class boost::serialization::access;
+
+        /**Unserializes this class*/
+        template <typename Archive>
+        void load(Archive &ar, const unsigned int version);
+
+        /**Serializes this class. Only the directed graph is serialized,
+         * subscribers are excluded and the mapping of the labeled graph
+         * is regenerated. */
+        template <typename Archive>
+        void save(Archive &ar, const unsigned int version) const;
+
+        /**Splits boost serialize into a load and save method */
+        template <typename Archive>
+        void serialize(Archive &ar, const unsigned int version);
 
     };
     
@@ -558,4 +587,29 @@ namespace envire { namespace core
         }
     }
     
+    template <typename Archive>
+    void TransformGraph::load(Archive &ar, const unsigned int version)
+    {
+        ar >> boost::serialization::make_nvp("directed_graph", _graph);
+
+        // regenerate mapping of the labeled graph
+        boost::graph_traits<TransformGraphBase>::vertex_iterator it, end;
+        for (boost::tie( it, end ) = boost::vertices(_graph); it != end; ++it)
+        {
+            _map[_graph[*it].frame.name] = *it;
+        }
+    }
+    
+    template <typename Archive>
+    void TransformGraph::save(Archive &ar, const unsigned int version) const
+    {
+        ar << boost::serialization::make_nvp("directed_graph", _graph);
+    }
+    
+    template <typename Archive>
+    void TransformGraph::serialize(Archive &ar, const unsigned int version)
+    {
+        boost::serialization::split_member(ar, *this, version);
+    }
+  
 }}

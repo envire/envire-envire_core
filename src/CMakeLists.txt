@@ -32,7 +32,9 @@ set(headers items/ItemBase.hpp
             serialization/SerializationHandle.hpp
             serialization/SerializationRegistration.hpp
             serialization/ItemHeader.hpp
-            serialization/Eigen.hpp
+            serialization/EigenTypes.hpp
+            serialization/BoostTypes.hpp
+            serialization/BaseTypes.hpp
             serialization/BinaryBufferHelper.hpp
             util/MetaProgramming.hpp)
             
