@@ -72,6 +72,7 @@ namespace envire { namespace core
         *
         */
         void setData(const _ItemData& data) { this->user_data = data; }
+        void setData(_ItemData&& data) { this->user_data = std::move(data); }
 
         /**@brief getData
         *
@@ -79,6 +80,7 @@ namespace envire { namespace core
         *
         */
         _ItemData& getData() { return this->user_data; }
+        const _ItemData& getData() const { return this->user_data; }
 
         virtual std::type_index getTypeIndex() const
         {
