@@ -472,7 +472,8 @@ namespace envire { namespace core
     {
         assertDerivesFromItemBase<T>();
         checkFrameValid(frameId);
-
+        assert(frameId.compare(item->getFrame()) == 0);
+        
         Frame& frame = (*this)[frameId].frame;
         const std::type_index key(typeid(T));
         auto mapEntry = frame.items.find(key);
