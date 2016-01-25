@@ -36,7 +36,8 @@ set(headers items/ItemBase.hpp
             serialization/BoostTypes.hpp
             serialization/BaseTypes.hpp
             serialization/BinaryBufferHelper.hpp
-            util/MetaProgramming.hpp)
+            util/Demangle.hpp)
+
             
 set(sources items/ItemBase.cpp
             items/AlignedBoundingBox.cpp

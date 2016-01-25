@@ -84,9 +84,7 @@ namespace envire { namespace core
 
         virtual std::type_index getTypeIndex() const
         {
-            /** FIXME: This should return the typeid of the type without the shared_ptr wrapping.
-                       Currently this is necessary to be compatible with the TransformGraph */
-            return std::type_index(typeid(envire::core::Item<_ItemData>::Ptr));
+            return std::type_index(typeid(envire::core::Item<_ItemData>));
         }
 
     private:

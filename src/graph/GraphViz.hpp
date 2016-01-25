@@ -6,8 +6,7 @@
 #include <envire_core/graph/TransformGraph.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/algorithm/string.hpp>
-#include <cxxabi.h> // for name demangling
-
+#include <envire_core/util/Demangle.hpp>
 
 namespace envire { namespace core
 {
@@ -33,7 +32,7 @@ namespace envire { namespace core
                 
             for(const auto& itemPair : frame.items)
             {
-                std::string typeName = demangledTypeName(itemPair.first);
+                std::string typeName = demangleTypeName(itemPair.first);
                 //all types in the graph are stored as shared pointers, but
                 //the user does not care about it and it clutters the output
                 //typeName = stripSharedPtr(typeName);
@@ -44,15 +43,7 @@ namespace envire { namespace core
         }
 
     private:
-      
-      std::string demangledTypeName(const std::type_index& type) const
-      {
-        char* p_nice_name = abi::__cxa_demangle(type.name(),NULL,NULL,NULL);
-        std::string result(p_nice_name);
-        free(p_nice_name);
-        return result;  
-      }
-      
+           
       /**escapes angle braces because they are not valid dot labels */
       std::string escapeLabel(const std::string& label) const
       {

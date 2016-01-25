@@ -22,9 +22,8 @@ namespace envire { namespace core
     template <class T>
     struct TypedItemRemovedEvent 
     {
-      TypedItemRemovedEvent(const FrameId& frame, const T& item) : frame(frame), item(item) {}
+      TypedItemRemovedEvent(const FrameId& frame, const ItemBase::PtrType<T> item) : frame(frame), item(item) {}
       FrameId frame;
-      T item;
+      ItemBase::PtrType<T> item;
     };
-    
 }}

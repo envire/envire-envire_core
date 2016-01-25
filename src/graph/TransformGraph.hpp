@@ -27,6 +27,7 @@
 #include <envire_core/events/ItemAddedEvent.hpp>
 #include <envire_core/events/ItemRemovedEvent.hpp>
 #include <envire_core/serialization/BoostTypes.hpp>
+#include <envire_core/util/Demangle.hpp>
 
 
 
@@ -52,10 +53,19 @@ namespace envire { namespace core
                            public TreeUpdatePublisher
     {
     public:
-        /**Transform iterator used to down cast from ItemBase to @p T while
-         * iterating */
+        /**Transform iterator used to down cast from ItemBase::Ptr to @p T::Ptr while
+         * iterating. T has to derive from ItemBase for this to work.
+         * The iterator returns a T&.
+         * Example:
+         * @code
+         *    TransformGraph g;
+         *    FrameId id("bla");
+         *    ItemIterator<Item<Eigen::Vector3d>> it = g.getItems<Item<Eigen::Vector3d>>(id);
+         *    Item<Eigen::Vector3d>& item = *it;
+         * @endcode
+         */
         template<class T>
-        using ItemIterator = boost::transform_iterator<ItemBaseCaster<typename T::element_type>, std::vector<ItemBase::Ptr>::const_iterator, T>;
+        using ItemIterator = boost::transform_iterator<ItemBaseCaster<T>, std::vector<ItemBase::Ptr>::const_iterator, T&>;
 
         TransformGraph(envire::core::Environment const &environment = Environment());
         
@@ -140,27 +150,14 @@ namespace envire { namespace core
          * @throw UnknownFrameException if the frame does not exist.
          * @throw UnknownItemException if the item is not part of the frame's
          *                             item list.
-         * @param T should be ItemBase::PtrType<X> where X is derived from ItemBase
-         * @note Invalidates all iterators of type ItemIterator<ItemBase::PtrType<T>> for the
-         *       specified @p frame.
+         * @param T should derive from ItemBase.
+         * @note Invalidates all iterators of type ItemIterator<T> for the specified @p frame.
          * @return A pair of iterators. The first one points to the element that
          *         comes after @p item and the second one points to the end of the
          *         list.*/ 
         template <class T>
         std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>>
-        removeItemFromFrame(const FrameId& frameId, ItemIterator<T> item);
-        
-        /**Searches for @p item in @p frame and removes it if present.
-         * Causes ItemRemovedEvent.
-         * @throw UnknownFrameException if the @ frame does not exist.
-         * @throw UnknownItemException if the @p frame does not contain the @p item.
-         * @note Invalidates all iterators of type ItemIterator<ItemBase::PtrType<T>> for the
-         *       specified @p frame.
-         *       I.e. you cannot iterate over all items and use this method at the same time.
-         * */
-        template <class T>
-        void removeItemFromFrame(const FrameId& frameId, ItemBase::PtrType<T> item);
-        
+        removeItemFromFrame(const FrameId& frameId, ItemIterator<T> item);       
         
         /**Disconnects @p frame from the Graph.
          * I.e. all transformations from and to @p frame will be removed.
@@ -218,51 +215,55 @@ namespace envire { namespace core
          *  @param item that should be added. The item provides the frame to which it will be added */
         void addItem(ItemBase::Ptr item);
         
+        
          /** Adds @p item to the item list of the specified frame 
          *  Causes ItemAddedEvent.
          *  @throw UnknownFrameException if the frame id is invalid
-         *  @param T type of the item that should be added. The item has to 
-         *           be of type ItemBase::PtrType<U> where U derives from ItemBase */
-        template<class T>
-        void addItemToFrame(const FrameId& frame, T item);
+         *  @param frame The frame the item should be added to.
+         *  @param item The item that should be added to the frame.
+         *  @note item.frame_name will be set to @p frame.
+         *        This means that it is not possible to use the same item
+         *        in multiple Graphs. */
+        void addItemToFrame(const FrameId& frame, ItemBase::Ptr item);
         
         /**Returns all items of type @p T that are stored in @p frame.
          * @throw UnknownFrameException if the @p frame id is invalid.
-         * @param T has to be of type ItemBase::PtrType<X> where X derives from ItemBase.
+         * @param T has to derive from ItemBase.
          * @return a pair iterators [begin, end]. If no items of type @p T
          *         exist, both iterators are equal and invalid */
         template<class T>
         const std::pair<ItemIterator<T>, ItemIterator<T>> getItems(const FrameId& frame) const;
         template<class T>
         const std::pair<ItemIterator<T>, ItemIterator<T>> getItems(const vertex_descriptor frame) const;
+        
         /** @return a list of all items of @p tyoe in @p frame
          *  @throw NoItemsOfTypeInFrameException if no items of the type are in the frame*/
         const envire::core::Frame::ItemList& getItems(const vertex_descriptor frame,
                                                       const std::type_index& type) const;
         
-        
-        
-        /**Convenience method that returns the @p i'th item of type @p T from @p frame.
+        /**Convenience method that returns an iterator to the @p i'th item of type @p T from @p frame.
+         * @param T has to derive from ItemBase.
          * @throw UnknownFrameException if the @p frame id is invalid.
          * @throw NoItemsOfTypeInFrameException if no items of type @p T exist in the frame.
          * @throw std::out_of_range if @p i is out of range*/
         template <class T>
-        const T getItem(const FrameId& frame, const int i = 0) const;
+        const ItemIterator<T> getItem(const FrameId& frame, const int i = 0) const;
         template <class T>
-        const T getItem(const vertex_descriptor frame, const int i = 0) const;
-        
-        
+        const ItemIterator<T> getItem(const vertex_descriptor frame, const int i = 0) const;
         
         /** @return true if the @p frame contains at least one item of type @p T
+         *  @param T should derive from ItemBase
          *  @throw UnknownFrameException if the @p frame id is invalid.*/
         template <class T>
         bool containsItems(const FrameId& frame) const;
         template <class T>
         bool containsItems(const vertex_descriptor frame) const;
-        /** @return true if @p frame contains at least one item of @p type */
+        /** @return true if @p frame contains at least one item of @p type. 
+         *  @param type The described type should derive from ItemBase*/
         bool containsItems(const vertex_descriptor frame, const std::type_index& type) const;
         
         /** @return the number of items of type @p T in @p frame.
+         *  @param T should derive from ItemBase
          *  @throw UnknownFrameException if the @p frame id is invalid.*/
         template <class T>
         size_t getItemCount(const FrameId& frame) const;
@@ -318,7 +319,9 @@ namespace envire { namespace core
         /**Sets the transform value and causes transformModified event. */
         void updateTransform(edge_descriptor ed, const Transform& tf);
         
+        
         /** @return A range that contains all items of type @p T in frame @p frame
+         *  @param T should derive from ItemBase
          **/
         template<class T>
         const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> 
@@ -350,9 +353,10 @@ namespace envire { namespace core
                         const TreeView * view) const;
         
     private:
-        /**Ensures that T is ItemBase::PtrType<X> where X derives from ItemBase  */
+       
+        /**static_asser that T derives from ItemBase */
         template <class T>
-        static void checkItemType();
+        static void assertDerivesFromItemBase();
         
         /** @throw UnknownFrameException if the frame does not exist */
         void checkFrameValid(const FrameId& frame) const;
@@ -379,33 +383,20 @@ namespace envire { namespace core
 
     };
     
-    template <class T>
-    void TransformGraph::checkItemType()
-    {
-        using ItemType = typename extract_value_type<T>::value_type;
-        static_assert(std::is_same<T, ItemBase::PtrType<ItemType>>::value,
-            "Item should be of type ItemBase::PtrType<T>");
-        static_assert(std::is_base_of<ItemBase, ItemType>::value,
-            "Item is of type ItemBase::PtrType<T> but T does not derive from ItemBase"); 
-    }
-
     
     template <class T>
-    void TransformGraph::addItemToFrame(const FrameId& frame, T item)
+    void TransformGraph::assertDerivesFromItemBase()
     {
-        checkItemType<T>();
-        checkFrameValid(frame);
-        std::type_index i(typeid(T));
-        (*this)[frame].frame.items[i].push_back(item);
-        ItemBase::Ptr baseItem = boost::dynamic_pointer_cast<ItemBase>(item);
-        notify(ItemAddedEvent(frame, baseItem, i));
+        static_assert(std::is_base_of<ItemBase, T>::value,
+            "T should derive from ItemBase"); 
     }
+
     
     template<class T>
     const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>>
     TransformGraph::getItems(const FrameId& frame) const
     {
-        checkItemType<T>();
+        assertDerivesFromItemBase<T>();
         const vertex_descriptor desc = vertex(frame);
         if(desc == null_vertex())
         {
@@ -419,7 +410,7 @@ namespace envire { namespace core
     const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> 
     TransformGraph::getItems(const vertex_descriptor frame) const
     {
-        checkItemType<T>();
+        assertDerivesFromItemBase<T>();
         return getItemsInternal<T>(frame, getFrameId(frame));
     }  
     
@@ -427,7 +418,8 @@ namespace envire { namespace core
     const std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>> 
     TransformGraph::getItemsInternal(const vertex_descriptor frame, const FrameId& frameId) const
     {
-        // T has to be ItemBase::PtrType<X> where X derives ItemBase for this method to work
+        assertDerivesFromItemBase<T>();
+        
         const Frame::ItemMap& items = graph()[frame].frame.items;
         const std::type_index key(typeid(T));
         
@@ -437,47 +429,48 @@ namespace envire { namespace core
             return std::make_pair(invalid, invalid);
         }
         
-        auto begin = items.at(std::type_index(typeid(T))).begin();
-        auto end = items.at(std::type_index(typeid(T))).end();
+        auto begin = items.at(key).begin();
+        auto end = items.at(key).end();
         assert(begin != end); //if a list exists it should not be empty
         
-        ItemIterator<T> beginIt(begin, ItemBaseCaster<typename T::element_type>()); 
-        ItemIterator<T> endIt(end, ItemBaseCaster<typename T::element_type>()); 
+        ItemIterator<T> beginIt(begin, ItemBaseCaster<T>()); 
+        ItemIterator<T> endIt(end, ItemBaseCaster<T>()); 
         return std::make_pair(beginIt, endIt);        
     }
     
     template <class T>
-    const T TransformGraph::getItem(const FrameId& frame, const int i) const
+    const TransformGraph::ItemIterator<T> TransformGraph::getItem(const FrameId& frame, const int i) const
     {
-        checkItemType<T>();
+        assertDerivesFromItemBase<T>();
         const vertex_descriptor vd = getVertex(frame); //may throw
         return getItem<T>(vd, i);
 
     }
     
     template <class T>
-    const T TransformGraph::getItem(const vertex_descriptor frame, const int i) const
+    const TransformGraph::ItemIterator<T> TransformGraph::getItem(const vertex_descriptor frame, const int i) const
     {
-        checkItemType<T>();
-        const std::unordered_map<std::type_index, Frame::ItemList>& items = graph()[frame].frame.items;
+        assertDerivesFromItemBase<T>();
+        const Frame::ItemMap& items = graph()[frame].frame.items;
         const std::type_index key(typeid(T));
         if(items.find(key) == items.end())
         {
-            throw NoItemsOfTypeInFrameException(getFrameId(frame), typeid(T).name());
+            throw NoItemsOfTypeInFrameException(getFrameId(frame), demangleTypeName(key));
         }
-        const Frame::ItemList& list = items.at(std::type_index(typeid(T)));
+        const Frame::ItemList& list = items.at(key);
         assert(list.size() > 0); //if everything is implemented correctly empty lists can never exist in the map
-        T casted = boost::dynamic_pointer_cast<typename T::element_type>(list.at(i)); //list.at(i) may throw std::out_of_range
-        //the cast can only fail if there is a programming error somewhere in here...
-        assert(nullptr != casted.get());
-        return casted; 
+        if(i >= list.size())
+        {
+          throw std::out_of_range("Out of range");
+        }
+        return ItemIterator<T>(list.begin() + i, ItemBaseCaster<T>()); 
     }
     
     template <class T>
     std::pair<TransformGraph::ItemIterator<T>, TransformGraph::ItemIterator<T>>
     TransformGraph::removeItemFromFrame(const FrameId& frameId, ItemIterator<T> item)
     {
-        checkItemType<T>();
+        assertDerivesFromItemBase<T>();
         checkFrameValid(frameId);
 
         Frame& frame = (*this)[frameId].frame;
@@ -485,7 +478,7 @@ namespace envire { namespace core
         auto mapEntry = frame.items.find(key);
         if(mapEntry == frame.items.end())
         {
-            throw NoItemsOfTypeInFrameException(frameId, key.name());
+            throw NoItemsOfTypeInFrameException(frameId, demangleTypeName(key));
         }
         std::vector<ItemBase::Ptr>& items = mapEntry->second;
         std::vector<ItemBase::Ptr>::const_iterator baseIterator = item.base();
@@ -500,8 +493,8 @@ namespace envire { namespace core
         ItemBase::Ptr baseItem = boost::dynamic_pointer_cast<ItemBase>(deletedItem);
         notify(ItemRemovedEvent(frameId, baseItem, key));
         
-        ItemIterator<T> nextIt(next, ItemBaseCaster<typename T::element_type>()); 
-        ItemIterator<T> endIt(items.cend(), ItemBaseCaster<typename T::element_type>()); 
+        ItemIterator<T> nextIt(next, ItemBaseCaster<T>()); 
+        ItemIterator<T> endIt(items.cend(), ItemBaseCaster<T>()); 
         
         //remove the map entry if there are no more values in the vector
         if(nextIt == endIt)
@@ -514,42 +507,11 @@ namespace envire { namespace core
         
         return std::make_pair(nextIt, endIt);
     }
-    
-    template <class T>
-    void TransformGraph::removeItemFromFrame(const FrameId& frameId, ItemBase::PtrType<T> item)
-    {
-        static_assert(std::is_base_of<ItemBase, T>::value,
-            "T does not derive from ItemBase"); 
         
-        checkFrameValid(frameId);
-        
-        Frame& frame = (*this)[frameId].frame;
-        const std::type_index key(typeid(ItemBase::PtrType<T>));
-        auto mapEntry = frame.items.find(key);
-        if(mapEntry == frame.items.end())
-        {
-            throw NoItemsOfTypeInFrameException(frameId, key.name());
-        }
-        std::vector<ItemBase::Ptr>& items = mapEntry->second;
-        auto searchResult = std::find(items.begin(), items.end(), item);
-        if(searchResult == items.end())
-        {
-            throw UnknownItemException(frameId, item->getID());
-        }
-        items.erase(searchResult);
-        //remove the map entry if it does not contain any more items
-        if(items.size() <= 0)
-        {
-            frame.items.erase(key);
-        }
-        ItemBase::Ptr baseItem = boost::dynamic_pointer_cast<ItemBase>(item);
-        notify(ItemRemovedEvent(frameId, baseItem, key));
-    }   
-    
     template <class T>
     bool TransformGraph::containsItems(const FrameId& frameId) const
     {
-        checkItemType<T>();
+        assertDerivesFromItemBase<T>();
         const vertex_descriptor vd = getVertex(frameId); //may throw
         return containsItems<T>(vd);
     }
@@ -557,7 +519,7 @@ namespace envire { namespace core
     template <class T>
     bool TransformGraph::containsItems(const vertex_descriptor vertex) const
     {
-        checkItemType<T>();
+        assertDerivesFromItemBase<T>();
         const std::type_index type(typeid(T));
         return containsItems(vertex, type);
     }
@@ -565,7 +527,7 @@ namespace envire { namespace core
     template <class T>
     size_t TransformGraph::getItemCount(const FrameId& frameId) const
     {
-        checkItemType<T>();
+        assertDerivesFromItemBase<T>();
         vertex_descriptor vd = getVertex(frameId);
         return getItemCount<T>(vd);
     }
@@ -573,7 +535,7 @@ namespace envire { namespace core
     template <class T>
     size_t TransformGraph::getItemCount(const vertex_descriptor vd) const
     {
-        checkItemType<T>();
+        assertDerivesFromItemBase<T>();
         const Frame& frame = graph()[vd].frame;
         const std::type_index key(typeid(T));
         auto mapEntry = frame.items.find(key);

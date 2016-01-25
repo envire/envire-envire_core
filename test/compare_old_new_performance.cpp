@@ -382,7 +382,7 @@ const double newGetItemCartesianMap10000()
     auto start = chrono::steady_clock::now();
     for(int i = 0; i < 10000; ++i)
     {
-      volatile Item::Ptr result = graph.getItem<Item::Ptr>(rootV);
+      (*graph.getItem<Item>(rootV)); //dereference to ensure that the dynamic_cast is included in the timing
     }
     auto end = chrono::steady_clock::now();
     double diff = chrono::duration <double, milli> (end - start).count();

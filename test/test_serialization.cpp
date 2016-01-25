@@ -151,21 +151,22 @@ BOOST_AUTO_TEST_CASE(transform_graph_serialization_binary)
     BOOST_CHECK(graph_2.getTotalItemCount(b) == graph.getTotalItemCount(b));
 
     // check if items are the same
-    using Iterator = TransformGraph::ItemIterator<Item<Eigen::Vector3d>::Ptr>;
+    using Iterator = TransformGraph::ItemIterator<Item<Eigen::Vector3d>>;
     Iterator begin, end;
-    boost::tie(begin, end) = graph_2.getItems<Item<Eigen::Vector3d>::Ptr>(a);
+    boost::tie(begin, end) = graph_2.getItems<Item<Eigen::Vector3d>>(a);
     BOOST_CHECK(begin != end);
-    BOOST_CHECK((*begin)->getFrame() == vector_plugin_a->getFrame());
-    BOOST_CHECK((*begin)->getData() == vector_plugin_a->getData());
-    BOOST_CHECK((*begin)->getID() == vector_plugin_a->getID());
-    BOOST_CHECK((*begin)->getTime() == vector_plugin_a->getTime());
+    
+    BOOST_CHECK(begin->getFrame() == vector_plugin_a->getFrame());
+    BOOST_CHECK(begin->getData() == vector_plugin_a->getData());
+    BOOST_CHECK(begin->getID() == vector_plugin_a->getID());
+    BOOST_CHECK(begin->getTime() == vector_plugin_a->getTime());
 
-    boost::tie(begin, end) = graph_2.getItems<Item<Eigen::Vector3d>::Ptr>(b);
+    boost::tie(begin, end) = graph_2.getItems<Item<Eigen::Vector3d>>(b);
     BOOST_CHECK(begin != end);
-    BOOST_CHECK((*begin)->getFrame() == vector_plugin_b->getFrame());
-    BOOST_CHECK((*begin)->getData() == vector_plugin_b->getData());
-    BOOST_CHECK((*begin)->getID() == vector_plugin_b->getID());
-    BOOST_CHECK((*begin)->getTime() == vector_plugin_b->getTime());
+    BOOST_CHECK(begin->getFrame() == vector_plugin_b->getFrame());
+    BOOST_CHECK(begin->getData() == vector_plugin_b->getData());
+    BOOST_CHECK(begin->getID() == vector_plugin_b->getID());
+    BOOST_CHECK(begin->getTime() == vector_plugin_b->getTime());
 
     // check if transformation is the same
     Transform tf_2 = graph_2.getTransform(a, b);

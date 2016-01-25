@@ -23,8 +23,8 @@ namespace envire { namespace core
     template <class T>
     struct TypedItemAddedEvent 
     {
-      TypedItemAddedEvent(const FrameId& frame, const T& item) : frame(frame), item(item) {}
+      TypedItemAddedEvent(const FrameId& frame, const ItemBase::PtrType<T> item) : frame(frame), item(item) {}
       FrameId frame;
-      T item;
+      ItemBase::PtrType<T> item;
     };
 }}

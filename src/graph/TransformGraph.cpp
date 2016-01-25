@@ -699,9 +699,17 @@ const Frame::ItemList& TransformGraph::getItems(const vertex_descriptor frame,
     
     if(items.find(type) == items.end())
     {
-        throw NoItemsOfTypeInFrameException(getFrameId(frame), type.name());
+        throw NoItemsOfTypeInFrameException(getFrameId(frame), demangleTypeName(type));
     }
     return items.at(type);   
 }
 
 
+void TransformGraph::addItemToFrame(const FrameId& frame, ItemBase::Ptr item)
+{
+    checkFrameValid(frame);
+    const std::type_index i(item->getTypeIndex());
+    (*this)[frame].frame.items[i].push_back(item);
+    item->setFrame(frame);
+    notify(ItemAddedEvent(frame, item, i));
+}

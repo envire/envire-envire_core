@@ -125,10 +125,10 @@ namespace envire { namespace core
     template <class TARGET>
     struct ItemBaseCaster 
     {
-        ItemBase::PtrType<TARGET> operator()(const ItemBase::Ptr p) const
+        TARGET& operator()(const ItemBase::Ptr p) const
         {
             //FIXME static_assert that TARGET is ItemBase::PtrType<X>
-            return boost::dynamic_pointer_cast<TARGET>(p);
+            return *(boost::dynamic_pointer_cast<TARGET>(p));
         }
     };
 }}
