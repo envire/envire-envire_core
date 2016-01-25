@@ -123,6 +123,27 @@ BOOST_AUTO_TEST_CASE(simple_add_item_test)
 
 }
 
+BOOST_AUTO_TEST_CASE(simple_add_item_non_generic_test)
+{
+    FrameId aFrame = "frame_a";
+    const string text("you win again, gravity!");
+    
+    TransformGraph g;
+    g.addFrame(aFrame);
+    
+    ItemBase::Ptr item(new Item<string>(text));
+    item->setFrame(aFrame);
+    g.addItem(item);
+    
+    using Iterator = TransformGraph::ItemIterator<Item<string>>;
+
+    Iterator begin, end;
+    boost::tie(begin, end) = g.getItems<Item<string>>(aFrame);
+    BOOST_CHECK(begin != end);
+    BOOST_CHECK(begin->getData().compare(text) == 0);
+}
+
+
 BOOST_AUTO_TEST_CASE(add_multiple_items_test)
 {
     FrameId a = "frame_a";
@@ -250,6 +271,37 @@ BOOST_AUTO_TEST_CASE(get_item_test)
     
     Item<string>& retItem = *g.getItem<Item<string>>(frame, 0);
     BOOST_CHECK(retItem.getData().compare(text) == 0);
+}
+
+BOOST_AUTO_TEST_CASE(get_items_vertex_desc_non_generic_test)
+{
+    FrameId frame = "Saturn";
+    TransformGraph g;
+    g.addFrame(frame);
+    const string text("I would love to change the world, but they won't give me the source code.");
+    const string text2("Nothing travels faster than the speed of light, with the possible exception of bad news, which obeys its own special laws.");
+    Item<string>::Ptr item(new Item<string>(text));
+    Item<string>::Ptr item2(new Item<string>(text2));
+    g.addItemToFrame(frame, item);
+    g.addItemToFrame(frame, item2);
+    
+    vertex_descriptor desc = g.getVertex(frame);
+    const Frame::ItemList& items = g.getItems(desc, item->getTypeIndex());
+    BOOST_CHECK(items.size() == 2);
+    Item<string>::Ptr itemResult =  boost::dynamic_pointer_cast<Item<string>>(items[0]);
+    BOOST_CHECK(itemResult->getData().compare(text) == 0);
+    Item<string>::Ptr itemResult2 =  boost::dynamic_pointer_cast<Item<string>>(items[1]);
+    BOOST_CHECK(itemResult2->getData().compare(text2) == 0);
+}
+
+BOOST_AUTO_TEST_CASE(get_items_vertex_desc_non_generic_error_case_test)
+{
+    FrameId frame = "Saturn";
+    TransformGraph g;
+    g.addFrame(frame);
+    Item<string>::Ptr item(new Item<string>("bla"));
+    vertex_descriptor desc = g.getVertex(frame);
+    BOOST_CHECK_THROW(g.getItems(desc, item->getTypeIndex()), NoItemsOfTypeInFrameException);
 }
 
 BOOST_AUTO_TEST_CASE(get_item_on_empty_frame_test)
@@ -1622,6 +1674,39 @@ BOOST_AUTO_TEST_CASE(tree_view_automatic_update_remove_test)
     BOOST_CHECK(updateCalled);
 
 }
+
+BOOST_AUTO_TEST_CASE(get_transform_with_descriptor_between_unconnected_frames_test)
+{
+    TransformGraph graph;
+    FrameId a("A");
+    FrameId b("B");
+    graph.addFrame(a);
+    graph.addFrame(b);
+    
+    vertex_descriptor aDesc = graph.getVertex(a);
+    vertex_descriptor bDesc = graph.getVertex(b);
+    
+    BOOST_CHECK_THROW(graph.getTransform(aDesc, bDesc), UnknownTransformException);
+    
+}
+
+BOOST_AUTO_TEST_CASE(get_transform_from_edge_test)
+{
+    TransformGraph graph;
+    FrameId a("A");
+    FrameId b("B");
+    Transform tf;
+    tf.transform.translation << 42, 42, 42;
+    
+    graph.addTransform(a, b, tf);
+    edge_descriptor edge = graph.getEdge(a, b);
+    Transform tf2 = graph.getTransform(edge);
+    BOOST_CHECK(tf.transform.translation.x() == tf2.transform.translation.x());
+    BOOST_CHECK(tf.transform.translation.y() == tf2.transform.translation.y());
+    BOOST_CHECK(tf.transform.translation.z() == tf2.transform.translation.z());
+}
+
+
 
 
 

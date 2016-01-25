@@ -110,16 +110,16 @@ const Transform TransformGraph::getTransform(const vertex_descriptor originVerte
     pair = boost::edge(originVertex, targetVertex, *this);
     if(!pair.second)
     {
-        /** It is not a direct edge transformation **/
-        Transform tf(base::Position::Zero(), base::Orientation::Identity()); //start with identity transform
-        envire::core::TransformGraphBFSVisitor <vertex_descriptor>visit(targetVertex, this->graph());
-
         // check whether the vertices exist in the graph
         // search algorithm result on segfault in case some of the vertices do not exist
         if (originVertex == null_vertex() || targetVertex == null_vertex())
         {
             throw UnknownTransformException(getFrameId(originVertex), getFrameId(targetVertex));
         }
+        
+        /** It is not a direct edge transformation **/
+        Transform tf(base::Position::Zero(), base::Orientation::Identity()); //start with identity transform
+        envire::core::TransformGraphBFSVisitor <vertex_descriptor>visit(targetVertex, this->graph());
 
         try
         {
