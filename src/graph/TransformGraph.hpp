@@ -23,7 +23,6 @@
 #include <envire_core/events/GraphEventPublisher.hpp>
 #define BOOST_RESULT_OF_USE_DECLTYPE //this is important for the transform_iterator
 #include <boost/iterator/transform_iterator.hpp>
-#include <envire_core/util/MetaProgramming.hpp>
 #include <envire_core/events/ItemAddedEvent.hpp>
 #include <envire_core/events/ItemRemovedEvent.hpp>
 #include <envire_core/serialization/BoostTypes.hpp>

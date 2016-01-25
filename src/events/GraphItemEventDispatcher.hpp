@@ -3,7 +3,6 @@
 #include "GraphEventPublisher.hpp"
 #include "ItemAddedEvent.hpp"
 #include "ItemRemovedEvent.hpp"
-#include <envire_core/util/MetaProgramming.hpp>
 #include <typeindex>
 
 
