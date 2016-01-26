@@ -1,4 +1,4 @@
-find_package(Boost COMPONENTS unit_test_framework system filesystem serialization)
+find_package(Boost COMPONENTS unit_test_framework system filesystem serialization thread)
 
 if(ENABLE_PLUGINS)
     rock_library(VectorPlugin_envire_plugin
@@ -19,20 +19,16 @@ rock_testsuite(test_suite suite.cpp
     test_transform_graph.cpp
     test_boundary.cpp
     test_frame.cpp
+    test_dummy_graph.cpp
+    test_property_tag.cpp
     DEPS_CMAKE Boost
     DEPS envire_core)
-find_package(Boost COMPONENTS unit_test_framework system filesystem thread)
-target_link_libraries(test_suite ${Boost_LIBRARIES})
 
 #rock_testsuite(timing suite.cpp
 #    graph_performance_test.cpp
 #    DEPS_CMAKE Boost
 #    DEPS envire_core)
 #target_link_libraries(timing ${Boost_LIBRARIES})
-
-rock_testsuite(test_dummy suite.cpp
-    test_dummy_graph.cpp
-    test_property_tag.cpp)
 
 rock_executable(dfs_test dfs_test.cpp
     DEPS_CMAKE Boost
