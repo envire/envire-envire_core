@@ -16,15 +16,9 @@ class SerializationHandle
 public:
     virtual ~SerializationHandle() {}
 
-    virtual bool save(ArchiveOutType& ar, const ItemBase::Ptr& item)
-    {
-        throw std::runtime_error("Method save is not implemented!");
-    };
+    virtual bool save(ArchiveOutType& ar, const ItemBase::Ptr& item) = 0;
 
-    virtual bool load(ArchiveInType& ar, ItemBase::Ptr& item)
-    {
-        throw std::runtime_error("Method load is not implemented!");
-    };
+    virtual bool load(ArchiveInType& ar, ItemBase::Ptr& item) = 0;
 };
 
 }}
