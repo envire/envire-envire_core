@@ -1,6 +1,6 @@
 #include <envire_core/items/Item.hpp>
 #include <Eigen/Geometry>
-#include <envire_core/serialization/EigenTypes.hpp>
+#include <boost_serialization/EigenTypes.hpp>
 
 using namespace envire;
 

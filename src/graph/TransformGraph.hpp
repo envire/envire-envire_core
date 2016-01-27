@@ -25,7 +25,7 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include <envire_core/events/ItemAddedEvent.hpp>
 #include <envire_core/events/ItemRemovedEvent.hpp>
-#include <envire_core/serialization/BoostTypes.hpp>
+#include <boost_serialization/BoostTypes.hpp>
 #include <envire_core/util/Demangle.hpp>
 
 

@@ -11,7 +11,7 @@
     
 #include "ItemBase.hpp"
 #include "RandomGenerator.hpp"
-#include <envire_core/serialization/BoostTypes.hpp>
+#include <boost_serialization/BoostTypes.hpp>
 #include <envire_core/serialization/Serialization.hpp>
 
 namespace envire { namespace core

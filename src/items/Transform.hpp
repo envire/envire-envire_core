@@ -5,7 +5,7 @@
 #include <string>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
-#include <envire_core/serialization/BaseTypes.hpp>
+#include <boost_serialization/BaseTypes.hpp>
 
 #include <base/Time.hpp>
 #include <base/TransformWithCovariance.hpp>

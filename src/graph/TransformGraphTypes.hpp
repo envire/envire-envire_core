@@ -14,8 +14,8 @@
 #include <envire_core/items/Frame.hpp> /** Frames are for the Vertex **/
 #include <envire_core/items/Transform.hpp> /** Transform are the Edges **/
 #include <envire_core/items/Environment.hpp> /** Environment is the graph property **/
-#include <envire_core/serialization/BaseTypes.hpp>
-#include <envire_core/serialization/BoostTypes.hpp>
+#include <boost_serialization/BaseTypes.hpp>
+#include <boost_serialization/BoostTypes.hpp>
 
 //HACK to gain access to private members in labeled_graph
 //This is necessary because there is a bug in boost and a workaround needs to be

@@ -12,7 +12,7 @@
 #include <string>
 #include <type_traits>
 #include <typeindex>
-#include <envire_core/serialization/BoostTypes.hpp>
+#include <boost_serialization/BoostTypes.hpp>
 
 namespace envire { namespace core
 {
