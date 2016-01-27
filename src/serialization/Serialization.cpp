@@ -2,6 +2,9 @@
 
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/nvp.hpp>
+#include <envire_core/serialization/BinaryBufferHelper.hpp>
+#include <boost/archive/polymorphic_binary_iarchive.hpp>
+#include <boost/archive/polymorphic_binary_oarchive.hpp>
 
 using namespace envire::core;
 
@@ -29,7 +32,7 @@ bool Serialization::save(ArchiveOutType& ar, const ItemBase::Ptr& item)
         return false;
     }
     return false;
-};
+}
 
 bool Serialization::load(ArchiveInType& ar, ItemBase::Ptr& item)
 {
@@ -53,7 +56,25 @@ bool Serialization::load(ArchiveInType& ar, ItemBase::Ptr& item)
         return false;
     }
     return false;
-};
+}
+
+bool Serialization::save(std::vector< uint8_t >& binary, const ItemBase::Ptr& item)
+{
+    binary.reserve(1000000);
+    BinaryOutputBuffer buffer(&binary);
+    std::ostream ostream(&buffer);
+    boost::archive::polymorphic_binary_oarchive oa(ostream);
+    return save(oa, item);
+}
+
+bool Serialization::load(const std::vector< uint8_t >& binary, ItemBase::Ptr& item)
+{
+    BinaryInputBuffer buffer(binary);
+    std::istream istream(&buffer);
+    boost::archive::polymorphic_binary_iarchive ia(istream);
+    return load(ia, item);
+}
+
 
 Serialization::HandleMap& Serialization::getHandleMap()
 {

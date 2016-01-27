@@ -29,6 +29,24 @@ public:
         return result;
     }
 
+    /**
+     * @brief Serializes an abstract item to a binary blob
+     *
+     * @param binary data
+     * @param item pointer to the ItemBase class
+     * @return true if successful
+     */
+    static bool save(std::vector<uint8_t>& binary, const ItemBase::Ptr& item);
+
+    /**
+     * @brief Unserializes an abstract item from a binary blob
+     *
+     * @param binary data
+     * @param item pointer to the ItemBase class
+     * @return true if successful
+     */
+    static bool load(const std::vector<uint8_t>& binary, ItemBase::Ptr& item);
+
     static HandleMap& getHandleMap();
 
     static void registerHandle(const std::string& plugin_name, HandlePtr& handle);
