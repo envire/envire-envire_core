@@ -15,6 +15,66 @@
 
 using namespace envire::core;
 
+BOOST_AUTO_TEST_CASE(eigen_matrix_serialization_test)
+{
+    Eigen::Matrix3d m = 0.2 * Eigen::Matrix3d::Identity();
+
+    std::stringstream stream;
+    boost::archive::polymorphic_binary_oarchive oa(stream);
+    oa << m;
+
+    // deserialize from string stream
+    boost::archive::polymorphic_binary_iarchive ia(stream);
+    Eigen::MatrixXd m2;
+    ia >> m2;
+
+    BOOST_CHECK(m.rows() == m2.rows());
+    BOOST_CHECK(m.cols() == m2.cols());
+    BOOST_CHECK(m == m2);
+}
+
+BOOST_AUTO_TEST_CASE(eigen_quaternion_serialization_test)
+{
+    Eigen::Quaterniond rot = Eigen::AngleAxisd(0.45 * M_PI, Eigen::Vector3d::UnitZ()) *
+                            Eigen::AngleAxisd(0.5 * M_PI, Eigen::Vector3d::UnitY()) *
+                            Eigen::AngleAxisd(0.27 * M_PI, Eigen::Vector3d::UnitX());
+
+    std::stringstream stream;
+    boost::archive::polymorphic_binary_oarchive oa(stream);
+    oa << rot;
+
+    // deserialize from string stream
+    boost::archive::polymorphic_binary_iarchive ia(stream);
+    Eigen::Quaterniond rot_2;
+    ia >> rot_2;
+
+    BOOST_CHECK(rot.matrix() == rot_2.matrix());
+}
+
+BOOST_AUTO_TEST_CASE(item_serialization_expected_failures)
+{
+    envire::core::Item<std::string>::Ptr string_item(new envire::core::Item<std::string>);
+    envire::core::ItemBase::Ptr base_item = boost::dynamic_pointer_cast< envire::core::ItemBase >(string_item);
+    BOOST_CHECK(base_item->getClassName() == "UnknownItem");
+
+
+    std::stringstream stream;
+    boost::archive::polymorphic_binary_oarchive oa(stream);
+    BOOST_CHECK(Serialization::save(oa, base_item) == false);
+
+    ItemHeader header(base_item);
+    oa << BOOST_SERIALIZATION_NVP(header);
+
+    boost::archive::polymorphic_binary_iarchive ia(stream);
+    BOOST_CHECK(Serialization::load(ia, base_item) == false);
+
+    BOOST_CHECK(envire::ClassLoader::getInstance()->hasValidPluginPath());
+
+    BOOST_CHECK_THROW(auto base_plugin = envire::ClassLoader::getInstance()->createItem("SomeNotExistingPlugin"), std::runtime_error);
+
+    BOOST_CHECK_THROW(envire::core::Item<std::string>::Ptr string_item_2 = envire::ClassLoader::getInstance()->createItem< envire::core::Item<std::string> >("VectorPlugin"), std::runtime_error);
+}
+
 BOOST_AUTO_TEST_CASE(vector_plugin_serialization_text)
 {
     BOOST_CHECK(envire::ClassLoader::getInstance()->hasValidPluginPath());
@@ -86,6 +146,18 @@ BOOST_AUTO_TEST_CASE(vector_plugin_serialization_binary)
     BOOST_CHECK(vector_plugin_2->getData() == vector_plugin->getData());
     BOOST_CHECK(vector_plugin_2->getID() == vector_plugin->getID());
     BOOST_CHECK(vector_plugin_2->getTime() == vector_plugin->getTime());
+
+    // serialize to binary blob
+    std::vector<uint8_t> bin;
+    stream.clear();
+    BOOST_CHECK(Serialization::save(bin, base_plugin));
+    envire::core::ItemBase::Ptr base_plugin_3 = NULL;
+    BOOST_CHECK(Serialization::load(bin, base_plugin_3));
+    Item<Eigen::Vector3d>::Ptr vector_plugin_3 = boost::dynamic_pointer_cast< Item<Eigen::Vector3d> >(base_plugin_3);
+    BOOST_CHECK(vector_plugin_3->getFrame() == vector_plugin->getFrame());
+    BOOST_CHECK(vector_plugin_3->getData() == vector_plugin->getData());
+    BOOST_CHECK(vector_plugin_3->getID() == vector_plugin->getID());
+    BOOST_CHECK(vector_plugin_3->getTime() == vector_plugin->getTime());
 }
 
 BOOST_AUTO_TEST_CASE(transform_graph_serialization_binary)
