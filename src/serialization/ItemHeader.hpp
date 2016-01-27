@@ -5,6 +5,11 @@
 namespace envire { namespace core
 {
 
+/**
+ * @brief Header of serialized items.
+ * It stores the class name of the serialized item in order to obtain the correct
+ * serialization handle of this item.
+ */
 class ItemHeader
 {
 public:
@@ -13,7 +18,6 @@ public:
     ItemHeader(const ItemBase::Ptr& item) {this->class_name = item->getClassName();}
 
     std::string class_name;
-    // TODO extend by data size
 
 private:
     friend class boost::serialization::access;

@@ -11,6 +11,11 @@ namespace envire { namespace core
 typedef boost::archive::polymorphic_iarchive ArchiveInType;
 typedef boost::archive::polymorphic_oarchive ArchiveOutType;
 
+/**
+ * @brief Interface class of the item serialization handle.
+ * By using the ENVIRE_REGISTER_SERIALIZATION macro a handle class for an
+ * item will be generated.
+ */
 class SerializationHandle
 {
 public:

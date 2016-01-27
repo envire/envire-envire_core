@@ -7,6 +7,10 @@
 namespace envire { namespace core
 {
 
+/**
+ * @brief Helper class which defines a std::streambuf which reads
+ * direcly out of a std::vector<uint8_t>.
+ */
 class BinaryInputBuffer : public std::streambuf
 {
 public:
@@ -18,6 +22,10 @@ public:
     }
 };
 
+/**
+ * @brief Helper class which defines a std::streambuf which writes
+ * direcly in a std::vector<uint8_t>.
+ */
 class BinaryOutputBuffer : public std::streambuf
 {
 public:
