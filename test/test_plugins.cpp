@@ -11,6 +11,47 @@ using namespace envire::core;
 using namespace envire;
 using namespace std;
 
+BOOST_AUTO_TEST_CASE(test_copy_operators)
+{
+    class StringItem : public envire::core::Item<std::string>
+    {
+        virtual std::string getClassName() const { return "StringItem"; }
+    };
+
+    StringItem string_item;
+    string_item.setData("In-A-Gadda-Da-Vida");
+    string_item.setTime(base::Time::now());
+    string_item.setFrame("map_frame");
+
+    // copy to new item
+    StringItem string_item_copy;
+    string_item_copy = string_item;
+    BOOST_CHECK(string_item.getData() == string_item_copy.getData());
+    BOOST_CHECK(string_item.getFrame() == string_item_copy.getFrame());
+    BOOST_CHECK(string_item.getTime() == string_item_copy.getTime());
+    BOOST_CHECK(string_item.getID() == string_item_copy.getID());
+
+    // copy constructor
+    StringItem string_item_copy_2(string_item);
+    BOOST_CHECK(string_item.getData() == string_item_copy_2.getData());
+    BOOST_CHECK(string_item.getFrame() == string_item_copy_2.getFrame());
+    BOOST_CHECK(string_item.getTime() == string_item_copy_2.getTime());
+    BOOST_CHECK(string_item.getID() == string_item_copy_2.getID());
+
+    StringItem string_item_move;
+    string_item_move = std::move(string_item_copy);
+    BOOST_CHECK(string_item.getData() == string_item_move.getData());
+    BOOST_CHECK(string_item.getFrame() == string_item_move.getFrame());
+    BOOST_CHECK(string_item.getTime() == string_item_move.getTime());
+    BOOST_CHECK(string_item.getID() == string_item_move.getID());
+
+    StringItem string_item_move_2(std::move(string_item_copy_2));
+    BOOST_CHECK(string_item.getData() == string_item_move_2.getData());
+    BOOST_CHECK(string_item.getFrame() == string_item_move_2.getFrame());
+    BOOST_CHECK(string_item.getTime() == string_item_move_2.getTime());
+    BOOST_CHECK(string_item.getID() == string_item_move_2.getID());
+}
+
 BOOST_AUTO_TEST_CASE(vector_plugin_test)
 {
     vector<string> paths = ClassLoader::loadLibraryPath();
