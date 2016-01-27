@@ -39,7 +39,7 @@ namespace envire { namespace core
             user_data_ptr = &this->user_data;
         }
 
-        Item(Item<_ItemData>&& item) :  ItemBase(item), user_data(std::move(item.user_data))
+        Item(Item<_ItemData>&& item) :  ItemBase(std::move(item)), user_data(std::move(item.user_data))
         {
             user_data_ptr = &this->user_data;
         }
@@ -61,7 +61,7 @@ namespace envire { namespace core
 
         Item<_ItemData>& operator=(Item<_ItemData>&& item)
         {
-            ItemBase::operator=(item);
+            ItemBase::operator=(std::move(item));
             user_data = std::move(item.user_data);
             return *this;
         }
