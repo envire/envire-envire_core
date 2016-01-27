@@ -32,9 +32,6 @@ set(headers items/ItemBase.hpp
             serialization/SerializationHandle.hpp
             serialization/SerializationRegistration.hpp
             serialization/ItemHeader.hpp
-            serialization/EigenTypes.hpp
-            serialization/BoostTypes.hpp
-            serialization/BaseTypes.hpp
             serialization/BinaryBufferHelper.hpp
             util/Demangle.hpp)
 
@@ -47,7 +44,7 @@ set(sources items/ItemBase.cpp
             graph/TransformGraph.cpp
             serialization/Serialization.cpp)
             
-set(deps_pkg_config base-types)
+set(deps_pkg_config base-types boost_serialization)
 
 if(ENABLE_PLUGINS)
 

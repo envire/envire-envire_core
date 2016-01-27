@@ -11,7 +11,7 @@ if(ENABLE_PLUGINS)
         test_serialization.cpp
         DEPS_CMAKE Boost
         DEPS envire_core
-        DEPS_PKGCONFIG class_loader)
+        DEPS_PKGCONFIG class_loader boost_serialization)
     
 endif()
 
