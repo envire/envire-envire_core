@@ -21,6 +21,7 @@ rock_testsuite(test_suite suite.cpp
     test_frame.cpp
     test_dummy_graph.cpp
     test_property_tag.cpp
+    test_graph.cpp
     DEPS_CMAKE Boost
     DEPS envire_core)
 

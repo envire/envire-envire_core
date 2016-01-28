@@ -16,6 +16,8 @@ set(headers items/ItemBase.hpp
             graph/TransformGraphVisitors.hpp
             graph/GraphViz.hpp
             graph/TreeView.hpp
+            graph/GraphTypes.hpp
+            graph/Graph.hpp
             events/GraphEvent.hpp
             events/GraphEventSubscriber.hpp
             events/GraphEventDispatcher.hpp
