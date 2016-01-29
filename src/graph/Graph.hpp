@@ -15,6 +15,11 @@ namespace envire { namespace core { namespace graph
 
 //FIXME write real comment
 /**A labeled graph that provides and manages different views of the graph
+ * 
+ * Methods Naming convention
+ * Overloading boost methods uses delimited separated
+ * words, new methods use Camel Case separated words
+ * 
  * @param FRAME_PROP should extend FramePropertyBase */
 template <class FRAME_PROP, class EDGE_PROP>
 class Graph : public GraphBase<FRAME_PROP, EDGE_PROP>, 
@@ -25,6 +30,8 @@ public:
     using vertex_descriptor = typename GraphBase<FRAME_PROP, EDGE_PROP>::vertex_descriptor;
     using edge_descriptor = typename GraphBase<FRAME_PROP, EDGE_PROP>::edge_descriptor;
     using EdgePair = std::pair<edge_descriptor, bool>;
+    using vertices_size_type = typename GraphBase<FRAME_PROP, EDGE_PROP>::vertices_size_type;
+    using edges_size_type = typename GraphBase<FRAME_PROP, EDGE_PROP>::edges_size_type;
     
     Graph();
     
@@ -32,7 +39,7 @@ public:
     * 
     * @throw FrameAlreadyExistsException if the frame already exists
     */
-    void addFrame(const FrameId& frame);
+    void addFrame(const FrameId& frame, const FRAME_PROP& frameProp);
     
     /**Disconnects @p frame from the Graph.
     * I.e. all edges from and to @p frame will be removed.
@@ -61,6 +68,7 @@ public:
     *         The boolean is false if the edge already existed.
     *         In that case no new edge was added, instead the existing
     *         edge was updated.
+    * @throw EdgeAlreadyExistsException if the edge already exists
     * @note The edge will also be added to all Subscribed TreeViews
     */
   EdgePair add_edge(const vertex_descriptor origin,
@@ -71,6 +79,16 @@ public:
   EdgePair add_edge(const FrameId& origin,
                     const FrameId& target,
                     const EDGE_PROP& edgeProperty);
+  
+  /**Removes the specified edge from the graph.
+   * FIXME events?!
+   * @throw UnknownEdgeException if there is no edge from @p origin to @p target
+   **/
+  void remove_edge(const vertex_descriptor origin,
+                   const vertex_descriptor target);
+  /** @throw UnknownFrameException if one of the frames does not exist.*/
+  void remove_edge(const FrameId& origin,
+                   const FrameId& target);
     
     /** @return the edge between frame @p origin and @p target
       * @throw UnknownFrameException If @p orign or @p target do not exist.
@@ -121,6 +139,9 @@ public:
     * @throw UnknownFrameException if @p orign or @p target don't exist */
     Path getPath(FrameId origin, FrameId target) const;
     
+    vertices_size_type num_vertices() const;
+    
+    edges_size_type num_edges() const;
     
 protected:
     using map_type = typename GraphBase<FRAME_PROP, EDGE_PROP>::map_type;
@@ -173,12 +194,12 @@ Graph<F,E>::Graph()
 }
 
 template <class F, class E>
-void Graph<F,E>::addFrame(const FrameId& frame)
+void Graph<F,E>::addFrame(const FrameId& frame, const F& frameProp)
 {
     vertex_descriptor desc = vertex(frame);
     if(desc == null_vertex())
     {
-        desc = add_vertex(frame);
+        desc = add_vertex(frame, frameProp);
     }
     else
     {
@@ -212,7 +233,7 @@ typename Graph<F,E>::edge_descriptor Graph<F,E>::getEdge(const vertex_descriptor
     EdgePair e = boost::edge(origin, target, graph());
     if(!e.second)
     {
-        throw UnknownTransformException(getFrameId(origin), getFrameId(target));
+        throw UnknownEdgeException(getFrameId(origin), getFrameId(target));
     }
     return e.first;
 }
@@ -320,7 +341,7 @@ void Graph<F,E>::getTree(const vertex_descriptor root, TreeView* outView) const
     }
     else
     {
-        TreeBuilderVisitor visitor(*outView, *this);
+        TreeBuilderVisitor<Graph<F,E>> visitor(*outView, *this);
         boost::breadth_first_search(*this, root, boost::visitor(visitor));
     }
 }
@@ -387,6 +408,13 @@ typename Graph<F,E>::EdgePair Graph<F,E>::add_edge(const vertex_descriptor origi
                                                    const vertex_descriptor target,
                                                    const E& edgeProperty)
 {
+    //check if an edge already exists
+    EdgePair e = boost::edge(origin, target, *this);
+    if(e.second)// edge already exists
+    {
+        throw EdgeAlreadyExistsException(getFrameId(origin), getFrameId(target));
+    }
+  
     auto edge_pair =  boost::add_edge(origin, target, edgeProperty, *this);
     if(edge_pair.second) 
     {
@@ -403,6 +431,29 @@ typename Graph<F,E>::EdgePair Graph<F,E>::add_edge(const FrameId& origin,
     const vertex_descriptor originDesc = getVertex(origin);
     const vertex_descriptor targetDesc = getVertex(target);
     return add_edge(originDesc, targetDesc, edgeProperty);
+}
+
+template <class F, class E>
+void Graph<F,E>::remove_edge(const vertex_descriptor origin,
+                             const vertex_descriptor target)
+{
+    EdgePair edge = boost::edge(origin, target, graph());
+    if(!edge.second)
+    {
+        throw UnknownEdgeException(getFrameId(origin), getFrameId(target));
+    }
+    boost::remove_edge(edge.first, *this);
+    //FIXME EdgeRemovedEvent
+    //notify(TransformRemovedEvent(origin, target));
+}
+
+template <class F, class E>
+void Graph<F,E>::remove_edge(const FrameId& origin,
+                             const FrameId& target)
+{
+    const vertex_descriptor originDesc = getVertex(origin); //may throw
+    const vertex_descriptor targetDesc = getVertex(target); //may throw
+    remove_edge(originDesc, targetDesc);
 }
 
 template <class F, class E>
@@ -502,7 +553,7 @@ void Graph<F,E>::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) cons
         //below notInView because the edges leading to inView are hidden by the filter
         //and thus the bfs will not follow those edges.
         //the visitor will add those edges directly to the view
-        TreeBuilderVisitor visitor(*view, *this);
+        TreeBuilderVisitor<Graph<F,E>> visitor(*view, *this);
         boost::breadth_first_search(fg, notInView, boost::visitor(visitor));
     }
 }
@@ -518,6 +569,17 @@ void Graph<F,E>::rebuildTreeViews() const
     }
 }
 
+template <class F, class E>
+typename Graph<F,E>::vertices_size_type Graph<F,E>::num_vertices() const
+{
+    return boost::num_vertices(*this);
+}
+
+template <class F, class E>
+typename Graph<F,E>::edges_size_type Graph<F,E>::num_edges() const
+{
+    return boost::num_edges(*this);
+}
 
 }}}
 

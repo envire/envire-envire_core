@@ -73,13 +73,15 @@ namespace envire { namespace core
     };
 
 
-    /**Visits every node in bfs order and stores the search tree in the provided map */
+    /**Visits every node in bfs order and stores the search tree in the provided map 
+     * @param GRAPH should be a boost graph of some kind*/
+    template <class GRAPH>
     struct TreeBuilderVisitor : public boost::default_bfs_visitor
     {
         /** @param view The TreeView that should be filled
          *  @param graph The graph that is visited. The reference to the graph
          *               is needed to get the source and target of an edge.*/
-        TreeBuilderVisitor(TreeView& view, const LabeledTransformGraph& graph) :
+        TreeBuilderVisitor(TreeView& view, const GRAPH& graph) :
             view(view), graph(graph) {}
 
         /**This is invoked on each edge as it becomes a member of 
@@ -114,7 +116,7 @@ namespace envire { namespace core
         }
         
         TreeView& view;
-        const LabeledTransformGraph& graph;
+        const GRAPH& graph;
     };
 
     

@@ -349,6 +349,7 @@
 // 
 // BOOST_AUTO_TEST_CASE(simple_remove_transform_test)
 // {
+       //FIXME partly tested in test_graph
 //     FrameId a = "frame_a";
 //     FrameId b = "frame_b";   
 //     TransformGraph tree;

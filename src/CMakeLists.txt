@@ -10,7 +10,6 @@ set(headers items/ItemBase.hpp
             items/RandomGenerator.hpp
             items/SpatialItem.hpp
             items/BoundingVolume.hpp
-            graph/TransformGraph.hpp
             graph/TransformGraphTypes.hpp
             graph/TransformGraphExceptions.hpp
             graph/TransformGraphVisitors.hpp
@@ -43,7 +42,6 @@ set(sources items/ItemBase.cpp
             events/GraphEventPublisher.cpp
             events/GraphEventDispatcher.cpp
             events/GraphEventSubscriber.cpp
-            graph/TransformGraph.cpp
             serialization/Serialization.cpp)
             
 set(deps_pkg_config base-types boost_serialization)

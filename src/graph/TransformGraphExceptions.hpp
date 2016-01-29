@@ -22,12 +22,30 @@ namespace envire { namespace core
         virtual char const * what() const throw() { return msg.c_str(); }
         const std::string msg;
     };
+    
+    class EdgeAlreadyExistsException : public std::exception
+    {
+    public:
+        explicit EdgeAlreadyExistsException(const FrameId& nameA, const FrameId& nameB) :
+          msg("Edge between " + nameA + " and " + nameB + " already exists") {}
+        virtual char const * what() const throw() { return msg.c_str(); }
+        const std::string msg;
+    };
 
     class UnknownTransformException : public std::exception
     {
     public:
       explicit UnknownTransformException(const FrameId& nameA, const FrameId& nameB) :
           msg("Transform between " + nameA + " and " + nameB + " doesn't exists") {}
+        virtual char const * what() const throw() { return msg.c_str(); }
+        const std::string msg;
+    };
+    
+    class UnknownEdgeException : public std::exception
+    {
+    public:
+      explicit UnknownEdgeException(const FrameId& nameA, const FrameId& nameB) :
+          msg("Edge between " + nameA + " and " + nameB + " doesn't exists") {}
         virtual char const * what() const throw() { return msg.c_str(); }
         const std::string msg;
     };
