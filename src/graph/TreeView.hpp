@@ -108,6 +108,34 @@ namespace envire { namespace core
             crossEdges.clear();
         }
         
+        /**Returns true if an edge between a and b exists in @p view.*/
+        bool edgeExists(const vertex_descriptor a, const vertex_descriptor b) const
+        {
+            //an edge exists if either a is the parent of b and aChildren contains b
+            //or the other way around.
+            if(tree.find(a) == tree.end() || tree.find(b) == tree.end())
+            {
+                return false;
+            }
+            const VertexRelation& aRelation = tree.at(a);
+            const VertexRelation& bRelation = tree.at(b);
+
+            //If we assume that we made no mistake when populating the tree we could just 
+            //return (aRelation.parent == b || bRelation.parent == a)
+            //but using asserts is always better :D
+
+            //the if will be optimized out if asserts are disabled
+            if(aRelation.parent == b) //b is parent of a
+            {
+              assert(bRelation.children.find(a) != bRelation.children.end());
+            }
+            else if(bRelation.parent == a) //a is parent of b
+            {
+              assert(aRelation.children.find(b) != aRelation.children.end());
+            }
+            return aRelation.parent == b || bRelation.parent == a;
+        }
+        
         /**This signal is invoked whenever the tree is updated by the TransformGraph
         * @note This is only the case if you requested an updating TreeView. 
         *       Otherwise this signal will never be invoked.
