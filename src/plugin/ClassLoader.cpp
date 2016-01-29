@@ -11,14 +11,18 @@ constexpr char ClassLoader::envire_collision_suffix[];
 
 vector<string> ClassLoader::loadLibraryPath()
 {
-    const string path(std::getenv("LD_LIBRARY_PATH"));
+    const char* lib_path = std::getenv("LD_LIBRARY_PATH");
     vector<string> paths;
-    //":" is the separator in LD_LIBRARY_PATH
-    boost::split(paths, path, boost::is_any_of(":"));
-    //trim ":" and " " from the beginning and end of the string
-    for(string& path : paths)
+    if(lib_path != NULL)
     {
-        boost::trim_if(path, boost::is_any_of(": "));
+        const string path(lib_path);
+        //":" is the separator in LD_LIBRARY_PATH
+        boost::split(paths, path, boost::is_any_of(":"));
+        //trim ":" and " " from the beginning and end of the string
+        for(string& path : paths)
+        {
+            boost::trim_if(path, boost::is_any_of(": "));
+        }
     }
     return paths;
 }
