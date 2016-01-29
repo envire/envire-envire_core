@@ -44,7 +44,7 @@ set(sources items/ItemBase.cpp
             graph/TransformGraph.cpp
             serialization/Serialization.cpp)
             
-set(deps_pkg_config base-types boost_serialization)
+set(deps_pkg_config base-types)
 
 if(ENABLE_PLUGINS)
 
