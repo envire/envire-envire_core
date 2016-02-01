@@ -25,10 +25,12 @@ public:
 struct EdgeProp
 {
   bool inverted = false;
+  int value = 42;
   EdgeProp inverse() const
   {
     EdgeProp other;
     other.inverted = !inverted;
+    other.value = -value;
     return other;
   }
 };
@@ -622,4 +624,73 @@ BOOST_AUTO_TEST_CASE(tree_edge_exists_test)
     BOOST_CHECK(!view.edgeExists(vC, vA));
 }
 
+BOOST_AUTO_TEST_CASE(simple_modify_edge_prop_test_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    Gra graph;
+    EdgeProp ep;
+    graph.add_edge(a, b, ep);
+    
+    ep.value = 21;
+    vertex_descriptor aDesc = graph.getVertex(a);
+    vertex_descriptor bDesc = graph.getVertex(b);
+    
+    graph.setEdgeProperty(aDesc, bDesc, ep);
+    BOOST_CHECK(graph.getEdgeProperty(aDesc, bDesc).value == 21);
+    BOOST_CHECK(graph.getEdgeProperty(bDesc, aDesc).value == -21);
+}
 
+BOOST_AUTO_TEST_CASE(modify_edge_on_empty_graph_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    Gra graph;
+    EdgeProp ep;
+    BOOST_CHECK_THROW(graph.setEdgeProperty(a, b, ep), UnknownFrameException);
+}
+
+
+BOOST_AUTO_TEST_CASE(modify_invalid_edge_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    Gra graph;
+    EdgeProp ep;
+    graph.add_edge(a, b, ep);
+    graph.addFrame(c);
+    BOOST_CHECK_THROW(graph.setEdgeProperty(a, c, ep), UnknownEdgeException);
+}
+
+BOOST_AUTO_TEST_CASE(remove_edge_from_empty_graph_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    Gra graph;
+    graph.addFrame(a);
+    graph.addFrame(b);
+    BOOST_CHECK_THROW(graph.remove_edge(a, b), UnknownEdgeException);
+}
+
+BOOST_AUTO_TEST_CASE(remove_non_existing_edge_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    Gra graph;
+    EdgeProp ep;
+    graph.add_edge(a, b, ep);
+    BOOST_CHECK_THROW(graph.remove_edge(a, c), UnknownFrameException);
+}
+
+BOOST_AUTO_TEST_CASE(get_invalid_edge_property_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    Gra graph;
+    EdgeProp ep;
+    BOOST_CHECK_NO_THROW(graph.add_edge(a, b, ep));
+    BOOST_CHECK_THROW(graph.getEdgeProperty(a, c), UnknownFrameException);
+}

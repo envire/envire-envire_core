@@ -114,6 +114,22 @@ public:
     const EDGE_PROP& getEdgeProperty(const edge_descriptor edge) const;
     
     
+    /** Sets the property of the edge from @p orign to @p target to @p prop.
+     *  Sets the property of the edge from @p target to @p origin to prop.inverse().
+     *  @throw UnknownEdgeException If there is no edge between origin and target.
+     *  @note There is no setEdgeProperty(edge_descriptor) because it is not trivial
+     *        to figure out the inverse edge soley based on the edge_descriptor.
+     * FIXME events?!!*/
+    void setEdgeProperty(const vertex_descriptor origin,
+                         const vertex_descriptor target,
+                         const EDGE_PROP& prop);
+    
+    /** @throw UnknownFrameException If @p orign or @p target do not exist */
+    void setEdgeProperty(const FrameId& origin,
+                         const FrameId& target,
+                         const EDGE_PROP& prop);
+    
+    
     
     const vertex_descriptor source(const edge_descriptor edge) const;
     const vertex_descriptor target(const edge_descriptor edge) const;
@@ -644,6 +660,35 @@ template <class F, class E>
 const E& Graph<F,E>::getEdgeProperty(const edge_descriptor edge) const
 {
   return (*this)[edge];
+}
+
+
+template <class F, class E>
+void Graph<F,E>::setEdgeProperty(const FrameId& origin,
+                                 const FrameId& target,
+                                 const E& prop)
+{
+    const vertex_descriptor originDesc = getVertex(origin);
+    const vertex_descriptor targetDesc = getVertex(target);
+    setEdgeProperty(originDesc, targetDesc, prop);
+}
+
+template <class F, class E>
+void Graph<F,E>::setEdgeProperty(const vertex_descriptor origin,
+                                 const vertex_descriptor target,
+                                 const E& prop)
+{
+    EdgePair originToTarget = boost::edge(origin, target, *this);
+    
+    if(!originToTarget.second)
+    {
+      throw UnknownEdgeException(getFrameId(origin), getFrameId(target));
+    } 
+    (*this)[originToTarget.first] = prop;
+    
+    EdgePair targetToOrigin = boost::edge(target, origin, *this);
+    assert(targetToOrigin.second); //there should always be an inverse edge
+    (*this)[targetToOrigin.first] = prop.inverse();
 }
 
 }}}

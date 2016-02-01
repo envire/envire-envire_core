@@ -65,6 +65,13 @@ namespace envire { namespace core { namespace graph
       const T t; //inverse() has to be const
     };
     
+    /**A generic property tag with one property */
+    template <class T>
+    struct PropertyTag
+    {
+      T data;
+    };
+    
 
     template <class FRAME_PROP, class EDGE_PROP>
     using GraphBase = boost::labeled_graph<boost::directed_graph<FRAME_PROP, EDGE_PROP, envire::core::Environment>, FrameId>;
