@@ -1,6 +1,7 @@
 #define protected public
 #include <boost/test/unit_test.hpp>
 #include <envire_core/graph/Graph.hpp>
+#include <envire_core/events/GraphEventDispatcher.hpp>
 #include <vector>
 #include <string>
  
@@ -22,6 +23,7 @@ public:
       id = _id;
   }
 };
+
 struct EdgeProp
 {
   bool inverted = false;
@@ -36,6 +38,41 @@ struct EdgeProp
 };
 
 using Gra = envire::core::graph::Graph<FrameProp, EdgeProp>;
+
+class Dispatcher : public GraphEventDispatcher {
+public:
+    vector<EdgeAddedEvent> edgeAddedEvents;
+    vector<EdgeModifiedEvent> edgeModifiedEvents;
+    vector<EdgeRemovedEvent> edgeRemovedEvents;
+    vector<FrameAddedEvent> frameAddedEvents;
+    vector<FrameRemovedEvent> frameRemovedEvents;
+    
+    Dispatcher(Gra& graph) : GraphEventDispatcher(&graph) {}
+    virtual ~Dispatcher() {}
+    
+    virtual void edgeAdded(const EdgeAddedEvent& e)
+    {
+        edgeAddedEvents.push_back(e);
+    }
+
+    virtual void edgeModified(const EdgeModifiedEvent& e)
+    {
+        edgeModifiedEvents.push_back(e);
+    }
+
+    virtual void edgeRemoved(const EdgeRemovedEvent& e)
+    {
+        edgeRemovedEvents.push_back(e);
+    }
+    virtual void frameAdded(const FrameAddedEvent& e)
+    {
+        frameAddedEvents.push_back(e);
+    }
+    virtual void frameRemoved(const FrameRemovedEvent& e)
+    {
+        frameRemovedEvents.push_back(e);
+    }
+};
 
 BOOST_AUTO_TEST_CASE(simple_add_remove_edge_test)
 {
@@ -694,3 +731,83 @@ BOOST_AUTO_TEST_CASE(get_invalid_edge_property_test)
     BOOST_CHECK_NO_THROW(graph.add_edge(a, b, ep));
     BOOST_CHECK_THROW(graph.getEdgeProperty(a, c), UnknownFrameException);
 }
+
+BOOST_AUTO_TEST_CASE(remove_transform_event_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    Gra graph;
+    EdgeProp ep;
+    graph.add_edge(a, b, ep);
+    Dispatcher d(graph);
+    graph.remove_edge(a, b);
+    BOOST_CHECK(d.edgeRemovedEvents.size() == 2);
+    BOOST_CHECK(d.edgeRemovedEvents[0].origin == a);
+    BOOST_CHECK(d.edgeRemovedEvents[0].target == b);
+    BOOST_CHECK(d.edgeRemovedEvents[1].origin == b);
+    BOOST_CHECK(d.edgeRemovedEvents[1].target == a);
+}
+
+BOOST_AUTO_TEST_CASE(frame_added_event_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    Gra graph;
+    EdgeProp ep;
+    Dispatcher d(graph);
+    graph.addFrame(a);
+    BOOST_CHECK(d.frameAddedEvents.size() == 1);
+    BOOST_CHECK(d.frameAddedEvents[0].addedFrame == a);
+    
+    graph.add_edge(a, b, ep);
+    BOOST_CHECK(d.frameAddedEvents.size() == 2);
+    BOOST_CHECK(d.frameAddedEvents[1].addedFrame == b);
+
+    FrameId c = "frame_c";
+    FrameId e = "frame_d";
+    graph.add_edge(c, e, ep);
+    BOOST_CHECK(d.frameAddedEvents.size() == 4);
+    BOOST_CHECK(d.frameAddedEvents[2].addedFrame == c);
+    BOOST_CHECK(d.frameAddedEvents[3].addedFrame == e);
+}
+
+
+BOOST_AUTO_TEST_CASE(modify_edge_property_event_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    Gra graph;
+    EdgeProp ep;
+    graph.add_edge(a, b, ep);
+
+    Dispatcher d(graph);
+    graph.setEdgeProperty(b, a, ep);
+    
+    BOOST_CHECK(d.edgeModifiedEvents.size() == 1);
+    BOOST_CHECK(d.edgeModifiedEvents[0].origin == b);
+    BOOST_CHECK(d.edgeModifiedEvents[0].target == a);
+    BOOST_CHECK(d.edgeModifiedEvents[0].edge == graph.getEdge(b, a));
+    BOOST_CHECK(d.edgeModifiedEvents[0].inverseEdge == graph.getEdge(a, b));
+}
+
+BOOST_AUTO_TEST_CASE(frame_removed_event_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    Gra graph;
+    EdgeProp ep;
+    graph.addFrame(a);
+    graph.addFrame(b);
+    
+    Dispatcher d(graph);
+    graph.removeFrame(a);
+    BOOST_CHECK(d.frameRemovedEvents.size() == 1);
+    BOOST_CHECK(d.frameRemovedEvents[0].removedFrame == a);
+    graph.removeFrame(b);
+    BOOST_CHECK(d.frameRemovedEvents.size() == 2);
+    BOOST_CHECK(d.frameRemovedEvents[1].removedFrame == b);
+    
+}
+
+
+

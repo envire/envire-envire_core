@@ -6,19 +6,17 @@
 
 namespace envire { namespace core
 {
-    class TransformAddedEvent : public GraphEvent
+    class EdgeAddedEvent : public GraphEvent
     {
     public:
-      TransformAddedEvent(const FrameId& origin,
-                          const FrameId& target,
-                          const edge_descriptor& edge,
-                          const Transform& transform) :
-        GraphEvent(GraphEvent::TRANSFORMATION_ADDED), origin(origin), target(target),
-        edge(edge), transform(transform){}
+      EdgeAddedEvent(const FrameId& origin,
+                     const FrameId& target,
+                     const edge_descriptor& edge) :
+        GraphEvent(GraphEvent::EDGE_ADDED), origin(origin), target(target),
+        edge(edge){}
 
       FrameId origin;/**<Source vertex of the transform */
       FrameId target; /**<Target vertex of the transform */
       edge_descriptor edge; /**<Edge of the tree that the transformation is attached to */
-      Transform transform; /**<value of the transformation */
     };
 }}

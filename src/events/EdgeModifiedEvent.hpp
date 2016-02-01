@@ -1,19 +1,18 @@
 #pragma once
 #include <envire_core/graph/TransformGraphTypes.hpp>
-#include <envire_core/items/Transform.hpp>
 #include <envire_core/items/Frame.hpp>
 #include "GraphEvent.hpp"
 
 namespace envire { namespace core
 {
-    class TransformModifiedEvent : public GraphEvent
+    class EdgeModifiedEvent : public GraphEvent
     {
     public:
-      TransformModifiedEvent(const FrameId& origin,
-                             const FrameId& target,
-                             const edge_descriptor edge,
-                             const edge_descriptor inverseEdge) :
-        GraphEvent(GraphEvent::TRANSFORMATION_MODIFIED), origin(origin), target(target),
+      EdgeModifiedEvent(const FrameId& origin,
+                        const FrameId& target,
+                        const edge_descriptor edge,
+                        const edge_descriptor inverseEdge) :
+        GraphEvent(GraphEvent::EDGE_MODIFIED), origin(origin), target(target),
         edge(edge), inverseEdge(inverseEdge){}
 
       FrameId origin;/**<Source vertex of the transform */

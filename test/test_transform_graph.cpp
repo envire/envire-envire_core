@@ -328,23 +328,7 @@
 //     BOOST_CHECK_THROW(g.getItem<Item<string>>(frame, 11), UnknownFrameException);
 // }
 // 
-// BOOST_AUTO_TEST_CASE(remove_transform_event_test)
-// {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     TransformGraph graph;
-//     Transform tf;
-//     tf.transform.translation << 42, 21, -42;
-//     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
-//     graph.addTransform(a, b, tf);
-//     Dispatcher d(graph);
-//     graph.removeTransform(a, b);
-//     BOOST_CHECK(d.transformRemovedEvents.size() == 2);
-//     BOOST_CHECK(d.transformRemovedEvents[0].origin == a);
-//     BOOST_CHECK(d.transformRemovedEvents[0].target == b);
-//     BOOST_CHECK(d.transformRemovedEvents[1].origin == b);
-//     BOOST_CHECK(d.transformRemovedEvents[1].target == a);
-// }
+
 // 
 
 
@@ -506,57 +490,8 @@
 //     BOOST_CHECK_THROW(tree.getEdge(b, c), UnknownTransformException);
 // }
 // 
-// BOOST_AUTO_TEST_CASE(frame_added_event_test)
-// {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     TransformGraph graph;
-//     Transform tf;  
-//     Dispatcher d(graph);
-//     graph.addFrame(a);
-//     BOOST_CHECK(d.frameAddedEvents.size() == 1);
-//     BOOST_CHECK(d.frameAddedEvents[0].addedFrame == a);
-//     
-//     graph.addTransform(a, b, tf);
-//     BOOST_CHECK(d.frameAddedEvents.size() == 2);
-//     BOOST_CHECK(d.frameAddedEvents[1].addedFrame == b);
-// 
-//     FrameId c = "frame_c";
-//     FrameId e = "frame_d";
-//     graph.addTransform(c, e, tf);
-//     BOOST_CHECK(d.frameAddedEvents.size() == 4);
-//     BOOST_CHECK(d.frameAddedEvents[2].addedFrame == c);
-//     BOOST_CHECK(d.frameAddedEvents[3].addedFrame == e);
-//     
-//     BOOST_CHECK_THROW(graph.addFrame(a), FrameAlreadyExistsException);
-// }
-// 
-// BOOST_AUTO_TEST_CASE(modify_transform_event_test)
-// {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     TransformGraph graph;
-//     Transform tf;
-//     tf.transform.translation << 42, 21, -42;
-//     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
-//     graph.addTransform(a, b, tf);
-// 
-//     Dispatcher d(graph);
-//     Transform tf2;
-//     tf2.transform.translation << 0, 1, 2; 
-//     tf2.transform.orientation = base::AngleAxisd(0.42, base::Vector3d::UnitY());
-//     graph.updateTransform(a, b, tf2);
-//     BOOST_CHECK(d.transformModifiedEvents.size() == 1);
-//     Transform tf2Inv = tf2;
-//     tf2Inv.setTransform(tf2.transform.inverse());
-//     Transform tfInv = tf;
-//     tfInv.setTransform(tf.transform.inverse());
-//     
-//     BOOST_CHECK(d.transformModifiedEvents[0].origin == a);
-//     BOOST_CHECK(d.transformModifiedEvents[0].target == b);
-//     BOOST_CHECK(d.transformModifiedEvents[0].edge == graph.getEdge(a, b));
-//     BOOST_CHECK(d.transformModifiedEvents[0].inverseEdge == graph.getEdge(b, a));
-// }
+
+
 // 
 // BOOST_AUTO_TEST_CASE(operations_with_transform)
 // {
@@ -707,29 +642,6 @@
 // }
 // 
 // 
-// BOOST_AUTO_TEST_CASE(simple_add_transform_event_test)
-// {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     TransformGraph graph;
-//     Transform tf;
-//     tf.transform.translation << 42, 21, -42;
-//     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
-// 
-//     Dispatcher d(graph);
-// 
-//     graph.addTransform(a, b, tf);
-//     BOOST_CHECK(d.transformAddedEvents.size() == 2);
-//     edge_descriptor aToB = graph.getEdge(a, b);
-//     BOOST_CHECK(d.transformAddedEvents[0].edge == aToB);
-//     edge_descriptor bToA = graph.getEdge(b, a);
-//     BOOST_CHECK(d.transformAddedEvents[1].edge == bToA);
-//     //annoying amount of checks because there is no operator== in eigen
-//     BOOST_CHECK(compareTransform(d.transformAddedEvents[0].transform, tf));
-//     Transform invTf = tf;
-//     invTf.setTransform(tf.transform.inverse());
-//     BOOST_CHECK(compareTransform(d.transformAddedEvents[1].transform, invTf));
-// }
 // 
 // 
 // 

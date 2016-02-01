@@ -1,7 +1,14 @@
 #pragma once
 
 #include <type_traits>
+
 #include <envire_core/events/GraphEventPublisher.hpp>
+#include <envire_core/events/FrameAddedEvent.hpp>
+#include <envire_core/events/FrameRemovedEvent.hpp>
+#include <envire_core/events/EdgeAddedEvent.hpp>
+#include <envire_core/events/EdgeModifiedEvent.hpp>
+#include <envire_core/events/EdgeRemovedEvent.hpp>
+
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/concept_check.hpp>
 
@@ -9,6 +16,7 @@
 #include "TreeView.hpp"
 #include "TransformGraphExceptions.hpp"
 #include "TransformGraphVisitors.hpp"
+
 
 
 namespace envire { namespace core { namespace graph
@@ -27,7 +35,7 @@ namespace envire { namespace core { namespace graph
  * @param EDGE_PROP should follow the EdgePropertyConcept concept (see GraphTypes.hpp) */
 template <class FRAME_PROP, class EDGE_PROP>
 class Graph : public GraphBase<FRAME_PROP, EDGE_PROP>, 
-             // public envire::core::GraphEventPublisher,
+              public envire::core::GraphEventPublisher,
               public envire::core::TreeUpdatePublisher
 {
 public:
@@ -237,6 +245,7 @@ typename Graph<F,E>::vertex_descriptor Graph<F,E>::addFrame(const FrameId& frame
     {
       throw FrameAlreadyExistsException(frame);
     }
+    notify(envire::core::FrameAddedEvent(frame));
     return desc;
 }
 
@@ -318,7 +327,7 @@ void Graph<F,E>::removeFrame(const FrameId& frame)
         _map.erase(it);
     }
     //FIXME event wieder einauen
-    //notify(FrameRemovedEvent(frame));
+    notify(envire::core::FrameRemovedEvent(frame));
 }
 
 template <class F, class E>
@@ -458,6 +467,7 @@ void Graph<F,E>::add_edge(const vertex_descriptor origin,
     //      In fact: if we add both, both will end up in the cross edges list
     //      which might lead to infinite recursion when updating edges
     addEdgeToTreeViews(edge_pair.first);
+    notify(envire::core::EdgeAddedEvent(getFrameId(origin), getFrameId(target), edge_pair.first));
 }
 
 template <class F, class E>
@@ -495,12 +505,11 @@ void Graph<F,E>::remove_edge(const vertex_descriptor origin,
     }
     
     boost::remove_edge(originToTarget.first, *this);
-    //FIXME removed events
-    //notify(TransformRemovedEvent(origin, target));
+    notify(envire::core::EdgeRemovedEvent(getFrameId(origin), getFrameId(target)));
     
     boost::remove_edge(targetToOrigin.first, *this);
-    //FIXME REMOVE events
-    //notify(TransformRemovedEvent(target, origin));
+    //FIXME so umbauen, dass getFrameId hier nicht nochmal aufgerufen werden muss
+    notify(envire::core::EdgeRemovedEvent(getFrameId(target), getFrameId(origin)));
     
     //removing a transform might invalidate the TreeViews.
     //This is a brute-force solution to the problem.
@@ -689,6 +698,8 @@ void Graph<F,E>::setEdgeProperty(const vertex_descriptor origin,
     EdgePair targetToOrigin = boost::edge(target, origin, *this);
     assert(targetToOrigin.second); //there should always be an inverse edge
     (*this)[targetToOrigin.first] = prop.inverse();
+    
+    notify(EdgeModifiedEvent(getFrameId(origin), getFrameId(target), originToTarget.first, targetToOrigin.first));
 }
 
 }}}
