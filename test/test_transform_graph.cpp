@@ -99,8 +99,7 @@
 //     
 // };
 // 
-// 
-// 
+
 // BOOST_AUTO_TEST_CASE(simple_add_item_test)
 // {
 //     FrameId aFrame = "frame_a";
@@ -347,54 +346,9 @@
 //     BOOST_CHECK(d.transformRemovedEvents[1].target == a);
 // }
 // 
-// BOOST_AUTO_TEST_CASE(simple_remove_transform_test)
-// {
-       //FIXME partly tested in test_graph
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";   
-//     TransformGraph tree;
-//     Transform tf;
-//     tf.transform.translation << 42, 21, -42;
-//     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
-//     tree.addTransform(a, b, tf);
+
 // 
-//     tree.removeTransform(b, a);
-//     BOOST_CHECK(tree.num_edges() == 0);
-//     BOOST_CHECK(tree.num_vertices() == 2); //vertices are still there, just not connected anymore
-// }
-// 
-// BOOST_AUTO_TEST_CASE(remove_existing_but_unconnected_test)
-// {
-      //FIXME implemented in simple_add_remove_edge_test
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     FrameId c = "frame_c";
-//     TransformGraph tree;
-//     Transform tf;
-//     tree.addTransform(a, b, tf);
-//     tree.addTransform(a, c, tf);
-//     BOOST_CHECK_THROW(tree.removeTransform(b, c), UnknownTransformException);
-// }
-// 
-// BOOST_AUTO_TEST_CASE(complex_remove_transform_test)
-// {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     FrameId c = "frame_c";
-//     TransformGraph tree;
-//     Transform tf;
-//     tf.transform.translation << 42, 21, -42;
-//     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
-//     tree.addTransform(a, b, tf);
-//     tree.addTransform(a, c, tf);
-// 
-//     tree.removeTransform(b, a);
-//     BOOST_CHECK(tree.num_edges() == 2);
-//     BOOST_CHECK(tree.num_vertices() == 3);
-//     BOOST_CHECK_NO_THROW(tree.getFrame(a));
-//     BOOST_CHECK_NO_THROW(tree.getFrame(b));
-//     BOOST_CHECK_NO_THROW(tree.getFrame(c));
-// }
+
 // 
 // BOOST_AUTO_TEST_CASE(simple_modify_transform_test)
 // {
@@ -1215,18 +1169,8 @@
 //     const vector<FrameId> path = graph.getPath(A, C);
 //     BOOST_CHECK(path.size() == 0);
 // }
-// 
-// 
 
 
-
-
-// 
-
-
-
-
-// 
 // BOOST_AUTO_TEST_CASE(get_transform_with_descriptor_between_unconnected_frames_test)
 // {
 //     TransformGraph graph;
@@ -1257,8 +1201,4 @@
 //     BOOST_CHECK(tf.transform.translation.y() == tf2.transform.translation.y());
 //     BOOST_CHECK(tf.transform.translation.z() == tf2.transform.translation.z());
 // }
-// 
-// 
-// 
-// 
-// 
+

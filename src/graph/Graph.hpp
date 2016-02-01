@@ -18,12 +18,13 @@ namespace envire { namespace core { namespace graph
  * Each vertex (frame) is identified by a unique FrameId.
  * Each edge is accompanied by it's inverse edge.
  * 
+ * 
  * Methods Naming convention
  * Overloading boost methods uses _ delimited separated
  * words, new methods use Camel Case separated words
  * 
- * @param FRAME_PROP should extend FramePropertyBase and should be default constructable
- * @param EDGE_PROP should follow the Invertable concept (see GraphTypes.hpp) */
+ * @param FRAME_PROP should follow the FramePropertyConcept (see GraphTypes.hpp)
+ * @param EDGE_PROP should follow the EdgePropertyConcept concept (see GraphTypes.hpp) */
 template <class FRAME_PROP, class EDGE_PROP>
 class Graph : public GraphBase<FRAME_PROP, EDGE_PROP>, 
              // public envire::core::GraphEventPublisher,
@@ -105,6 +106,14 @@ public:
       * @throw UnknownTransformException if there is no such edge  */
     edge_descriptor getEdge(const FrameId& origin, const FrameId& target) const;
     edge_descriptor getEdge(const vertex_descriptor origin, const vertex_descriptor target) const;
+    
+    /** @throw UnknownFrameException if @p origin or @p target do not exist
+     *  @return The edge property of the edge from origin to target*/
+    const EDGE_PROP& getEdgeProperty(const FrameId& origin, const FrameId& target) const;
+    const EDGE_PROP& getEdgeProperty(const vertex_descriptor origin, const vertex_descriptor target) const;
+    const EDGE_PROP& getEdgeProperty(const edge_descriptor edge) const;
+    
+    
     
     const vertex_descriptor source(const edge_descriptor edge) const;
     const vertex_descriptor target(const edge_descriptor edge) const;
@@ -193,13 +202,9 @@ Graph<F,E>::Graph()
                   "vertex list type should be listS to ensure that vertex_descriptors remain valid");
     static_assert(std::is_same<typename GraphBase<F, E>::graph_type::graph_type::graph_type::edge_list_selector, boost::listS>::value,
                   "edge list type should be listS to ensure that vertex_descriptors remain valid");
-    static_assert(std::is_base_of<FramePropertyBase, F>::value, "FRAME_PROP should derive from FramePropertyBase");
-    
-    //The edge property should be invertable
-    BOOST_CONCEPT_ASSERT((Invertable<E>));
-    //the frame property should be default constructable
-    BOOST_CONCEPT_ASSERT((boost::DefaultConstructible<F>));
-  
+
+    BOOST_CONCEPT_ASSERT((EdgePropertyConcept<E>));
+    BOOST_CONCEPT_ASSERT((FramePropertyConcept<F>));
 }
 
 template <class F, class E>
@@ -253,7 +258,7 @@ typename Graph<F,E>::edge_descriptor Graph<F,E>::getEdge(const vertex_descriptor
 template <class F, class E>
 const FrameId& Graph<F,E>::getFrameId(const vertex_descriptor vertex) const
 {
-    return graph()[vertex].id;
+    return graph()[vertex].getId();
 }
 
 template <class F, class E>
@@ -619,6 +624,26 @@ template <class F, class E>
 typename Graph<F,E>::edges_size_type Graph<F,E>::num_edges() const
 {
     return boost::num_edges(*this);
+}
+
+template <class F, class E>
+const E& Graph<F,E>::getEdgeProperty(const FrameId& origin, const FrameId& target) const
+{
+    const edge_descriptor edge = getEdge(origin, target);
+    return getEdgeProperty(edge);
+}
+
+template <class F, class E>
+const E& Graph<F,E>::getEdgeProperty(const vertex_descriptor origin, const vertex_descriptor target) const
+{
+    const edge_descriptor edge = getEdge(origin, target);
+    return getEdgeProperty(edge);
+}
+
+template <class F, class E>
+const E& Graph<F,E>::getEdgeProperty(const edge_descriptor edge) const
+{
+  return (*this)[edge];
 }
 
 }}}

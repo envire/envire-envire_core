@@ -9,7 +9,19 @@ using namespace envire::core::graph;
 using namespace std;
 
 
-class FrameProp : public envire::core::graph::FramePropertyBase { };
+class FrameProp
+{
+  FrameId id;
+public:
+  const FrameId& getId() const
+  {
+    return id;
+  }
+  void setId(const FrameId& _id) 
+  {
+      id = _id;
+  }
+};
 struct EdgeProp
 {
   bool inverted = false;
@@ -48,6 +60,38 @@ BOOST_AUTO_TEST_CASE(simple_add_remove_edge_test)
 
     BOOST_CHECK(g.num_vertices() == 2); //vertices are still there, just not connected anymore
 }
+
+BOOST_AUTO_TEST_CASE(complex_remove_transform_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    Gra graph;
+    EdgeProp ep;
+
+    graph.add_edge(a, b, ep);
+    graph.add_edge(a, c, ep);
+
+    graph.remove_edge(b, a);
+    BOOST_CHECK(graph.num_edges() == 2);
+    BOOST_CHECK(graph.num_vertices() == 3);
+    BOOST_CHECK_NO_THROW(graph.getVertex(a));
+    BOOST_CHECK_NO_THROW(graph.getVertex(b));
+    BOOST_CHECK_NO_THROW(graph.getVertex(c));
+}
+
+BOOST_AUTO_TEST_CASE(add_edge_inverse_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    Gra graph;
+    EdgeProp ep;
+
+    graph.add_edge(a, b, ep);
+    EdgeProp inverted = graph.getEdgeProperty(b, a);
+    BOOST_CHECK(ep.inverted != inverted.inverted);
+}
+
 
 BOOST_AUTO_TEST_CASE(add_frame_already_exists_test)
 {

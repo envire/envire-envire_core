@@ -9,6 +9,7 @@
 #undef private
 
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
 #include <cassert>
@@ -22,43 +23,48 @@
 
 namespace envire { namespace core { namespace graph
 {
-    /**@brief Frame Property
-     * boost access tag for the Frame property
+    
+    /**Concept checking class for frame properties in the Graph.
+     * A FrameProperty should:
+     * * store a FrameId.
+     * * provide getId() method that returns a const reference to the id.
+     * * provide a setId(const FrameId&) method.
+     * * be default constructible
+
      */
-    struct FramePropertyBase
+    template <class T>
+    class FramePropertyConcept
     {
-        FrameId id;
-        
-        FramePropertyBase() : id("envire::core::default_name"){}
-        explicit FramePropertyBase(const FrameId& frameId): id(frameId){}
-        void setId(const FrameId& _id)
-        {
-          id = _id;
-        }
+      BOOST_CONCEPT_ASSERT((boost::DefaultConstructible<T>));
+    public:
+      BOOST_CONCEPT_USAGE(FramePropertyConcept)
+      {
+        T prop;
+        static_assert(std::is_same<decltype(t.getId()), const FrameId&>::value, "getId() must return a const FrameId&");
+        const FrameId& id = t.getId();
+        prop.setId(id);
+      }
+      
+    private:
+      const T t;
     };
     
-    /**A concept checking class to enforce the existence of an inverse() method */
+    /**A concept checking class for edge properties in the Graph.
+     * An EdgeProperty should:
+     * * provide an inverse() method that creates an inverted copy.*/
     template <class T>
-    class Invertable
+    class EdgePropertyConcept
     {
     public:
-        BOOST_CONCEPT_USAGE(Invertable)
+        BOOST_CONCEPT_USAGE(EdgePropertyConcept)
         {
             T u = t.inverse();//check for inverse() method that returns a T
             u.inverse();//suppress "u not used" warning
         }
     private:
-      const T t;
+      const T t; //inverse() has to be const
     };
     
-
-    /**@brief Transform Property
-     * boost access tag for the Transform property
-     */
-    struct TransformProperty
-    {
-        envire::core::Transform transform;
-    };
 
     template <class FRAME_PROP, class EDGE_PROP>
     using GraphBase = boost::labeled_graph<boost::directed_graph<FRAME_PROP, EDGE_PROP, envire::core::Environment>, FrameId>;
