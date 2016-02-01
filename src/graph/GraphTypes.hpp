@@ -31,7 +31,26 @@ namespace envire { namespace core { namespace graph
         
         FramePropertyBase() : id("envire::core::default_name"){}
         explicit FramePropertyBase(const FrameId& frameId): id(frameId){}
+        void setId(const FrameId& _id)
+        {
+          id = _id;
+        }
     };
+    
+    /**A concept checking class to enforce the existence of an inverse() method */
+    template <class T>
+    class Invertable
+    {
+    public:
+        BOOST_CONCEPT_USAGE(Invertable)
+        {
+            T u = t.inverse();//check for inverse() method that returns a T
+            u.inverse();//suppress "u not used" warning
+        }
+    private:
+      const T t;
+    };
+    
 
     /**@brief Transform Property
      * boost access tag for the Transform property

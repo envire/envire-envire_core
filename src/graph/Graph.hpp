@@ -3,6 +3,7 @@
 #include <type_traits>
 #include <envire_core/events/GraphEventPublisher.hpp>
 #include <boost/graph/filtered_graph.hpp>
+#include <boost/concept_check.hpp>
 
 #include "GraphTypes.hpp"
 #include "TreeView.hpp"
@@ -13,14 +14,16 @@
 namespace envire { namespace core { namespace graph
 {
 
-//FIXME write real comment
-/**A labeled graph that provides and manages different views of the graph
+/**A double connected labeled graph structure.
+ * Each vertex (frame) is identified by a unique FrameId.
+ * Each edge is accompanied by it's inverse edge.
  * 
  * Methods Naming convention
- * Overloading boost methods uses delimited separated
+ * Overloading boost methods uses _ delimited separated
  * words, new methods use Camel Case separated words
  * 
- * @param FRAME_PROP should extend FramePropertyBase */
+ * @param FRAME_PROP should extend FramePropertyBase and should be default constructable
+ * @param EDGE_PROP should follow the Invertable concept (see GraphTypes.hpp) */
 template <class FRAME_PROP, class EDGE_PROP>
 class Graph : public GraphBase<FRAME_PROP, EDGE_PROP>, 
              // public envire::core::GraphEventPublisher,
@@ -32,14 +35,17 @@ public:
     using EdgePair = std::pair<edge_descriptor, bool>;
     using vertices_size_type = typename GraphBase<FRAME_PROP, EDGE_PROP>::vertices_size_type;
     using edges_size_type = typename GraphBase<FRAME_PROP, EDGE_PROP>::edges_size_type;
+    using GraphBase<FRAME_PROP, EDGE_PROP>::null_vertex;
+    using GraphBase<FRAME_PROP, EDGE_PROP>::vertex;
     
     Graph();
     
     /** Adds an unconnected frame to the graph.
-    * 
+    *   The frame property is default constructed and the id is set to @p frame.
     * @throw FrameAlreadyExistsException if the frame already exists
+    * @return A handle to the newly created frame.
     */
-    void addFrame(const FrameId& frame, const FRAME_PROP& frameProp);
+    vertex_descriptor addFrame(const FrameId& frame);
     
     /**Disconnects @p frame from the Graph.
     * I.e. all edges from and to @p frame will be removed.
@@ -58,8 +64,11 @@ public:
     /** @return the frame id of the specified @p vertex */
     const envire::core::FrameId& getFrameId(const vertex_descriptor vertex) const;
     
+    
     /**@brief Add an Edge
     * Add an edge between two frames.
+    * If the frames do not exist they are created.
+    * The inverse edge is created automatically and added as well.
     * 
     * @param origin Source of the edge.
     * @param target Target of the edge.
@@ -71,16 +80,17 @@ public:
     * @throw EdgeAlreadyExistsException if the edge already exists
     * @note The edge will also be added to all Subscribed TreeViews
     */
-  EdgePair add_edge(const vertex_descriptor origin,
-                    const vertex_descriptor target,
-                    const EDGE_PROP& edgeProperty);
+  void add_edge(const vertex_descriptor origin,
+                const vertex_descriptor target,
+                const EDGE_PROP& edgeProperty);
   
   /** @throw UnknownFrameException If @p orign or @p target do not exist. */
-  EdgePair add_edge(const FrameId& origin,
-                    const FrameId& target,
-                    const EDGE_PROP& edgeProperty);
+  void add_edge(const FrameId& origin,
+                const FrameId& target,
+                const EDGE_PROP& edgeProperty);
   
   /**Removes the specified edge from the graph.
+   * Also removes the inverse
    * FIXME events?!
    * @throw UnknownEdgeException if there is no edge from @p origin to @p target
    **/
@@ -145,8 +155,6 @@ public:
     
 protected:
     using map_type = typename GraphBase<FRAME_PROP, EDGE_PROP>::map_type;
-    using GraphBase<FRAME_PROP, EDGE_PROP>::vertex;
-    using GraphBase<FRAME_PROP, EDGE_PROP>::null_vertex;
     using GraphBase<FRAME_PROP, EDGE_PROP>::graph;
     using GraphBase<FRAME_PROP, EDGE_PROP>::_map;
     /**@brief Add a vertex
@@ -178,33 +186,37 @@ protected:
 
 
 
-
-
 template <class F, class E>
 Graph<F,E>::Graph()
 {
-  
     static_assert(std::is_same<typename GraphBase<F, E>::graph_type::graph_type::graph_type::vertex_list_selector, boost::listS>::value,
                   "vertex list type should be listS to ensure that vertex_descriptors remain valid");
     static_assert(std::is_same<typename GraphBase<F, E>::graph_type::graph_type::graph_type::edge_list_selector, boost::listS>::value,
                   "edge list type should be listS to ensure that vertex_descriptors remain valid");
     static_assert(std::is_base_of<FramePropertyBase, F>::value, "FRAME_PROP should derive from FramePropertyBase");
     
+    //The edge property should be invertable
+    BOOST_CONCEPT_ASSERT((Invertable<E>));
+    //the frame property should be default constructable
+    BOOST_CONCEPT_ASSERT((boost::DefaultConstructible<F>));
   
 }
 
 template <class F, class E>
-void Graph<F,E>::addFrame(const FrameId& frame, const F& frameProp)
+typename Graph<F,E>::vertex_descriptor Graph<F,E>::addFrame(const FrameId& frame)
 {
     vertex_descriptor desc = vertex(frame);
     if(desc == null_vertex())
     {
+        F frameProp;
+        frameProp.setId(frame);
         desc = add_vertex(frame, frameProp);
     }
     else
     {
       throw FrameAlreadyExistsException(frame);
     }
+    return desc;
 }
 
 template <class F, class E>
@@ -404,32 +416,47 @@ const typename Graph<F,E>::vertex_descriptor Graph<F,E>::target(const edge_descr
 
 
 template <class F, class E>
-typename Graph<F,E>::EdgePair Graph<F,E>::add_edge(const vertex_descriptor origin,
-                                                   const vertex_descriptor target,
-                                                   const E& edgeProperty)
-{
+void Graph<F,E>::add_edge(const vertex_descriptor origin,
+                          const vertex_descriptor target,
+                          const E& edgeProperty)
+{   
     //check if an edge already exists
+    //If a->b exists, b->a also exist. Therefore we need to check only one direction
     EdgePair e = boost::edge(origin, target, *this);
     if(e.second)// edge already exists
     {
         throw EdgeAlreadyExistsException(getFrameId(origin), getFrameId(target));
     }
   
-    auto edge_pair =  boost::add_edge(origin, target, edgeProperty, *this);
-    if(edge_pair.second) 
-    {
-      addEdgeToTreeViews(edge_pair.first);
-    }
-    return edge_pair;
+    EdgePair edge_pair =  boost::add_edge(origin, target, edgeProperty, *this);
+    edge_pair =  boost::add_edge(target, origin, edgeProperty.inverse(), *this);
+    assert(edge_pair.second);//origin->target has already been checkd before
+    
+    //note: we only need to add one of the edges to the tree, because the tree
+    //      does not care about the edge direction.
+    //      In fact: if we add both, both will end up in the cross edges list
+    //      which might lead to infinite recursion when updating edges
+    addEdgeToTreeViews(edge_pair.first);
 }
 
 template <class F, class E>
-typename Graph<F,E>::EdgePair Graph<F,E>::add_edge(const FrameId& origin,
-                                                   const FrameId& target,
-                                                   const E& edgeProperty)
+void Graph<F,E>::add_edge(const FrameId& origin,
+                          const FrameId& target,
+                          const E& edgeProperty)
 {
-    const vertex_descriptor originDesc = getVertex(origin);
-    const vertex_descriptor targetDesc = getVertex(target);
+    vertex_descriptor originDesc = vertex(origin);
+    vertex_descriptor targetDesc = vertex(target);
+    
+      //if they don't exist create them
+    if(originDesc == null_vertex())
+    {
+        originDesc = addFrame(origin);
+    }
+    if(targetDesc == null_vertex())
+    {
+        targetDesc = addFrame(target);
+    }
+    
     return add_edge(originDesc, targetDesc, edgeProperty);
 }
 
@@ -437,14 +464,27 @@ template <class F, class E>
 void Graph<F,E>::remove_edge(const vertex_descriptor origin,
                              const vertex_descriptor target)
 {
-    EdgePair edge = boost::edge(origin, target, graph());
-    if(!edge.second)
+    //note: do not use boost::edge_by_label as it will segfault if one of the
+    //frames is not part of the tree.
+    EdgePair originToTarget = boost::edge(origin, target, graph());
+    EdgePair targetToOrigin = boost::edge(target, origin, graph());
+    if(!originToTarget.second || !targetToOrigin.second)
     {
         throw UnknownEdgeException(getFrameId(origin), getFrameId(target));
     }
-    boost::remove_edge(edge.first, *this);
-    //FIXME EdgeRemovedEvent
+    
+    boost::remove_edge(originToTarget.first, *this);
+    //FIXME removed events
     //notify(TransformRemovedEvent(origin, target));
+    
+    boost::remove_edge(targetToOrigin.first, *this);
+    //FIXME REMOVE events
+    //notify(TransformRemovedEvent(target, origin));
+    
+    //removing a transform might invalidate the TreeViews.
+    //This is a brute-force solution to the problem.
+    //FIXME update TreeViews when removing a transform instead of rebuilding them
+    rebuildTreeViews();
 }
 
 template <class F, class E>
