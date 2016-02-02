@@ -17,11 +17,10 @@
 #include <boost/functional/hash.hpp> 
 #include <functional> //to be able to provide custom hash functions for std maps
 
-#include <envire_core/items/Frame.hpp>
-#include <envire_core/items/Transform.hpp>
 #include <envire_core/items/Environment.hpp>
 
-namespace envire { namespace core { namespace graph
+
+namespace envire { namespace core
 {
     
     /**Concept checking class for frame properties in the Graph.
@@ -65,14 +64,54 @@ namespace envire { namespace core { namespace graph
       const T t; //inverse() has to be const
     };
     
-    /**A generic property tag with one property */
-    template <class T>
-    struct PropertyTag
-    {
-      T data;
-    };
+                                                       
     
-
+     /* vertex_descriptor and edge_descriptor are not dependent on the 
+     * graph properties. They only depend on the type of the underlying
+     * datastructure (they are different for random access and pointer based
+     * structures).
+     * The datastructure is already set in the directed_graph. Thus
+     * vertex_descriptor and edge_descriptor will be the same type for all
+     * template instanziations of GraphBase.
+     *
+     * null_vertex() also depends on the datastructure. however there is no 
+     * easy way to access the implementation of null_vertex from the traits.
+     * 
+     * @warning This works as long as the directed_graph is an adjacency_list
+     *          based on boost::listS.
+     */
+    struct GraphTraits : public boost::adjacency_list_traits<boost::listS, boost::listS,
+                                                             boost::bidirectionalS,
+                                                             boost::listS>
+    {
+        using Base = boost::adjacency_list_traits<boost::listS, boost::listS,
+                                                  boost::bidirectionalS,
+                                                  boost::listS>;
+        using vertex_descriptor = Base::vertex_descriptor;
+        using edge_descriptor = Base::edge_descriptor;
+        using vertices_size_type = Base::vertices_size_type;
+        using edges_size_type = Base::edges_size_type;
+        
+        static vertex_descriptor null_vertex()
+        {
+            //the null_vertex definiton is different depending on the data type
+            //of the vertex_descriptor. For lists the descriptor is a pointer
+            //and nullptr is the correct null_vertex. 
+            //However, for vectors the correct null_vertex is 
+            //std::numeric_limits<vertex_descriptor>::max.
+            //if the underlying datatype changes, you have to modify this method
+            //to reflect the change.
+            //
+            //FIXME A better implementation might check for Base::is_rand_access
+            //      and return either a nullptr or limits::max.
+            static_assert(std::is_same<Base::vertex_descriptor, Base::vertex_ptr>::value,
+                          "vertex_descriptor should be a vertex_ptr.");
+            return nullptr;
+        }
+                                                                
+    };
+                                                     
+                                              
     template <class FRAME_PROP, class EDGE_PROP>
     using GraphBase = boost::labeled_graph<boost::directed_graph<FRAME_PROP, EDGE_PROP, envire::core::Environment>, FrameId>;
     
@@ -98,4 +137,4 @@ namespace envire { namespace core { namespace graph
       }
       const std::shared_ptr<GRAPH> graph;
     }; 
-}}}
+}}

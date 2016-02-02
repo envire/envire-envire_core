@@ -6,7 +6,6 @@
 #include <string>
  
 using namespace envire::core;
-using namespace envire::core::graph;
 using namespace std;
 
 
@@ -37,7 +36,7 @@ struct EdgeProp
   }
 };
 
-using Gra = envire::core::graph::Graph<FrameProp, EdgeProp>;
+using Gra = envire::core::Graph<FrameProp, EdgeProp>;
 
 class Dispatcher : public GraphEventDispatcher {
 public:
@@ -170,8 +169,6 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     FrameId f = "frame_f";
     FrameId g = "frame_g";
 
-    Transform tf;
-   
     graph.add_edge(a, b, ep);
     graph.add_edge(a, c, ep);
     graph.add_edge(c, d, ep);
@@ -197,13 +194,13 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     BOOST_CHECK(tree[graph.vertex(f)].parentRelation == &tree[graph.vertex(e)]);
     BOOST_CHECK(tree[graph.vertex(g)].parent == graph.vertex(e));
     BOOST_CHECK(tree[graph.vertex(g)].parentRelation == &tree[graph.vertex(e)]);
-    std::unordered_set<vertex_descriptor>& aChildren = tree[graph.vertex(a)].children;
+    std::unordered_set<GraphTraits::vertex_descriptor>& aChildren = tree[graph.vertex(a)].children;
     BOOST_CHECK(aChildren.find(graph.vertex(b)) != aChildren.end());
     BOOST_CHECK(aChildren.find(graph.vertex(c)) != aChildren.end());
-    std::unordered_set<vertex_descriptor>& cChildren = tree[graph.vertex(c)].children;
+    std::unordered_set<GraphTraits::vertex_descriptor>& cChildren = tree[graph.vertex(c)].children;
     BOOST_CHECK(cChildren.find(graph.vertex(d)) != cChildren.end());
     BOOST_CHECK(cChildren.find(graph.vertex(e)) != cChildren.end());
-    std::unordered_set<vertex_descriptor>& eChildren = tree[graph.vertex(e)].children;
+    std::unordered_set<GraphTraits::vertex_descriptor>& eChildren = tree[graph.vertex(e)].children;
     BOOST_CHECK(eChildren.find(graph.vertex(f)) != eChildren.end());
     BOOST_CHECK(eChildren.find(graph.vertex(g)) != eChildren.end());
 
@@ -241,14 +238,14 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     BOOST_CHECK(tree[graph.vertex(f)].parent == graph.vertex(e));
     BOOST_CHECK(tree[graph.vertex(g)].parent == graph.vertex(e));
 
-    std::unordered_set<vertex_descriptor>& aChildren2 = tree[graph.vertex(a)].children;
+    std::unordered_set<GraphTraits::vertex_descriptor>& aChildren2 = tree[graph.vertex(a)].children;
     BOOST_CHECK(aChildren2.find(graph.vertex(b)) != aChildren2.end());
-    std::unordered_set<vertex_descriptor>& cChildren2 = tree[graph.vertex(c)].children;
+    std::unordered_set<GraphTraits::vertex_descriptor>& cChildren2 = tree[graph.vertex(c)].children;
     BOOST_CHECK(cChildren2.find(graph.vertex(a)) != cChildren2.end());
     BOOST_CHECK(cChildren2.find(graph.vertex(e)) != cChildren2.end());
-    std::unordered_set<vertex_descriptor>& dChildren = tree[graph.vertex(d)].children;
+    std::unordered_set<GraphTraits::vertex_descriptor>& dChildren = tree[graph.vertex(d)].children;
     BOOST_CHECK(dChildren.find(graph.vertex(c)) != aChildren.end());
-    std::unordered_set<vertex_descriptor>& eChildren2 = tree[graph.vertex(e)].children;
+    std::unordered_set<GraphTraits::vertex_descriptor>& eChildren2 = tree[graph.vertex(e)].children;
     BOOST_CHECK(eChildren2.find(graph.vertex(f)) != eChildren2.end());
     BOOST_CHECK(eChildren2.find(graph.vertex(g)) != eChildren2.end());
 
@@ -328,9 +325,9 @@ BOOST_AUTO_TEST_CASE(non_tree_edges_test)
     BOOST_CHECK(view.root == graph.getVertex(a));
     BOOST_CHECK(view.crossEdges.size() == 1);
     
-    edge_descriptor edge = view.crossEdges[0];
-    vertex_descriptor source = graph.source(edge);
-    vertex_descriptor target = graph.target(edge);
+    GraphTraits::edge_descriptor edge = view.crossEdges[0];
+    GraphTraits::vertex_descriptor source = graph.source(edge);
+    GraphTraits::vertex_descriptor target = graph.target(edge);
     BOOST_CHECK(graph.vertex(c) == source);
     BOOST_CHECK(graph.vertex(e) == target);
 }
@@ -361,9 +358,9 @@ BOOST_AUTO_TEST_CASE(tree_view_automatic_update_simple_test)
     
     graph.add_edge(A, C, ep);
     
-    vertex_descriptor vA = graph.getVertex(A);
-    vertex_descriptor vB = graph.getVertex(B);
-    vertex_descriptor vC = graph.getVertex(C);
+    GraphTraits::vertex_descriptor vA = graph.getVertex(A);
+    GraphTraits::vertex_descriptor vB = graph.getVertex(B);
+    GraphTraits::vertex_descriptor vC = graph.getVertex(C);
     
     BOOST_CHECK(view.tree[vA].children.size() == 2);
     //vB is child of vA
@@ -384,7 +381,7 @@ BOOST_AUTO_TEST_CASE(tree_view_automatic_update_simple_test)
     const FrameId D("D");
     graph.add_edge(C, D, ep);
     
-    const vertex_descriptor vD = graph.getVertex(D);
+    const GraphTraits::vertex_descriptor vD = graph.getVertex(D);
     BOOST_CHECK(view.tree.find(vD) == view.tree.end());
     BOOST_CHECK(view.tree[vC].children.size() == 0);
     
@@ -405,7 +402,6 @@ BOOST_AUTO_TEST_CASE(tree_view_cross_edge_test)
     FrameId B("B");
     FrameId C("C");
     FrameId D("D");
-    Transform tf;
      
     /**      A
      *      / \
@@ -430,9 +426,9 @@ BOOST_AUTO_TEST_CASE(tree_view_cross_edge_test)
     graph.add_edge(B, D, ep);
     graph.add_edge(C, D, ep);
     
-    vertex_descriptor vB = graph.getVertex(B);
-    vertex_descriptor vC = graph.getVertex(C);
-    vertex_descriptor vD = graph.getVertex(D);
+    GraphTraits::vertex_descriptor vB = graph.getVertex(B);
+    GraphTraits::vertex_descriptor vC = graph.getVertex(C);
+    GraphTraits::vertex_descriptor vD = graph.getVertex(D);
     
     //D should be a child of B but not of C because c->d is a cross-edge
     BOOST_CHECK(view.tree[vB].children.size() == 1);
@@ -444,8 +440,8 @@ BOOST_AUTO_TEST_CASE(tree_view_cross_edge_test)
     BOOST_CHECK(view.tree[vD].children.size() == 0);
     //C -> D or D -> C should be part of the cross edges
     BOOST_CHECK(view.crossEdges.size() == 1);
-    const vertex_descriptor src = graph.source(view.crossEdges[0]);
-    const vertex_descriptor tar = graph.target(view.crossEdges[0]);
+    const GraphTraits::vertex_descriptor src = graph.source(view.crossEdges[0]);
+    const GraphTraits::vertex_descriptor tar = graph.target(view.crossEdges[0]);
     //note: it is not specified whether src->tar or tar->src ends up in the cross
     //      edges. The current implementation adds tar->src but that can change.
     BOOST_CHECK(tar == vC);
@@ -460,7 +456,7 @@ BOOST_AUTO_TEST_CASE(tree_view_update_event_test)
     FrameId A("A");
     FrameId B("B");
     FrameId C("C");
-    Transform tf;
+
     graph.addFrame(A);
     graph.addFrame(B);
     graph.addFrame(C);
@@ -544,14 +540,14 @@ BOOST_AUTO_TEST_CASE(tree_view_add_sub_tree_test)
     TreeView view;
     graph.getTree(A, true, &view);
     
-    vertex_descriptor vA = graph.getVertex(A);
-    vertex_descriptor vB = graph.getVertex(B);
-    vertex_descriptor vC = graph.getVertex(C);
-    vertex_descriptor vD = graph.getVertex(D);
-    vertex_descriptor vE = graph.getVertex(E);
-    vertex_descriptor vF = graph.getVertex(F);
-    vertex_descriptor vG = graph.getVertex(G);
-    vertex_descriptor vH = graph.getVertex(H);
+    GraphTraits::vertex_descriptor vA = graph.getVertex(A);
+    GraphTraits::vertex_descriptor vB = graph.getVertex(B);
+    GraphTraits::vertex_descriptor vC = graph.getVertex(C);
+    GraphTraits::vertex_descriptor vD = graph.getVertex(D);
+    GraphTraits::vertex_descriptor vE = graph.getVertex(E);
+    GraphTraits::vertex_descriptor vF = graph.getVertex(F);
+    GraphTraits::vertex_descriptor vG = graph.getVertex(G);
+    GraphTraits::vertex_descriptor vH = graph.getVertex(H);
     
     BOOST_CHECK(view.tree.find(vG) == view.tree.end());
     BOOST_CHECK(view.tree.find(vF) == view.tree.end());
@@ -602,7 +598,7 @@ BOOST_AUTO_TEST_CASE(get_tree_disconnected_graph_test)
   g.addFrame(A);
   TreeView view;
   g.getTree(A, &view);
-  vertex_descriptor vA = g.getVertex(A);
+  GraphTraits::vertex_descriptor vA = g.getVertex(A);
   BOOST_CHECK(view.tree.find(vA) != view.tree.end());
 }
 
@@ -628,9 +624,9 @@ BOOST_AUTO_TEST_CASE(tree_view_automatic_update_remove_test)
     
     graph.remove_edge(A, B);
     
-    vertex_descriptor vA = graph.getVertex(A);
-    vertex_descriptor vB = graph.getVertex(B);
-    vertex_descriptor vC = graph.getVertex(C);
+    GraphTraits::vertex_descriptor vA = graph.getVertex(A);
+    GraphTraits::vertex_descriptor vB = graph.getVertex(B);
+    GraphTraits::vertex_descriptor vC = graph.getVertex(C);
     
     BOOST_CHECK(view.crossEdges.size() == 0);
     BOOST_CHECK(view.tree.find(vA) != view.tree.end());
@@ -652,9 +648,9 @@ BOOST_AUTO_TEST_CASE(tree_edge_exists_test)
     graph.add_edge(A, B, ep);
     graph.add_edge(B, C, ep);
     TreeView view = graph.getTree(A);
-    vertex_descriptor vA = graph.getVertex(A);
-    vertex_descriptor vB = graph.getVertex(B);
-    vertex_descriptor vC = graph.getVertex(C);
+    GraphTraits::vertex_descriptor vA = graph.getVertex(A);
+    GraphTraits::vertex_descriptor vB = graph.getVertex(B);
+    GraphTraits::vertex_descriptor vC = graph.getVertex(C);
     BOOST_CHECK(view.edgeExists(vA, vB));
     BOOST_CHECK(view.edgeExists(vB, vA));
     BOOST_CHECK(!view.edgeExists(vA, vC));
@@ -670,8 +666,8 @@ BOOST_AUTO_TEST_CASE(simple_modify_edge_prop_test_test)
     graph.add_edge(a, b, ep);
     
     ep.value = 21;
-    vertex_descriptor aDesc = graph.getVertex(a);
-    vertex_descriptor bDesc = graph.getVertex(b);
+    GraphTraits::vertex_descriptor aDesc = graph.getVertex(a);
+    GraphTraits::vertex_descriptor bDesc = graph.getVertex(b);
     
     graph.setEdgeProperty(aDesc, bDesc, ep);
     BOOST_CHECK(graph.getEdgeProperty(aDesc, bDesc).value == 21);

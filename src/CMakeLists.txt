@@ -10,20 +10,20 @@ set(headers items/ItemBase.hpp
             items/RandomGenerator.hpp
             items/SpatialItem.hpp
             items/BoundingVolume.hpp
-            graph/TransformGraphTypes.hpp
             graph/TransformGraphExceptions.hpp
             graph/TransformGraphVisitors.hpp
             graph/GraphViz.hpp
             graph/TreeView.hpp
             graph/GraphTypes.hpp
             graph/Graph.hpp
+            graph/TransformGraph.hpp
             events/GraphEvent.hpp
             events/GraphEventSubscriber.hpp
             events/GraphEventDispatcher.hpp
             events/GraphEventPublisher.hpp
-            events/TransformAddedEvent.hpp
-            events/TransformModifiedEvent.hpp
-            events/TransformRemovedEvent.hpp
+            events/EdgeAddedEvent.hpp
+            events/EdgeModifiedEvent.hpp
+            events/EdgeRemovedEvent.hpp
             events/ItemAddedEvent.hpp
             events/ItemRemovedEvent.hpp
             events/FrameAddedEvent.hpp

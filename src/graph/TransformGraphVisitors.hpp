@@ -7,7 +7,7 @@
 
 #pragma once
 #include "TransformGraphExceptions.hpp"
-#include "TransformGraphTypes.hpp"
+#include "GraphTypes.hpp"
 #include "TreeView.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/graph/breadth_first_search.hpp>
@@ -94,8 +94,8 @@ namespace envire { namespace core
             //      Because the signature for source() and target() is different
             //      on filtered_graphs. Dunno why exactly that happens but using
             //      the original graph works fine :-)
-            const vertex_descriptor source = boost::source(e, graph);
-            const vertex_descriptor target = boost::target(e, graph);
+            const typename GRAPH::vertex_descriptor source = boost::source(e, graph);
+            const typename GRAPH::vertex_descriptor target = boost::target(e, graph);
 
             /** Insert children **/
             view.tree[source].children.insert(target);
@@ -127,13 +127,13 @@ namespace envire { namespace core
     public:
       EdgeFilter() {}//needed by boost, dunno why
       
-      bool operator()(const edge_descriptor& e) const 
+      bool operator()(const GraphTraits::edge_descriptor& e) const 
       {
           return e != edge1 && e != edge2;
       }
       //the edges that should be removed
-      edge_descriptor edge1;
-      edge_descriptor edge2;
+      GraphTraits::edge_descriptor edge1;
+      GraphTraits::edge_descriptor edge2;
   };
 
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TransformGraphTypes.hpp"
+#include "GraphTypes.hpp"
 namespace envire { namespace core
 {
     /** Structure to store the parent and children relation for a vertex in a tree.
@@ -8,13 +8,13 @@ namespace envire { namespace core
     struct VertexRelation
     {
         VertexRelation* parentRelation; /**<can be NULL */
-        vertex_descriptor parent;
-        std::unordered_set<vertex_descriptor> children;
+        GraphTraits::vertex_descriptor parent;
+        std::unordered_set<GraphTraits::vertex_descriptor> children;
     };
 
     /**A map that shows the vertex information (parent and children) of the vertices in a tree.
        The key is the vertex descriptor.*/
-    using VertexRelationMap = std::unordered_map<vertex_descriptor, VertexRelation>;
+    using VertexRelationMap = std::unordered_map<GraphTraits::vertex_descriptor, VertexRelation>;
     
     
     class TreeView;
@@ -37,9 +37,9 @@ namespace envire { namespace core
     {
     public:
              
-        TreeView(vertex_descriptor root) : root(root) {}
+        TreeView(GraphTraits::vertex_descriptor root) : root(root) {}
         
-        TreeView() : root(boost::graph_traits<LabeledTransformGraph>::null_vertex()) {}
+        TreeView() : root(GraphTraits::null_vertex()) {}
         
         /**Creates a copy ***without*** retaining the treeUpdated subscribers  */
         TreeView(const TreeView& other)
@@ -96,7 +96,7 @@ namespace envire { namespace core
             publisher = pub;
         }
 
-        bool isRoot(const vertex_descriptor vd) const
+        bool isRoot(const GraphTraits::vertex_descriptor vd) const
         {
             return vd == root;
         }
@@ -109,7 +109,7 @@ namespace envire { namespace core
         }
         
         /**Returns true if an edge between a and b exists in @p view.*/
-        bool edgeExists(const vertex_descriptor a, const vertex_descriptor b) const
+        bool edgeExists(const GraphTraits::vertex_descriptor a, const GraphTraits::vertex_descriptor b) const
         {
             //an edge exists if either a is the parent of b and aChildren contains b
             //or the other way around.
@@ -151,10 +151,10 @@ namespace envire { namespace core
          * @note The TransformGraph always contains two edges between connected nodes (the edge and the inverse edge)
          *       However only one of them will be in the crossEdges. The other one automatically becomes a back-edge 
          *       and is ignored. */
-        std::vector<edge_descriptor> crossEdges;
+        std::vector<GraphTraits::edge_descriptor> crossEdges;
         
         /**The root node of this TreeView */
-        vertex_descriptor root;
+        GraphTraits::vertex_descriptor root;
               
     protected:
         TreeUpdatePublisher* publisher = nullptr;/*< Used for automatic unsubscribing in dtor */

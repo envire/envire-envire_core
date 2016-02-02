@@ -19,7 +19,7 @@
 
 
 
-namespace envire { namespace core { namespace graph
+namespace envire { namespace core
 {
 
 /**A double connected labeled graph structure.
@@ -39,13 +39,13 @@ class Graph : public GraphBase<FRAME_PROP, EDGE_PROP>,
               public envire::core::TreeUpdatePublisher
 {
 public:
-    using vertex_descriptor = typename GraphBase<FRAME_PROP, EDGE_PROP>::vertex_descriptor;
-    using edge_descriptor = typename GraphBase<FRAME_PROP, EDGE_PROP>::edge_descriptor;
-    using EdgePair = std::pair<edge_descriptor, bool>;
-    using vertices_size_type = typename GraphBase<FRAME_PROP, EDGE_PROP>::vertices_size_type;
-    using edges_size_type = typename GraphBase<FRAME_PROP, EDGE_PROP>::edges_size_type;
-    using GraphBase<FRAME_PROP, EDGE_PROP>::null_vertex;
-    using GraphBase<FRAME_PROP, EDGE_PROP>::vertex;
+
+     using vertex_descriptor = GraphTraits::vertex_descriptor;
+     using edge_descriptor = GraphTraits::edge_descriptor;
+     using EdgePair = std::pair<edge_descriptor, bool>;
+     using vertices_size_type = GraphTraits::vertices_size_type;
+     using edges_size_type = GraphTraits::edges_size_type;
+     using GraphBase<FRAME_PROP, EDGE_PROP>::vertex;
     
     Graph();
     
@@ -186,6 +186,8 @@ public:
     
     edges_size_type num_edges() const;
     
+    static vertex_descriptor null_vertex();
+    
 protected:
     using map_type = typename GraphBase<FRAME_PROP, EDGE_PROP>::map_type;
     using GraphBase<FRAME_PROP, EDGE_PROP>::graph;
@@ -222,6 +224,12 @@ protected:
 template <class F, class E>
 Graph<F,E>::Graph()
 {
+    /**These asserts are important because:
+     *   * we are handing out vertex_descriptor and edge_descriptor to the user.
+     *     If the underlying datatype is a random-access container the vertex_descriptors
+     *     could be invalidated each time a vertex/edge is added or removed.
+     *   * The null_vertex() definition is different for random_access containers
+     *     The definition provided in GraphTypes only works for pointer based containers.*/
     static_assert(std::is_same<typename GraphBase<F, E>::graph_type::graph_type::graph_type::vertex_list_selector, boost::listS>::value,
                   "vertex list type should be listS to ensure that vertex_descriptors remain valid");
     static_assert(std::is_same<typename GraphBase<F, E>::graph_type::graph_type::graph_type::edge_list_selector, boost::listS>::value,
@@ -245,7 +253,6 @@ typename Graph<F,E>::vertex_descriptor Graph<F,E>::addFrame(const FrameId& frame
     {
       throw FrameAlreadyExistsException(frame);
     }
-    notify(envire::core::FrameAddedEvent(frame));
     return desc;
 }
 
@@ -254,8 +261,7 @@ typename Graph<F,E>::vertex_descriptor Graph<F,E>::add_vertex(const FrameId& fra
                                                               const F& frame)
 {
     vertex_descriptor v = GraphBase<F, E>::add_vertex(frameId, frame);
-    //FIXME frameAddedEvent
-    //notify(FrameAddedEvent(frameId));
+    notify(FrameAddedEvent(frameId));
     return v;
 }
 
@@ -702,5 +708,11 @@ void Graph<F,E>::setEdgeProperty(const vertex_descriptor origin,
     notify(EdgeModifiedEvent(getFrameId(origin), getFrameId(target), originToTarget.first, targetToOrigin.first));
 }
 
-}}}
+template <class F, class E>
+typename Graph<F,E>::vertex_descriptor Graph<F,E>::null_vertex()
+{
+    return GraphTraits::null_vertex();
+}
+
+}}
 
