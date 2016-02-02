@@ -14,8 +14,8 @@
 
 #include "GraphTypes.hpp"
 #include "TreeView.hpp"
-#include "TransformGraphExceptions.hpp"
-#include "TransformGraphVisitors.hpp"
+#include "GraphExceptions.hpp"
+#include "GraphVisitors.hpp"
 
 
 

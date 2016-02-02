@@ -1,5 +1,5 @@
 /*
- * TransformGraphExceptions.hpp
+ * GraphExceptions.hpp
  *
  *  Created on: Sep 22, 2015
  *      Author: aboeckmann

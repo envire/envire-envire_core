@@ -1,12 +1,12 @@
 /*
- * TransformGraphExceptions.hpp
+ * GraphExceptions.hpp
  *
  *  Created on: Sep 22, 2015
  *      Author: jhidalgo
  */
 
 #pragma once
-#include "TransformGraphExceptions.hpp"
+#include "GraphExceptions.hpp"
 #include "GraphTypes.hpp"
 #include "TreeView.hpp"
 #include <boost/shared_ptr.hpp>

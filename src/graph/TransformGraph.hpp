@@ -16,8 +16,7 @@
 
 
 #include "Graph.hpp"
-#include "TransformGraphExceptions.hpp"
-#include "TransformGraphVisitors.hpp"
+#include "GraphExceptions.hpp"
 #include "TreeView.hpp"
 
 #include <envire_core/events/GraphEventPublisher.hpp>
