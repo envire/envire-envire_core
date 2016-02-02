@@ -478,17 +478,7 @@
 //     BOOST_CHECK_THROW(graph.getFrame(a), UnknownFrameException);
 // }
 // 
-// BOOST_AUTO_TEST_CASE(get_edge_invalid_test)
-// {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     FrameId c = "frame_c";
-//     TransformGraph tree;
-//     Transform tf;
-//     tree.addTransform(a, b, tf);
-//     tree.addTransform(a, c, tf);
-//     BOOST_CHECK_THROW(tree.getEdge(b, c), UnknownTransformException);
-// }
+
 // 
 
 
@@ -702,22 +692,12 @@
 
 
 // 
-// BOOST_AUTO_TEST_CASE(simple_get_tree_with_invalid_frameId_test)
-// {
-//     FrameId a = "frame_a";
-//     TransformGraph graph;
-//     BOOST_CHECK_THROW(graph.getTree(a), UnknownFrameException);
-// }
+
 // 
 // 
 // 
 // 
-// BOOST_AUTO_TEST_CASE(remove_unknown_frame_test)
-// {
-//     FrameId a = "frame_a";
-//     TransformGraph graph;
-//     BOOST_CHECK_THROW(graph.removeFrame(a), UnknownFrameException);
-// }
+
 // 
 // BOOST_AUTO_TEST_CASE(clear_unknown_frame_test)
 // {
@@ -950,60 +930,11 @@
 //     
 // }
 // 
-// BOOST_AUTO_TEST_CASE(get_path_test)
-// {
-//     TransformGraph graph;
-//     FrameId A("A");
-//     FrameId B("B");
-//     FrameId C("C");
-//     FrameId D("D");
-//     FrameId E("E");
-//     FrameId F("F");
-//     FrameId G("G");
-//     
-//     Transform tf;
-//     
-//     graph.addTransform(A, B, tf);
-//     graph.addTransform(B, C, tf);
-//     graph.addTransform(B, F, tf);
-//     graph.addTransform(A, E, tf);
-//     graph.addTransform(E, C, tf);
-//     graph.addTransform(C, D, tf);
-//     graph.addTransform(D, G, tf);
-//     graph.addTransform(C, F, tf);
-//     
-//     const vector<FrameId> path = graph.getPath(A, D);
-//     
-//     BOOST_CHECK(path[0] == A);
-//     BOOST_CHECK(path[1] == B);
-//     BOOST_CHECK(path[2] == C);
-//     BOOST_CHECK(path[3] == D);
-// }
+
 // 
-// BOOST_AUTO_TEST_CASE(get_path_invalid_frame_test)
-// {
-//     TransformGraph graph;
-//     FrameId A("A");
-//     FrameId B("B");
-//     
-//     graph.addFrame(A);
-//     BOOST_CHECK_THROW(graph.getPath(A, B), UnknownFrameException);
-//     BOOST_CHECK_THROW(graph.getPath(B, A), UnknownFrameException);
-// }
+
 // 
-// BOOST_AUTO_TEST_CASE(get_empty_path_test)
-// {
-//     TransformGraph graph;
-//     FrameId A("A");
-//     FrameId B("B");
-//     FrameId C("C");
-//     Transform tf;
-//     
-//     graph.addTransform(A, B, tf);
-//     graph.addFrame(C);
-//     const vector<FrameId> path = graph.getPath(A, C);
-//     BOOST_CHECK(path.size() == 0);
-// }
+
 
 
 // BOOST_AUTO_TEST_CASE(get_transform_with_descriptor_between_unconnected_frames_test)

@@ -417,7 +417,7 @@ Path Graph<F,E>::getPath(FrameId origin, FrameId target) const
     vertex_descriptor toDesc = getVertex(target); //may throw
   
     Path path;
-    envire::core::TransformGraphBFSVisitor <vertex_descriptor>visit(toDesc, this->graph());
+    envire::core::GraphBFSVisitor <vertex_descriptor>visit(toDesc, this->graph());
     try
     {
         boost::breadth_first_search(this->graph(), fromDesc, visitor(visit));

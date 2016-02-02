@@ -20,12 +20,14 @@ namespace envire { namespace core
 
     class Empty{};
 
+    /** Searches a graph in bfs order for a certain vertex.
+     *  Interrupts the search thrown an exception of the vertex is found. */
     template < typename Vertex>
-    class TransformGraphBFSVisitor: public boost::default_bfs_visitor
+    class GraphBFSVisitor: public boost::default_bfs_visitor
     {
     public:
         template <typename Graph>
-        TransformGraphBFSVisitor(const Vertex &v,const Graph &g):vertex_to_search(v)
+        GraphBFSVisitor(const Vertex &v,const Graph &g):vertex_to_search(v)
         {
             parent.reset(new std::unordered_map<Vertex,Vertex>());
             tree.reset(new std::deque<Vertex>());
@@ -51,7 +53,7 @@ namespace envire { namespace core
                     }
                 }
 
-                throw FoundFrameException(g[v].frame.name);
+                throw FoundFrameException(g[v].getId());
             }
         }
 
@@ -63,8 +65,6 @@ namespace envire { namespace core
             Vertex target_vertex = boost::target(e, g);
             parent->insert(std::make_pair<Vertex,Vertex>(static_cast<Vertex>(target_vertex), static_cast<Vertex>(source_vertex)));
         }
-
-
 
     public:
         Vertex vertex_to_search;

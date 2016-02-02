@@ -805,5 +805,80 @@ BOOST_AUTO_TEST_CASE(frame_removed_event_test)
     
 }
 
+BOOST_AUTO_TEST_CASE(get_path_test)
+{
+    Gra graph;
+    FrameId A("A");
+    FrameId B("B");
+    FrameId C("C");
+    FrameId D("D");
+    FrameId E("E");
+    FrameId F("F");
+    FrameId G("G");
+    
+    EdgeProp ep;
+    
+    graph.add_edge(A, B, ep);
+    graph.add_edge(B, C, ep);
+    graph.add_edge(B, F, ep);
+    graph.add_edge(A, E, ep);
+    graph.add_edge(E, C, ep);
+    graph.add_edge(C, D, ep);
+    graph.add_edge(D, G, ep);
+    graph.add_edge(C, F, ep);
+    
+    const vector<FrameId> path = graph.getPath(A, D);
+    
+    BOOST_CHECK(path[0] == A);
+    BOOST_CHECK(path[1] == B);
+    BOOST_CHECK(path[2] == C);
+    BOOST_CHECK(path[3] == D);
+}
+
+BOOST_AUTO_TEST_CASE(get_path_invalid_frame_test)
+{
+    Gra graph;
+    FrameId A("A");
+    FrameId B("B");
+    
+    graph.addFrame(A);
+    BOOST_CHECK_THROW(graph.getPath(A, B), UnknownFrameException);
+    BOOST_CHECK_THROW(graph.getPath(B, A), UnknownFrameException);
+}
+
+BOOST_AUTO_TEST_CASE(get_empty_path_test)
+{
+    Gra graph;
+    FrameId A("A");
+    FrameId B("B");
+    FrameId C("C");
+    EdgeProp ep;
+    
+    graph.add_edge(A, B, ep);
+    graph.addFrame(C);
+    const vector<FrameId> path = graph.getPath(A, C);
+    BOOST_CHECK(path.size() == 0);
+}
+
+BOOST_AUTO_TEST_CASE(remove_unknown_frame_test)
+{
+    FrameId a = "frame_a";
+    Gra graph;
+    BOOST_CHECK_THROW(graph.removeFrame(a), UnknownFrameException);
+}
+
+
+BOOST_AUTO_TEST_CASE(get_edge_invalid_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    Gra graph;
+    EdgeProp ep;
+    graph.add_edge(a, b, ep);
+    graph.add_edge(a, c, ep);
+    BOOST_CHECK_THROW(graph.getEdge(b, c), UnknownEdgeException);
+}
+
 
 
