@@ -5,7 +5,7 @@
 
 namespace envire { namespace core { 
   
-std::string demangleTypeName(const std::type_index& type)
+static std::string demangleTypeName(const std::type_index& type)
 {
   int status = 0;
   std::string result;
