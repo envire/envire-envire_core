@@ -23,6 +23,7 @@ rock_testsuite(test_suite suite.cpp
     test_property_tag.cpp
     test_graph.cpp
     test_transform.cpp
+    test_envire_graph.cpp
     DEPS_CMAKE Boost
     DEPS envire_core)
 

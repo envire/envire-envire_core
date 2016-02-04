@@ -9,13 +9,11 @@ namespace envire { namespace core
     class ItemAddedEvent : public GraphEvent
     {
     public:
-      ItemAddedEvent(const FrameId& frame, const ItemBase::Ptr item, std::type_index itemType) :
-        GraphEvent(GraphEvent::ITEM_ADDED_TO_FRAME), frame(frame), item(item),
-        itemType(itemType){}
+      ItemAddedEvent(const FrameId& frame, const ItemBase::Ptr item) :
+        GraphEvent(GraphEvent::ITEM_ADDED_TO_FRAME), frame(frame), item(item){}
 
       FrameId frame;/**<frame that the item has been added to.*/
       ItemBase::Ptr item; /**<The item */
-      std::type_index itemType; /**<Actual type of the item, can be used for downcasting */
     };
     
     //a type safe version of the above event

@@ -17,6 +17,7 @@ set(headers items/ItemBase.hpp
             graph/GraphTypes.hpp
             graph/Graph.hpp
             graph/TransformGraph.hpp
+            graph/EnvireGraph.hpp
             events/GraphEvent.hpp
             events/GraphEventSubscriber.hpp
             events/GraphEventDispatcher.hpp
@@ -42,6 +43,7 @@ set(sources items/ItemBase.cpp
             events/GraphEventPublisher.cpp
             events/GraphEventDispatcher.cpp
             events/GraphEventSubscriber.cpp
+            graph/EnvireGraph.cpp
             serialization/Serialization.cpp)
             
 set(deps_pkg_config base-types boost_serialization)
