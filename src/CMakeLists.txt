@@ -10,8 +10,8 @@ set(headers items/ItemBase.hpp
             items/RandomGenerator.hpp
             items/SpatialItem.hpp
             items/BoundingVolume.hpp
-            graph/TransformGraphExceptions.hpp
-            graph/TransformGraphVisitors.hpp
+            graph/GraphExceptions.hpp
+            graph/GraphVisitors.hpp
             graph/GraphViz.hpp
             graph/TreeView.hpp
             graph/GraphTypes.hpp

@@ -68,6 +68,11 @@ namespace envire { namespace core
             }
             return Transform(this->time, this->transform*tf.transform);
         }
+        
+        Transform inverse() const
+        {
+            return Transform(time, transform.inverse());
+        }
 
     private:
         /**Grants access to boost serialization */

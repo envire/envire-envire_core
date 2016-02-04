@@ -1,23 +1,344 @@
-// #include <boost/test/unit_test.hpp>
-// #define protected public
-// #include <envire_core/all>
-// 
-// #include <vector>
-// #include <string>
-// 
-// using namespace envire::core;
-// using namespace std;
-// 
-// bool compareTransform(const Transform& a, const Transform& b)
-// {
-//     return a.transform.translation.x() == b.transform.translation.x() &&
-//            a.transform.translation.y() == b.transform.translation.y() &&
-//            a.transform.translation.z() == b.transform.translation.z() &&
-//            a.transform.orientation.x() == b.transform.orientation.x() &&
-//            a.transform.orientation.y() == b.transform.orientation.y() &&
-//            a.transform.orientation.z() == b.transform.orientation.z() &&
-//            a.transform.orientation.w() == b.transform.orientation.w();
-// }
+#include <boost/test/unit_test.hpp>
+#define protected public
+#include <envire_core/graph/TransformGraph.hpp>
+#include <vector>
+#include <string>
+
+using namespace envire::core;
+using namespace std;
+
+class FrameProp 
+{
+public:
+  string id;
+  const string& getId() const {return id;}
+  void setId(const string& _id) {id = _id;}
+};
+
+using Tfg = TransformGraph<FrameProp>;
+using edge_descriptor = GraphTraits::edge_descriptor;
+using vertex_descriptor = GraphTraits::vertex_descriptor;
+
+
+void compareTranslation(const Transform& a, const Transform& b)
+{
+    BOOST_CHECK(a.transform.translation.x() == b.transform.translation.x());
+    BOOST_CHECK(a.transform.translation.y() == b.transform.translation.y());
+    BOOST_CHECK(a.transform.translation.z() == b.transform.translation.z());
+  
+}
+
+void compareTransform(const Transform& a, const Transform& b)
+{
+    BOOST_CHECK(a.transform.translation.x() == b.transform.translation.x());
+    BOOST_CHECK(a.transform.translation.y() == b.transform.translation.y());
+    BOOST_CHECK(a.transform.translation.z() == b.transform.translation.z());
+    BOOST_CHECK(a.transform.orientation.x() == b.transform.orientation.x());
+    BOOST_CHECK(a.transform.orientation.y() == b.transform.orientation.y());
+    BOOST_CHECK(a.transform.orientation.z() == b.transform.orientation.z()); 
+    BOOST_CHECK(a.transform.orientation.w() == b.transform.orientation.w());
+}
+
+
+BOOST_AUTO_TEST_CASE(create_test)
+{
+    Tfg g;
+}
+
+BOOST_AUTO_TEST_CASE(get_transform_from_vertices_test)
+{
+    Tfg graph;
+    FrameId a("A");
+    FrameId b("B");
+    Transform tf;
+    tf.transform.translation << 42, 42, 42;
+    Transform invTf = tf.inverse();
+    
+    graph.add_edge(a, b, tf);
+    vertex_descriptor aDesc = graph.getVertex(a);
+    vertex_descriptor bDesc = graph.getVertex(b);
+    
+    Transform tf2 = graph.getTransform(aDesc, bDesc);
+    compareTranslation(tf, tf2);
+    
+    Transform invtf2 = graph.getTransform(bDesc, aDesc);
+    compareTranslation(invtf2, invTf);
+    
+}
+
+BOOST_AUTO_TEST_CASE(get_transform_from_frameIds_test)
+{
+    Tfg graph;
+    FrameId a("A");
+    FrameId b("B");
+    Transform tf;
+    tf.transform.translation << -13, 27, 0;
+    Transform invTf = tf.inverse();
+    
+    graph.add_edge(a, b, tf);
+    
+    Transform tf2 = graph.getTransform(a, b);
+    compareTranslation(tf, tf2);
+    
+    Transform invtf2 = graph.getTransform(b, a);
+    compareTranslation(invtf2, invTf);  
+}
+
+BOOST_AUTO_TEST_CASE(get_transform_with_descriptor_without_edges_test)
+{
+    Tfg g;
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    Transform tf;
+    g.add_edge(a, b, tf);
+    g.disconnectFrame(a);
+    vertex_descriptor aDesc = g.vertex(a);
+    vertex_descriptor bDesc = g.vertex(b);
+    
+    BOOST_CHECK_THROW(g.getTransform(aDesc, bDesc), UnknownTransformException);
+}
+
+
+BOOST_AUTO_TEST_CASE(update_transform_with_descriptors_on_disconnected_graph_test)
+{
+    Tfg g;
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    Transform tf;
+    g.add_edge(a, b, tf);
+    g.disconnectFrame(a);
+    vertex_descriptor aDesc = g.vertex(a);
+    vertex_descriptor bDesc = g.vertex(b);
+    //test on totally disconnected graph
+    BOOST_CHECK_THROW(g.updateTransform(aDesc, bDesc, tf), UnknownEdgeException);
+    
+    //test on partially disconnected graph
+    FrameId c = "frame_c";
+    g.add_edge(a, c, tf);
+    BOOST_CHECK_THROW(g.updateTransform(aDesc, bDesc, tf), UnknownEdgeException);
+    
+}
+
+BOOST_AUTO_TEST_CASE(simple_add_get_transform_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    Tfg graph;
+    Transform tf;
+    tf.transform.translation << 42, 21, -42;
+    tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
+    BOOST_CHECK_NO_THROW(graph.add_edge(a, b, tf));
+    BOOST_CHECK(graph.num_edges() == 2);
+    BOOST_CHECK(graph.num_vertices() == 2);
+    Transform readTf = graph.getTransform(a, b);
+    compareTransform(readTf, tf);
+    Transform invTf = tf;
+    invTf.setTransform(tf.transform.inverse());
+    Transform readTfInv = graph.getTransform(b, a);
+    compareTransform(readTfInv, invTf);
+}
+
+
+BOOST_AUTO_TEST_CASE(complex_add_get_transform_test)
+{
+
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    FrameId d = "frame_d";
+    Tfg graph;
+    Transform tf;
+    tf.transform.translation << 42, 21, -42;
+    tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
+    BOOST_CHECK_NO_THROW(graph.addTransform(a, b, tf));
+    BOOST_CHECK_NO_THROW(graph.addTransform(b, c, tf));
+    BOOST_CHECK_NO_THROW(graph.addTransform(a, d, tf));
+    BOOST_CHECK(graph.num_edges() == 6);
+    BOOST_CHECK(graph.num_vertices() == 4);
+
+    /* a -> c **/
+    Transform readTf;
+    BOOST_CHECK_NO_THROW(readTf = graph.getTransform(a, c));
+    compareTransform(readTf, tf*tf);
+
+    /* c -> a **/
+    Transform invTf;
+    invTf.setTransform(tf.transform.inverse() * tf.transform.inverse());
+    Transform readTfInv;
+    BOOST_CHECK_NO_THROW(readTfInv = graph.getTransform(c, a));
+    compareTransform(readTfInv, invTf);
+
+    /* a -> d **/
+    BOOST_CHECK_NO_THROW(readTf = graph.getTransform(a, d));
+    compareTransform(readTf, tf);
+
+    /* c -> d **/
+    Transform complexTf;
+    complexTf.setTransform(tf.transform.inverse()*tf.transform.inverse()*tf.transform);
+    BOOST_CHECK_NO_THROW(readTf = graph.getTransform(c, d));
+    compareTransform(readTf, complexTf);
+
+    /* d -> c **/
+    complexTf.setTransform(tf.transform.inverse()*tf.transform*tf.transform);
+    BOOST_CHECK_NO_THROW(readTf = graph.getTransform(d, c));
+    compareTransform(readTf, complexTf);
+
+    //Close a cycle with an extra frame.
+    //In practice it should not happen in envire
+    FrameId e = "frame_e";
+    BOOST_CHECK_NO_THROW(graph.addTransform(d, e, tf));
+    BOOST_CHECK_NO_THROW(graph.addTransform(e, c, tf));
+
+    /* d -> c **/
+    BOOST_CHECK_NO_THROW(readTf = graph.getTransform(d, c));
+    compareTransform(readTf, tf*tf);
+
+    /* a-> e **/
+    BOOST_CHECK_NO_THROW(readTf = graph.getTransform(a, e));
+    compareTransform(readTf, tf*tf);
+
+    FrameId f = "frame_f";
+    BOOST_CHECK_NO_THROW(graph.addTransform(d, f, tf));
+
+    /* c -> f **/
+    BOOST_CHECK_NO_THROW(readTf = graph.getTransform(c, f));
+    complexTf.setTransform(tf.transform.inverse()*tf.transform.inverse()*tf.transform);
+    compareTransform(readTf, complexTf);
+
+}
+
+BOOST_AUTO_TEST_CASE(add_transform_exception_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    Tfg graph;
+    Transform tf;
+    BOOST_CHECK_NO_THROW(graph.addTransform(a, b, tf));
+    BOOST_CHECK_THROW(graph.addTransform(b, a, tf), EdgeAlreadyExistsException);
+}
+
+BOOST_AUTO_TEST_CASE(get_transform_exception_test)
+{
+    FrameId a = "frame_a";
+    FrameId c = "frame_c";
+    Tfg graph;
+    Transform tf;
+    BOOST_CHECK_THROW(graph.getTransform(a, c), UnknownFrameException);
+}
+
+
+BOOST_AUTO_TEST_CASE(get_transform_between_unconnected_trees)
+{
+    Tfg graph;
+    FrameId a("a");
+    FrameId b("b");
+    FrameId c("c");
+    FrameId d("d");
+    Transform tf;
+
+    graph.addTransform(a, b, tf);
+    graph.addTransform(c, d, tf);
+    BOOST_CHECK_THROW(graph.getTransform(a, c), UnknownTransformException);
+}
+
+BOOST_AUTO_TEST_CASE(get_transform_using_a_tree)
+{
+
+    Tfg graph;
+    /*       a
+     *      / \
+     *     c   b
+     *   /  \
+     *  d   e
+     *    /  \
+     *   f   g
+     */
+
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    FrameId d = "frame_d";
+    FrameId e = "frame_e";
+    FrameId f = "frame_f";
+    FrameId g = "frame_g";
+
+    Transform tf;
+    tf.transform.translation << 1, 2, 1;
+    tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitZ());
+
+    graph.addTransform(a, b, tf);
+    graph.addTransform(a, c, tf);
+    graph.addTransform(c, d, tf);
+    graph.addTransform(c, e, tf);
+    graph.addTransform(e, f, tf);
+    graph.addTransform(e, g, tf);
+
+    //use a as root
+    TreeView view = graph.getTree(graph.getVertex(a));
+    BOOST_CHECK(view.root == graph.getVertex(a));
+
+    Transform tree_tf_a_f = graph.getTransform(a, f, view);
+    Transform graph_tf_a_f = graph.getTransform(a, f);
+
+    /** Compare transform cannot be used due to round-off errors **/
+    BOOST_CHECK(tree_tf_a_f.transform.translation.isApprox(graph_tf_a_f.transform.translation));
+    BOOST_CHECK(tree_tf_a_f.transform.orientation.isApprox(graph_tf_a_f.transform.orientation));
+
+    Transform tree_tf_d_g = graph.getTransform(d, g, view);
+    Transform graph_tf_d_g = graph.getTransform(d, g);
+
+
+    /** Compare transform cannot be used due to round-off errors **/
+    BOOST_CHECK(tree_tf_d_g.transform.translation.isApprox(graph_tf_d_g.transform.translation));
+    BOOST_CHECK(tree_tf_d_g.transform.orientation.isApprox(graph_tf_d_g.transform.orientation));
+
+    Transform tree_tf_f_g = graph.getTransform(f, g, view);
+    Transform graph_tf_f_g = graph.getTransform(f, g);
+
+
+    /** Compare transform cannot be used due to round-off errors **/
+    BOOST_CHECK(tree_tf_f_g.transform.translation.isMuchSmallerThan(0.01));
+    BOOST_CHECK(graph_tf_f_g.transform.translation.isApprox(Eigen::Vector3d::Zero()));
+    BOOST_CHECK(tree_tf_f_g.transform.orientation.isApprox(graph_tf_f_g.transform.orientation));
+
+    /** Identity **/
+    Transform tree_tf_f_f = graph.getTransform(f, f, view);
+    BOOST_CHECK(tree_tf_f_f.transform.translation.isApprox(Eigen::Vector3d::Zero()));
+    BOOST_CHECK(tree_tf_f_f.transform.orientation.isApprox(Eigen::Quaterniond::Identity()));
+}
+
+
+BOOST_AUTO_TEST_CASE(get_transform_with_descriptor_between_unconnected_frames_test)
+{
+    Tfg graph;
+    FrameId a("A");
+    FrameId b("B");
+    graph.addFrame(a);
+    graph.addFrame(b);
+    
+    vertex_descriptor aDesc = graph.getVertex(a);
+    vertex_descriptor bDesc = graph.getVertex(b);
+    
+    BOOST_CHECK_THROW(graph.getTransform(aDesc, bDesc), UnknownTransformException);
+    
+}
+
+BOOST_AUTO_TEST_CASE(get_transform_from_edge_test)
+{
+    Tfg graph;
+    FrameId a("A");
+    FrameId b("B");
+    Transform tf;
+    tf.transform.translation << 42, 42, 42;
+    
+    graph.addTransform(a, b, tf);
+    edge_descriptor edge = graph.getEdge(a, b);
+    Transform tf2 = graph.getTransform(edge);
+    BOOST_CHECK(tf.transform.translation.x() == tf2.transform.translation.x());
+    BOOST_CHECK(tf.transform.translation.y() == tf2.transform.translation.y());
+    BOOST_CHECK(tf.transform.translation.z() == tf2.transform.translation.z());
+}
+
 // 
 // class Dispatcher : public GraphEventDispatcher {
 // public:
@@ -329,87 +650,11 @@
 // }
 // 
 
+
 // 
 
+// 
 
-// BOOST_AUTO_TEST_CASE(get_transform_with_descriptor_without_edges_test)
-// {
-//     TransformGraph g;
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     Transform tf;
-//     g.addTransform(a, b, tf);
-//     g.disconnectFrame(a);
-//     vertex_descriptor aDesc = g.vertex(a);
-//     vertex_descriptor bDesc = g.vertex(b);
-//     
-//     BOOST_CHECK_THROW(g.getTransform(aDesc, bDesc), UnknownTransformException);
-// }
-// 
-// BOOST_AUTO_TEST_CASE(update_transform_with_descriptors_on_disconnected_graph_test)
-// {
-//     TransformGraph g;
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     Transform tf;
-//     g.addTransform(a, b, tf);
-//     g.disconnectFrame(a);
-//     vertex_descriptor aDesc = g.vertex(a);
-//     vertex_descriptor bDesc = g.vertex(b);
-//     //test on totally disconnected graph
-//     BOOST_CHECK_THROW(g.updateTransform(aDesc, bDesc, tf), UnknownTransformException);
-//     
-//     //test on partially disconnected graph
-//     FrameId c = "frame_c";
-//     g.addTransform(a, c, tf);
-//     BOOST_CHECK_THROW(g.updateTransform(aDesc, bDesc, tf), UnknownTransformException);
-//     
-// }
-// 
-// 
-// BOOST_AUTO_TEST_CASE(get_transform_with_descriptors_test)
-// {
-//     TransformGraph g;
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     Transform tf;
-//     tf.transform.translation << 42, 21, 10;
-//     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
-//     g.addTransform(a, b, tf);
-//     vertex_descriptor aDesc = g.vertex(a);
-//     vertex_descriptor bDesc = g.vertex(b);  
-//     Transform tf2 = g.getTransform(aDesc, bDesc);
-//     BOOST_CHECK(compareTransform(tf, tf2));
-//     
-// }
-// 
-// BOOST_AUTO_TEST_CASE(get_edge_on_empty_tree_test)
-// {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     TransformGraph tree;
-//     BOOST_CHECK_THROW(tree.getEdge(a, b), UnknownFrameException);
-// }
-// 
-// BOOST_AUTO_TEST_CASE(disconnect_frame_test)
-// {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     FrameId c = "frame_c";
-//     TransformGraph tree;
-//     Transform tf;
-//     tree.addTransform(a, b, tf);
-//     tree.addTransform(a, c, tf);
-//     tree.disconnectFrame(a);
-//     BOOST_CHECK_THROW(tree.getTransform(a, b), UnknownTransformException);
-//     BOOST_CHECK_THROW(tree.getTransform(b, a), UnknownTransformException);
-//     BOOST_CHECK_THROW(tree.getTransform(a, c), UnknownTransformException);
-//     BOOST_CHECK_THROW(tree.getTransform(c, a), UnknownTransformException); 
-//     
-//     FrameId d = "frame_d";
-//     BOOST_CHECK_THROW(tree.disconnectFrame(d), UnknownFrameException);
-//     
-// }
 // 
 // 
 // BOOST_AUTO_TEST_CASE(clear_frame_test)
@@ -460,176 +705,11 @@
 //   //boost:tie(begin, end) = g.getItems<Item<Joint>::Ptr>(frame);
 // 
 // }
-// 
-// 
-// BOOST_AUTO_TEST_CASE(remove_frame_test)
-// {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     FrameId c = "frame_c";
-//     TransformGraph graph;
-//     Transform tf;
-//     graph.addTransform(a, b, tf);
-//     graph.addTransform(a, c, tf);
-//     
-//     BOOST_CHECK_THROW(graph.removeFrame(a), FrameStillConnectedException);
-//     graph.disconnectFrame(a);
-//     graph.removeFrame(a);
-//     BOOST_CHECK_THROW(graph.getFrame(a), UnknownFrameException);
-// }
-// 
+
+
 
 // 
 
-
-// 
-// BOOST_AUTO_TEST_CASE(operations_with_transform)
-// {
-//     Transform tf1, tf2;
-//     tf1.transform.translation << 42, 21, -42;
-//     tf1.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
-//     tf2.transform.translation << 42, 21, -42;
-//     tf2.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
-// 
-//     Transform tf_manual;
-//     tf_manual.setTransform(tf1.transform * tf2.transform);
-//     Transform tf_operator(tf1 * tf2);
-//     BOOST_CHECK(compareTransform(tf_operator, tf_manual));
-// }
-// 
-// BOOST_AUTO_TEST_CASE(simple_add_get_transform_test)
-// {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     TransformGraph tree;
-//     Transform tf;
-//     tf.transform.translation << 42, 21, -42;
-//     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
-//     BOOST_CHECK_NO_THROW(tree.addTransform(a, b, tf));
-//     BOOST_CHECK(tree.num_edges() == 2);
-//     BOOST_CHECK(tree.num_vertices() == 2);
-//     Transform readTf = tree.getTransform(a, b);
-//     BOOST_CHECK(compareTransform(readTf, tf));
-//     Transform invTf = tf;
-//     invTf.setTransform(tf.transform.inverse());
-//     Transform readTfInv = tree.getTransform(b, a);
-//     BOOST_CHECK(compareTransform(readTfInv, invTf));
-// }
-// 
-// 
-// BOOST_AUTO_TEST_CASE(add_transform_existing_vertex_test)
-// { 
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     TransformGraph graph;
-//     graph.addFrame(a);
-//     graph.addFrame(b);
-//     
-//     vertex_descriptor aDesc = graph.vertex(a);
-//     vertex_descriptor bDesc = graph.vertex(b);
-//     
-//     Transform tf;
-//     graph.addTransform(aDesc, bDesc, tf);
-//     BOOST_CHECK_NO_THROW(graph.getTransform(a, b));
-//     
-//     
-// }
-// 
-// BOOST_AUTO_TEST_CASE(complex_add_get_transform_test)
-// {
-// 
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     FrameId c = "frame_c";
-//     FrameId d = "frame_d";
-//     TransformGraph tree;
-//     Transform tf;
-//     tf.transform.translation << 42, 21, -42;
-//     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
-//     BOOST_CHECK_NO_THROW(tree.addTransform(a, b, tf));
-//     BOOST_CHECK_NO_THROW(tree.addTransform(b, c, tf));
-//     BOOST_CHECK_NO_THROW(tree.addTransform(a, d, tf));
-//     BOOST_CHECK(tree.num_edges() == 6);
-//     BOOST_CHECK(tree.num_vertices() == 4);
-// 
-//     /* a -> c **/
-//     BOOST_TEST_MESSAGE( "a - > c" );
-//     Transform readTf;
-//     BOOST_CHECK_NO_THROW(readTf = tree.getTransform(a, c));
-//     BOOST_CHECK(compareTransform(readTf, tf*tf));
-// 
-//     /* c -> a **/
-//     BOOST_TEST_MESSAGE( "c - > a" );
-//     Transform invTf;
-//     invTf.setTransform(tf.transform.inverse() * tf.transform.inverse());
-//     Transform readTfInv;
-//     BOOST_CHECK_NO_THROW(readTfInv = tree.getTransform(c, a));
-//     BOOST_CHECK(compareTransform(readTfInv, invTf));
-// 
-//     /* a -> d **/
-//     BOOST_TEST_MESSAGE( "a - > d" );
-//     BOOST_CHECK_NO_THROW(readTf = tree.getTransform(a, d));
-//     BOOST_CHECK(compareTransform(readTf, tf));
-// 
-//     /* c -> d **/
-//     BOOST_TEST_MESSAGE( "c - > d" );
-//     Transform complexTf;
-//     complexTf.setTransform(tf.transform.inverse()*tf.transform.inverse()*tf.transform);
-//     BOOST_CHECK_NO_THROW(readTf = tree.getTransform(c, d));
-//     BOOST_CHECK(compareTransform(readTf, complexTf));
-// 
-//     /* d -> c **/
-//     BOOST_TEST_MESSAGE( "d - > c" );
-//     complexTf.setTransform(tf.transform.inverse()*tf.transform*tf.transform);
-//     BOOST_CHECK_NO_THROW(readTf = tree.getTransform(d, c));
-//     BOOST_CHECK(compareTransform(readTf, complexTf));
-// 
-//     //Close a cycle with an extra frame.
-//     //In practice it should not happen in envire
-//     FrameId e = "frame_e";
-//     BOOST_CHECK_NO_THROW(tree.addTransform(d, e, tf));
-//     BOOST_CHECK_NO_THROW(tree.addTransform(e, c, tf));
-// 
-//     /* d -> c **/
-//     BOOST_TEST_MESSAGE( "d - > c" );
-//     BOOST_CHECK_NO_THROW(readTf = tree.getTransform(d, c));
-//     BOOST_CHECK(compareTransform(readTf, tf*tf));
-// 
-//     /* a-> e **/
-//     BOOST_TEST_MESSAGE( "a - > e" );
-//     BOOST_CHECK_NO_THROW(readTf = tree.getTransform(a, e));
-//     BOOST_CHECK(compareTransform(readTf, tf*tf));
-// 
-//     FrameId f = "frame_f";
-//     BOOST_CHECK_NO_THROW(tree.addTransform(d, f, tf));
-// 
-//     /* c -> f **/
-//     BOOST_TEST_MESSAGE( "c - > f" );
-//     BOOST_CHECK_NO_THROW(readTf = tree.getTransform(c, f));
-//     complexTf.setTransform(tf.transform.inverse()*tf.transform.inverse()*tf.transform);
-//     BOOST_CHECK(compareTransform(readTf, complexTf));
-// 
-// }
-// 
-// 
-// BOOST_AUTO_TEST_CASE(add_transform_exception_test)
-// {
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     TransformGraph tree;
-//     Transform tf;
-//     BOOST_CHECK_NO_THROW(tree.addTransform(a, b, tf));
-//     BOOST_CHECK_THROW(tree.addTransform(b, a, tf), TransformAlreadyExistsException);
-// }
-// 
-// BOOST_AUTO_TEST_CASE(get_transform_exception_test)
-// {
-//     FrameId a = "frame_a";
-//     FrameId c = "frame_c";
-//     TransformGraph tree;
-//     Transform tf;
-//     BOOST_CHECK_THROW(tree.getTransform(a, c), UnknownTransformException);
-// }
 // 
 // 
 // 
@@ -816,92 +896,9 @@
 //     BOOST_CHECK(!graph.containsItems<Item<int>>(a));
 // }
 // 
-// BOOST_AUTO_TEST_CASE(get_transform_between_unconnected_trees)
-// {
-//     TransformGraph graph;
-//     FrameId a("a");
-//     FrameId b("b");
-//     FrameId c("c");
-//     FrameId d("d");
-//     Transform tf;
+
 // 
-//     graph.addTransform(a, b, tf);
-//     graph.addTransform(c, d, tf);
-//     BOOST_CHECK_THROW(graph.getTransform(a, c), UnknownTransformException);
-// }
-// 
-// BOOST_AUTO_TEST_CASE(get_transform_using_a_tree)
-// {
-// 
-//     TransformGraph graph;
-//     /*       a
-//      *      / \
-//      *     c   b
-//      *   /  \
-//      *  d   e
-//      *    /  \
-//      *   f   g
-//      */
-// 
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     FrameId c = "frame_c";
-//     FrameId d = "frame_d";
-//     FrameId e = "frame_e";
-//     FrameId f = "frame_f";
-//     FrameId g = "frame_g";
-// 
-//     Transform tf;
-//     tf.transform.translation << 1, 2, 1;
-//     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitZ());
-// 
-//     graph.addTransform(a, b, tf);
-//     graph.addTransform(a, c, tf);
-//     graph.addTransform(c, d, tf);
-//     graph.addTransform(c, e, tf);
-//     graph.addTransform(e, f, tf);
-//     graph.addTransform(e, g, tf);
-// 
-//     //use a as root
-//     TreeView view = graph.getTree(graph.getVertex(a));
-//     BOOST_CHECK(view.root == graph.getVertex(a));
-// 
-//     Transform tree_tf_a_f = graph.getTransform(a, f, view);
-//     Transform graph_tf_a_f = graph.getTransform(a, f);
-// 
-//     BOOST_TEST_MESSAGE(tree_tf_a_f.transform);
-//     BOOST_TEST_MESSAGE(graph_tf_a_f.transform);
-// 
-//     /** Compare transform cannot be used due to round-off errors **/
-//     BOOST_CHECK(tree_tf_a_f.transform.translation.isApprox(graph_tf_a_f.transform.translation));
-//     BOOST_CHECK(tree_tf_a_f.transform.orientation.isApprox(graph_tf_a_f.transform.orientation));
-// 
-//     Transform tree_tf_d_g = graph.getTransform(d, g, view);
-//     Transform graph_tf_d_g = graph.getTransform(d, g);
-// 
-//     BOOST_TEST_MESSAGE(tree_tf_d_g.transform);
-//     BOOST_TEST_MESSAGE(graph_tf_d_g.transform);
-// 
-//     /** Compare transform cannot be used due to round-off errors **/
-//     BOOST_CHECK(tree_tf_d_g.transform.translation.isApprox(graph_tf_d_g.transform.translation));
-//     BOOST_CHECK(tree_tf_d_g.transform.orientation.isApprox(graph_tf_d_g.transform.orientation));
-// 
-//     Transform tree_tf_f_g = graph.getTransform(f, g, view);
-//     Transform graph_tf_f_g = graph.getTransform(f, g);
-// 
-//     BOOST_TEST_MESSAGE(tree_tf_f_g.transform);
-//     BOOST_TEST_MESSAGE(graph_tf_f_g.transform);
-// 
-//     /** Compare transform cannot be used due to round-off errors **/
-//     BOOST_CHECK(tree_tf_f_g.transform.translation.isMuchSmallerThan(0.01));
-//     BOOST_CHECK(graph_tf_f_g.transform.translation.isApprox(Eigen::Vector3d::Zero()));
-//     BOOST_CHECK(tree_tf_f_g.transform.orientation.isApprox(graph_tf_f_g.transform.orientation));
-// 
-//     /** Identity **/
-//     Transform tree_tf_f_f = graph.getTransform(f, f, view);
-//     BOOST_CHECK(tree_tf_f_f.transform.translation.isApprox(Eigen::Vector3d::Zero()));
-//     BOOST_CHECK(tree_tf_f_f.transform.orientation.isApprox(Eigen::Quaterniond::Identity()));
-// }
+
 // 
 // BOOST_AUTO_TEST_CASE(item_count_test)
 // {
@@ -937,34 +934,7 @@
 
 
 
-// BOOST_AUTO_TEST_CASE(get_transform_with_descriptor_between_unconnected_frames_test)
-// {
-//     TransformGraph graph;
-//     FrameId a("A");
-//     FrameId b("B");
-//     graph.addFrame(a);
-//     graph.addFrame(b);
-//     
-//     vertex_descriptor aDesc = graph.getVertex(a);
-//     vertex_descriptor bDesc = graph.getVertex(b);
-//     
-//     BOOST_CHECK_THROW(graph.getTransform(aDesc, bDesc), UnknownTransformException);
-//     
-// }
+
 // 
-// BOOST_AUTO_TEST_CASE(get_transform_from_edge_test)
-// {
-//     TransformGraph graph;
-//     FrameId a("A");
-//     FrameId b("B");
-//     Transform tf;
-//     tf.transform.translation << 42, 42, 42;
-//     
-//     graph.addTransform(a, b, tf);
-//     edge_descriptor edge = graph.getEdge(a, b);
-//     Transform tf2 = graph.getTransform(edge);
-//     BOOST_CHECK(tf.transform.translation.x() == tf2.transform.translation.x());
-//     BOOST_CHECK(tf.transform.translation.y() == tf2.transform.translation.y());
-//     BOOST_CHECK(tf.transform.translation.z() == tf2.transform.translation.z());
-// }
+
 

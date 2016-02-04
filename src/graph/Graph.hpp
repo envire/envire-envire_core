@@ -65,7 +65,7 @@ public:
     * A frame can only be removed if there are no edges connected to
     * or coming from that frame.
     * @throw UnknownFrameException if the frame does not exist.
-    * @ŧhrow FrameStillConnectedException if there are still transforms
+    * @ŧhrow FrameStillConnectedException if there are still edges
     *                                     coming from or leading to this
     *                                     frame. */
     void removeFrame(const FrameId& frame);
@@ -111,7 +111,7 @@ public:
     
     /** @return the edge between frame @p origin and @p target
       * @throw UnknownFrameException If @p orign or @p target do not exist.
-      * @throw UnknownTransformException if there is no such edge  */
+      * @throw UnknownEdgeException if there is no such edge  */
     edge_descriptor getEdge(const FrameId& origin, const FrameId& target) const;
     edge_descriptor getEdge(const vertex_descriptor origin, const vertex_descriptor target) const;
     
@@ -161,8 +161,8 @@ public:
     
     /**Builds a TreeView containing all vertices that are accessible starting
       * from @p root and writes it to @p outView.
-      * if @p keepTreeUpdated is true, the TransformGraph will retain a pointer
-      * to @p outView and update it whenenver transformations are added or removed.
+      * if @p keepTreeUpdated is true, the Graph will retain a pointer
+      * to @p outView and update it whenever edges are added or removed.
       * If the TreeView is destroyed it will automatically unsubscribe from
       * the graph. The view can also be unsubscribed manually by calling
       * unsubscribeTreeView()*/
@@ -197,8 +197,8 @@ protected:
     vertex_descriptor add_vertex(const FrameId& frameId, const FRAME_PROP& frame);
     
     /**Update all subscribed TreeViews with the new edge.
-    * @note When adding a new transform the back-edge is added to the graph
-    *       as well. I.e. for each transform two edges are added to the graph.
+    * @note When adding a new edge the back-edge is added to the graph
+    *       as well. I.e. for each edge two edges are added to the graph.
     *       However only one of the edges should be added to the tree,
     *       because the tree does not care about edge direction.
     *       It does not matter whether you add the back-edge or the edge
@@ -517,9 +517,9 @@ void Graph<F,E>::remove_edge(const vertex_descriptor origin,
     //FIXME so umbauen, dass getFrameId hier nicht nochmal aufgerufen werden muss
     notify(envire::core::EdgeRemovedEvent(getFrameId(target), getFrameId(origin)));
     
-    //removing a transform might invalidate the TreeViews.
+    //removing an edge might invalidate the TreeViews.
     //This is a brute-force solution to the problem.
-    //FIXME update TreeViews when removing a transform instead of rebuilding them
+    //FIXME update TreeViews when removing an edge instead of rebuilding them
     rebuildTreeViews();
 }
 
