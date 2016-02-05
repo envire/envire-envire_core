@@ -3,7 +3,7 @@
 
 #include <fstream> // std::ofstream
 
-#include <envire_core/graph/TransformGraph.hpp>
+#include <envire_core/graph/EnvireGraph.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/algorithm/string.hpp>
 #include <envire_core/util/Demangle.hpp>
@@ -11,91 +11,26 @@
 namespace envire { namespace core
 {
 
-    /**@class Transform Writer
-    * Frame Graph Viz property writer for boost graphs
-    * */
-    template <class _Frame>
-    class FrameWriter
+    /**@class GraphVizConceptWriter
+     * Writes edge properties or vertex properties that follow the 
+     * concepts specified in graph/GraphTypes.hpp to graphviz output.
+     * */
+    template <class PROP_MAP>
+    class GraphVizConceptWriter
     {
     public:
-        FrameWriter(_Frame _f):f(_f){}
-        template <class _Vertex>
-        void operator()(std::ostream &out, const _Vertex& n) const
+        GraphVizConceptWriter(PROP_MAP propMap) : propMap(propMap){}
+        
+        template <class EDGE_OR_VERTEX>
+        void operator()(std::ostream &out, const EDGE_OR_VERTEX& eov) const
         {
-            const Frame& frame = f[n];
-            
-            //example output line:
-            //label="{{frame_a | 3} | {boost::shared_ptr\<envire::core::Item\<float\> \>|1}| {boost::shared_ptr\<envire::core::Item\<int\> \>|1}| {boost::shared_ptr\<envire::core::Item\<std::string\> \>|1}}", 
-            
-            out << "[shape=record, label=\"{{" << frame.name <<
-                   "|" << frame.calculateTotalItemCount() << "}";
-                
-            for(const auto& itemPair : frame.items)
-            {
-                std::string typeName = demangleTypeName(itemPair.first);
-                //all types in the graph are stored as shared pointers, but
-                //the user does not care about it and it clutters the output
-                //typeName = stripSharedPtr(typeName);
-                typeName = escapeLabel(typeName);
-                out << "| {" << typeName  << "|" << itemPair.second.size() << "}";
-            }
-            out << "}\"" << ",style=filled,fillcolor=lightblue]";
-        }
-
-    private:
-           
-      /**escapes angle braces because they are not valid dot labels */
-      std::string escapeLabel(const std::string& label) const
-      {
-        const std::string one = boost::replace_all_copy(label, "<", "\\<");
-        const std::string two = boost::replace_all_copy(one, ">", "\\>");
-        return two;
-      }
-      
-      /**
-       * Expects input of the format
-       * "boost::shared_ptr<STUFF>"
-       * and returns "STUFF"
-       */
-      std::string stripSharedPtr(const std::string& input) const 
-      {
-        if(boost::starts_with(input, "boost::shared_ptr<"))
-        {
-          std::string output = boost::erase_first_copy(input, "boost::shared_ptr<");
-          output = boost::erase_last_copy(output, ">");
-          return output;
-        }
-        return input;
-      }
-      
-        _Frame f;
-
-    };
-
-    /**@class Transform Writer
-     * Transform Graph Viz Property writer for boost graphs
-     * */
-    template <class _Transform>
-    class TransformWriter
-    {
-    public:
-        TransformWriter(_Transform _tf):tf(_tf){}
-        template <class _Edge>
-        void operator()(std::ostream &out, const _Edge& e) const
-        {
-            out << "[label=\"" << tf[e].time.toString(::base::Time::Seconds) <<
-                boost::format("\\nt: (%.1f %.1f %.1f)\\nr: (%.1f %.1f %.1f %.1f)") % tf[e].transform.translation.x() % tf[e].transform.translation.y() % tf[e].transform.translation.z()
-                % tf[e].transform.orientation.w() % tf[e].transform.orientation.x() % tf[e].transform.orientation.y() % tf[e].transform.orientation.z()
-                << "\""
-                << ",shape=ellipse,color=red,style=filled,fillcolor=lightcoral]";
+            out << propMap[eov].toGraphviz();
         }
     private:
-        _Transform tf;
+        PROP_MAP propMap;
     };
 
-    /**@class Environment Writer
-     * Transform Graph Viz Property writer for boost graphs
-     * */
+
     class GraphPropWriter
     {
     public:
@@ -109,45 +44,24 @@ namespace envire { namespace core
 
 
     /**@class GraphViz
-     * Class to print TransformGraphs in Graph Viz
+     * Creates .dot graphs for all Graphs that follow the concepts specified in 
+     * graph/GraphTypes.hpp
      * */
     class GraphViz
     {
 
     protected:
-
-        inline GraphPropWriter
-        make_graph_writer()
+        
+        template <class PROP_MAP>
+        static GraphVizConceptWriter<PROP_MAP> make_property_writer(PROP_MAP propMap)
         {
-            return GraphPropWriter();
+            return GraphVizConceptWriter<PROP_MAP>(propMap);
         }
-
-
-        /**@brief Writer for Frame Node
-         */
-        template <class _Frame>
-        inline FrameWriter<_Frame>
-        make_node_writer(_Frame frame)
-        {
-            return FrameWriter<_Frame>(frame);
-        }
-
-
-        /**@brief Writer for Frame Node
-         */
-        template <class _Transform>
-        inline TransformWriter<_Transform>
-        make_edge_writer(_Transform tf)
-        {
-            return TransformWriter<_Transform>(tf);
-        }
-
+        
     public:
-
-        /**@brief Export to GraphViz
-         *
-         */
-        void write(const TransformGraphBase &graph, const std::string& filename = "")
+        
+        template <class FRAME_PROP, class EDGE_PROP>
+        static void write(const Graph<FRAME_PROP, EDGE_PROP> &graph, const std::string& filename = "")
         {
             std::streambuf * buf;
             std::ofstream of;
@@ -165,14 +79,9 @@ namespace envire { namespace core
             /** Print graph **/
             std::ostream out(buf);
             boost::write_graphviz (out, graph,
-                    make_node_writer(boost::get(&FrameProperty::frame, graph)),
-                    make_edge_writer(boost::get(&TransformProperty::transform, graph)),
-                    make_graph_writer());
-        }
-
-        void write(const TransformGraph &tree, const std::string& filename = "")
-        {
-            write(dynamic_cast<const TransformGraphBase&>(tree.graph()), filename);
+                    make_property_writer(boost::get(boost::vertex_bundle, graph)),
+                    make_property_writer(boost::get(boost::edge_bundle, graph)),
+                    GraphPropWriter());       
         }
     };
 }}

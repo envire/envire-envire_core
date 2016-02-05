@@ -1,9 +1,11 @@
 #include <boost/test/unit_test.hpp>
+#include <boost/lexical_cast.hpp>
 #define protected public
 #include <envire_core/graph/EnvireGraph.hpp>
 #include <envire_core/events/GraphEventDispatcher.hpp>
 #include <envire_core/events/GraphItemEventDispatcher.hpp>
 #include <envire_core/items/Item.hpp>
+#include <envire_core/graph/GraphViz.hpp>
 #include <vector>
 
 
@@ -487,4 +489,48 @@ BOOST_AUTO_TEST_CASE(contains_item_test)
     BOOST_CHECK(graph.containsItems<Item<string>>(a));
     BOOST_CHECK(!graph.containsItems<Item<int>>(a));
 }
+
+
+BOOST_AUTO_TEST_CASE(graphviz_test)
+{
+    EnvireGraph graph;
+    
+    for(int i = 0; i < 12; ++i)
+    {
+        FrameId origin = "frame_" + boost::lexical_cast<std::string>(i);
+        FrameId target = "frame_" + boost::lexical_cast<std::string>(i + 1);
+        Transform tf;
+        graph.addTransform(origin, target, tf);
+    }
+    GraphViz viz;
+    viz.write(graph, "envireGraph_graphviz_test.dot");
+}
+
+BOOST_AUTO_TEST_CASE(complex_graphviz_test)
+{
+    EnvireGraph graph;
+    
+    const FrameId a = "frame_a";
+    const FrameId b = "frame_b";
+    const FrameId c = "frame_c";
+    Transform aToB;
+    aToB.transform.translation << 1, 2, 3;
+    Transform bToC;
+    bToC.transform.translation << 42, 44, -3;
+    
+    graph.addTransform(a, b, aToB);
+    graph.addTransform(b, c, bToC);
+    
+    Item<string>::Ptr item1(new Item<string>("So say we all!"));
+    Item<int>::Ptr item2(new Item<int>(42));
+    Item<float>::Ptr item3(new Item<float>(21.0f)); 
+    
+    graph.addItemToFrame(a, item1);
+    graph.addItemToFrame(a, item2);
+    graph.addItemToFrame(a, item3);
+    
+    GraphViz viz;
+    viz.write(graph, "envireGraph_complex_graphviz_test.dot");
+}
+
 

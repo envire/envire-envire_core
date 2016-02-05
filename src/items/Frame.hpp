@@ -4,6 +4,7 @@
 #include <boost/serialization/string.hpp>
 #include <vector>
 #include <string>
+#include <sstream>
 #include <unordered_map>
 #include <typeindex>
     
@@ -11,6 +12,7 @@
 #include "RandomGenerator.hpp"
 #include <boost_serialization/BoostTypes.hpp>
 #include <envire_core/serialization/Serialization.hpp>
+#include <envire_core/util/Demangle.hpp>
 
 namespace envire { namespace core
 {
@@ -57,6 +59,22 @@ namespace envire { namespace core
               count += itemPair.second.size();
             }
             return count;
+        }
+        
+        const std::string toGraphviz() const 
+        {
+            std::stringstream out;
+            out << "[shape=record, label=\"{{" << id <<
+                   "|" << calculateTotalItemCount() << "}";
+                
+            for(const auto& itemPair : items)
+            {
+                std::string typeName = demangleTypeName(itemPair.first);
+                typeName = escapeAngleBraces(typeName);
+                out << "| {" << typeName  << "|" << itemPair.second.size() << "}";
+            }
+            out << "}\"" << ",style=filled,fillcolor=lightblue]";
+            return out.str();
         }
 
     private:

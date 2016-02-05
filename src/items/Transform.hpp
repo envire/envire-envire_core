@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
 #include <boost_serialization/BaseTypes.hpp>
@@ -72,6 +73,17 @@ namespace envire { namespace core
         Transform inverse() const
         {
             return Transform(time, transform.inverse());
+        }
+        
+        const std::string toGraphviz() const 
+        {
+            std::stringstream out;
+            out << "[label=\"" << time.toString(::base::Time::Seconds) <<
+            boost::format("\\nt: (%.2f %.2f %.2f)\\nr: (%.2f %.2f %.2f %.2f)") % transform.translation.x() % transform.translation.y() % transform.translation.z()
+            % transform.orientation.w() % transform.orientation.x() % transform.orientation.y() % transform.orientation.z()
+            << "\""
+            << ",shape=ellipse,color=red,style=filled,fillcolor=lightcoral]";
+            return out.str();
         }
 
     private:

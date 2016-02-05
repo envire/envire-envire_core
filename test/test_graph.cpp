@@ -1,7 +1,9 @@
 #define protected public
 #include <boost/test/unit_test.hpp>
+#include <boost/lexical_cast.hpp>
 #include <envire_core/graph/Graph.hpp>
 #include <envire_core/events/GraphEventDispatcher.hpp>
+#include <envire_core/graph/GraphViz.hpp>
 #include <vector>
 #include <string>
  
@@ -21,6 +23,11 @@ public:
   {
       id = _id;
   }
+  
+  const string toGraphviz() const
+  {
+      return "[label=\"" + id + "\"]";
+  }
 };
 
 struct EdgeProp
@@ -33,6 +40,12 @@ struct EdgeProp
     other.inverted = !inverted;
     other.value = -value;
     return other;
+  }
+  
+  const string toGraphviz() const
+  {
+      return "[label=\" inverted: " + boost::lexical_cast<string>(inverted) +
+             ", value: " + boost::lexical_cast<string>(value) + "\"]";
   }
 };
 
@@ -944,79 +957,25 @@ BOOST_AUTO_TEST_CASE(add_edge_existing_vertex_test)
     
 }
 
-// BOOST_AUTO_TEST_CASE(complex_add_get_transform_test)
-// {
-// 
-//     FrameId a = "frame_a";
-//     FrameId b = "frame_b";
-//     FrameId c = "frame_c";
-//     FrameId d = "frame_d";
-//     TransformGraph tree;
-//     Transform tf;
-//     tf.transform.translation << 42, 21, -42;
-//     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
-//     BOOST_CHECK_NO_THROW(tree.addTransform(a, b, tf));
-//     BOOST_CHECK_NO_THROW(tree.addTransform(b, c, tf));
-//     BOOST_CHECK_NO_THROW(tree.addTransform(a, d, tf));
-//     BOOST_CHECK(tree.num_edges() == 6);
-//     BOOST_CHECK(tree.num_vertices() == 4);
-// 
-//     /* a -> c **/
-//     BOOST_TEST_MESSAGE( "a - > c" );
-//     Transform readTf;
-//     BOOST_CHECK_NO_THROW(readTf = tree.getTransform(a, c));
-//     BOOST_CHECK(compareTransform(readTf, tf*tf));
-// 
-//     /* c -> a **/
-//     BOOST_TEST_MESSAGE( "c - > a" );
-//     Transform invTf;
-//     invTf.setTransform(tf.transform.inverse() * tf.transform.inverse());
-//     Transform readTfInv;
-//     BOOST_CHECK_NO_THROW(readTfInv = tree.getTransform(c, a));
-//     BOOST_CHECK(compareTransform(readTfInv, invTf));
-// 
-//     /* a -> d **/
-//     BOOST_TEST_MESSAGE( "a - > d" );
-//     BOOST_CHECK_NO_THROW(readTf = tree.getTransform(a, d));
-//     BOOST_CHECK(compareTransform(readTf, tf));
-// 
-//     /* c -> d **/
-//     BOOST_TEST_MESSAGE( "c - > d" );
-//     Transform complexTf;
-//     complexTf.setTransform(tf.transform.inverse()*tf.transform.inverse()*tf.transform);
-//     BOOST_CHECK_NO_THROW(readTf = tree.getTransform(c, d));
-//     BOOST_CHECK(compareTransform(readTf, complexTf));
-// 
-//     /* d -> c **/
-//     BOOST_TEST_MESSAGE( "d - > c" );
-//     complexTf.setTransform(tf.transform.inverse()*tf.transform*tf.transform);
-//     BOOST_CHECK_NO_THROW(readTf = tree.getTransform(d, c));
-//     BOOST_CHECK(compareTransform(readTf, complexTf));
-// 
-//     //Close a cycle with an extra frame.
-//     //In practice it should not happen in envire
-//     FrameId e = "frame_e";
-//     BOOST_CHECK_NO_THROW(tree.addTransform(d, e, tf));
-//     BOOST_CHECK_NO_THROW(tree.addTransform(e, c, tf));
-// 
-//     /* d -> c **/
-//     BOOST_TEST_MESSAGE( "d - > c" );
-//     BOOST_CHECK_NO_THROW(readTf = tree.getTransform(d, c));
-//     BOOST_CHECK(compareTransform(readTf, tf*tf));
-// 
-//     /* a-> e **/
-//     BOOST_TEST_MESSAGE( "a - > e" );
-//     BOOST_CHECK_NO_THROW(readTf = tree.getTransform(a, e));
-//     BOOST_CHECK(compareTransform(readTf, tf*tf));
-// 
-//     FrameId f = "frame_f";
-//     BOOST_CHECK_NO_THROW(tree.addTransform(d, f, tf));
-// 
-//     /* c -> f **/
-//     BOOST_TEST_MESSAGE( "c - > f" );
-//     BOOST_CHECK_NO_THROW(readTf = tree.getTransform(c, f));
-//     complexTf.setTransform(tf.transform.inverse()*tf.transform.inverse()*tf.transform);
-//     BOOST_CHECK(compareTransform(readTf, complexTf));
-// 
-// }
+BOOST_AUTO_TEST_CASE(graph_graphviz_test)
+{
+    Gra graph;
+    
+    FrameId a("Captain Benjamin Sisko");
+    FrameId b("Major Kira Nerys");
+    FrameId c("Dr. Julian Bashir");
+    FrameId d("Lieutenant Commander Jadzia Dax");
+    FrameId e(" Lieutenant Ezri Dax");
+
+    EdgeProp ep;
+    graph.add_edge(a,b, ep);
+    graph.add_edge(a,c, ep);
+    graph.add_edge(c,d, ep);
+    graph.add_edge(d,e, ep);
+    graph.add_edge(e,a, ep);
+    
+  
+    GraphViz viz;
+    viz.write(graph, "graph_graphviz_test.dot");
+}
 

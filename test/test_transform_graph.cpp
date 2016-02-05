@@ -1,6 +1,8 @@
 #include <boost/test/unit_test.hpp>
 #define protected public
 #include <envire_core/graph/TransformGraph.hpp>
+#include <envire_core/graph/GraphViz.hpp>
+#include <boost/lexical_cast.hpp>
 #include <vector>
 #include <string>
 
@@ -13,6 +15,11 @@ public:
   string id;
   const string& getId() const {return id;}
   void setId(const string& _id) {id = _id;}
+  
+  const string toGraphviz() const
+  {
+      return "[label=\"test frame " + id + "\"]";
+  }
 };
 
 using Tfg = TransformGraph<FrameProp>;
@@ -340,50 +347,39 @@ BOOST_AUTO_TEST_CASE(get_transform_from_edge_test)
 }
 
 
-// // class Vector: public envire::core::Item<Eigen::Vector3d>{};
-// 
-// BOOST_AUTO_TEST_CASE(graphviz_test)
-// {
-//     TransformGraph graph;
-//     
-//     for(int i = 0; i < 12; ++i)
-//     {
-//         FrameId origin = "frame_" + boost::lexical_cast<std::string>(i);
-//         FrameId target = "frame_" + boost::lexical_cast<std::string>(i + 1);
-//         Transform tf;
-//         graph.addTransform(origin, target, tf);
-//     }
-//     GraphViz viz;
-//     viz.write(graph, "transformGraph_graphviz_test.dot");
-// }
-// 
-// BOOST_AUTO_TEST_CASE(complex_graphviz_test)
-// {
-//     TransformGraph graph;
-//     
-//     const FrameId a = "frame_a";
-//     const FrameId b = "frame_b";
-//     const FrameId c = "frame_c";
-//     Transform aToB;
-//     aToB.transform.translation << 1, 2, 3;
-//     Transform bToC;
-//     bToC.transform.translation << 42, 44, -3;
-//     
-//     graph.addTransform(a, b, aToB);
-//     graph.addTransform(b, c, bToC);
-//     
-//     Item<string>::Ptr item1(new Item<string>("So say we all!"));
-//     Item<int>::Ptr item2(new Item<int>(42));
-//     Item<float>::Ptr item3(new Item<float>(21.0f)); 
-//     
-//     graph.addItemToFrame(a, item1);
-//     graph.addItemToFrame(a, item2);
-//     graph.addItemToFrame(a, item3);
-//     
-//     GraphViz viz;
-//     viz.write(graph, "transformGraph_complex_graphviz_test.dot");
-// }
-// 
-
-
-
+BOOST_AUTO_TEST_CASE(transform_graph_graphviz_test)
+{
+    Tfg graph;
+    
+    
+    FrameId a("Captain Kathryn Janeway");
+    FrameId b("Commander Chakotay");
+    FrameId c("Lieutenant Commander Tuvok");
+    FrameId d("Lieutenant Tom Paris");
+    FrameId e("Lieutenant B’Elanna Torres");
+    FrameId f("Medizinisch-holografisches Notfallprogramm");
+    
+    Transform ab;
+    ab.transform.translation << 42, 42, 42;
+    Transform ac;
+    ac.transform.translation << 13, 0, 21;
+    Transform ad;
+    ad.transform.translation << -42, 2, 31;
+    
+    Transform de;
+    de.transform.translation << 0.5, 0, 99;
+    Transform ce;
+    ce.transform.translation << 0.00001, 0, 11;
+    Transform ef;
+    ef.transform.translation << -0.000234, 0, 81;
+    
+    graph.addTransform(a,b, ab);
+    graph.addTransform(a, c, ac);
+    graph.addTransform(a, d, ad);
+    graph.addTransform(d, e, de);
+    graph.addTransform(c, e, ce);
+    graph.addTransform(e, f, ef);
+    
+    GraphViz viz;
+    viz.write(graph, "transformgraph_graphviz_test.dot");
+}

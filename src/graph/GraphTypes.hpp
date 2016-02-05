@@ -24,12 +24,22 @@ namespace envire { namespace core
 {
     
     /**Concept checking class for frame properties in the Graph.
+     * 
      * A FrameProperty should:
-     * * store a FrameId.
-     * * provide getId() method that returns a const reference to the id.
-     * * provide a setId(const FrameId&) method.
-     * * be default constructible
-
+     *  * store a FrameId.
+     * 
+     *  * provide getId() const method that returns a const reference to the id.
+     * 
+     *  * provide a setId(const FrameId&) method.
+     * 
+     *  * provide a toGraphviz() const method that returns a const reference to a
+     *    graphviz representation of this property. It should output a pair of
+     *    brackets with a series of assigments "name=value" inside.
+     *    Each assignment should be separated either with space, with comma,
+     *    or with semicolon.
+     *    Example: "[label=\"" + id + "\"]"
+     * 
+     *  * be default constructible
      */
     template <class T>
     class FramePropertyConcept
@@ -42,6 +52,7 @@ namespace envire { namespace core
         static_assert(std::is_same<decltype(t.getId()), const FrameId&>::value, "getId() must return a const FrameId&");
         const FrameId& id = t.getId();
         prop.setId(id);
+        const std::string graphviz_text = t.toGraphviz(); //check for toGraphviz() method
       }
       
     private:
@@ -49,8 +60,17 @@ namespace envire { namespace core
     };
     
     /**A concept checking class for edge properties in the Graph.
+     * 
      * An EdgeProperty should:
-     * * provide an inverse() method that creates an inverted copy.*/
+     *  * provide an inverse() method that creates an inverted copy.
+     * 
+     *  * provide a toGraphviz() const method that returns a const reference to a
+     *    graphviz representation of this property. It should output a pair of
+     *    brackets with a series of assigments "name=value" inside.
+     *    Each assignment should be separated either with space, with comma,
+     *    or with semicolon.
+     *    Example: "[label=\"" + id + "\"]"
+     */
     template <class T>
     class EdgePropertyConcept
     {
@@ -59,6 +79,7 @@ namespace envire { namespace core
         {
             T u = t.inverse();//check for inverse() method that returns a T
             u.inverse();//suppress "u not used" warning
+            const std::string graphviz_text = t.toGraphviz(); //check for toGraphviz() method
         }
     private:
       const T t; //inverse() has to be const
@@ -66,7 +87,7 @@ namespace envire { namespace core
     
                                                        
     
-     /* vertex_descriptor and edge_descriptor are not dependent on the 
+     /* vertex_descriptor and edge_descriptor are don't depend on the
      * graph properties. They only depend on the type of the underlying
      * datastructure (they are different for random access and pointer based
      * structures).
