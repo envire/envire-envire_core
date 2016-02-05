@@ -983,3 +983,27 @@ BOOST_AUTO_TEST_CASE(graph_graphviz_test)
     viz.write(graph, "graph_graphviz_test.dot");
 }
 
+
+BOOST_AUTO_TEST_CASE(emplace_frame_test)
+{
+  
+    struct StringProperty
+    { 
+    string value;
+    StringProperty() : value("wrong") {}
+    StringProperty(string value) : value(value) {}
+    const FrameId& getId() const { return value;}
+    void setId(const FrameId& _id){}
+    const string toGraphviz() const{return "[label=\"bla\"]";}
+    };
+    
+    envire::core::Graph<StringProperty, EdgeProp> graph;
+    FrameId id("frrrraaaaammmeee");
+    
+    
+    graph.emplaceFrame(id, "blabla");
+    
+    StringProperty prop = graph.getFrameProperty(id);
+    BOOST_CHECK(prop.value.compare("blabla") == 0);
+}
+

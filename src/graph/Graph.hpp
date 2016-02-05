@@ -59,6 +59,18 @@ public:
     */
     vertex_descriptor addFrame(const FrameId& frame);
     
+    /**Adds an unconnected frame to the graph.
+     * The frame property is constructed using @p args and the id is set to
+     * @p frame.
+     * 
+     * Causes FrameAddedEvent.
+     * 
+    *  @throw FrameAlreadyExistsException if the frame already exists
+    *  @return A handle to the newly created frame.
+     */
+    template <class... Args>
+    vertex_descriptor emplaceFrame(const FrameId&, Args&&... args);
+    
     /**Disconnects @p frame from the Graph.
     *  I.e. all edges from and to @p frame will be removed.
     *  @throw UnknownFrameException if the frame does not exist. */
@@ -122,6 +134,9 @@ public:
     const EDGE_PROP& getEdgeProperty(const FrameId& origin, const FrameId& target) const;
     const EDGE_PROP& getEdgeProperty(const vertex_descriptor origin, const vertex_descriptor target) const;
     const EDGE_PROP& getEdgeProperty(const edge_descriptor edge) const;
+    
+    /** @throw UnknownFrameException if @p frame does not exist.*/
+    const FRAME_PROP& getFrameProperty(const FrameId& frame) const;
     
     
     /** Sets the property of the edge from @p orign to @p target to @p prop.
@@ -734,5 +749,30 @@ typename Graph<F,E>::vertex_descriptor Graph<F,E>::null_vertex()
     return GraphTraits::null_vertex();
 }
 
+template <class F, class E>
+template <class... Args>
+typename Graph<F,E>::vertex_descriptor Graph<F,E>::emplaceFrame(const FrameId& frame,
+                                                                Args&&... args)
+{
+    vertex_descriptor desc = vertex(frame);
+    if(desc == null_vertex())
+    {
+        F frameProp(std::forward<Args>(args)...);
+        frameProp.setId(frame);
+        desc = add_vertex(frame, frameProp);
+    }
+    else
+    {
+      throw FrameAlreadyExistsException(frame);
+    }
+    return desc;
+}
+
+template <class F, class E>
+const F& Graph<F,E>::getFrameProperty(const FrameId& frame) const
+{
+    vertex_descriptor v = getVertex(frame);
+    return graph()[v];
+}
 }}
 
