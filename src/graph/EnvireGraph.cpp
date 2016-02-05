@@ -24,13 +24,12 @@ void EnvireGraph::clearFrame(const FrameId& frame)
     
     for(Frame::ItemMap::iterator it = items.begin(); it != items.end();)
     {
-        std::type_index key = it->first;
         Frame::ItemList& list = it->second;
         for(auto it = list.begin(); it != list.end();)
         {
             ItemBase::Ptr removedItem = *it;
             it = list.erase(it);
-            notify(ItemRemovedEvent(frame, removedItem, key));
+            notify(ItemRemovedEvent(frame, removedItem));
         }
         it = items.erase(it);
     }
@@ -73,6 +72,13 @@ const Frame::ItemList& EnvireGraph::getItems(const vertex_descriptor frame,
         throw NoItemsOfTypeInFrameException(getFrameId(frame), demangleTypeName(type));
     }
     return items.at(type);   
+}
+
+void EnvireGraph::removeFrame(const FrameId& frame) 
+{
+    //explicitly remove all items from the frame to cause ItemRemovedEvents
+    clearFrame(frame);
+    Base::removeFrame(frame);
 }
 
 

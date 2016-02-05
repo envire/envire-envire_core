@@ -124,6 +124,20 @@ public:
     size_t getTotalItemCount(const vertex_descriptor vd) const;
     
     
+    /**Removes @p frame from the Graph.
+    *  A frame can only be removed if there are no edges connected to
+    *  or coming from that frame.
+    *
+    *  Causes FrameRemovedEvent.
+    *  Causes ItemRemovedEvent for each item in the frame.
+    * 
+    * 
+    *  @throw UnknownFrameException if the frame does not exist.
+    *  @throw FrameStillConnectedException if there are still edges
+    *                                      coming from or leading to this
+    *                                      frame. */
+    virtual void removeFrame(const FrameId& frame) override;
+    
 protected:
 
     /** @return A range that contains all items of type @p T in frame @p frame
@@ -252,7 +266,7 @@ EnvireGraph::removeItemFromFrame(const FrameId& frameId, ItemIterator<T> item)
     std::vector<ItemBase::Ptr>::const_iterator next = items.erase(nonConstBaseIterator);
 
     ItemBase::Ptr baseItem = boost::dynamic_pointer_cast<ItemBase>(deletedItem);
-    notify(ItemRemovedEvent(frameId, baseItem, key));
+    notify(ItemRemovedEvent(frameId, baseItem));
     
     ItemIterator<T> nextIt(next, ItemBaseCaster<T>()); 
     ItemIterator<T> endIt(items.cend(), ItemBaseCaster<T>()); 
@@ -309,6 +323,7 @@ size_t EnvireGraph::getItemCount(const vertex_descriptor vd) const
         return mapEntry->second.size();
     }
 }
+
 
 
 }}

@@ -84,6 +84,10 @@ public:
     {
         frameRemovedEvents.push_back(e);
     }
+    
+    void itemRemoved(const ItemRemovedEvent& e) override
+    {
+    }
 };
 
 BOOST_AUTO_TEST_CASE(simple_add_remove_edge_test)

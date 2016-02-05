@@ -14,19 +14,20 @@ using namespace std;
 
 
 
-class Dispatcher : public GraphEventDispatcher {
+class EnvireDispatcher : public GraphEventDispatcher {
 public:
     vector<ItemAddedEvent> itemAddedEvents;
     vector<ItemRemovedEvent> itemRemovedEvents;
     
-    Dispatcher(EnvireGraph& graph) : GraphEventDispatcher(&graph) {}
-    virtual ~Dispatcher() {}
+    EnvireDispatcher(EnvireGraph& graph) : GraphEventDispatcher(&graph) {}
+    virtual ~EnvireDispatcher() {}
     
-    virtual void itemAdded(const ItemAddedEvent& e)
+    void itemAdded(const ItemAddedEvent& e) override
     {
         itemAddedEvents.push_back(e);
     }
-    virtual void itemRemoved(const ItemRemovedEvent& e)
+    
+    void itemRemoved(const ItemRemovedEvent& e) override
     {
         itemRemovedEvents.push_back(e);
     }
@@ -531,6 +532,29 @@ BOOST_AUTO_TEST_CASE(complex_graphviz_test)
     
     GraphViz viz;
     viz.write(graph, "envireGraph_complex_graphviz_test.dot");
+}
+
+BOOST_AUTO_TEST_CASE(remove_frame_item_events_test)
+{
+    EnvireGraph graph;
+    const FrameId a = "Lt. W. Thomas Riker";
+    
+    Item<string>::Ptr item1(new Item<string>("Don't call me Tiny."));
+    Item<int>::Ptr item2(new Item<int>(42));
+    
+
+    graph.addFrame(a);
+    graph.addItemToFrame(a, item1);
+    graph.addItemToFrame(a, item2);
+        
+    EnvireDispatcher d(graph);
+    graph.removeFrame(a);
+    BOOST_CHECK(d.itemRemovedEvents.size() == 2);
+    //note: the order in which the items will be removed is undefined
+    BOOST_CHECK(d.itemRemovedEvents[1].item->getTypeIndex() == item1->getTypeIndex());
+    BOOST_CHECK(d.itemRemovedEvents[0].item->getTypeIndex() == item2->getTypeIndex());
+    
+    
 }
 
 

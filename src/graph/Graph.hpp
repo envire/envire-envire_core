@@ -49,10 +49,13 @@ public:
     
     Graph();
     
-    /** Adds an unconnected frame to the graph.
-    *   The frame property is default constructed and the id is set to @p frame.
-    * @throw FrameAlreadyExistsException if the frame already exists
-    * @return A handle to the newly created frame.
+    /**Adds an unconnected frame to the graph.
+    *  The frame property is default constructed and the id is set to @p frame.
+    * 
+    *  Causes FrameAddedEvent.
+    * 
+    *  @throw FrameAlreadyExistsException if the frame already exists
+    *  @return A handle to the newly created frame.
     */
     vertex_descriptor addFrame(const FrameId& frame);
     
@@ -64,11 +67,14 @@ public:
     /**Removes @p frame from the Graph.
     *  A frame can only be removed if there are no edges connected to
     *  or coming from that frame.
+    * 
+    *  Causes FrameRemovedEvent.
+    * 
     *  @throw UnknownFrameException if the frame does not exist.
     *  @throw FrameStillConnectedException if there are still edges
     *                                      coming from or leading to this
     *                                      frame. */
-    void removeFrame(const FrameId& frame);
+    virtual void removeFrame(const FrameId& frame);
 
     /** @return the id of the specified @p vertex */
     const FrameId& getFrameId(const vertex_descriptor vertex) const;
@@ -76,6 +82,9 @@ public:
     /**Add an edge between two frames.
     *  If the frames do not exist they are created.
     *  The inverse edge is created automatically and added as well.
+    * 
+    *  Causes EdgeAddedEvent.
+    *  Causes FrameAddedEvent if the frames did not exist.
     *  
     *  @param origin Source of the edge.
     *  @param target Target of the edge.
@@ -87,14 +96,13 @@ public:
                   const vertex_descriptor target,
                   const EDGE_PROP& edgeProperty);
     
-    /** @throw UnknownFrameException If @p orign or @p target do not exist. */
     void add_edge(const FrameId& origin,
                   const FrameId& target,
                   const EDGE_PROP& edgeProperty);
     
     /**Removes the specified edge from the graph.
     * Also removes the inverse.
-    * FIXME events?!
+    * Causes EdgeRemovedEvent for both edges.
     * @throw UnknownEdgeException if there is no edge from @p origin to @p target
     **/
     void remove_edge(const vertex_descriptor origin,
@@ -118,18 +126,20 @@ public:
     
     /** Sets the property of the edge from @p orign to @p target to @p prop.
      *  Sets the property of the edge from @p target to @p origin to prop.inverse().
+     * 
+     *  Causes EdgeModifiedEvent.
+     * 
      *  @throw UnknownEdgeException If there is no edge between origin and target.
      *  @note There is no setEdgeProperty(edge_descriptor) because it is not trivial
-     *        to figure out the inverse edge soley based on the edge_descriptor.
-     * FIXME events?!!*/
-    void setEdgeProperty(const vertex_descriptor origin,
-                         const vertex_descriptor target,
-                         const EDGE_PROP& prop);
+     *        to figure out the inverse edge soley based on the edge_descriptor.*/
+    virtual void setEdgeProperty(const vertex_descriptor origin,
+                                 const vertex_descriptor target,
+                                 const EDGE_PROP& prop);
     
     /** @throw UnknownFrameException If @p orign or @p target do not exist */
-    void setEdgeProperty(const FrameId& origin,
-                         const FrameId& target,
-                         const EDGE_PROP& prop);
+    virtual void setEdgeProperty(const FrameId& origin,
+                                 const FrameId& target,
+                                 const EDGE_PROP& prop);
     
     
     /** @return the source vertex of the @p edge*/
@@ -211,6 +221,11 @@ protected:
     
     /**Rebuild all subscribed TreeViews */
     void rebuildTreeViews() const;
+    
+    /**Removes the specified edge.*/
+    void remove_edge(const FrameId& origin, const FrameId& target, 
+                     const vertex_descriptor originDesc, 
+                     const vertex_descriptor targetDesc);
     
     
     /**TreeViews that need to be updated when the graph is modified */
@@ -321,10 +336,6 @@ void Graph<F,E>::removeFrame(const FrameId& frame)
         throw FrameStillConnectedException(frame);
     }
     
-    //explicitly remove all items from the frame to cause ItemRemovedEvents
-    //FIXME think about how to call clearFrame now?!
-    //clearFrame(frame);
-    
     boost::remove_vertex(frame, *this);
     //HACK this is a workaround for bug https://svn.boost.org/trac/boost/ticket/9493
     //If the bug is fixed also remove the #define private protected in GraphTypes.hpp
@@ -333,7 +344,6 @@ void Graph<F,E>::removeFrame(const FrameId& frame)
     {
         _map.erase(it);
     }
-    //FIXME event wieder einauen
     notify(envire::core::FrameRemovedEvent(frame));
 }
 
@@ -488,49 +498,58 @@ void Graph<F,E>::add_edge(const FrameId& origin,
       //if they don't exist create them
     if(originDesc == null_vertex())
     {
-        originDesc = addFrame(origin);
+        F originProp;
+        originProp.setId(origin);
+        originDesc = add_vertex(origin, originProp);
     }
     if(targetDesc == null_vertex())
     {
-        targetDesc = addFrame(target);
+        F targetProp;
+        targetProp.setId(target);
+        targetDesc = add_vertex(target, targetProp);
     }
     
     return add_edge(originDesc, targetDesc, edgeProperty);
 }
 
 template <class F, class E>
-void Graph<F,E>::remove_edge(const vertex_descriptor origin,
-                             const vertex_descriptor target)
+void Graph<F,E>::remove_edge(const FrameId& origin, const FrameId& target, 
+                             const vertex_descriptor originDesc, 
+                             const vertex_descriptor targetDesc)
 {
     //note: do not use boost::edge_by_label as it will segfault if one of the
     //frames is not part of the tree.
-    EdgePair originToTarget = boost::edge(origin, target, graph());
-    EdgePair targetToOrigin = boost::edge(target, origin, graph());
+    EdgePair originToTarget = boost::edge(originDesc, targetDesc, graph());
+    EdgePair targetToOrigin = boost::edge(targetDesc, originDesc, graph());
     if(!originToTarget.second || !targetToOrigin.second)
     {
-        throw UnknownEdgeException(getFrameId(origin), getFrameId(target));
+        throw UnknownEdgeException(origin, target);
     }
     
     boost::remove_edge(originToTarget.first, *this);
-    notify(envire::core::EdgeRemovedEvent(getFrameId(origin), getFrameId(target)));
+    notify(envire::core::EdgeRemovedEvent(origin, target));
     
     boost::remove_edge(targetToOrigin.first, *this);
-    //FIXME so umbauen, dass getFrameId hier nicht nochmal aufgerufen werden muss
-    notify(envire::core::EdgeRemovedEvent(getFrameId(target), getFrameId(origin)));
+    notify(envire::core::EdgeRemovedEvent(target, origin));
     
     //removing an edge might invalidate the TreeViews.
     //This is a brute-force solution to the problem.
     //FIXME update TreeViews when removing an edge instead of rebuilding them
-    rebuildTreeViews();
+    rebuildTreeViews();    
+}
+
+template <class F, class E>
+void Graph<F,E>::remove_edge(const vertex_descriptor origin,
+                             const vertex_descriptor target)
+{
+    remove_edge(getFrameId(origin), getFrameId(target), origin, target);
 }
 
 template <class F, class E>
 void Graph<F,E>::remove_edge(const FrameId& origin,
                              const FrameId& target)
 {
-    const vertex_descriptor originDesc = getVertex(origin); //may throw
-    const vertex_descriptor targetDesc = getVertex(target); //may throw
-    remove_edge(originDesc, targetDesc);
+    remove_edge(origin, target, getVertex(origin), getVertex(target));
 }
 
 template <class F, class E>
@@ -627,7 +646,7 @@ void Graph<F,E>::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) cons
         
         //use TreeBuilderVisitor to generate a new tree starting from notInView.
         //This tree will only contain vertices that are part of the sub tree that
-        //below notInView because the edges leading to inView are hidden by the filter
+        //below to notInView because the edges leading to inView are hidden by the filter
         //and thus the bfs will not follow those edges.
         //the visitor will add those edges directly to the view
         TreeBuilderVisitor<Graph<F,E>> visitor(*view, *this);
