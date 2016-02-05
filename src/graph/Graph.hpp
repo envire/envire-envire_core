@@ -57,58 +57,52 @@ public:
     vertex_descriptor addFrame(const FrameId& frame);
     
     /**Disconnects @p frame from the Graph.
-    * I.e. all edges from and to @p frame will be removed.
-    * @throw UnknownFrameException if the frame does not exist. */
+    *  I.e. all edges from and to @p frame will be removed.
+    *  @throw UnknownFrameException if the frame does not exist. */
     void disconnectFrame(const FrameId& frame);
     
     /**Removes @p frame from the Graph.
-    * A frame can only be removed if there are no edges connected to
-    * or coming from that frame.
-    * @throw UnknownFrameException if the frame does not exist.
-    * @ŧhrow FrameStillConnectedException if there are still edges
-    *                                     coming from or leading to this
-    *                                     frame. */
+    *  A frame can only be removed if there are no edges connected to
+    *  or coming from that frame.
+    *  @throw UnknownFrameException if the frame does not exist.
+    *  @throw FrameStillConnectedException if there are still edges
+    *                                      coming from or leading to this
+    *                                      frame. */
     void removeFrame(const FrameId& frame);
 
-    /** @return the frame id of the specified @p vertex */
-    const envire::core::FrameId& getFrameId(const vertex_descriptor vertex) const;
+    /** @return the id of the specified @p vertex */
+    const FrameId& getFrameId(const vertex_descriptor vertex) const;
     
-    
-    /**@brief Add an Edge
-    * Add an edge between two frames.
-    * If the frames do not exist they are created.
-    * The inverse edge is created automatically and added as well.
-    * 
-    * @param origin Source of the edge.
-    * @param target Target of the edge.
-    * @param edgeProperty The value that should be stored in the edge.
-    * @return an edge descriptor pointing to the new edge and a boolean.
-    *         The boolean is false if the edge already existed.
-    *         In that case no new edge was added, instead the existing
-    *         edge was updated.
-    * @throw EdgeAlreadyExistsException if the edge already exists
-    * @note The edge will also be added to all Subscribed TreeViews
+    /**Add an edge between two frames.
+    *  If the frames do not exist they are created.
+    *  The inverse edge is created automatically and added as well.
+    *  
+    *  @param origin Source of the edge.
+    *  @param target Target of the edge.
+    *  @param edgeProperty The value that should be stored in the edge.
+    *  @throw EdgeAlreadyExistsException if the edge already exists
+    *  @note The edge will also be added to all subscribed TreeViews
     */
-  void add_edge(const vertex_descriptor origin,
-                const vertex_descriptor target,
-                const EDGE_PROP& edgeProperty);
-  
-  /** @throw UnknownFrameException If @p orign or @p target do not exist. */
-  void add_edge(const FrameId& origin,
-                const FrameId& target,
-                const EDGE_PROP& edgeProperty);
-  
-  /**Removes the specified edge from the graph.
-   * Also removes the inverse
-   * FIXME events?!
-   * @throw UnknownEdgeException if there is no edge from @p origin to @p target
-   **/
-  void remove_edge(const vertex_descriptor origin,
-                   const vertex_descriptor target);
-  /** @throw UnknownFrameException if one of the frames does not exist.*/
-  void remove_edge(const FrameId& origin,
-                   const FrameId& target);
+    void add_edge(const vertex_descriptor origin,
+                  const vertex_descriptor target,
+                  const EDGE_PROP& edgeProperty);
     
+    /** @throw UnknownFrameException If @p orign or @p target do not exist. */
+    void add_edge(const FrameId& origin,
+                  const FrameId& target,
+                  const EDGE_PROP& edgeProperty);
+    
+    /**Removes the specified edge from the graph.
+    * Also removes the inverse.
+    * FIXME events?!
+    * @throw UnknownEdgeException if there is no edge from @p origin to @p target
+    **/
+    void remove_edge(const vertex_descriptor origin,
+                    const vertex_descriptor target);
+    /** @throw UnknownFrameException if one of the frames does not exist.*/
+    void remove_edge(const FrameId& origin,
+                    const FrameId& target);
+      
     /** @return the edge between frame @p origin and @p target
       * @throw UnknownFrameException If @p orign or @p target do not exist.
       * @throw UnknownEdgeException if there is no such edge  */
@@ -138,17 +132,20 @@ public:
                          const EDGE_PROP& prop);
     
     
-    
+    /** @return the source vertex of the @p edge*/
     const vertex_descriptor source(const edge_descriptor edge) const;
+    
+    /** @return the target vertex of the @p edge*/
     const vertex_descriptor target(const edge_descriptor edge) const;
     
-    /**Gets the vertex corresponding to @p frame.
+    /**Gets the vertex with id @p frameId.
     * @throw UnknownFrameException if the frame does not exist */
-    vertex_descriptor getVertex(const FrameId& frame) const;
+    vertex_descriptor getVertex(const FrameId& frameId) const;
     
 
     /**Builds a TreeView containing all vertices that are accessible starting
-      * from @p root.  */
+      * from @p root.
+      * @note The tree is ***not** updated when the Graph changes. */
     TreeView getTree(const vertex_descriptor root) const;
     
     /**Builds a TreeView containing all vertices that are accessible starting
@@ -182,10 +179,15 @@ public:
     * @throw UnknownFrameException if @p orign or @p target don't exist */
     Path getPath(FrameId origin, FrameId target) const;
     
+    /** @return number of frames in this graph*/
     vertices_size_type num_vertices() const;
     
+    /** @return number of edges in this graph*/
     edges_size_type num_edges() const;
     
+    /** 
+     * A vertex_descriptor that does not point to any vertex.
+     * "A nullptr for vertices" */
     static vertex_descriptor null_vertex();
     
 protected:
@@ -213,7 +215,6 @@ protected:
     
     /**TreeViews that need to be updated when the graph is modified */
     std::vector<TreeView*> subscribedTreeViews;
-  
 };
 
 
