@@ -100,7 +100,7 @@ public:
     *  The inverse edge is created automatically and added as well.
     * 
     *  Causes EdgeAddedEvent.
-    *  Causes FrameAddedEvent if the frames did not exist.
+    *  Causes FrameAddedEvent for each frame if it did not exist before.
     *  
     *  @param origin Source of the edge.
     *  @param target Target of the edge.
@@ -117,7 +117,7 @@ public:
                   const EDGE_PROP& edgeProperty);
     
     /**Removes the specified edge from the graph.
-    * Also removes the inverse.
+    * Also removes the inverse edge.
     * Causes EdgeRemovedEvent for both edges.
     * @throw UnknownEdgeException if there is no edge from @p origin to @p target
     **/

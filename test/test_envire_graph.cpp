@@ -309,6 +309,30 @@ BOOST_AUTO_TEST_CASE(clear_frame_test)
     BOOST_CHECK(begin == end);
 }
 
+BOOST_AUTO_TEST_CASE(clear_frame_event_test)
+{
+    FrameId frame = "frame";
+    EnvireGraph g;
+    g.addFrame(frame);
+    
+    ItemBase::Ptr item1(new Item<string>("bla"));
+    ItemBase::Ptr item2(new Item<int>(42));
+    
+    g.addItemToFrame(frame, item1);
+    g.addItemToFrame(frame, item2);
+    
+    EnvireDispatcher d(g);
+    g.clearFrame(frame);
+    BOOST_CHECK(d.itemRemovedEvents.size() == 2);
+    BOOST_CHECK(d.itemRemovedEvents[0].frame == frame);
+    BOOST_CHECK(d.itemRemovedEvents[1].frame == frame);
+    BOOST_CHECK(d.itemRemovedEvents[1].item == item1);
+    BOOST_CHECK(d.itemRemovedEvents[0].item == item2);
+    
+    
+}
+
+
 
 BOOST_AUTO_TEST_CASE(check_item_existence_example)
 {
