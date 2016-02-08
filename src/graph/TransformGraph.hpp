@@ -74,16 +74,6 @@ namespace envire { namespace core
         /**Grants access to boost serialization */
         friend class boost::serialization::access;
 
-        /**Unserializes this class*/
-        template <typename Archive>
-        void load(Archive &ar, const unsigned int version);
-
-        /**Serializes this class. Only the directed graph is serialized,
-         * subscribers are excluded and the mapping of the labeled graph
-         * is regenerated. */
-        template <typename Archive>
-        void save(Archive &ar, const unsigned int version) const;
-
         /**Splits boost serialize into a load and save method */
         template <typename Archive>
         void serialize(Archive &ar, const unsigned int version);
@@ -234,35 +224,10 @@ namespace envire { namespace core
       add_edge(origin, target, tf);
     }
     
-
-    
-    template<class F>
-    template <typename Archive>
-    void TransformGraph<F>::load(Archive &ar, const unsigned int version)
-    {
-      //FIXME
-//         ar >> boost::serialization::make_nvp("directed_graph", _graph);
-// 
-//         // regenerate mapping of the labeled graph
-//         boost::graph_traits<TransformGraphBase>::vertex_iterator it, end;
-//         for (boost::tie( it, end ) = boost::vertices(_graph); it != end; ++it)
-//         {
-//             _map[_graph[*it].frame.name] = *it;
-//         }
-    }
-    
-    template<class F>
-    template <typename Archive>
-    void TransformGraph<F>::save(Archive &ar, const unsigned int version) const
-    {
-//         ar << boost::serialization::make_nvp("directed_graph", _graph);
-    }
-    
     template<class F>
     template <typename Archive>
     void TransformGraph<F>::serialize(Archive &ar, const unsigned int version)
     {
-//         boost::serialization::split_member(ar, *this, version);
+        ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Base);
     }
-  
 }}

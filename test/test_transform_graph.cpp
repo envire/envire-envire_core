@@ -20,6 +20,12 @@ public:
   {
       return "[label=\"test frame " + id + "\"]";
   }
+  
+  template<class Archive>
+  void serialize(Archive &ar, const unsigned int version)
+  {
+    ar & id;
+  }  
 };
 
 using Tfg = TransformGraph<FrameProp>;
@@ -383,3 +389,49 @@ BOOST_AUTO_TEST_CASE(transform_graph_graphviz_test)
     GraphViz viz;
     viz.write(graph, "transformgraph_graphviz_test.dot");
 }
+
+BOOST_AUTO_TEST_CASE(transform_graph_serialization_test)
+{
+    FrameId a = "AA";
+    FrameId b = "BBB";
+    FrameId c = "CCCC";
+    Tfg graph;
+    Transform ab;
+    Transform bc;
+    
+    ab.transform.translation << 1, 2, 3;
+    ab.transform.orientation.coeffs() << 0, 1, 2, 3;
+    ab.time = base::Time::now();
+    bc.transform.translation << 4, 5, 6;
+    bc.transform.orientation.coeffs() << -0, 2, 4, 6;
+  
+    graph.addTransform(a, b, ab);
+    graph.addTransform(b,c, bc);
+    
+    std::stringstream stream;
+    boost::archive::polymorphic_binary_oarchive oa(stream);
+    oa << graph;
+    boost::archive::polymorphic_binary_iarchive ia(stream);
+    Tfg graph2;
+    ia >> graph2;   
+    
+    BOOST_CHECK(graph2.num_edges() == graph.num_edges());
+    BOOST_CHECK(graph2.num_vertices() == graph.num_vertices());
+    //check if vertices exist
+    BOOST_CHECK_NO_THROW(graph2.getVertex(a));
+    BOOST_CHECK_NO_THROW(graph2.getVertex(b));
+    BOOST_CHECK_NO_THROW(graph2.getVertex(c));
+    //check if edges exist
+    BOOST_CHECK_NO_THROW(graph2.getEdge(a, b));
+    BOOST_CHECK_NO_THROW(graph2.getEdge(b, a));
+    BOOST_CHECK_NO_THROW(graph2.getEdge(b, c));
+    BOOST_CHECK_NO_THROW(graph2.getEdge(c, b));
+    //check if edge property was loaded correctly
+    Transform ab2 = graph.getTransform(a, b);
+    Transform bc2 = graph.getTransform(b, c);
+    compareTransform(ab, ab2);
+    compareTransform(bc, bc2);
+}
+
+
+

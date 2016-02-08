@@ -35,6 +35,7 @@ set(headers items/ItemBase.hpp
             serialization/SerializationRegistration.hpp
             serialization/ItemHeader.hpp
             serialization/BinaryBufferHelper.hpp
+            serialization/SerializableConcept.hpp
             util/Demangle.hpp)
 
             

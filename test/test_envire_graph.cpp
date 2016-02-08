@@ -328,8 +328,6 @@ BOOST_AUTO_TEST_CASE(clear_frame_event_test)
     BOOST_CHECK(d.itemRemovedEvents[1].frame == frame);
     BOOST_CHECK(d.itemRemovedEvents[1].item == item1);
     BOOST_CHECK(d.itemRemovedEvents[0].item == item2);
-    
-    
 }
 
 

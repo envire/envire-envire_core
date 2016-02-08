@@ -18,6 +18,7 @@
 #include <functional> //to be able to provide custom hash functions for std maps
 
 #include <envire_core/items/Environment.hpp>
+#include <envire_core/serialization/SerializableConcept.hpp>
 
 
 namespace envire { namespace core
@@ -44,19 +45,20 @@ namespace envire { namespace core
     template <class T>
     class FramePropertyConcept
     {
-      BOOST_CONCEPT_ASSERT((boost::DefaultConstructible<T>));
+        BOOST_CONCEPT_ASSERT((boost::DefaultConstructible<T>));
+        BOOST_CONCEPT_ASSERT((SerializableConcept<T>));
     public:
-      BOOST_CONCEPT_USAGE(FramePropertyConcept)
-      {
-        T prop;
-        static_assert(std::is_same<decltype(t.getId()), const FrameId&>::value, "getId() must return a const FrameId&");
-        const FrameId& id = t.getId();
-        prop.setId(id);
-        const std::string graphviz_text = t.toGraphviz(); //check for toGraphviz() method
-      }
+        BOOST_CONCEPT_USAGE(FramePropertyConcept)
+        {
+          T prop;
+          static_assert(std::is_same<decltype(t.getId()), const FrameId&>::value, "getId() must return a const FrameId&");
+          const FrameId& id = t.getId();
+          prop.setId(id);
+          const std::string graphviz_text = t.toGraphviz(); //check for toGraphviz() method
+        }
       
     private:
-      const T t;
+        const T t;
     };
     
     /**A concept checking class for edge properties in the Graph.
@@ -74,6 +76,7 @@ namespace envire { namespace core
     template <class T>
     class EdgePropertyConcept
     {
+        BOOST_CONCEPT_ASSERT((SerializableConcept<T>));
     public:
         BOOST_CONCEPT_USAGE(EdgePropertyConcept)
         {

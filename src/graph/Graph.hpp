@@ -249,6 +249,24 @@ protected:
     
     /**TreeViews that need to be updated when the graph is modified */
     std::vector<TreeView*> subscribedTreeViews;
+    
+private:
+    /**Grants access to boost serialization */
+    friend class boost::serialization::access;
+
+    /**Unserializes this class*/
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version);
+
+    /**Serializes this class. Only the directed graph is serialized,
+      * subscribers are excluded and the mapping of the labeled graph
+      * is regenerated. */
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const;
+
+    /**Splits boost serialize into a load and save method */
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version);
 };
 
 
@@ -790,5 +808,35 @@ const F& Graph<F,E>::getFrameProperty(const FrameId& frame) const
     vertex_descriptor v = getVertex(frame);
     return graph()[v];
 }
+
+
+template<class F, class E>
+template <typename Archive>
+void Graph<F,E>::load(Archive &ar, const unsigned int version)
+{
+    ar >> boost::serialization::make_nvp("directed_graph",  graph());
+
+    // regenerate mapping of the labeled graph
+    typename boost::graph_traits<Graph<F,E>>::vertex_iterator it, end;
+    for (boost::tie( it, end ) = boost::vertices( graph()); it != end; ++it)
+    {
+        _map[getFrameId(*it)] = *it;
+    }
+}
+
+template<class F, class E>
+template <typename Archive>
+void Graph<F,E>::save(Archive &ar, const unsigned int version) const
+{
+    ar << boost::serialization::make_nvp("directed_graph", graph());
+}
+
+template<class F, class E>
+template <typename Archive>
+void Graph<F,E>::serialize(Archive &ar, const unsigned int version)
+{
+    boost::serialization::split_member(ar, *this, version);
+}
+
 }}
 

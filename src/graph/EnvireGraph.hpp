@@ -22,6 +22,8 @@ class EnvireGraph : public TransformGraph<Frame>
 {
 public:
   
+    using Base = TransformGraph<Frame>;
+  
     /**Iterator used to down cast from ItemBase::Ptr to @p T::Ptr while
     * iterating. T has to derive from ItemBase for this to work.
     * The iterator returns a T&.
@@ -96,6 +98,7 @@ public:
       * @throw std::out_of_range if @p i is out of range*/
     template <class T>
     const ItemIterator<T> getItem(const FrameId& frame, const int i = 0) const;
+
     template <class T>
     const ItemIterator<T> getItem(const vertex_descriptor frame, const int i = 0) const;
 
@@ -154,6 +157,14 @@ protected:
     /**Assert that @p T derives from ItemBase */
     template <class T>
     void assertDerivesFromItemBase() const;
+    
+private:
+    /**Grants access to boost serialization */
+    friend class boost::serialization::access;
+    
+    /**boost serialization method*/
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version);
                                                             
 };
 
@@ -324,6 +335,11 @@ size_t EnvireGraph::getItemCount(const vertex_descriptor vd) const
     }
 }
 
+template <typename Archive>
+void EnvireGraph::serialize(Archive &ar, const unsigned int version)
+{
+    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Base);
+}
 
 
 }}

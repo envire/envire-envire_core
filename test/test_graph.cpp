@@ -1,6 +1,11 @@
 #define protected public
 #include <boost/test/unit_test.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/archive/polymorphic_text_iarchive.hpp>
+#include <boost/archive/polymorphic_text_oarchive.hpp>
+#include <boost/archive/polymorphic_binary_iarchive.hpp>
+#include <boost/archive/polymorphic_binary_oarchive.hpp>
 #include <envire_core/graph/Graph.hpp>
 #include <envire_core/events/GraphEventDispatcher.hpp>
 #include <envire_core/graph/GraphViz.hpp>
@@ -28,6 +33,13 @@ public:
   {
       return "[label=\"" + id + "\"]";
   }
+  
+  template<class Archive>
+  void serialize(Archive &ar, const unsigned int version)
+  {
+    ar & id;
+  }
+  
 };
 
 struct EdgeProp
@@ -46,6 +58,13 @@ struct EdgeProp
   {
       return "[label=\" inverted: " + boost::lexical_cast<string>(inverted) +
              ", value: " + boost::lexical_cast<string>(value) + "\"]";
+  }
+  
+  template<class Archive>
+  void serialize(Archive &ar, const unsigned int version)
+  {
+    ar & inverted;
+    ar & value;
   }
 };
 
@@ -984,19 +1003,23 @@ BOOST_AUTO_TEST_CASE(graph_graphviz_test)
 }
 
 
-BOOST_AUTO_TEST_CASE(emplace_frame_test)
-{
-  
-    struct StringProperty
-    { 
+struct StringProperty
+{ 
     string value;
     StringProperty() : value("wrong") {}
     StringProperty(string value) : value(value) {}
     const FrameId& getId() const { return value;}
     void setId(const FrameId& _id){}
     const string toGraphviz() const{return "[label=\"bla\"]";}
-    };
-    
+    template<class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & value;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(emplace_frame_test)
+{
     envire::core::Graph<StringProperty, EdgeProp> graph;
     FrameId id("frrrraaaaammmeee");
     
@@ -1030,6 +1053,46 @@ BOOST_AUTO_TEST_CASE(disconnect_frame_event_test)
     BOOST_CHECK(d.edgeRemovedEvents[3].origin == c);
     BOOST_CHECK(d.edgeRemovedEvents[3].target == a);
   
+}
+
+
+BOOST_AUTO_TEST_CASE(serialization_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    Gra graph;
+    EdgeProp ab;
+    ab.value = 22;
+    EdgeProp ac;
+    ac.value = 44;
+    graph.add_edge(a, b, ab);
+    graph.add_edge(a, c, ac);
+    
+    std::stringstream stream;
+    boost::archive::polymorphic_binary_oarchive oa(stream);
+    oa << graph;
+    boost::archive::polymorphic_binary_iarchive ia(stream);
+    Gra graph2;
+    ia >> graph2;   
+    
+    BOOST_CHECK(graph2.num_edges() == graph.num_edges());
+    BOOST_CHECK(graph2.num_vertices() == graph.num_vertices());
+    //check if vertices exist
+    BOOST_CHECK_NO_THROW(graph2.getVertex(a));
+    BOOST_CHECK_NO_THROW(graph2.getVertex(b));
+    BOOST_CHECK_NO_THROW(graph2.getVertex(c));
+    //check if edges exist
+    BOOST_CHECK_NO_THROW(graph2.getEdge(a, b));
+    BOOST_CHECK_NO_THROW(graph2.getEdge(b, a));
+    BOOST_CHECK_NO_THROW(graph2.getEdge(a, c));
+    BOOST_CHECK_NO_THROW(graph2.getEdge(c, a));
+    //check if edge property was loaded correctly
+    BOOST_CHECK(graph2.getEdgeProperty(a, b).value == ab.value);
+    BOOST_CHECK(graph2.getEdgeProperty(a, c).value == ac.value);
+    
+    
+    
 }
 
 
