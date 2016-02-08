@@ -45,6 +45,7 @@ public:
      using EdgePair = std::pair<edge_descriptor, bool>;
      using vertices_size_type = GraphTraits::vertices_size_type;
      using edges_size_type = GraphTraits::edges_size_type;
+     using out_edge_iterator = typename GraphBase<FRAME_PROP, EDGE_PROP>::out_edge_iterator;
      using GraphBase<FRAME_PROP, EDGE_PROP>::vertex;
     
     Graph();
@@ -73,6 +74,9 @@ public:
     
     /**Disconnects @p frame from the Graph.
     *  I.e. all edges from and to @p frame will be removed.
+    * 
+    * Causes EdgeRemovedEvent for each edge that is removed.
+    * 
     *  @throw UnknownFrameException if the frame does not exist. */
     void disconnectFrame(const FrameId& frame);
     
@@ -337,9 +341,21 @@ typename Graph<F,E>::vertex_descriptor Graph<F,E>::getVertex(const FrameId& fram
 template <class F, class E>
 void Graph<F,E>::disconnectFrame(const FrameId& frame)
 {
-    vertex_descriptor desc = getVertex(frame);
-    boost::clear_vertex(desc, *this);
-
+    const vertex_descriptor frameDesc = getVertex(frame);
+    
+    out_edge_iterator begin, end;
+      
+    //removing an edge invalidates the out_edge_iterators, thus the strange
+    //loop structure :-)
+    do
+    {
+        boost::tie(begin, end) = boost::out_edges(frameDesc, *this);
+        if(begin != end)
+        {
+            const vertex_descriptor target = boost::target(*begin, *this);
+            remove_edge(frameDesc, target); //this will remove the inv edge as well.
+        }
+    } while(begin != end);
 }
 
 template <class F, class E>

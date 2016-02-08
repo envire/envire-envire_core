@@ -1007,3 +1007,29 @@ BOOST_AUTO_TEST_CASE(emplace_frame_test)
     BOOST_CHECK(prop.value.compare("blabla") == 0);
 }
 
+
+BOOST_AUTO_TEST_CASE(disconnect_frame_event_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    Gra graph;
+    EdgeProp ep;
+    graph.add_edge(a, b, ep);
+    graph.add_edge(a, c, ep);
+    
+    Dispatcher d(graph);
+    graph.disconnectFrame(a);
+    BOOST_CHECK(d.edgeRemovedEvents.size() == 4);
+    BOOST_CHECK(d.edgeRemovedEvents[0].origin == a);
+    BOOST_CHECK(d.edgeRemovedEvents[0].target == b);
+    BOOST_CHECK(d.edgeRemovedEvents[1].origin == b);
+    BOOST_CHECK(d.edgeRemovedEvents[1].target == a);
+    BOOST_CHECK(d.edgeRemovedEvents[2].origin == a);
+    BOOST_CHECK(d.edgeRemovedEvents[2].target == c);
+    BOOST_CHECK(d.edgeRemovedEvents[3].origin == c);
+    BOOST_CHECK(d.edgeRemovedEvents[3].target == a);
+  
+}
+
+
