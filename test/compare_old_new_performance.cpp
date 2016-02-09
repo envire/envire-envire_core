@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include <envire/Core.hpp>
 #include <envire_core/all>
+#include <envire_core/graph/GraphTypes.hpp>
 #include <chrono>
 #include <iostream>
 
@@ -10,7 +11,7 @@ using namespace Eigen;
 const double newAdd10000Children()
 {
     using namespace envire::core;
-    TransformGraph graph;
+    EnvireGraph graph;
     const FrameId root("root");
     graph.addFrame(root);
     
@@ -81,7 +82,7 @@ const double oldAdd10000Chain()
 const double newAdd10000Chain()
 {
     using namespace envire::core;
-    TransformGraph graph;
+    EnvireGraph graph;
     envire::core::Transform tf;
     
     //create frameids beforehand. we dont want to benchmark boost::lexical_cast
@@ -102,7 +103,7 @@ const double newAdd10000Chain()
 }
 
 /**Helper method that builds a tree of depth @p i with 4 children per node */
-void addFourChildren(envire::core::TransformGraph& graph, const envire::core::FrameId& id, const int i)
+void addFourChildren(envire::core::EnvireGraph& graph, const envire::core::FrameId& id, const int i)
 {
   if(i == 0) 
       return;
@@ -121,7 +122,7 @@ void addFourChildren(envire::core::TransformGraph& graph, const envire::core::Fr
 const double newTranformSearch10000()
 {
     using namespace envire::core;
-    TransformGraph graph;
+    EnvireGraph graph;
     const FrameId root("4");
     graph.addFrame(root);
     addFourChildren(graph, root, 3);
@@ -146,7 +147,7 @@ const double newTranformSearch10000()
 const double newTranformSearchUsingTree10000()
 {
     using namespace envire::core;
-    TransformGraph graph;
+    EnvireGraph graph;
     const FrameId root("4");
     graph.addFrame(root);
     addFourChildren(graph, root, 3);
@@ -156,8 +157,8 @@ const double newTranformSearchUsingTree10000()
 
     //we search from "4" to "4333" which is the rightmost child
     //according to the naming schema of addFourChildren()
-    const vertex_descriptor from = graph.getVertex("4");
-    const vertex_descriptor to = graph.getVertex("4333");
+    const envire::core::GraphTraits::vertex_descriptor from = graph.getVertex("4");
+    const envire::core::GraphTraits::vertex_descriptor to = graph.getVertex("4333");
     auto start = chrono::steady_clock::now();
     envire::core::Transform tf;
     for(int i = 0; i < 10000; ++i)
@@ -230,7 +231,7 @@ const double oldUpdateTransform10000()
 const double newUpdateTransform10000()
 {
     using namespace envire::core;
-    TransformGraph graph;
+    EnvireGraph graph;
     const FrameId root("4");
     const FrameId other("other");
     envire::core::Transform tf;
@@ -271,14 +272,14 @@ const double oldGetTransform10000()
 const double newGetTransform10000()
 {
     using namespace envire::core;
-    TransformGraph graph;
+    EnvireGraph graph;
     const FrameId roo("4");
     const FrameId othe("other");
     envire::core::Transform tf;
     graph.addTransform(roo, othe, tf);
     
-    vertex_descriptor root = graph.vertex(roo);
-    vertex_descriptor other = graph.vertex(othe);
+    envire::core::GraphTraits::vertex_descriptor root = graph.vertex(roo);
+    envire::core::GraphTraits::vertex_descriptor other = graph.vertex(othe);
     
     auto start = chrono::steady_clock::now();
     for(int i = 0; i < 10000; ++i)
@@ -304,7 +305,7 @@ const double newAddItemCartesianMap10000()
     using namespace envire::core;
     using Item = Item<MyMap>;
     
-    TransformGraph graph;
+    EnvireGraph graph;
     const FrameId root("4");
     graph.addFrame(root);
         
@@ -372,12 +373,12 @@ const double newGetItemCartesianMap10000()
     using namespace envire::core;
     using Item = Item<MyMap>;
     
-    TransformGraph graph;
+    EnvireGraph graph;
     const FrameId root("4");
     graph.addFrame(root);
     Item::Ptr item(new Item("bla"));
     graph.addItemToFrame(root, item);
-    const vertex_descriptor rootV = graph.vertex(root);
+    const envire::core::GraphTraits::vertex_descriptor rootV = graph.vertex(root);
 
     auto start = chrono::steady_clock::now();
     for(int i = 0; i < 10000; ++i)

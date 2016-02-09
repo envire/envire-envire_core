@@ -11,6 +11,7 @@
 #include "items/SpatialItem.hpp"
 #include "items/BoundingVolume.hpp"
 #include "graph/TransformGraph.hpp"
+#include "graph/EnvireGraph.hpp"
 #include "graph/Graph.hpp"
 #include "graph/GraphTypes.hpp"
 #include "graph/GraphExceptions.hpp"
@@ -20,12 +21,12 @@
 #include "events/GraphEventSubscriber.hpp"
 #include "events/GraphEventDispatcher.hpp"
 #include "events/GraphEventPublisher.hpp"
-#include "events/TransformAddedEvent.hpp"
-#include "events/TransformModifiedEvent.hpp"
-#include "events/TransformRemovedEvent.hpp"
 #include "events/ItemAddedEvent.hpp"
 #include "events/ItemRemovedEvent.hpp"
 #include "events/FrameAddedEvent.hpp"
 #include "events/GraphItemEventDispatcher.hpp"
+#include "events/EdgeAddedEvent.hpp"
+#include "events/EdgeRemovedEvent.hpp"
+#include "events/EdgeModifiedEvent.hpp"
 
 #endif // ENVIRE_CORE_H
