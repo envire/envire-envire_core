@@ -13,15 +13,6 @@
 
 namespace envire { namespace core
 {
-
-    class TransformAlreadyExistsException : public std::exception
-    {
-    public:
-        explicit TransformAlreadyExistsException(const FrameId& nameA, const FrameId& nameB) :
-          msg("Transform between " + nameA + " and " + nameB + " already exists") {}
-        virtual char const * what() const throw() { return msg.c_str(); }
-        const std::string msg;
-    };
     
     class EdgeAlreadyExistsException : public std::exception
     {
