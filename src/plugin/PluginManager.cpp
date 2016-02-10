@@ -70,6 +70,26 @@ bool PluginManager::getBaseClass(const std::string& class_name, std::string& bas
     return false;
 }
 
+bool PluginManager::getAssociatedClasses(const std::string& class_name, std::vector<std::string>& associated_classes) const
+{
+    std::string full_class_name;
+    if(!getFullClassName(class_name, full_class_name))
+        return false;
+
+    std::map<std::string, PluginInfoPtr>::const_iterator plugin_info = classes_available.find(full_class_name);
+    if(plugin_info != classes_available.end())
+    {
+        if(plugin_info->second->associated_classes.empty())
+            return false;
+        else
+        {
+            associated_classes = plugin_info->second->associated_classes;
+            return true;
+        }
+    }
+    return false;
+}
+
 bool PluginManager::getClassDescription(const std::string& class_name, std::string& class_description) const
 {
     std::string full_class_name;
@@ -250,8 +270,24 @@ bool PluginManager::processSingleXMLPluginFile(const std::string& xml_file, std:
                 plugin_info->library_path = library_path;
                 plugin_info->class_name = removeNamespace(plugin_info->full_class_name);
 
+                // find description
                 TiXmlElement* description_element = class_element->FirstChildElement("description");
-                plugin_info->description = description_element->GetText();
+                if(description_element != NULL)
+                    plugin_info->description = description_element->GetText();
+
+                // find associations
+                TiXmlElement* association_element = class_element->FirstChildElement("associations");
+                if(association_element != NULL)
+                {
+                    TiXmlElement* associated_class_element = association_element->FirstChildElement("class");
+                    while (associated_class_element != NULL)
+                    {
+                        const char* associated_class_name = associated_class_element->Attribute("class_name");
+                        if(associated_class_name != NULL)
+                            plugin_info->associated_classes.push_back(std::string(associated_class_name));
+                        associated_class_element = associated_class_element->NextSiblingElement("class");
+                    }
+                }
 
                 class_available.push_back(plugin_info);
             }

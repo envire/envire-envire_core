@@ -145,6 +145,13 @@ BOOST_AUTO_TEST_CASE(plugin_manager_test)
     base_class.clear();
     BOOST_CHECK(plugin_manager.getBaseClass("UnknownPlugin", base_class) == false);
 
+    // get associated classes
+    std::vector<std::string> associated_classes;
+    BOOST_CHECK(plugin_manager.getAssociatedClasses("VectorPlugin", associated_classes));
+    BOOST_CHECK(associated_classes.size() == 1);
+    BOOST_CHECK(associated_classes.front() == "Eigen::Vector3d");
+    BOOST_CHECK(plugin_manager.getAssociatedClasses("FakePlugin", associated_classes) == false);
+
     // get library path
     std::string library_path;
     BOOST_CHECK(plugin_manager.getClassLibraryPath("envire::VectorPlugin", library_path));

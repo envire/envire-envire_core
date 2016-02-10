@@ -59,6 +59,15 @@ public:
     bool getBaseClass(const std::string& class_name, std::string& base_class) const;
 
     /**
+     * @brief Returns a vector of all associated classes of the given class.
+     *        If there are no associated classes returns false.
+     * @param class_name the name of the plugin class
+     * @param associated_classes names of the associated classes
+     * @return True if an associated class was found
+     */
+    bool getAssociatedClasses(const std::string& class_name, std::vector<std::string>& associated_classes) const;
+
+    /**
      * @brief Returns the description of the given class
      * @param class_name the name of the plugin class
      * @param class_description the class description
