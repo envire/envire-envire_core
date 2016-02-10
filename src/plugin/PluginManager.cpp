@@ -251,8 +251,8 @@ bool PluginManager::processSingleXMLPluginFile(const std::string& xml_file, std:
     while (library != NULL)
     {
         // read library path
-        std::string library_path = library->Attribute("path");
-        if (library_path.empty())
+        const char* library_path = library->Attribute("path");
+        if (library_path == NULL)
         {
             LOG(ERROR) << "Failed to find path attirbute in library element in " << xml_file;
             continue;
@@ -262,11 +262,13 @@ bool PluginManager::processSingleXMLPluginFile(const std::string& xml_file, std:
         while (class_element != NULL)
         {
             PluginInfoPtr plugin_info(new PluginInfo);
-            plugin_info->base_class_name = class_element->Attribute("base_class_name");
-            plugin_info->full_class_name = class_element->Attribute("class_name");
+            const char* base_class_name = class_element->Attribute("base_class_name");
+            const char* full_class_name = class_element->Attribute("class_name");
 
-            if(!plugin_info->full_class_name.empty() && !plugin_info->base_class_name.empty())
+            if(base_class_name != NULL && full_class_name != NULL)
             {
+                plugin_info->full_class_name = full_class_name;
+                plugin_info->base_class_name = base_class_name;
                 plugin_info->library_path = library_path;
                 plugin_info->class_name = removeNamespace(plugin_info->full_class_name);
 
