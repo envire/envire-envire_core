@@ -1,6 +1,5 @@
 #pragma once
 #include <typeindex>
-#include <envire_core/graph/GraphTypes.hpp>
 #include <envire_core/items/ItemBase.hpp>
 #include "GraphEvent.hpp"
 

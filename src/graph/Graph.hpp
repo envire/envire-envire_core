@@ -385,7 +385,7 @@ void Graph<F,E>::removeFrame(const FrameId& frame)
         throw FrameStillConnectedException(frame);
     }
     
-    boost::remove_vertex(frame, *this);
+    boost::remove_vertex(desc, graph());//If the HACK is removed, remove_vertex needs to be called with frame as first parameter
     //HACK this is a workaround for bug https://svn.boost.org/trac/boost/ticket/9493
     //If the bug is fixed also remove the #define private protected in GraphTypes.hpp
     typename map_type::iterator it = _map.find(frame);
