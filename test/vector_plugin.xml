@@ -1,0 +1,8 @@
+<library path="lib/VectorPlugin_envire_plugin">
+  <class class_name="envire::VectorPlugin" base_class_name="envire::core::ItemBase">
+    <description>Vector plugin which is used in the unit tests of the envire core.</description>
+  </class>
+  <class class_name="envire::FakePlugin" base_class_name="envire::core::ItemBase">
+    <description>This plugin does not really exist.</description>
+  </class>
+</library>

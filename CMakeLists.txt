@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 2.6)
 set(ROCK_USE_CXX11 TRUE)
 find_package(Rock)
 set(ROCK_TEST_ENABLED ON)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 option(COVERAGE "Enable code coverage. run 'make test && make coverage' to generate the coverage report. The report will be in ${CMAKE_BINARY_DIR}/cov" OFF)
 option(ENABLE_PLUGINS "Enable the plugin system. Disable this to get rid of the dependency to the class_loader" ON)

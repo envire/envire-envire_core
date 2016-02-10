@@ -3,6 +3,7 @@
 #include <Eigen/Geometry>
 #include <class_loader/class_loader.h>
 #include <envire_core/plugin/ClassLoader.hpp>
+#include <envire_core/plugin/PluginManager.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <vector>
@@ -107,4 +108,66 @@ BOOST_AUTO_TEST_CASE(class_loader_test)
     Item<Eigen::Vector3d>::Ptr vector_plugin_3 = envire::ClassLoader::getInstance()->createItem< Item<Eigen::Vector3d> >("VectorPlugin");
     BOOST_CHECK(vector_plugin_3->getClassName() == "VectorPlugin");
     BOOST_CHECK(vector_plugin_2->getID() != vector_plugin_3->getID());
+}
+
+BOOST_AUTO_TEST_CASE(plugin_manager_test)
+{
+    // load xml files
+    std::vector<std::string> xml_paths;
+    const char* root_folder = std::getenv("AUTOPROJ_CURRENT_ROOT");
+    BOOST_CHECK(root_folder != NULL);
+    std::string root_folder_str(root_folder);
+    root_folder_str += "/envire/envire_core/test/";
+    xml_paths.push_back(root_folder_str);
+    PluginManager plugin_manager(xml_paths, false);
+
+    // check available classes
+    std::vector<std::string> available_classes = plugin_manager.getAvailableClasses();
+    BOOST_CHECK(available_classes.size() == 2);
+    BOOST_CHECK(available_classes.back() == "envire::VectorPlugin");
+    BOOST_CHECK(available_classes.front() == "envire::FakePlugin");
+
+    // check if they are both of the same type
+    available_classes = plugin_manager.getAvailableClasses("envire::core::ItemBase");
+    BOOST_CHECK(available_classes.size() == 2);
+
+    // get base class with full type name
+    std::string base_class;
+    BOOST_CHECK(plugin_manager.getBaseClass("envire::VectorPlugin", base_class));
+    BOOST_CHECK(base_class == "envire::core::ItemBase");
+
+    // get base class with class name only
+    base_class.clear();
+    BOOST_CHECK(plugin_manager.getBaseClass("VectorPlugin", base_class));
+    BOOST_CHECK(base_class == "envire::core::ItemBase");
+
+    // get base class of not existing class
+    base_class.clear();
+    BOOST_CHECK(plugin_manager.getBaseClass("UnknownPlugin", base_class) == false);
+
+    // get library path
+    std::string library_path;
+    BOOST_CHECK(plugin_manager.getClassLibraryPath("envire::VectorPlugin", library_path));
+    BOOST_CHECK(library_path == "lib/VectorPlugin_envire_plugin");
+
+    // get all registered libraries
+    std::set<std::string> libs = plugin_manager.getRegisteredLibraries();
+    BOOST_CHECK(libs.size() == 1);
+    BOOST_CHECK(*libs.begin() == "lib/VectorPlugin_envire_plugin");
+
+    // remove one of the classes
+    BOOST_CHECK(plugin_manager.removeClassInfo("envire::FakePlugin"));
+
+    available_classes = plugin_manager.getAvailableClasses();
+    BOOST_CHECK(available_classes.size() == 1);
+
+    // remove all classes
+    plugin_manager.clear();
+    available_classes = plugin_manager.getAvailableClasses();
+    BOOST_CHECK(available_classes.size() == 0);
+
+    // reload class info
+    plugin_manager.reloadXMLPluginFiles();
+    available_classes = plugin_manager.getAvailableClasses();
+    BOOST_CHECK(available_classes.size() == 2);
 }

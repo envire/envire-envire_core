@@ -1,4 +1,4 @@
-find_package(Boost COMPONENTS serialization)
+find_package(Boost COMPONENTS serialization filesystem)
 
 
 set(headers items/ItemBase.hpp
@@ -50,10 +50,13 @@ if(ENABLE_PLUGINS)
 
   set(headers ${headers}
               plugin/ClassLoader.hpp
-              plugin/Plugin.hpp)          
+              plugin/Plugin.hpp
+              plugin/PluginInfo.hpp
+              plugin/PluginManager.hpp)
   set(sources ${sources}
-              plugin/ClassLoader.cpp)
-  set(deps_pkg_config ${deps_pkg_config} class_loader)
+              plugin/ClassLoader.cpp
+              plugin/PluginManager.cpp)
+  set(deps_pkg_config ${deps_pkg_config} class_loader tinyxml)
   
 endif()
 
@@ -62,7 +65,7 @@ endif()
 rock_library(envire_core
     HEADERS ${headers}
     SOURCES ${sources}
-    DEPS_CMAKE Boost
+    DEPS_CMAKE Boost Glog
     DEPS_PKGCONFIG ${deps_pkg_config})
 
 
