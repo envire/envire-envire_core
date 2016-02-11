@@ -330,6 +330,11 @@ void PluginManager::insertPluginInfos(const std::vector<PluginInfoPtr>& classes)
     }
 }
 
+bool PluginManager::hasNamespace(const std::string& class_name) const
+{
+    return class_name.find("::") != std::string::npos;
+}
+
 std::string PluginManager::removeNamespace(const std::string& class_name) const
 {
     std::vector<std::string> split_names;

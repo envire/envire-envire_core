@@ -20,7 +20,7 @@ public:
     typedef boost::shared_ptr<PluginInfo> PluginInfoPtr;
 
     /**
-     * @brief Constructor for a PluginManager
+     * @brief Constructor for PluginManager
      * @param plugin_xml_paths The list of paths of plugin.xml files
      * @param load_environment_paths true if environment path shall be loaded
      */
@@ -113,6 +113,11 @@ public:
      */
     void reloadXMLPluginFiles();
 
+protected:
+    /**
+     * @brief Returns true if the given class name has a namespace
+     */
+    bool hasNamespace(const std::string& class_name) const;
 private:
     /**
      * @brief Returns the paths in all install folders set by the environment.
