@@ -74,7 +74,7 @@ namespace envire { namespace core
         /**Grants access to boost serialization */
         friend class boost::serialization::access;
 
-        /**Splits boost serialize into a load and save method */
+        /**boost serialization method*/
         template <typename Archive>
         void serialize(Archive &ar, const unsigned int version);
     };
