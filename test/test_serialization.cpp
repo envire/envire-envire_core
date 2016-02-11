@@ -6,6 +6,7 @@
 #include <boost/archive/polymorphic_text_oarchive.hpp>
 #include <boost/archive/polymorphic_binary_iarchive.hpp>
 #include <boost/archive/polymorphic_binary_oarchive.hpp>
+#include <boost/filesystem.hpp>
 
 #include <envire_core/serialization/Serialization.hpp>
 #include <envire_core/items/Item.hpp>
@@ -114,6 +115,84 @@ BOOST_AUTO_TEST_CASE(vector_plugin_serialization_binary)
     BOOST_CHECK(vector_plugin_3->getData() == vector_plugin->getData());
     BOOST_CHECK(vector_plugin_3->getID() == vector_plugin->getID());
     BOOST_CHECK(vector_plugin_3->getTime() == vector_plugin->getTime());
+}
+
+BOOST_AUTO_TEST_CASE(test_unkown_plugin_binary_deserialization)
+{
+    /* Note: This code block can be used to recreate the serialized test files if nessecary
+
+    envire::core::Item<Eigen::Vector3d>::Ptr plugin;
+    BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItem< envire::core::Item<Eigen::Vector3d> >("VectorPlugin", plugin));
+    plugin->setFrame("body");
+    plugin->setTime(base::Time::now());
+    plugin->getData().x() = -1.0;
+    plugin->getData().y() = 2.0;
+    plugin->getData().z() = -3.0;
+
+    std::cerr << "ID: " << plugin->getIDString() << std::endl;
+    std::cerr << "Time: " << plugin->getTime().microseconds << std::endl;
+
+    std::ofstream ostream("vector_plugin.bin");
+    boost::archive::polymorphic_binary_oarchive oa(ostream);
+    BOOST_CHECK(Serialization::save(oa, plugin));
+
+    std::ofstream ostream_2("vector_plugin.asc");
+    boost::archive::polymorphic_text_oarchive oa_s(ostream_2);
+    BOOST_CHECK(Serialization::save(oa_s, plugin));
+    */
+
+    const char* root_path = std::getenv("AUTOPROJ_CURRENT_ROOT");
+    std::string serialized_file;
+    if(root_path != NULL)
+    {
+        serialized_file = std::string(root_path) + "/envire/envire_core/test/vector_plugin.bin";
+    }
+    boost::filesystem::path file(serialized_file);
+    BOOST_CHECK(boost::filesystem::exists(file));
+
+    // deserialization plugin
+    std::ifstream istream(serialized_file.c_str());
+    boost::archive::polymorphic_binary_iarchive ia(istream);
+    envire::core::ItemBase::Ptr base_plugin;
+    BOOST_CHECK(Serialization::load(ia, base_plugin));
+
+    BOOST_CHECK(base_plugin->getFrame() == "body");
+    BOOST_CHECK(base_plugin->getIDString() == "70a7293e-a7e1-4ba4-8fcf-876f469d4e6e");
+    BOOST_CHECK(base_plugin->getTime().microseconds == 1455214130632382);
+
+    Item<Eigen::Vector3d>::Ptr vector_plugin = boost::dynamic_pointer_cast< Item<Eigen::Vector3d> >(base_plugin);
+    BOOST_CHECK(vector_plugin.get() != NULL);
+    BOOST_CHECK(vector_plugin->getData().x() == -1.0);
+    BOOST_CHECK(vector_plugin->getData().y() == 2.0);
+    BOOST_CHECK(vector_plugin->getData().z() == -3.0);
+}
+
+BOOST_AUTO_TEST_CASE(test_unkown_plugin_text_deserialization)
+{
+    const char* root_path = std::getenv("AUTOPROJ_CURRENT_ROOT");
+    std::string serialized_file;
+    if(root_path != NULL)
+    {
+        serialized_file = std::string(root_path) + "/envire/envire_core/test/vector_plugin.asc";
+    }
+    boost::filesystem::path file(serialized_file);
+    BOOST_CHECK(boost::filesystem::exists(file));
+
+    // deserialization plugin
+    std::ifstream istream(serialized_file.c_str());
+    boost::archive::polymorphic_text_iarchive ia(istream);
+    envire::core::ItemBase::Ptr base_plugin;
+    BOOST_CHECK(Serialization::load(ia, base_plugin));
+
+    BOOST_CHECK(base_plugin->getFrame() == "body");
+    BOOST_CHECK(base_plugin->getIDString() == "70a7293e-a7e1-4ba4-8fcf-876f469d4e6e");
+    BOOST_CHECK(base_plugin->getTime().microseconds == 1455214130632382);
+
+    Item<Eigen::Vector3d>::Ptr vector_plugin = boost::dynamic_pointer_cast< Item<Eigen::Vector3d> >(base_plugin);
+    BOOST_CHECK(vector_plugin.get() != NULL);
+    BOOST_CHECK(vector_plugin->getData().x() == -1.0);
+    BOOST_CHECK(vector_plugin->getData().y() == 2.0);
+    BOOST_CHECK(vector_plugin->getData().z() == -3.0);
 }
 
 BOOST_AUTO_TEST_CASE(transform_graph_serialization_binary)
