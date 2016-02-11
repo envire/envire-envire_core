@@ -1,7 +1,7 @@
 find_package(Boost COMPONENTS unit_test_framework system filesystem serialization thread)
 
 if(ENABLE_PLUGINS)
-    rock_library(VectorPlugin_envire_plugin
+    rock_library(envire_vector_plugin
         SOURCES vector_plugin.cpp
         DEPS envire_core
         DEPS_PKGCONFIG class_loader)
@@ -12,6 +12,9 @@ if(ENABLE_PLUGINS)
         DEPS_CMAKE Boost
         DEPS envire_core
         DEPS_PKGCONFIG class_loader boost_serialization)
+
+    install(FILES vector_plugin.xml
+            DESTINATION share/plugin_manager)
     
 endif()
 

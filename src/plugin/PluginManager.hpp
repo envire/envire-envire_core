@@ -91,6 +91,14 @@ public:
     bool getClassLibraryPath(const std::string& class_name, std::string& library_path) const;
 
     /**
+     * @brief Return the full class name of a given class
+     * @param class_name class name without namespace
+     * @param full_class_name class name with namespace
+     * @return True if class coudl be found
+     */
+    bool getFullClassName(const std::string& class_name, std::string& full_class_name) const;
+
+    /**
      * @brief Returns the libraries that are registered and can be loaded
      * @return A vector of strings corresponding to the names of registered libraries
      */
@@ -118,6 +126,14 @@ protected:
      * @brief Returns true if the given class name has a namespace
      */
     bool hasNamespace(const std::string& class_name) const;
+
+    /**
+     * @brief Helper method that strips the namespace if available from the given class name
+     * @param class_name the name of the plugin class
+     * @return class name without namespace
+     */
+    std::string removeNamespace(const std::string& class_name) const;
+
 private:
     /**
      * @brief Returns the paths in all install folders set by the environment.
@@ -145,21 +161,6 @@ private:
      * @param classes vector of plugin infos
      */
     void insertPluginInfos(const std::vector<PluginInfoPtr>& classes);
-
-    /**
-     * @brief Helper method that strips the namespace if available from the given class name
-     * @param class_name the name of the plugin class
-     * @return class name without namespace
-     */
-    std::string removeNamespace(const std::string& class_name) const;
-
-    /**
-     * @brief Return the full class name of a given class
-     * @param class_name class name without namespace
-     * @param full_class_name class name with namespace
-     * @return True if class coudl be found
-     */
-    bool getFullClassName(const std::string& class_name, std::string& full_class_name) const;
 
 private:
     /** Path to the folders where the xml files can be found */

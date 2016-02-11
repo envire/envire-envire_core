@@ -31,20 +31,13 @@ BOOST_AUTO_TEST_CASE(item_serialization_expected_failures)
 
     boost::archive::polymorphic_binary_iarchive ia(stream);
     BOOST_CHECK(Serialization::load(ia, base_item) == false);
-
-    BOOST_CHECK(envire::ClassLoader::getInstance()->hasValidPluginPath());
-
-    BOOST_CHECK_THROW(auto base_plugin = envire::ClassLoader::getInstance()->createItem("SomeNotExistingPlugin"), std::runtime_error);
-
-    BOOST_CHECK_THROW(envire::core::Item<std::string>::Ptr string_item_2 = envire::ClassLoader::getInstance()->createItem< envire::core::Item<std::string> >("VectorPlugin"), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(vector_plugin_serialization_text)
 {
-    BOOST_CHECK(envire::ClassLoader::getInstance()->hasValidPluginPath());
-
     // create vector plugin
-    auto base_plugin = envire::ClassLoader::getInstance()->createItem("VectorPlugin");
+    envire::core::ItemBase::Ptr base_plugin;
+    BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItem("VectorPlugin", base_plugin));
     BOOST_CHECK(base_plugin != NULL);
 
     Item<Eigen::Vector3d>::Ptr vector_plugin;
@@ -78,10 +71,9 @@ BOOST_AUTO_TEST_CASE(vector_plugin_serialization_text)
 
 BOOST_AUTO_TEST_CASE(vector_plugin_serialization_binary)
 {
-    BOOST_CHECK(envire::ClassLoader::getInstance()->hasValidPluginPath());
-
     // create vector plugin
-    auto base_plugin = envire::ClassLoader::getInstance()->createItem("VectorPlugin");
+    envire::core::ItemBase::Ptr base_plugin;
+    BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItem("VectorPlugin", base_plugin));
     BOOST_CHECK(base_plugin != NULL);
     Item<Eigen::Vector3d>::Ptr vector_plugin;
     vector_plugin = boost::dynamic_pointer_cast< Item<Eigen::Vector3d> >(base_plugin);
@@ -137,7 +129,8 @@ BOOST_AUTO_TEST_CASE(transform_graph_serialization_binary)
     graph.addTransform(a, b, tf);
 
     // add items to the graph
-    auto base_plugin_a = envire::ClassLoader::getInstance()->createItem("VectorPlugin");
+    envire::core::ItemBase::Ptr base_plugin_a;
+    BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItem("VectorPlugin", base_plugin_a));
     Item<Eigen::Vector3d>::Ptr vector_plugin_a = boost::dynamic_pointer_cast< Item<Eigen::Vector3d> >(base_plugin_a);
     BOOST_CHECK(vector_plugin_a != NULL);
     vector_plugin_a->setFrame(a);
@@ -146,7 +139,8 @@ BOOST_AUTO_TEST_CASE(transform_graph_serialization_binary)
     vector_plugin_a->getData().y() = 3.0;
     vector_plugin_a->getData().z() = -5.0;
 
-    auto base_plugin_b = envire::ClassLoader::getInstance()->createItem("VectorPlugin");
+    envire::core::ItemBase::Ptr base_plugin_b;
+    BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItem("VectorPlugin", base_plugin_b));
     Item<Eigen::Vector3d>::Ptr vector_plugin_b = boost::dynamic_pointer_cast< Item<Eigen::Vector3d> >(base_plugin_b);
     BOOST_CHECK(vector_plugin_b != NULL);
     vector_plugin_b->setFrame(b);

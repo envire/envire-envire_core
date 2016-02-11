@@ -6,7 +6,7 @@
 
 using namespace envire::core;
 
-static const std::string plugin_files_path = "/share/rock/plugin/";
+static const std::string plugin_files_path = "/share/plugin_manager/";
 static const std::string plugin_file_extension = ".xml";
 
 PluginManager::PluginManager(const std::vector< std::string >& plugin_xml_paths, bool load_environment_paths)

@@ -33,7 +33,8 @@ set(headers items/ItemBase.hpp
             serialization/SerializationRegistration.hpp
             serialization/ItemHeader.hpp
             serialization/BinaryBufferHelper.hpp
-            util/Demangle.hpp)
+            util/Demangle.hpp
+            util/Exceptions.hpp)
 
             
 set(sources items/ItemBase.cpp
