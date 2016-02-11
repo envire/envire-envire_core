@@ -5,18 +5,42 @@
 #include <envire_core/serialization/BinaryBufferHelper.hpp>
 #include <boost/archive/polymorphic_binary_iarchive.hpp>
 #include <boost/archive/polymorphic_binary_oarchive.hpp>
+#include <glog/logging.h>
+#include <envire_core/plugin/ClassLoader.hpp>
 
 using namespace envire::core;
+
+bool loadPluginLibrary(const std::string& class_name)
+{
+    LOG(INFO) << "Trying to load plugin library for item " << class_name;
+    ClassLoader* loader = ClassLoader::getInstance();
+    ItemBase::Ptr item;
+    return loader->createEnvireItem(class_name, item);
+}
 
 bool Serialization::save(ArchiveOutType& ar, const ItemBase::Ptr& item)
 {
     try
     {
+        // try to get handle
         if(!hasHandle(item->getClassName()))
         {
-            std::cerr << "Cannot find plugin " << item->getClassName() << std::endl;
-            throw std::runtime_error("Automatic lookup of plugins is not implemented yet.");
-            //TODO try to load library if handle is not available
+            // load plugin lib
+            if(loadPluginLibrary(item->getClassName()))
+            {
+                // try to get handle
+                LOG(INFO) << "Successfully loaded plugin library for item " << item->getClassName();
+                if(!hasHandle(item->getClassName()))
+                {
+                    LOG(ERROR) << "Library has been loaded but can't find a serialization handle for " << item->getClassName();
+                    return false;
+                }
+            }
+            else
+            {
+                LOG(ERROR) << "Failed to load plugin library for item " << item->getClassName();
+                return false;
+            }
         }
         HandlePtr handle;
         if(getHandle(item->getClassName(), handle) && handle)
@@ -29,7 +53,7 @@ bool Serialization::save(ArchiveOutType& ar, const ItemBase::Ptr& item)
     }
     catch(const std::runtime_error& e)
     {
-        return false;
+        LOG(ERROR) << "Caught exception while trying to save item of type " << item->getClassName();
     }
     return false;
 }
@@ -40,11 +64,25 @@ bool Serialization::load(ArchiveInType& ar, ItemBase::Ptr& item)
     {
         ItemHeader header;
         ar >> BOOST_SERIALIZATION_NVP(header);
+        // try to get handle
         if(!hasHandle(header.class_name))
         {
-            std::cerr << "Cannot find plugin " << header.class_name << std::endl;
-            throw std::runtime_error("Automatic lookup of plugins is not implemented yet.");
-            //TODO try to load library if handle is not available
+            // load plugin lib
+            if(loadPluginLibrary(header.class_name))
+            {
+                // try to get handle
+                LOG(INFO) << "Successfully loaded plugin library for item " << header.class_name;
+                if(!hasHandle(header.class_name))
+                {
+                    LOG(ERROR) << "Library has been loaded but can't find a serialization handle for " << header.class_name;
+                    return false;
+                }
+            }
+            else
+            {
+                LOG(ERROR) << "Failed to load plugin library for item " << header.class_name;
+                return false;
+            }
         }
         HandlePtr handle;
         if(getHandle(header.class_name, handle) && handle)
@@ -53,7 +91,7 @@ bool Serialization::load(ArchiveInType& ar, ItemBase::Ptr& item)
     }
     catch(const std::runtime_error& e)
     {
-        return false;
+        LOG(ERROR) << "Caught exception while trying to load item";
     }
     return false;
 }
