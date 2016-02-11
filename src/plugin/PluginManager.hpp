@@ -51,6 +51,13 @@ public:
     std::vector<std::string> getAvailableClasses(const std::string& base_class) const;
 
     /**
+     * @brief Return true if the given class is registered.
+     * @param class_name the name of the plugin class
+     * @return True if class could be found
+     */
+    bool isClassInfoAvailable(const std::string& class_name) const;
+
+    /**
      * @brief Returns the base class of the given class
      * @param class_name the name of the plugin class
      * @param base_class the base class name

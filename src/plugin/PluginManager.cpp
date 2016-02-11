@@ -55,6 +55,14 @@ std::vector< std::string > PluginManager::getAvailableClasses(const std::string&
     return classes;
 }
 
+bool PluginManager::isClassInfoAvailable(const std::string& class_name) const
+{
+    std::string full_class_name;
+    if(getFullClassName(class_name, full_class_name))
+        return true;
+    return false;
+}
+
 bool PluginManager::getBaseClass(const std::string& class_name, std::string& base_class) const
 {
     std::string full_class_name;
