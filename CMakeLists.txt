@@ -39,4 +39,8 @@ endif()
 rock_init(envire_core 0.1)
 rock_standard_layout()
 
-
+# install PluginManager.cmake extension
+configure_file(cmake/pluginmanager-config.cmake.in pluginmanager-config.cmake @ONLY)
+install(FILES cmake/PluginManager.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/pluginmanager-config.cmake
+        DESTINATION share/rock/cmake)
