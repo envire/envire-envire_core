@@ -1,5 +1,6 @@
 #include "ItemBase.hpp"
 #include "RandomGenerator.hpp"
+#define BOOST_SERIALIZATION_DYN_LINK 1
 
 using namespace envire::core;
 
@@ -32,3 +33,5 @@ ItemBase& ItemBase::operator=(ItemBase&& item)
     frame_name = std::move(item.frame_name);
     return *this;
 }
+
+BOOST_CLASS_EXPORT(envire::core::ItemBase)

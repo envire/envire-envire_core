@@ -33,7 +33,6 @@ void serialize(Archive &ar, const unsigned int version) \
 ENVIRE_REGISTER_SERIALIZATION_INTERNAL( _classname, _datatype, __COUNTER__ )
 
 #define ENVIRE_REGISTER_SERIALIZATION_INTERNAL( _classname, _datatype, _unique_id ) \
-BOOST_CLASS_EXPORT(envire::core::ItemBase) \
 BOOST_CLASS_EXPORT(envire::core::Item< _datatype >) \
 BOOST_CLASS_EXPORT(_classname) \
 class SerializationHandle ## _unique_id : public envire::core::SerializationHandle \
