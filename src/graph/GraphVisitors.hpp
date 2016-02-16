@@ -1,13 +1,13 @@
 /*
- * TransformGraphExceptions.hpp
+ * GraphExceptions.hpp
  *
  *  Created on: Sep 22, 2015
  *      Author: jhidalgo
  */
 
 #pragma once
-#include "TransformGraphExceptions.hpp"
-#include "TransformGraphTypes.hpp"
+#include "GraphExceptions.hpp"
+#include "GraphTypes.hpp"
 #include "TreeView.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/graph/breadth_first_search.hpp>
@@ -20,12 +20,14 @@ namespace envire { namespace core
 
     class Empty{};
 
+    /** Searches a graph in bfs order for a certain vertex.
+     *  Interrupts the search thrown an exception of the vertex is found. */
     template < typename Vertex>
-    class TransformGraphBFSVisitor: public boost::default_bfs_visitor
+    class GraphBFSVisitor: public boost::default_bfs_visitor
     {
     public:
         template <typename Graph>
-        TransformGraphBFSVisitor(const Vertex &v,const Graph &g):vertex_to_search(v)
+        GraphBFSVisitor(const Vertex &v,const Graph &g):vertex_to_search(v)
         {
             parent.reset(new std::unordered_map<Vertex,Vertex>());
             tree.reset(new std::deque<Vertex>());
@@ -51,7 +53,7 @@ namespace envire { namespace core
                     }
                 }
 
-                throw FoundFrameException(g[v].frame.name);
+                throw FoundFrameException(g[v].getId());
             }
         }
 
@@ -64,8 +66,6 @@ namespace envire { namespace core
             parent->insert(std::make_pair<Vertex,Vertex>(static_cast<Vertex>(target_vertex), static_cast<Vertex>(source_vertex)));
         }
 
-
-
     public:
         Vertex vertex_to_search;
         boost::shared_ptr< std::unordered_map<Vertex, Vertex> > parent;
@@ -73,13 +73,15 @@ namespace envire { namespace core
     };
 
 
-    /**Visits every node in bfs order and stores the search tree in the provided map */
+    /**Visits every node in bfs order and stores the search tree in the provided map 
+     * @param GRAPH should be a boost graph of some kind*/
+    template <class GRAPH>
     struct TreeBuilderVisitor : public boost::default_bfs_visitor
     {
         /** @param view The TreeView that should be filled
          *  @param graph The graph that is visited. The reference to the graph
          *               is needed to get the source and target of an edge.*/
-        TreeBuilderVisitor(TreeView& view, const LabeledTransformGraph& graph) :
+        TreeBuilderVisitor(TreeView& view, const GRAPH& graph) :
             view(view), graph(graph) {}
 
         /**This is invoked on each edge as it becomes a member of 
@@ -92,8 +94,8 @@ namespace envire { namespace core
             //      Because the signature for source() and target() is different
             //      on filtered_graphs. Dunno why exactly that happens but using
             //      the original graph works fine :-)
-            const vertex_descriptor source = boost::source(e, graph);
-            const vertex_descriptor target = boost::target(e, graph);
+            const typename GRAPH::vertex_descriptor source = boost::source(e, graph);
+            const typename GRAPH::vertex_descriptor target = boost::target(e, graph);
 
             /** Insert children **/
             view.tree[source].children.insert(target);
@@ -114,7 +116,7 @@ namespace envire { namespace core
         }
         
         TreeView& view;
-        const LabeledTransformGraph& graph;
+        const GRAPH& graph;
     };
 
     
@@ -125,13 +127,13 @@ namespace envire { namespace core
     public:
       EdgeFilter() {}//needed by boost, dunno why
       
-      bool operator()(const edge_descriptor& e) const 
+      bool operator()(const GraphTraits::edge_descriptor& e) const 
       {
           return e != edge1 && e != edge2;
       }
       //the edges that should be removed
-      edge_descriptor edge1;
-      edge_descriptor edge2;
+      GraphTraits::edge_descriptor edge1;
+      GraphTraits::edge_descriptor edge2;
   };
 
 

@@ -38,7 +38,7 @@ namespace envire { namespace core
                 case GraphEvent::ITEM_ADDED_TO_FRAME:
                 {
                     const ItemAddedEvent& itemEvent = dynamic_cast<const ItemAddedEvent&>(event);
-                    if(itemEvent.itemType == itemType)
+                    if(itemEvent.item->getTypeIndex() == itemType)
                     {
                         itemAdded(TypedItemAddedEvent<T>(itemEvent.frame, boost::dynamic_pointer_cast<T>(itemEvent.item)));
                     }
@@ -47,7 +47,7 @@ namespace envire { namespace core
                 case GraphEvent::ITEM_REMOVED_FROM_FRAME:  
                 {
                     const ItemRemovedEvent itemEvent =  dynamic_cast<const ItemRemovedEvent&>(event);
-                    if(itemEvent.itemType == itemType)
+                    if(itemEvent.item->getTypeIndex() == itemType)
                     {
                         itemRemoved(TypedItemRemovedEvent<T>(itemEvent.frame, boost::dynamic_pointer_cast<T>(itemEvent.item)));
                     }

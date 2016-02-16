@@ -1,11 +1,10 @@
 #ifndef __ENVIRE_CORE_FRAME__
 #define __ENVIRE_CORE_FRAME__
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
 #include <boost/serialization/string.hpp>
 #include <vector>
 #include <string>
+#include <sstream>
 #include <unordered_map>
 #include <typeindex>
     
@@ -13,6 +12,7 @@
 #include "RandomGenerator.hpp"
 #include <boost_serialization/BoostTypes.hpp>
 #include <envire_core/serialization/Serialization.hpp>
+#include <envire_core/util/Demangle.hpp>
 
 namespace envire { namespace core
 {
@@ -23,8 +23,7 @@ namespace envire { namespace core
     class Frame
     {
     public:
-        FrameId name; /** Frame name */
-        boost::uuids::uuid uuid; /** Unique Identifier */
+        FrameId id; /** Frame name */
 
         using ItemList = std::vector<ItemBase::Ptr>;
         using ItemMap = std::unordered_map<std::type_index, ItemList>;
@@ -32,8 +31,10 @@ namespace envire { namespace core
         ItemMap items;
 
     public:
-        Frame(const FrameId& _name): 
-            name(_name), uuid(RandomGenerator::getRandomGenerator()()) {}
+        
+        Frame() : id("envire::core::default_frame_id"){}
+      
+        Frame(const FrameId& id): id(id) {}
 
         ~Frame(){ this->items.clear(); }
 
@@ -41,13 +42,13 @@ namespace envire { namespace core
         *
         * Sets the frame name of the item
         */
-        void setName(const FrameId& name) { this->name = name; }
+        void setId(const FrameId& _id) { id = _id; }
 
         /**@brief getFrame
         *
         * Returns the frame name of the item
         */
-        const FrameId& getName() const { return this->name; }
+        const FrameId& getId() const { return id; }
         
         /**Returns the total number of items in this frame */
         std::size_t calculateTotalItemCount() const 
@@ -59,6 +60,22 @@ namespace envire { namespace core
             }
             return count;
         }
+        
+        const std::string toGraphviz() const 
+        {
+            std::stringstream out;
+            out << "[shape=record, label=\"{{" << id <<
+                   "|" << calculateTotalItemCount() << "}";
+                
+            for(const auto& itemPair : items)
+            {
+                std::string typeName = demangleTypeName(itemPair.first);
+                typeName = escapeAngleBraces(typeName);
+                out << "| {" << typeName  << "|" << itemPair.second.size() << "}";
+            }
+            out << "}\"" << ",style=filled,fillcolor=lightblue]";
+            return out.str();
+        }
 
     private:
         /**Grants access to boost serialization */
@@ -68,8 +85,7 @@ namespace envire { namespace core
         template<class Archive>
         void serialize(Archive & ar, const unsigned int version)
         {
-            ar & BOOST_SERIALIZATION_NVP(name);
-            ar & BOOST_SERIALIZATION_NVP(uuid);
+            ar & BOOST_SERIALIZATION_NVP(id);
             ar & BOOST_SERIALIZATION_NVP(items);
         }
 

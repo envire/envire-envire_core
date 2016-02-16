@@ -1,5 +1,6 @@
 #include <boost/test/unit_test.hpp>
-
+#define private public
+#define protected public
 #include <Eigen/Geometry>
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/archive/polymorphic_text_iarchive.hpp>
@@ -195,12 +196,12 @@ BOOST_AUTO_TEST_CASE(test_unkown_plugin_text_deserialization)
     BOOST_CHECK(vector_plugin->getData().z() == -3.0);
 }
 
-BOOST_AUTO_TEST_CASE(transform_graph_serialization_binary)
+BOOST_AUTO_TEST_CASE(envire_graph_serialization_binary)
 {
     // add transformation
     FrameId a = "frame_a";
     FrameId b = "frame_b";
-    TransformGraph graph;
+    EnvireGraph graph;
     Transform tf;
     tf.transform.translation << 42, 21, -42;
     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
@@ -242,7 +243,7 @@ BOOST_AUTO_TEST_CASE(transform_graph_serialization_binary)
 
     // deserialize graph from string stream
     boost::archive::polymorphic_binary_iarchive ia(stream);
-    TransformGraph graph_2;
+    EnvireGraph graph_2;
     ia >> graph_2;
 
     // check vertecies and edges
@@ -260,7 +261,7 @@ BOOST_AUTO_TEST_CASE(transform_graph_serialization_binary)
     BOOST_CHECK(graph_2.getTotalItemCount(b) == graph.getTotalItemCount(b));
 
     // check if items are the same
-    using Iterator = TransformGraph::ItemIterator<Item<Eigen::Vector3d>>;
+    using Iterator = EnvireGraph::ItemIterator<Item<Eigen::Vector3d>>;
     Iterator begin, end;
     boost::tie(begin, end) = graph_2.getItems<Item<Eigen::Vector3d>>(a);
     BOOST_CHECK(begin != end);

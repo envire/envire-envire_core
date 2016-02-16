@@ -1,8 +1,8 @@
 #include "GraphEventDispatcher.hpp"
 #include "GraphEvent.hpp"
-#include "TransformAddedEvent.hpp"
-#include "TransformModifiedEvent.hpp"
-#include "TransformRemovedEvent.hpp"
+#include "EdgeAddedEvent.hpp"
+#include "EdgeModifiedEvent.hpp"
+#include "EdgeRemovedEvent.hpp"
 #include "ItemAddedEvent.hpp"
 #include "ItemRemovedEvent.hpp"
 #include "FrameAddedEvent.hpp"
@@ -22,14 +22,14 @@ void GraphEventDispatcher::notifyGraphEvent(const GraphEvent& event)
 {
     switch(event.type)
     {
-    case GraphEvent::TRANSFORMATION_ADDED:
-        transformAdded(dynamic_cast<const TransformAddedEvent&>(event));
+    case GraphEvent::EDGE_ADDED:
+        edgeAdded(dynamic_cast<const EdgeAddedEvent&>(event));
         break;
-    case GraphEvent::TRANSFORMATION_MODIFIED:
-        transformModified(dynamic_cast<const TransformModifiedEvent&>(event));
+    case GraphEvent::EDGE_MODIFIED:
+        edgeModified(dynamic_cast<const EdgeModifiedEvent&>(event));
         break;
-    case GraphEvent::TRANSFORMATION_REMOVED:
-        transformRemoved(dynamic_cast<const TransformRemovedEvent&>(event));
+    case GraphEvent::EDGE_REMOVED:
+        edgeRemoved(dynamic_cast<const EdgeRemovedEvent&>(event));
         break;
     case GraphEvent::FRAME_ADDED:
         frameAdded(dynamic_cast<const FrameAddedEvent&>(event));

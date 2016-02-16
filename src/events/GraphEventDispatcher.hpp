@@ -5,11 +5,9 @@
 namespace envire { namespace core
 {
     class FrameAddedEvent;
-    class VertexAddedEvent;
-    class VertexRemovedEvent;
-    class TransformAddedEvent;
-    class TransformRemovedEvent;
-    class TransformModifiedEvent;
+    class EdgeAddedEvent;
+    class EdgeRemovedEvent;
+    class EdgeModifiedEvent;
     class ItemRemovedEvent;
     class FrameAddedEvent;
     class FrameRemovedEvent;
@@ -36,9 +34,9 @@ namespace envire { namespace core
         virtual void notifyGraphEvent(const GraphEvent& event);
 
     protected:
-        virtual void transformAdded(const TransformAddedEvent& e) {}
-        virtual void transformRemoved(const TransformRemovedEvent& e) {}
-        virtual void transformModified(const TransformModifiedEvent& e) {}
+        virtual void edgeAdded(const EdgeAddedEvent& e) {}
+        virtual void edgeRemoved(const EdgeRemovedEvent& e) {}
+        virtual void edgeModified(const EdgeModifiedEvent& e) {}
         virtual void frameAdded(const FrameAddedEvent& e) {}
         virtual void frameRemoved(const FrameRemovedEvent& e) {}
         virtual void itemAdded(const ItemAddedEvent& e) {}

@@ -1,5 +1,5 @@
 /*
- * TransformGraphExceptions.hpp
+ * GraphExceptions.hpp
  *
  *  Created on: Sep 22, 2015
  *      Author: aboeckmann
@@ -13,12 +13,12 @@
 
 namespace envire { namespace core
 {
-
-    class TransformAlreadyExistsException : public std::exception
+    
+    class EdgeAlreadyExistsException : public std::exception
     {
     public:
-        explicit TransformAlreadyExistsException(const FrameId& nameA, const FrameId& nameB) :
-          msg("Transform between " + nameA + " and " + nameB + " already exists") {}
+        explicit EdgeAlreadyExistsException(const FrameId& nameA, const FrameId& nameB) :
+          msg("Edge between " + nameA + " and " + nameB + " already exists") {}
         virtual char const * what() const throw() { return msg.c_str(); }
         const std::string msg;
     };
@@ -28,6 +28,15 @@ namespace envire { namespace core
     public:
       explicit UnknownTransformException(const FrameId& nameA, const FrameId& nameB) :
           msg("Transform between " + nameA + " and " + nameB + " doesn't exists") {}
+        virtual char const * what() const throw() { return msg.c_str(); }
+        const std::string msg;
+    };
+    
+    class UnknownEdgeException : public std::exception
+    {
+    public:
+      explicit UnknownEdgeException(const FrameId& nameA, const FrameId& nameB) :
+          msg("Edge between " + nameA + " and " + nameB + " doesn't exists") {}
         virtual char const * what() const throw() { return msg.c_str(); }
         const std::string msg;
     };
