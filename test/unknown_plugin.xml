@@ -1,0 +1,5 @@
+<library path="envire_vector_plugin">
+  <class class_name="envire::FakePlugin" base_class_name="envire::core::ItemBase">
+    <description>This plugin does not really exist.</description>
+  </class>
+</library>

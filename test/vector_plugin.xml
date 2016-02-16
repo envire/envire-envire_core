@@ -1,0 +1,8 @@
+<library path="envire_vector_plugin">
+  <class class_name="envire::VectorPlugin" base_class_name="envire::core::ItemBase">
+    <description>Vector plugin which is used in the unit tests of the envire core.</description>
+    <associations>
+        <class class_name="Eigen::Vector3d"></class>
+    </associations>
+  </class>
+</library>

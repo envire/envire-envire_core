@@ -10,5 +10,7 @@
   <depend package="base/cmake" />
   <depend package="base/types" />
   <depend package="envire/boost_serialization" />
+  <depend package="glog" />
   <depend package="tools/class_loader" optional="1"/>
+  <depend package="external/tinyxml" optional="1"/>
 </package>
