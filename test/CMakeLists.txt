@@ -14,7 +14,7 @@ if(ENABLE_PLUGINS)
         DEPS_PKGCONFIG class_loader boost_serialization)
 
     install(FILES vector_plugin.xml
-            DESTINATION share/plugin_manager)
+            DESTINATION lib/plugin_manager)
     
 endif()
 

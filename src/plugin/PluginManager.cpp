@@ -6,7 +6,7 @@
 
 using namespace envire::core;
 
-static const std::string plugin_files_path = "/share/plugin_manager/";
+static const std::string plugin_files_path = "/plugin_manager/";
 static const std::string plugin_file_extension = ".xml";
 
 PluginManager::PluginManager(const std::vector< std::string >& plugin_xml_paths, bool load_environment_paths)
@@ -190,12 +190,12 @@ void PluginManager::reloadXMLPluginFiles()
 
 std::vector< std::string > PluginManager::getPluginXmlPathsFromEnv() const
 {
-    const char* install_path = std::getenv("CMAKE_PREFIX_PATH");
+    const char* install_path = std::getenv("LD_LIBRARY_PATH");
     std::vector<std::string> paths;
     if(install_path != NULL)
     {
         const std::string path(install_path);
-        //":" is the separator in CMAKE_PREFIX_PATH
+        //":" is the separator in LD_LIBRARY_PATH
         boost::split(paths, path, boost::is_any_of(":"));
         //trim ":" and " " from the beginning and end of the string
         for(std::string& path : paths)
