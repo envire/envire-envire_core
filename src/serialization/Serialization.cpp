@@ -6,16 +6,25 @@
 #include <boost/archive/polymorphic_binary_iarchive.hpp>
 #include <boost/archive/polymorphic_binary_oarchive.hpp>
 #include <glog/logging.h>
-#include <envire_core/plugin/ClassLoader.hpp>
+
+#ifdef ENABLE_PLUGINS
+    #include <envire_core/plugin/ClassLoader.hpp>
+#endif
 
 using namespace envire::core;
 
 bool loadPluginLibrary(const std::string& class_name)
 {
-    LOG(INFO) << "Trying to load plugin library for item " << class_name;
-    ClassLoader* loader = ClassLoader::getInstance();
-    ItemBase::Ptr item;
-    return loader->createEnvireItem(class_name, item);
+    #ifdef ENABLE_PLUGINS
+        LOG(INFO) << "Trying to load plugin library for item " << class_name;
+        ClassLoader* loader = ClassLoader::getInstance();
+        ItemBase::Ptr item;
+        return loader->createEnvireItem(class_name, item);
+    #else
+        LOG(INFO) << "Unable to load plugin library from item " << class_name
+                  << " because plugin support is disabled (code has been compiled with ENABLE_PLUGINS=OFF).";
+        return false;
+    #endif
 }
 
 bool Serialization::save(ArchiveOutType& ar, const ItemBase::Ptr& item)
