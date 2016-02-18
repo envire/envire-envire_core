@@ -74,11 +74,37 @@ const Frame::ItemList& EnvireGraph::getItems(const vertex_descriptor frame,
     return items.at(type);   
 }
 
+const Frame::ItemList& EnvireGraph::getItems(const FrameId& frame,
+                                             const std::type_index& type) const
+{
+    const vertex_descriptor frameDesc = getVertex(frame); //may throw
+    return getItems(frameDesc, type);
+}
+
 void EnvireGraph::removeFrame(const FrameId& frame) 
 {
     //explicitly remove all items from the frame to cause ItemRemovedEvents
     clearFrame(frame);
     Base::removeFrame(frame);
+}
+ 
+
+void EnvireGraph::removeItemFromFrame(const ItemBase::Ptr item)
+{
+    const vertex_descriptor frame = getVertex(item->getFrame()); //may throw UnknownFrameException
+    //the const_cast is fine because we are inside the EnvireGraph and know what
+    //we are doing. The method returns const because the user should not be
+    //able to manipulate the ItemLists directly.
+    Frame::ItemList& items = const_cast<Frame::ItemList&>(getItems(frame, item->getTypeIndex()));
+    
+    Frame::ItemList::iterator itemIt = std::find(items.begin(), items.end(), item);
+    if(itemIt == items.end())
+    {
+        throw UnknownItemException(item->getFrame(), item->getID());
+    }
+    items.erase(itemIt);   
+    item->setFrame("");
+    notify(ItemRemovedEvent(item->getFrame(), item));
 }
 
 

@@ -49,6 +49,7 @@ public:
 
     /**Removes @p item from @p frame.
       *  Causes ItemRemovedEvent.
+      *  Sets @p item->frame_name to "" before causing the event.
       * @throw UnknownFrameException if the frame does not exist.
       * @throw UnknownItemException if the item is not part of the frame's
       *                             item list.
@@ -59,11 +60,19 @@ public:
       *         list.*/ 
     template <class T>
     ItemIteratorPair<T>
-    removeItemFromFrame(const FrameId& frameId, ItemIterator<T> item);       
+    removeItemFromFrame(const FrameId& frameId, ItemIterator<T> item);
+    
+    /**Removes @p item from its frame.
+     * Causes ItemRemovedEvent. 
+     * Sets @p item->frame_name to "" before causing the event.
+     * @throw UnknownFrameException if @p item.frame is not part of this graph.
+     * @throw UnknownItemException if @p item is not part of @p item.frame
+     * @note Invalidates all iterators of type ItemIterator<item.getTypeIndex()>*/
+    void removeItemFromFrame(const ItemBase::Ptr item);
           
     /**Removes all items from @p frame.
     * Causes ItemRemovedEvent for each item that is removd.
-    * @throw UnknownFrameException if the frame does not exist.    */
+    * @throw UnknownFrameException if the frame does not exist.*/
     void clearFrame(const FrameId& frame);
 
     /** Adds @p item to the item list of the specified frame 
@@ -86,11 +95,14 @@ public:
     template<class T>
     const std::pair<ItemIterator<T>, ItemIterator<T>> getItems(const vertex_descriptor frame) const;
 
-    /** @return a list of all items of @p tyoe in @p frame
-    *  @throw NoItemsOfTypeInFrameException if no items of the type are in the frame*/
+    /** @return a list of all items of @p type in @p frame
+     *  @throw NoItemsOfTypeInFrameException if no items of the type are in the frame*/
     const envire::core::Frame::ItemList& getItems(const vertex_descriptor frame,
-                                                 const std::type_index& type) const;
-
+                                                  const std::type_index& type) const;
+    /** @throw UnknownFrameException if @p frame is not part of this graph*/                                                  
+    const envire::core::Frame::ItemList& getItems(const FrameId& frame,
+                                                  const std::type_index& type) const;
+                                                 
     /**Convenience method that returns an iterator to the @p i'th item of type @p T from @p frame.
       * @param T has to derive from ItemBase.
       * @throw UnknownFrameException if the @p frame id is invalid.
@@ -275,9 +287,8 @@ EnvireGraph::removeItemFromFrame(const FrameId& frameId, ItemIterator<T> item)
     std::vector<ItemBase::Ptr>::iterator nonConstBaseIterator = items.begin() + (baseIterator - items.cbegin()); //vector iterator const cast hack
     ItemBase::Ptr deletedItem = *nonConstBaseIterator;//backup item so we can notify the user
     std::vector<ItemBase::Ptr>::const_iterator next = items.erase(nonConstBaseIterator);
-
-    ItemBase::Ptr baseItem = boost::dynamic_pointer_cast<ItemBase>(deletedItem);
-    notify(ItemRemovedEvent(frameId, baseItem));
+    deletedItem->setFrame("");
+    notify(ItemRemovedEvent(frameId, deletedItem));
     
     ItemIterator<T> nextIt(next, ItemBaseCaster<T>()); 
     ItemIterator<T> endIt(items.cend(), ItemBaseCaster<T>()); 
@@ -340,6 +351,5 @@ void EnvireGraph::serialize(Archive &ar, const unsigned int version)
 {
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Base);
 }
-
 
 }}

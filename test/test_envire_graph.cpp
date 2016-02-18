@@ -574,9 +574,39 @@ BOOST_AUTO_TEST_CASE(remove_frame_item_events_test)
     BOOST_CHECK(d.itemRemovedEvents.size() == 2);
     //note: the order in which the items will be removed is undefined
     BOOST_CHECK(d.itemRemovedEvents[1].item->getTypeIndex() == item1->getTypeIndex());
-    BOOST_CHECK(d.itemRemovedEvents[0].item->getTypeIndex() == item2->getTypeIndex());
+    BOOST_CHECK(d.itemRemovedEvents[0].item->getTypeIndex() == item2->getTypeIndex());  
+}
+
+
+BOOST_AUTO_TEST_CASE(remove_item_using_pointer_test)
+{
+    EnvireGraph graph;
+    const FrameId a = "Malcolm Reynolds";
+    Item<string>::Ptr item1(new Item<string>("Zoe Washburne"));
+    Item<string>::Ptr item2(new Item<string>("Hoban Washburne"));
+    Item<string>::Ptr item3(new Item<string>("Inara Serra"));
+    Item<string>::Ptr item4(new Item<string>("Jayne Cobb"));
+    Item<string>::Ptr item5(new Item<string>("Kaylee Frye"));
     
+    graph.addFrame(a);
+    graph.addItemToFrame(a, item1); 
+    graph.addItemToFrame(a, item2);
+    graph.addItemToFrame(a, item3);
+    graph.addItemToFrame(a, item4);
+    graph.addItemToFrame(a, item5);
+  
+    graph.removeItemFromFrame(item2);
+    BOOST_CHECK(item2->getFrame() == "");
     
+    const Frame::ItemList& items = graph.getItems(a, item1->getTypeIndex());
+    BOOST_CHECK(std::find(items.begin(), items.end(), item2) == items.end());
+    
+    item2->setFrame(a); //hack to test the exception, do NOT do this in real code!
+    BOOST_CHECK_THROW(graph.removeItemFromFrame(item2), UnknownItemException);
+    
+    item2->setFrame("unknown frame");
+    BOOST_CHECK_THROW(graph.removeItemFromFrame(item2), UnknownFrameException);
+ 
 }
 
 
