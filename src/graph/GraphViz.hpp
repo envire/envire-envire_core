@@ -3,7 +3,7 @@
 
 #include <fstream> // std::ofstream
 
-#include <envire_core/graph/EnvireGraph.hpp>
+#include <envire_core/graph/Graph.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/algorithm/string.hpp>
 #include <envire_core/util/Demangle.hpp>

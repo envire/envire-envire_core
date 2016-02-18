@@ -14,6 +14,7 @@
 #include <envire_core/plugin/ClassLoader.hpp>
 #include <envire_core/graph/TransformGraph.hpp>
 #include <envire_core/graph/GraphViz.hpp>
+#include <envire_core/graph/EnvireGraph.hpp>
 
 using namespace envire::core;
 
