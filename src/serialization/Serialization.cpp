@@ -7,7 +7,7 @@
 #include <boost/archive/polymorphic_binary_oarchive.hpp>
 #include <glog/logging.h>
 
-#ifdef ENABLE_PLUGINS
+#ifdef CMAKE_ENABLE_PLUGINS
     #include <envire_core/plugin/ClassLoader.hpp>
 #endif
 
@@ -15,7 +15,7 @@ using namespace envire::core;
 
 bool loadPluginLibrary(const std::string& class_name)
 {
-    #ifdef ENABLE_PLUGINS
+    #ifdef CMAKE_ENABLE_PLUGINS
         LOG(INFO) << "Trying to load plugin library for item " << class_name;
         ClassLoader* loader = ClassLoader::getInstance();
         ItemBase::Ptr item;
