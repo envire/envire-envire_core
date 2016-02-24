@@ -46,7 +46,8 @@ set(sources items/ItemBase.cpp
             events/GraphEventDispatcher.cpp
             events/GraphEventSubscriber.cpp
             graph/EnvireGraph.cpp
-            serialization/Serialization.cpp)
+            serialization/Serialization.cpp
+            util/Demangle.cpp)
             
 set(deps_pkg_config base-types)
 
