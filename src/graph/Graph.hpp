@@ -39,16 +39,21 @@ class Graph : public GraphBase<FRAME_PROP, EDGE_PROP>,
               public envire::core::TreeUpdatePublisher
 {
 public:
-
+     using Base = GraphBase<FRAME_PROP, EDGE_PROP>;
      using vertex_descriptor = GraphTraits::vertex_descriptor;
      using edge_descriptor = GraphTraits::edge_descriptor;
      using EdgePair = std::pair<edge_descriptor, bool>;
      using vertices_size_type = GraphTraits::vertices_size_type;
      using edges_size_type = GraphTraits::edges_size_type;
-     using out_edge_iterator = typename GraphBase<FRAME_PROP, EDGE_PROP>::out_edge_iterator;
-     using GraphBase<FRAME_PROP, EDGE_PROP>::vertex;
+     using out_edge_iterator = typename Base::out_edge_iterator;
+     using Base::vertex;
     
     Graph();
+    
+    /**Creates a copy of @p other.
+     * @note Does **not** copy the event subscribers or TreeView update subscribers.
+     *       Only the graph data is copied*/
+    explicit Graph(const Graph& other);
     
     /**Adds an unconnected frame to the graph.
     *  The frame property is default constructed and the id is set to @p frame.
@@ -290,6 +295,17 @@ Graph<F,E>::Graph()
 
     BOOST_CONCEPT_ASSERT((EdgePropertyConcept<E>));
     BOOST_CONCEPT_ASSERT((FramePropertyConcept<F>));
+}
+
+template <class F, class E>
+Graph<F,E>::Graph(const Graph<F, E>& other) : Base()
+{
+  //NOTE: we are explicitly avoiding calling the base copy constructor because it is
+  //      broken. (see https://svn.boost.org/trac/boost/ticket/10449).
+  //      Instead we create an empty copy and use operator= to intialize it.
+  //FIXME remove the copy ctor if boost bug 10449 is fixed
+  *this = other;
+  
 }
 
 template <class F, class E>

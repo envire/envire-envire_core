@@ -1090,9 +1090,37 @@ BOOST_AUTO_TEST_CASE(serialization_test)
     //check if edge property was loaded correctly
     BOOST_CHECK(graph2.getEdgeProperty(a, b).value == ab.value);
     BOOST_CHECK(graph2.getEdgeProperty(a, c).value == ac.value);
-    
-    
-    
 }
 
+BOOST_AUTO_TEST_CASE(copy_ctor_test)
+{
+    using StringGraph = envire::core::Graph<StringProperty, EdgeProp>;
+    StringGraph graph;
+    FrameId a("f1");
+    FrameId b("f2");
+    FrameId c("f3");
+    EdgeProp ab;
+    ab.value = 22;
+    EdgeProp ac;
+    ac.value = 44;    
+
+    graph.emplaceFrame(a, "blabla");
+    graph.emplaceFrame(b, "muhhh");
+    graph.emplaceFrame(c, "meeeh");
+    graph.add_edge(a, b, ab);
+    graph.add_edge(a, c, ac);
+
+    StringGraph graph2(graph);
+    
+    BOOST_CHECK(graph2.num_edges() == 4);
+    BOOST_CHECK(graph2.num_vertices() == 3);
+    BOOST_CHECK(graph2.getEdgeProperty(a, b).value == 22);
+    BOOST_CHECK(graph2.getEdgeProperty(a, c).value == 44);
+    BOOST_CHECK_NO_THROW(graph2.getVertex(a));
+    BOOST_CHECK_NO_THROW(graph2.getVertex(b));
+    BOOST_CHECK_NO_THROW(graph2.getVertex(c));
+    BOOST_CHECK(graph2.getFrameProperty(a).value == "blabla");
+    BOOST_CHECK(graph2.getFrameProperty(b).value == "muhhh");
+    BOOST_CHECK(graph2.getFrameProperty(c).value == "meeeh");
+}
 

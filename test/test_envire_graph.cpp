@@ -6,6 +6,7 @@
 #include <envire_core/events/GraphItemEventDispatcher.hpp>
 #include <envire_core/items/Item.hpp>
 #include <envire_core/graph/GraphViz.hpp>
+#include <envire_core/plugin/Plugin.hpp>
 #include <vector>
 
 
@@ -608,5 +609,34 @@ BOOST_AUTO_TEST_CASE(remove_item_using_pointer_test)
     BOOST_CHECK_THROW(graph.removeItemFromFrame(item2), UnknownFrameException);
  
 }
+
+BOOST_AUTO_TEST_CASE(envire_graph_serialization_test)
+{
+    FrameId a = "AA";
+    FrameId b = "BBB";
+    FrameId c = "CCCC";
+    EnvireGraph graph;
+    Transform ab;
+    Transform bc;
+    
+    ab.transform.translation << 1, 2, 3;
+    ab.transform.orientation.coeffs() << 0, 1, 2, 3; 
+    ab.time = base::Time::now();
+    bc.transform.translation << 4, 5, 6;
+    bc.transform.orientation.coeffs() << -0, 2, 4, 6;
+  
+    graph.addTransform(a, b, ab);
+    graph.addTransform(b,c, bc);
+    
+    std::stringstream stream;
+    boost::archive::polymorphic_binary_oarchive oa(stream);
+    oa << graph;
+    boost::archive::polymorphic_binary_iarchive ia(stream);
+    EnvireGraph graph2;
+    ia >> graph2;   
+    
+}
+
+
 
 
