@@ -6,7 +6,6 @@
 #include <envire_core/events/GraphItemEventDispatcher.hpp>
 #include <envire_core/items/Item.hpp>
 #include <envire_core/graph/GraphViz.hpp>
-#include <envire_core/plugin/Plugin.hpp>
 #include <vector>
 
 
