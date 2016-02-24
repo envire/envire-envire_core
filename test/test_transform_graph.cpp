@@ -434,4 +434,30 @@ BOOST_AUTO_TEST_CASE(transform_graph_serialization_test)
 }
 
 
+BOOST_AUTO_TEST_CASE(remove_transform_test)
+{
+    FrameId a = "aaa";
+    FrameId b = "bbb";
+    FrameId c = "ccc";
+    Tfg g;
+    Transform ab;
+    Transform bc;
+    
+    g.addTransform(a, b, ab);
+    g.addTransform(b, c, bc);
+    
+    g.removeTransform(a, b);
+    BOOST_CHECK_THROW(g.getTransform(a, b), UnknownTransformException);
+    BOOST_CHECK_THROW(g.getTransform(b, a), UnknownTransformException);
+    BOOST_CHECK_NO_THROW(g.getTransform(b, c));
+    
+    vertex_descriptor bVertex = g.getVertex(b);
+    vertex_descriptor cVertex = g.getVertex(c);
+    g.removeTransform(cVertex, bVertex);
+    BOOST_CHECK_THROW(g.getTransform(bVertex, cVertex), UnknownTransformException);
+    BOOST_CHECK_THROW(g.getTransform(cVertex, bVertex), UnknownTransformException);
+
+}
+
+
 

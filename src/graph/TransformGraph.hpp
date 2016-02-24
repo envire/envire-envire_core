@@ -37,6 +37,7 @@ namespace envire { namespace core
       using Base::getVertex;
       using Base::setEdgeProperty;
       using Base::add_edge;
+      using Base::remove_edge;
       using EdgePair = typename Base::EdgePair;
       
 
@@ -66,7 +67,10 @@ namespace envire { namespace core
         void addTransform(const FrameId& origin, const FrameId& target,
                           const Transform& tf);
         
-
+        /**A convenience wrapper around Base::remove_edge */
+        void removeTransform(const vertex_descriptor origin, const vertex_descriptor target);
+        void removeTransform(const FrameId& origin, const FrameId& target);
+        
     protected:
       using Base::graph;
         
@@ -221,8 +225,21 @@ namespace envire { namespace core
                                          const FrameId& target,
                                          const Transform& tf)
     {
-      add_edge(origin, target, tf);
+        add_edge(origin, target, tf);
     }
+    
+    template <class F>
+    void TransformGraph<F>::removeTransform(const vertex_descriptor origin, const vertex_descriptor target)
+    {
+        remove_edge(origin, target);
+    }
+    
+    template <class F>
+    void TransformGraph<F>::removeTransform(const FrameId& origin, const FrameId& target)
+    {
+        remove_edge(origin, target);
+    }
+    
     
     template<class F>
     template <typename Archive>
