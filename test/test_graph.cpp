@@ -1146,12 +1146,21 @@ BOOST_AUTO_TEST_CASE(treeview_dfsVisit_test)
     TreeView tv = graph.getTree(a);
     
     FrameId expectedOrder[] = {"a", "f", "g", "e", "b", "d", "c"};
+    FrameId expectedParent[] = {"", "a", "f", "a", "a", "b", "b"};
     
     int i = 0;
-    tv.visitDfs(graph.getVertex(a), [&](GraphTraits::vertex_descriptor vd)
+    tv.visitDfs(graph.getVertex(a), [&](GraphTraits::vertex_descriptor vd, 
+                                        GraphTraits::vertex_descriptor parent)
       { 
         const FrameId id = graph.getFrameId(vd);
         BOOST_CHECK(id == expectedOrder[i]);
+        if(expectedParent[i] == "") 
+          BOOST_CHECK(parent == GraphTraits::null_vertex());
+        else
+        {
+          const FrameId parentId = graph.getFrameId(parent);
+          BOOST_CHECK(expectedParent[i] == parentId);
+        }
         ++i;
       });
 }
