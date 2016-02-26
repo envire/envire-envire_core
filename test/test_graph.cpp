@@ -1124,3 +1124,35 @@ BOOST_AUTO_TEST_CASE(copy_ctor_test)
     BOOST_CHECK(graph2.getFrameProperty(c).value == "meeeh");
 }
 
+BOOST_AUTO_TEST_CASE(treeview_dfsVisit_test)
+{
+    FrameId a = "a";
+    FrameId b = "b";
+    FrameId c = "c";
+    FrameId d = "d";
+    FrameId e = "e";
+    FrameId f = "f";
+    FrameId g = "g";
+    
+    Gra graph;
+    EdgeProp ep;
+    graph.add_edge(a, b, ep);
+    graph.add_edge(b, c, ep);
+    graph.add_edge(b, d, ep);
+    graph.add_edge(a, e, ep);
+    graph.add_edge(a, f, ep);
+    graph.add_edge(f, g, ep);
+    
+    TreeView tv = graph.getTree(a);
+    
+    FrameId expectedOrder[] = {"a", "f", "g", "e", "b", "d", "c"};
+    
+    int i = 0;
+    tv.visitDfs(graph.getVertex(a), [&](GraphTraits::vertex_descriptor vd)
+      { 
+        const FrameId id = graph.getFrameId(vd);
+        BOOST_CHECK(id == expectedOrder[i]);
+        ++i;
+      });
+}
+

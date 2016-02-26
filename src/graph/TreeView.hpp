@@ -136,6 +136,20 @@ namespace envire { namespace core
             return aRelation.parent == b || bRelation.parent == a;
         }
         
+        /**visits all vertices in the tree starting at @p node in dfs order.
+         * I.e. it first visits node, then all its children.
+         * Calls @p f(vertex_descriptor) for each node.*/
+        template <class Func>
+        void visitDfs(const GraphTraits::vertex_descriptor node, Func f)
+        {
+          f(node);
+          const auto& children = tree[node].children;
+          for(const GraphTraits::vertex_descriptor child : children)
+          {
+            visitDfs(child, f);
+          }
+        }
+        
         /**This signal is invoked whenever the tree is updated by the TransformGraph
         * @note This is only the case if you requested an updating TreeView. 
         *       Otherwise this signal will never be invoked.
