@@ -46,6 +46,7 @@ public:
      using vertices_size_type = GraphTraits::vertices_size_type;
      using edges_size_type = GraphTraits::edges_size_type;
      using out_edge_iterator = typename Base::out_edge_iterator;
+     using vertex_iterator = typename Base::vertex_iterator;
      using Base::vertex;
     
     Graph();
@@ -97,7 +98,8 @@ public:
     *                                      frame. */
     virtual void removeFrame(const FrameId& frame);
 
-    /** @return the id of the specified @p vertex */
+    /** @return the id of the specified @p vertex
+     *  @throw NullVertexException if vertex is null_vertex */
     const FrameId& getFrameId(const vertex_descriptor vertex) const;
     
     /**Add an edge between two frames.
@@ -175,6 +177,10 @@ public:
     /**Gets the vertex with id @p frameId.
     * @throw UnknownFrameException if the frame does not exist */
     vertex_descriptor getVertex(const FrameId& frameId) const;
+    
+    /**Returns a pair of iterators containing all vertices  */
+    std::pair<vertex_iterator, vertex_iterator>
+    getVertices() const;
     
 
     /**Builds a TreeView containing all vertices that are accessible starting
@@ -358,6 +364,8 @@ typename Graph<F,E>::edge_descriptor Graph<F,E>::getEdge(const vertex_descriptor
 template <class F, class E>
 const FrameId& Graph<F,E>::getFrameId(const vertex_descriptor vertex) const
 {
+    if(vertex == GraphTraits::null_vertex())
+      throw NullVertexException();
     return graph()[vertex].getId();
 }
 
@@ -852,6 +860,13 @@ template <typename Archive>
 void Graph<F,E>::serialize(Archive &ar, const unsigned int version)
 {
     boost::serialization::split_member(ar, *this, version);
+}
+
+template<class F, class E>
+std::pair<typename Graph<F,E>::vertex_iterator, typename Graph<F,E>::vertex_iterator>
+Graph<F,E>::getVertices() const
+{
+  return boost::vertices(*this);
 }
 
 }}

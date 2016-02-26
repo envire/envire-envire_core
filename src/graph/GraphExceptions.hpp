@@ -98,6 +98,16 @@ namespace envire { namespace core
         const std::string msg;
     };
     
+    class NullVertexException : public std::exception
+    {
+    public:
+        explicit NullVertexException() :
+          msg("Encountered a null_vertex.") {}
+        virtual char const * what() const throw() { return msg.c_str(); }
+        const std::string msg;
+    };
+    
+    
 }}
 
 
