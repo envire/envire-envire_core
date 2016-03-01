@@ -21,7 +21,7 @@ namespace envire { namespace core {
 class EnvireGraph : public TransformGraph<Frame>
 {
 public:
-  
+    using FRAME_PROP = Frame;
     using Base = TransformGraph<Frame>;
   
     /**Iterator used to down cast from ItemBase::Ptr to @p T::Ptr while
