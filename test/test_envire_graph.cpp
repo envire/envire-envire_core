@@ -637,5 +637,3 @@ BOOST_AUTO_TEST_CASE(envire_graph_serialization_test)
 }
 
 
-
-

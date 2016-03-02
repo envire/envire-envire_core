@@ -1006,10 +1006,11 @@ BOOST_AUTO_TEST_CASE(graph_graphviz_test)
 struct StringProperty
 { 
     string value;
+    FrameId id;
     StringProperty() : value("wrong") {}
     StringProperty(string value) : value(value) {}
-    const FrameId& getId() const { return value;}
-    void setId(const FrameId& _id){}
+    const FrameId& getId() const { return id;}
+    void setId(const FrameId& _id){id = _id;}
     const string toGraphviz() const{return "[label=\"bla\"]";}
     template<class Archive>
     void serialize(Archive &ar, const unsigned int version)
@@ -1164,4 +1165,46 @@ BOOST_AUTO_TEST_CASE(treeview_dfsVisit_test)
         ++i;
       });
 }
+
+BOOST_AUTO_TEST_CASE(ctor_copy_test)
+{
+  Gra* copy;
+  {
+    Gra graph;
+    
+    FrameProp f1, f2, f3;
+    f1.setId("AAA");
+    f2.setId("BBB");
+    f3.setId("CCC");
+        
+    const Gra::vertex_descriptor v1 = graph.add_vertex("AAA", f1);
+    const Gra::vertex_descriptor v2 = graph.add_vertex("BBB", f2);
+    const Gra::vertex_descriptor v3 = graph.add_vertex("CCC", f3);
+    
+    copy = new Gra(graph);
+    
+    //calling setId directly is not something that the user should do.
+    //It breaks the internal structure of the graph!
+    graph["AAA"].setId("BLA");
+    graph["BBB"].setId("BLA");
+    graph["CCC"].setId("BLA");
+      
+    BOOST_CHECK(graph["AAA"].getId() == "BLA");
+    BOOST_CHECK(graph["BBB"].getId() == "BLA");
+    BOOST_CHECK(graph["CCC"].getId() == "BLA");
+
+    BOOST_CHECK((*copy)["AAA"].getId() == "AAA");
+    BOOST_CHECK((*copy)["BBB"].getId() == "BBB");
+    BOOST_CHECK((*copy)["CCC"].getId() == "CCC");
+  }
+  
+    BOOST_CHECK((*copy)["AAA"].getId() == "AAA");
+    BOOST_CHECK((*copy)["BBB"].getId() == "BBB");
+    BOOST_CHECK((*copy)["CCC"].getId() == "CCC");
+}
+
+
+
+
+
 

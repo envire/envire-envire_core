@@ -10,6 +10,7 @@
 #include <envire_core/events/EdgeRemovedEvent.hpp>
 
 #include <boost/graph/filtered_graph.hpp>
+#include <boost/graph/copy.hpp>
 #include <boost/concept_check.hpp>
 
 #include "GraphTypes.hpp"
@@ -51,7 +52,10 @@ public:
     
     Graph();
     
-    /**Creates a copy of @p other.
+    /**Creates a ***deep*** copy of @p other including edge and frame properties.
+     * @note The usual boost copy constructors do create shallow copies, this one
+     *       is an exception! If you want the shallow copy, call the base class
+     *       copy ctor instead.
      * @note Does **not** copy the event subscribers or TreeView update subscribers.
      *       Only the graph data is copied*/
     explicit Graph(const Graph& other);
@@ -101,6 +105,10 @@ public:
     /** @return the id of the specified @p vertex
      *  @throw NullVertexException if vertex is null_vertex */
     const FrameId& getFrameId(const vertex_descriptor vertex) const;
+    
+    /** @return true if this graph contains a frame with id @p frameId, false
+     *          otherwise.*/
+    bool containsFrame(const FrameId& frameId) const;
     
     /**Add an edge between two frames.
     *  If the frames do not exist they are created.
@@ -257,6 +265,10 @@ protected:
                      const vertex_descriptor originDesc, 
                      const vertex_descriptor targetDesc);
     
+    /**Re-generates the content of _map based on the FrameIds.
+     * This method is used when de-serializing or copying the graph.*/
+    void regernateLabelMap();
+    
     
     /**TreeViews that need to be updated when the graph is modified */
     std::vector<TreeView*> subscribedTreeViews;
@@ -306,12 +318,19 @@ Graph<F,E>::Graph()
 template <class F, class E>
 Graph<F,E>::Graph(const Graph<F, E>& other) : Base()
 {
-  //NOTE: we are explicitly avoiding calling the base copy constructor because it is
-  //      broken. (see https://svn.boost.org/trac/boost/ticket/10449).
-  //      Instead we create an empty copy and use operator= to intialize it.
-  //FIXME remove the copy ctor if boost bug 10449 is fixed
-  *this = other;
+  //NOTE: we are explicitly avoiding calling any copy constructor because boost
+  //      graphs are not deep copied by default. To achieve deep copies
+  //      we should use boost::copy_graph but copy_graph does not work for
+  //      boost_labeled graph because labeled_graph does not define an
+  //      add_vertex(G) method.
+  //
+  //      Therefore, we use copy_graph to copy the graph structure and add the
+  //      labels manually
   
+  //copy structure from other into the base directed_graph
+  boost::copy_graph(other, graph());
+  //copy the labels
+  regernateLabelMap();
 }
 
 template <class F, class E>
@@ -841,11 +860,7 @@ void Graph<F,E>::load(Archive &ar, const unsigned int version)
     ar >> boost::serialization::make_nvp("directed_graph",  graph());
 
     // regenerate mapping of the labeled graph
-    typename boost::graph_traits<Graph<F,E>>::vertex_iterator it, end;
-    for (boost::tie( it, end ) = boost::vertices( graph()); it != end; ++it)
-    {
-        _map[getFrameId(*it)] = *it;
-    }
+    regernateLabelMap();
 }
 
 template<class F, class E>
@@ -867,6 +882,24 @@ std::pair<typename Graph<F,E>::vertex_iterator, typename Graph<F,E>::vertex_iter
 Graph<F,E>::getVertices() const
 {
   return boost::vertices(*this);
+}
+
+template<class F, class E>
+bool Graph<F,E>::containsFrame(const FrameId& frameId) const
+{
+    const vertex_descriptor v = Base::vertex(frameId);
+    return v != null_vertex();
+}
+
+template<class F, class E>
+void Graph<F,E>::regernateLabelMap()
+{
+    typename boost::graph_traits<Graph<F,E>>::vertex_iterator it, end;
+    for (boost::tie( it, end ) = boost::vertices( graph()); it != end; ++it)
+    {
+        const FrameId id = getFrameId(*it);
+        _map[id] = *it;
+    }
 }
 
 }}
