@@ -69,25 +69,6 @@ void ClassLoader::addLibraryPath(const string& library_path)
     library_paths.insert(lib_path_trimed);
 }
 
-bool ClassLoader::getAssociatedClassOfType(const string& embedded_type, const string& base_class_name, string& associated_class) const
-{
-    std::vector<std::string> envire_item_classes = getAvailableClasses(envire_item_base_class);
-    for(const std::string& class_name : envire_item_classes)
-    {
-        std::vector<std::string> associated_classes;
-        if(getAssociatedClasses(class_name, associated_classes) && !associated_classes.empty())
-        {
-            std::vector<std::string>::const_iterator it = std::find(associated_classes.begin(), associated_classes.end(), embedded_type);
-            if(it != associated_classes.end())
-            {
-                associated_class = class_name;
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 void ClassLoader::loadLibraryPaths()
 {
     const char* lib_path = std::getenv("LD_LIBRARY_PATH");

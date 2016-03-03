@@ -128,6 +128,25 @@ bool PluginManager::getClassLibraryPath(const std::string& class_name, std::stri
     return false;
 }
 
+bool PluginManager::getAssociatedClassOfType(const std::string& embedded_type, const std::string& base_class_name, std::string& associated_class) const
+{
+    std::vector<std::string> available_classes = getAvailableClasses(base_class_name);
+    for(const std::string& class_name : available_classes)
+    {
+        std::vector<std::string> associated_classes;
+        if(getAssociatedClasses(class_name, associated_classes) && !associated_classes.empty())
+        {
+            std::vector<std::string>::const_iterator it = std::find(associated_classes.begin(), associated_classes.end(), embedded_type);
+            if(it != associated_classes.end())
+            {
+                associated_class = class_name;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 std::set< std::string > PluginManager::getRegisteredLibraries() const
 {
     std::set< std::string > registered_libraries;

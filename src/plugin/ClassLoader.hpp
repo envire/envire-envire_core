@@ -150,18 +150,6 @@ protected:
     virtual ~ClassLoader();
 
     /**
-     * @brief Returns the name of a class which inherits from the given
-     *        base class and is associated to the given embedded type.
-     * Note: If more than one associated class is available it will always
-     *       return the first one that is found.
-     * @param embedded_type name of the embedded type
-     * @param base_class_name name of the base class
-     * @param associated_class name of the associated class
-     * @return True if an associated class could be found
-     */
-    bool getAssociatedClassOfType(const std::string& embedded_type, const std::string& base_class_name, std::string& associated_class) const;
-
-    /**
      * @brief Loads all paths set in the environment variable LD_LIBRARY_PATH
      *        to the set of library paths.
      */
