@@ -108,6 +108,16 @@ namespace envire { namespace core
             crossEdges.clear();
         }
         
+        /**Unsibscribe from the currently subscribed publisher */
+        void unsubscribe()
+        {
+            if(publisher != nullptr)
+            {
+                publisher->unsubscribeTreeView(this);
+                publisher = nullptr;
+            }
+        }
+        
         /**Returns true if an edge between a and b exists in @p view.*/
         bool edgeExists(const GraphTraits::vertex_descriptor a, const GraphTraits::vertex_descriptor b) const
         {
