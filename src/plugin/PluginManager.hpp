@@ -83,6 +83,14 @@ public:
     bool getClassDescription(const std::string& class_name, std::string& class_description) const;
 
     /**
+     * @brief Returns if the class should be treated as singleton
+     * @param class_name the name of the plugin class
+     * @param is_singleton true if marked as singleton
+     * @return True if plugin description could be found
+     */
+    bool getSingletonFlag(const std::string& class_name, bool is_singleton) const;
+
+    /**
      * @brief Returns the library path of the given class
      * @param class_name the name of the plugin class
      * @param library_path the library path of the plugin
