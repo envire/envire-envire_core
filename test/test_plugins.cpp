@@ -114,6 +114,20 @@ BOOST_AUTO_TEST_CASE(class_loader_test)
     BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItemFor("Eigen::Vector3d", vector_plugin_4));
     BOOST_CHECK(vector_plugin_4->getClassName() == "VectorPlugin");
 
+    // create a singleton plugin
+    void* item_ptr = NULL;
+    std::string test_string = "In-A-Gadda-Da-Vida";
+    BOOST_CHECK(envire::core::ClassLoader::getInstance()->hasClass("StringPlugin"));
+    {
+        Item<std::string>::Ptr string_plugin;
+        BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItem< Item<std::string> >("StringPlugin", string_plugin));
+        string_plugin->setData(test_string);
+        item_ptr = string_plugin.get();
+    }
+    Item<std::string>::Ptr string_plugin;
+    BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItem< Item<std::string> >("StringPlugin", string_plugin));
+    BOOST_CHECK(string_plugin->getData() == test_string);
+    BOOST_CHECK(string_plugin.get() == item_ptr);
 
     ItemBase::Ptr base_plugin;
     BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItem("SomeNotExistingPlugin", base_plugin) == false);
@@ -137,17 +151,19 @@ BOOST_AUTO_TEST_CASE(plugin_manager_test)
 
     // check available classes
     std::vector<std::string> available_classes = plugin_manager.getAvailableClasses();
-    BOOST_CHECK(available_classes.size() == 2);
-    BOOST_CHECK(available_classes.back() == "envire::VectorPlugin");
-    BOOST_CHECK(available_classes.front() == "envire::FakePlugin");
+    BOOST_CHECK(available_classes.size() == 3);
+    BOOST_CHECK(std::find(available_classes.begin(), available_classes.end(), "envire::VectorPlugin") != available_classes.end());
+    BOOST_CHECK(std::find(available_classes.begin(), available_classes.end(), "envire::FakePlugin") != available_classes.end());
+    BOOST_CHECK(std::find(available_classes.begin(), available_classes.end(), "envire::StringPlugin") != available_classes.end());
 
     // check if they are both of the same type
     available_classes = plugin_manager.getAvailableClasses("envire::core::ItemBase");
-    BOOST_CHECK(available_classes.size() == 2);
+    BOOST_CHECK(available_classes.size() == 3);
 
     // check if class info is available
     BOOST_CHECK(plugin_manager.isClassInfoAvailable("VectorPlugin"));
     BOOST_CHECK(plugin_manager.isClassInfoAvailable("envire::FakePlugin"));
+    BOOST_CHECK(plugin_manager.isClassInfoAvailable("envire::StringPlugin"));
     BOOST_CHECK(plugin_manager.isClassInfoAvailable("UnknownPlugin") == false);
 
     // get base class with full type name
@@ -176,16 +192,24 @@ BOOST_AUTO_TEST_CASE(plugin_manager_test)
     BOOST_CHECK(plugin_manager.getClassLibraryPath("envire::VectorPlugin", library_path));
     BOOST_CHECK(library_path == "envire_vector_plugin");
 
+    // check singleton flag
+    bool is_singleton = false;
+    BOOST_CHECK(plugin_manager.getSingletonFlag("envire::VectorPlugin", is_singleton));
+    BOOST_CHECK(is_singleton == false);
+    BOOST_CHECK(plugin_manager.getSingletonFlag("envire::StringPlugin", is_singleton));
+    BOOST_CHECK(is_singleton == true);
+
     // get all registered libraries
     std::set<std::string> libs = plugin_manager.getRegisteredLibraries();
-    BOOST_CHECK(libs.size() == 1);
-    BOOST_CHECK(*libs.begin() == "envire_vector_plugin");
+    BOOST_CHECK(libs.size() == 2);
+    BOOST_CHECK(std::find(libs.begin(), libs.end(), "envire_vector_plugin") != libs.end());
+    BOOST_CHECK(std::find(libs.begin(), libs.end(), "envire_string_plugin") != libs.end());
 
     // remove one of the classes
     BOOST_CHECK(plugin_manager.removeClassInfo("envire::FakePlugin"));
 
     available_classes = plugin_manager.getAvailableClasses();
-    BOOST_CHECK(available_classes.size() == 1);
+    BOOST_CHECK(available_classes.size() == 2);
 
     // remove all classes
     plugin_manager.clear();
@@ -195,5 +219,6 @@ BOOST_AUTO_TEST_CASE(plugin_manager_test)
     // reload class info
     plugin_manager.reloadXMLPluginFiles();
     available_classes = plugin_manager.getAvailableClasses();
-    BOOST_CHECK(available_classes.size() == 2);
+    BOOST_CHECK(available_classes.size() == 3);
 }
+

@@ -5,6 +5,11 @@ if(ENABLE_PLUGINS)
         SOURCES vector_plugin.cpp
         DEPS envire_core
         DEPS_PKGCONFIG class_loader)
+
+    rock_library(envire_string_plugin
+        SOURCES string_plugin.cpp
+        DEPS envire_core
+        DEPS_PKGCONFIG class_loader)
     
     rock_testsuite(test_plugins suite.cpp
         test_plugins.cpp
@@ -13,7 +18,7 @@ if(ENABLE_PLUGINS)
         DEPS envire_core
         DEPS_PKGCONFIG class_loader boost_serialization)
 
-    install(FILES vector_plugin.xml
+    install(FILES vector_plugin.xml string_plugin.xml
             DESTINATION lib/plugin_manager)
     
 endif()
