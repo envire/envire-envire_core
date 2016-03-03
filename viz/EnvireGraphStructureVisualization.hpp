@@ -21,8 +21,7 @@ namespace vizkit3d
         EnvireGraphStructureVisualization();
         ~EnvireGraphStructureVisualization();
 
-    Q_INVOKABLE void updateData(envire::core::EnvireGraph const &sample)
-    {vizkit3d::Vizkit3DPlugin<envire::core::EnvireGraph>::updateData(sample);}
+    Q_INVOKABLE void updateData(envire::core::EnvireGraph const &sample);
     
     QStringList getNodes();
     void setNodes(const QStringList& values);

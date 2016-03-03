@@ -22,6 +22,8 @@ struct EnvireGraphStructureVisualization::Data {
     QStringList nodes;
     VisualizerPtr visualizer;
     osg::ref_ptr<osg::Group> rootGroup;
+    FrameId currentRoot;
+    FrameId nextRoot;
 };
 
 QStringList EnvireGraphStructureVisualization::getNodes()
@@ -33,10 +35,10 @@ void EnvireGraphStructureVisualization::setNodes(const QStringList& values)
 {
   //this method is called whenever the user selects a new root node.
   //For some reason the values list only contains the selected node.
-  //if(values.size() > 0)
- // {
- //   p->currentRootNode = values.first();
- // }
+  if(values.size() > 0)
+ {
+   p->nextRoot = values.first().toStdString();
+ }
 }
 
 
@@ -66,6 +68,14 @@ void EnvireGraphStructureVisualization::updateMainNode ( osg::Node* node )
   {
     p->rootGroup->addChild(p->visualizer->getRootNode());
   }
+  
+  //the user changed the root node
+  if(p->currentRoot != p->nextRoot)
+  {
+    p->visualizer->changeRoot(p->nextRoot);
+    p->currentRoot = p->nextRoot;
+  }
+  
 }
 
 void EnvireGraphStructureVisualization::updateDataIntern(envire::core::EnvireGraph const& graph)
@@ -91,7 +101,15 @@ void EnvireGraphStructureVisualization::initNodeList(envire::core::EnvireGraph c
   {
     p->nodes.append(QString(graph.getFrameId(*begin).c_str()));
   }
+  p->currentRoot = p->nodes.front().toStdString();
+  p->nextRoot = p->currentRoot;
   emit propertyChanged("rootNode");
+}
+
+void EnvireGraphStructureVisualization::updateData(envire::core::EnvireGraph const &sample)
+{
+  vizkit3d::Vizkit3DPlugin<envire::core::EnvireGraph>::updateData(sample);
+  
 }
 
 

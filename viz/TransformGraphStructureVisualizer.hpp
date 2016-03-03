@@ -4,9 +4,8 @@
 #include <envire_core/items/Transform.hpp>
 #include <envire_core/graph/TreeView.hpp>
 #include <vizkit3d/TransformerGraph.hpp>
+#include <vizkit3d/NodeLink.hpp>
 #include <memory>
-
-
 
 /**Visualizes the structure of the given TransformGraph.
  * Automatically updates the structure if the graph changes.
@@ -19,7 +18,10 @@ class TransformGraphStructureVisualizer
   using TreeView = envire::core::TreeView;
   using vertex_descriptor = envire::core::GraphTraits::vertex_descriptor;
   using Transform = envire::core::Transform;
+  using edge_descriptor = envire::core::GraphTraits::edge_descriptor;
+  using TransformerGraph = vizkit3d::TransformerGraph;
 public:
+  
   /**Creates an instance of the visualizer that is not connected to any graph */
   TransformGraphStructureVisualizer();
   
@@ -34,7 +36,16 @@ public:
   /**Only valid after init has been called */
   osg::ref_ptr<osg::Group> getRootNode();
   
+  /**Changes the root node of the visualization */
+  void changeRoot(const FrameId& newRoot);
+  
 private:
+  
+  /**Adds the treeView starting to the transformerGraph */
+  void addTreeview(const TreeView& view, const FrameId& rootNode);
+  
+  void setTransformation(const FrameId& source, const FrameId& target, 
+                         const Transform& tf);
   
   GraphPtr graph;
   TreeView treeView; /**< The view of the graph that is currently visualized*/
@@ -58,18 +69,25 @@ TransformGraphStructureVisualizer<F>::TransformGraphStructureVisualizer(GraphPtr
 template <class F>
 void TransformGraphStructureVisualizer<F>::init(GraphPtr graph, const FrameId& root)
 {
-  assert(!initialized); //this method may only be called once
+  assert(!initialized);
   this->graph = graph;
-  graph->getTree(root, true, &treeView);
-  initialized = true;
-  
-  transformerGraph = vizkit3d::TransformerGraph::create(root + "_world")->asGroup();
+  transformerGraph = TransformerGraph::create("transform_graph_world")->asGroup();
   rootNode = root;
-  vizkit3d::TransformerGraph::addFrame(*transformerGraph, rootNode);
-  vizkit3d::TransformerGraph::makeRoot(*transformerGraph, rootNode);
-  
+  graph->getTree(root, true, &treeView);
+  addTreeview(treeView, rootNode);
+  initialized = true;
+}
+
+template <class F>
+void TransformGraphStructureVisualizer<F>::addTreeview(const TreeView& view,
+                                                       const FrameId& rootNode
+)
+{
+  TransformerGraph::addFrame(*transformerGraph, rootNode);
+  TransformerGraph::makeRoot(*transformerGraph, rootNode);
   
   const vertex_descriptor rootVertex = graph->getVertex(rootNode);
+  
   //walk the tree and create a scene graph out of it
   treeView.visitDfs(rootVertex, [&] (const vertex_descriptor vd, const vertex_descriptor parent)
   {
@@ -79,16 +97,67 @@ void TransformGraphStructureVisualizer<F>::init(GraphPtr graph, const FrameId& r
     const FrameId& id = graph->getFrameId(vd);
     const FrameId& parentId = graph->getFrameId(parent);
     
-    vizkit3d::TransformerGraph::addFrame(*transformerGraph, id);
-    
+    TransformerGraph::addFrame(*transformerGraph, id);
     const Transform tf = graph->getTransform(parent, vd);
-    const base::Quaterniond& rot = tf.transform.orientation;
-    const base::Position& pos = tf.transform.translation;
-    const osg::Quat orientation(rot.x(), rot.y(), rot.z(), rot.w());
-    const osg::Vec3d translation(pos.x(), pos.y(), pos.z());  
-    
-    vizkit3d::TransformerGraph::setTransformation(*transformerGraph, parentId, id, orientation, translation);
+    setTransformation(parentId, id, tf);
   });
+  
+  //when the minimal tree has been added, the cross-edges can be added.
+  //we need to add them manually because the TransformerGraph breaks when
+  //adding loops
+  for(const edge_descriptor edge : treeView.crossEdges)
+  {
+    const FrameId& source = graph->getFrameId(graph->source(edge));
+    const FrameId& target = graph->getFrameId(graph->target(edge));
+    
+    osg::Node* srcNode = TransformerGraph::getFrame(*transformerGraph, source);
+    osg::Node* tarNode = TransformerGraph::getFrame(*transformerGraph, target);
+    
+    osg::Node *link = vizkit::NodeLink::create(srcNode, tarNode, osg::Vec4(255,255,0,255));
+    link->setName("link");
+    osg::Group* group = TransformerGraph::getFrameGroup(*transformerGraph, source);    
+    group->addChild(link);
+  }
+}
+  
+
+template <class F>
+void TransformGraphStructureVisualizer<F>::setTransformation(const FrameId& source,
+                                                             const FrameId& target,
+                                                             const Transform& tf)
+{
+  //normalizing is important, otherwise osg will break when switching the root.
+  const base::Quaterniond& rot = tf.transform.orientation.normalized();
+  const base::Position& pos = tf.transform.translation;
+  const osg::Quat orientation(rot.x(), rot.y(), rot.z(), rot.w());
+  const osg::Vec3d translation(pos.x(), pos.y(), pos.z());  
+  std::cout << source << " -> " << target << translation.x() << " " << translation.y() << " " 
+            << translation.z() << std::endl;
+  
+  TransformerGraph::setTransformation(*transformerGraph, source, target, orientation, translation);
+}
+
+template <class F>
+void TransformGraphStructureVisualizer<F>::changeRoot(const FrameId& newRoot)
+{
+  //check if the new root is part of the current TreeView
+  //if it is, the TransformerGraph already knows about it and we can just
+  //change the root. Otherwise the whole tree needs to be re-generated.
+  //This only happens when the graph consists of multiple disconnected graphs
+  const vertex_descriptor newRootDesc = graph->getVertex(newRoot);
+  if(treeView.tree.find(newRootDesc) != treeView.tree.end())
+  {
+    TransformerGraph::makeRoot(*transformerGraph, newRoot);
+  }
+  else
+  {
+    treeView.unsubscribe();
+    treeView.clear();
+    vizkit3d::TransformerGraph::removeFrame(*transformerGraph, rootNode);//clear the visualization
+    graph->getTree(newRoot, true, &treeView);
+    addTreeview(treeView, newRoot);
+    rootNode = newRoot;
+  }
 }
 
 template <class F>
