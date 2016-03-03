@@ -88,7 +88,7 @@ public:
      * @param is_singleton true if marked as singleton
      * @return True if plugin description could be found
      */
-    bool getSingletonFlag(const std::string& class_name, bool is_singleton) const;
+    bool getSingletonFlag(const std::string& class_name, bool& is_singleton) const;
 
     /**
      * @brief Returns the library path of the given class

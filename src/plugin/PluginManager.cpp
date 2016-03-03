@@ -113,7 +113,7 @@ bool PluginManager::getClassDescription(const std::string& class_name, std::stri
     return false;
 }
 
-bool PluginManager::getSingletonFlag(const std::string& class_name, bool is_singleton) const
+bool PluginManager::getSingletonFlag(const std::string& class_name, bool& is_singleton) const
 {
     std::string full_class_name;
     if(!getFullClassName(class_name, full_class_name))
@@ -336,7 +336,7 @@ bool PluginManager::processSingleXMLPluginFile(const std::string& xml_file, std:
                 // find singleton information
                 plugin_info->singleton = false;
                 TiXmlElement* singleton_element = class_element->FirstChildElement("singleton");
-                if(singleton_element != NULL && singleton_element->GetText() == "true")
+                if(singleton_element != NULL && strcmp(singleton_element->GetText(), "true") == 0)
                 {
                     plugin_info->singleton = true;
                 }
