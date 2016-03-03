@@ -83,6 +83,14 @@ public:
     bool getClassDescription(const std::string& class_name, std::string& class_description) const;
 
     /**
+     * @brief Returns if the class should be treated as singleton
+     * @param class_name the name of the plugin class
+     * @param is_singleton true if marked as singleton
+     * @return True if plugin description could be found
+     */
+    bool getSingletonFlag(const std::string& class_name, bool is_singleton) const;
+
+    /**
      * @brief Returns the library path of the given class
      * @param class_name the name of the plugin class
      * @param library_path the library path of the plugin
@@ -97,6 +105,18 @@ public:
      * @return True if class coudl be found
      */
     bool getFullClassName(const std::string& class_name, std::string& full_class_name) const;
+
+    /**
+     * @brief Returns the name of a class which inherits from the given
+     *        base class and is associated to the given embedded type.
+     * Note: If more than one associated class is available it will always
+     *       return the first one that is found.
+     * @param embedded_type name of the embedded type
+     * @param base_class_name name of the base class
+     * @param associated_class name of the associated class
+     * @return True if an associated class could be found
+     */
+    bool getAssociatedClassOfType(const std::string& embedded_type, const std::string& base_class_name, std::string& associated_class) const;
 
     /**
      * @brief Returns the libraries that are registered and can be loaded

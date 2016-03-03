@@ -27,6 +27,7 @@ class ClassLoader : public PluginManager, public boost::noncopyable
     static constexpr char envire_item_base_class[] = "envire::core::ItemBase";
     static constexpr char envire_collision_base_class[] = "envire::collision::ODECollisionBase";
     typedef std::map<std::string, boost::shared_ptr<class_loader::ClassLoader> > LoaderMap;
+    typedef std::map<std::string, boost::shared_ptr<void> > SingletonMap;
 
 public:
     /**
@@ -150,24 +151,25 @@ protected:
     virtual ~ClassLoader();
 
     /**
-     * @brief Returns the name of a class which inherits from the given
-     *        base class and is associated to the given embedded type.
-     * Note: If more than one associated class is available it will always
-     *       return the first one that is found.
-     * @param embedded_type name of the embedded type
-     * @param base_class_name name of the base class
-     * @param associated_class name of the associated class
-     * @return True if an associated class could be found
-     */
-    bool getAssociatedClassOfType(const std::string& embedded_type, const std::string& base_class_name, std::string& associated_class) const;
-
-    /**
      * @brief Loads all paths set in the environment variable LD_LIBRARY_PATH
      *        to the set of library paths.
      */
     void loadLibraryPaths();
 
 private:
+
+    /**
+     * @brief Uses the class_loader to create a new instance of the given class name.
+     *        If the class is marked a singleton, only one instance will be created and
+     *        returned on future queries.
+     * @param derived_class_name name of the plugin class
+     * @param loader the class loader
+     * @param instance new or singleton instance
+     */
+    template<class BaseClass>
+    void createInstanceIntern(const std::string& derived_class_name,
+                                const boost::shared_ptr<class_loader::ClassLoader>& loader,
+                                boost::shared_ptr< BaseClass >& instance);
 
     /**
      * @brief Loads the library of the given plugin class
@@ -179,6 +181,9 @@ private:
 private:
     /** Mapping between library name and class loader instances */
     LoaderMap loaders;
+
+    /** Singleton instances that have been instantiated */
+    SingletonMap singletons;
 
     /** Set of the known shared library folders */
     std::set<std::string> library_paths;
@@ -209,7 +214,7 @@ bool ClassLoader::createInstance(const std::string& class_name, boost::shared_pt
     // try to create an instance of the class
     if(it->second->isClassAvailable<BaseClass>(class_name))
     {
-        instance = it->second->createInstance<BaseClass>(class_name);
+        createInstanceIntern<BaseClass>(class_name, it->second, instance);
         return true;
     }
 
@@ -219,7 +224,7 @@ bool ClassLoader::createInstance(const std::string& class_name, boost::shared_pt
         std::string short_class_name = removeNamespace(class_name);
         if(it->second->isClassAvailable<BaseClass>(short_class_name))
         {
-            instance = it->second->createInstance<BaseClass>(short_class_name);
+            createInstanceIntern<BaseClass>(short_class_name, it->second, instance);
             return true;
         }
     }
@@ -229,7 +234,7 @@ bool ClassLoader::createInstance(const std::string& class_name, boost::shared_pt
         std::string full_class_name;
         if(getFullClassName(class_name, full_class_name) && it->second->isClassAvailable<BaseClass>(full_class_name))
         {
-            instance = it->second->createInstance<BaseClass>(full_class_name);
+            createInstanceIntern<BaseClass>(full_class_name, it->second, instance);
             return true;
         }
     }
@@ -273,6 +278,36 @@ template<class BaseClass>
 bool ClassLoader::createCollisionObjectFor(const envire::core::ItemBase& item, boost::shared_ptr<BaseClass>& collision_object)
 {
     return createCollisionObjectFor<BaseClass>(item.getClassName(), collision_object);
+}
+
+template<class BaseClass>
+void ClassLoader::createInstanceIntern(const std::string& derived_class_name,
+                                        const boost::shared_ptr<class_loader::ClassLoader>& loader,
+                                        boost::shared_ptr< BaseClass >& instance)
+{
+    bool singleton = false;
+    if(getSingletonFlag(derived_class_name, singleton) && singleton)
+    {
+        // class is marked as singleton
+        SingletonMap::iterator singleton_it = singletons.find(derived_class_name);
+        if(singleton_it == singletons.end())
+        {
+            // create an stores a new instance
+            instance = loader->createInstance<BaseClass>(derived_class_name);
+            boost::shared_ptr< void > instance_ptr = boost::static_pointer_cast<void>(instance);
+            singletons[derived_class_name] = instance_ptr;
+        }
+        else
+        {
+            // returns existing instance
+            instance = boost::static_pointer_cast<BaseClass>(singleton_it->second);
+        }
+    }
+    else
+    {
+        // create new instance
+        instance = loader->createInstance<BaseClass>(derived_class_name);
+    }
 }
 
 }}

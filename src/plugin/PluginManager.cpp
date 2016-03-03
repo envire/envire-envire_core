@@ -113,6 +113,21 @@ bool PluginManager::getClassDescription(const std::string& class_name, std::stri
     return false;
 }
 
+bool PluginManager::getSingletonFlag(const std::string& class_name, bool is_singleton) const
+{
+    std::string full_class_name;
+    if(!getFullClassName(class_name, full_class_name))
+        return false;
+
+    std::map<std::string, PluginInfoPtr>::const_iterator plugin_info = classes_available.find(full_class_name);
+    if(plugin_info != classes_available.end())
+    {
+        is_singleton = plugin_info->second->singleton;
+        return true;
+    }
+    return false;
+}
+
 bool PluginManager::getClassLibraryPath(const std::string& class_name, std::string& library_path) const
 {
     std::string full_class_name;
@@ -124,6 +139,25 @@ bool PluginManager::getClassLibraryPath(const std::string& class_name, std::stri
     {
         library_path = plugin_info->second->library_path;
         return true;
+    }
+    return false;
+}
+
+bool PluginManager::getAssociatedClassOfType(const std::string& embedded_type, const std::string& base_class_name, std::string& associated_class) const
+{
+    std::vector<std::string> available_classes = getAvailableClasses(base_class_name);
+    for(const std::string& class_name : available_classes)
+    {
+        std::vector<std::string> associated_classes;
+        if(getAssociatedClasses(class_name, associated_classes) && !associated_classes.empty())
+        {
+            std::vector<std::string>::const_iterator it = std::find(associated_classes.begin(), associated_classes.end(), embedded_type);
+            if(it != associated_classes.end())
+            {
+                associated_class = class_name;
+                return true;
+            }
+        }
     }
     return false;
 }
@@ -297,6 +331,14 @@ bool PluginManager::processSingleXMLPluginFile(const std::string& xml_file, std:
                             plugin_info->associated_classes.push_back(std::string(associated_class_name));
                         associated_class_element = associated_class_element->NextSiblingElement("class");
                     }
+                }
+
+                // find singleton information
+                plugin_info->singleton = false;
+                TiXmlElement* singleton_element = class_element->FirstChildElement("singleton");
+                if(singleton_element != NULL && singleton_element->GetText() == "true")
+                {
+                    plugin_info->singleton = true;
                 }
 
                 class_available.push_back(plugin_info);

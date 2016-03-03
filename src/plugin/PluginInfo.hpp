@@ -31,6 +31,9 @@ struct PluginInfo
 
     /** Description of this plugin class. This field is optional. */
     std::string description;
+
+    /** Marks the plugin as singleton. This field is optional and false per default. */
+    bool singleton;
 };
 
 }}

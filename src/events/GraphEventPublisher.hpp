@@ -35,7 +35,7 @@ namespace envire { namespace core
         //there is no use in creating an instance of the publisher
         //on its own.
         GraphEventPublisher() {}
-        ~GraphEventPublisher() {}
+        virtual ~GraphEventPublisher() {}
 
     };
 }}
