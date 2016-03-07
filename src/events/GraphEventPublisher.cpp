@@ -12,15 +12,23 @@
 using namespace envire::core;
 using namespace std;
 
-void GraphEventPublisher::subscribe(GraphEventSubscriber* pSubscriber)
+void GraphEventPublisher::subscribe(GraphEventSubscriber* pSubscriber, bool publish_current_state)
 {
     assert(nullptr != pSubscriber);
+
+    if(publish_current_state)
+        publishCurrentState(pSubscriber);
+
     subscribers.push_back(pSubscriber);
 }
 
-void GraphEventPublisher::unsubscribe(GraphEventSubscriber* pSubscriber)
+void GraphEventPublisher::unsubscribe(GraphEventSubscriber* pSubscriber, bool unpublish_current_state)
 {
     assert(nullptr != pSubscriber);
+
+    if(unpublish_current_state)
+        unpublishCurrentState(pSubscriber);
+
     auto pos = std::find(subscribers.begin(), subscribers.end(), pSubscriber);
     if(pos != subscribers.end())
     {
@@ -36,6 +44,7 @@ void GraphEventPublisher::notify(const GraphEvent& e)
     }
 }
 
-
-
-
+void GraphEventPublisher::notifySubscriber(GraphEventSubscriber* pSubscriber, const GraphEvent& e)
+{
+    pSubscriber->notifyGraphEvent(e);
+}

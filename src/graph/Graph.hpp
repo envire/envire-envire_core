@@ -264,6 +264,17 @@ protected:
     void remove_edge(const FrameId& origin, const FrameId& target, 
                      const vertex_descriptor originDesc, 
                      const vertex_descriptor targetDesc);
+
+    /**
+     * @brief Publishes the current state of the graph.
+     */
+    virtual void publishCurrentState(GraphEventSubscriber* pSubscriber);
+
+    /**
+     * @brief Unpublishes the current state of the graph.
+     *        Basically the reverse process of publishCurrentState
+     */
+    virtual void unpublishCurrentState(GraphEventSubscriber* pSubscriber);
     
     /**Re-generates the content of _map based on the FrameIds.
      * This method is used when de-serializing or copying the graph.*/
@@ -837,6 +848,45 @@ const F& Graph<F,E>::getFrameProperty(const FrameId& frame) const
     return graph()[v];
 }
 
+template <class F, class E>
+void Graph<F,E>::publishCurrentState(GraphEventSubscriber* pSubscriber)
+{
+    // publish frames
+    typename boost::graph_traits<Graph<F,E>>::vertex_iterator vertex_it, vertex_end;
+    for (boost::tie( vertex_it, vertex_end ) = boost::vertices( graph() ); vertex_it != vertex_end; ++vertex_it)
+    {
+        notifySubscriber(pSubscriber, FrameAddedEvent(getFrameId(*vertex_it)));
+    }
+
+    // publish edges
+    typename boost::graph_traits<Graph<F,E>>::edge_iterator edge_it, edge_end;
+    for (boost::tie( edge_it, edge_end ) = boost::edges( graph() ); edge_it != edge_end; ++edge_it)
+    {
+        const vertex_descriptor src = source(*edge_it);
+        const vertex_descriptor tar = target(*edge_it);
+        notifySubscriber(pSubscriber, EdgeAddedEvent(getFrameId(src), getFrameId(tar), *edge_it));
+    }
+}
+
+template <class F, class E>
+void Graph<F,E>::unpublishCurrentState(GraphEventSubscriber* pSubscriber)
+{
+    // unpublish edges
+    typename boost::graph_traits<Graph<F,E>>::edge_iterator edge_it, edge_end;
+    for (boost::tie( edge_it, edge_end ) = boost::edges( graph() ); edge_it != edge_end; ++edge_it)
+    {
+        const vertex_descriptor src = source(*edge_it);
+        const vertex_descriptor tar = target(*edge_it);
+        notifySubscriber(pSubscriber, EdgeRemovedEvent(getFrameId(src), getFrameId(tar)));
+    }
+
+    // unpublish frames
+    typename boost::graph_traits<Graph<F,E>>::vertex_iterator vertex_it, vertex_end;
+    for (boost::tie( vertex_it, vertex_end ) = boost::vertices( graph() ); vertex_it != vertex_end; ++vertex_it)
+    {
+        notifySubscriber(pSubscriber, FrameRemovedEvent(getFrameId(*vertex_it)));
+    }
+}
 
 template<class F, class E>
 template <typename Archive>

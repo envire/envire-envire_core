@@ -20,6 +20,7 @@ public:
     vector<ItemRemovedEvent> itemRemovedEvents;
     
     EnvireDispatcher(EnvireGraph& graph) : GraphEventDispatcher(&graph) {}
+    EnvireDispatcher() : GraphEventDispatcher() {}
     virtual ~EnvireDispatcher() {}
     
     void itemAdded(const ItemAddedEvent& e) override
@@ -636,4 +637,26 @@ BOOST_AUTO_TEST_CASE(envire_graph_serialization_test)
     
 }
 
+BOOST_AUTO_TEST_CASE(envire_graph_publish_current_state_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    EnvireGraph graph;
+    Transform ab;
+    ItemBase::Ptr item1(new Item<string>("bla"));
+    ItemBase::Ptr item2(new Item<int>(42));
 
+    graph.addTransform(a, b, ab);
+    graph.addItemToFrame(a, item1);
+    graph.addItemToFrame(b, item2);
+
+    EnvireDispatcher d;
+    graph.subscribe(&d, true);
+
+    BOOST_CHECK(d.itemAddedEvents.size() == 2);
+    BOOST_CHECK(d.itemRemovedEvents.size() == 0);
+
+    graph.unsubscribe(&d, true);
+
+    BOOST_CHECK(d.itemRemovedEvents.size() == 2);
+}

@@ -14,15 +14,15 @@ GraphEventSubscriber::GraphEventSubscriber() : pPublisher(nullptr)
 {
 }
 
-void GraphEventSubscriber::subscribe(GraphEventPublisher* pPublisher)
+void GraphEventSubscriber::subscribe(GraphEventPublisher* pPublisher, bool publish_current_state)
 {
     assert(pPublisher != nullptr);
     // unsubscribe if already subscribed
     if(this->pPublisher != nullptr)
-        this->pPublisher->unsubscribe(this);
+        this->pPublisher->unsubscribe(this, publish_current_state);
     // subscribe to new publisher
     this->pPublisher = pPublisher;
-    this->pPublisher->subscribe(this);
+    this->pPublisher->subscribe(this, publish_current_state);
 }
 
 

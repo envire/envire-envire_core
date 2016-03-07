@@ -19,7 +19,7 @@ namespace envire { namespace core
         /**Creates a subscriber that is not subscribed to any publisher. */
         GraphEventSubscriber();
         /**Subscribe to the specified publisher. Only works if not subscribed already.*/
-        void subscribe(GraphEventPublisher* pPublisher);
+        void subscribe(GraphEventPublisher* pPublisher, bool publish_current_state = false);
         /**This method is called by the publisher whenever a new event occurs */
         virtual void notifyGraphEvent(const GraphEvent& event) = 0;
         virtual ~GraphEventSubscriber();

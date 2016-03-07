@@ -107,5 +107,44 @@ void EnvireGraph::removeItemFromFrame(const ItemBase::Ptr item)
     notify(ItemRemovedEvent(item->getFrame(), item));
 }
 
+void EnvireGraph::publishCurrentState(GraphEventSubscriber* pSubscriber)
+{
+    // publish vertices and edges
+    envire::core::Graph< envire::core::Frame, envire::core::Transform >::publishCurrentState(pSubscriber);
+
+    // publish items
+    typename EnvireGraph::vertex_iterator vertex_it, vertex_end;
+    for (boost::tie( vertex_it, vertex_end ) = boost::vertices( graph() ); vertex_it != vertex_end; ++vertex_it)
+    {
+        const Frame& frame = graph()[*vertex_it];
+        for(Frame::ItemMap::const_iterator item_group = frame.items.begin(); item_group != frame.items.end(); item_group++)
+        {
+            for(Frame::ItemList::const_iterator item = item_group->second.begin(); item != item_group->second.end(); item++)
+            {
+                notifySubscriber(pSubscriber, ItemAddedEvent(frame.getId(), *item));
+            }
+        }
+    }
+}
+
+void EnvireGraph::unpublishCurrentState(GraphEventSubscriber* pSubscriber)
+{
+    // unpublish items
+    typename EnvireGraph::vertex_iterator vertex_it, vertex_end;
+    for (boost::tie( vertex_it, vertex_end ) = boost::vertices( graph() ); vertex_it != vertex_end; ++vertex_it)
+    {
+        const Frame& frame = graph()[*vertex_it];
+        for(Frame::ItemMap::const_iterator item_group = frame.items.begin(); item_group != frame.items.end(); item_group++)
+        {
+            for(Frame::ItemList::const_iterator item = item_group->second.begin(); item != item_group->second.end(); item++)
+            {
+                notifySubscriber(pSubscriber, ItemRemovedEvent(frame.getId(), *item));
+            }
+        }
+    }
+
+    // unpublish vertices and edges
+    envire::core::Graph< envire::core::Frame, envire::core::Transform >::unpublishCurrentState(pSubscriber);
+}
 
 }}

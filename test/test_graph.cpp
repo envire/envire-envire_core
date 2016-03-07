@@ -79,6 +79,7 @@ public:
     vector<FrameRemovedEvent> frameRemovedEvents;
     
     Dispatcher(Gra& graph) : GraphEventDispatcher(&graph) {}
+    Dispatcher() : GraphEventDispatcher() {}
     virtual ~Dispatcher() {}
     
     virtual void edgeAdded(const EdgeAddedEvent& e)
@@ -1220,20 +1221,46 @@ BOOST_AUTO_TEST_CASE(test_tree_view_events_test)
     
     graph.add_edge(c, d, ep);
     BOOST_CHECK(origins[2] == graph.getVertex(c));
-    BOOST_CHECK(targets[2] == graph.getVertex(d));
-    
-    graph.add_edge(d, e, ep);
-    BOOST_CHECK(origins[3] == graph.getVertex(d));
-    BOOST_CHECK(targets[3] == graph.getVertex(e));
-    
-    graph.add_edge(b, e, ep);
-    BOOST_CHECK(origins.size() == 4);
-    BOOST_CHECK(targets.size() == 4);
-    BOOST_CHECK(crossEdges[0] == graph.getEdge(e, b));
+
+    graph.add_edge(a, b, ep);
+    graph.add_edge(a, c, ep);
+
+    Dispatcher d;
+    graph.subscribe(&d, true);
+
+    BOOST_CHECK(d.frameAddedEvents.size() == 3);
+    BOOST_CHECK(d.edgeAddedEvents.size() == 4);
+    BOOST_CHECK(d.frameRemovedEvents.size() == 0);
+    BOOST_CHECK(d.edgeRemovedEvents.size() == 0);
+
+    graph.unsubscribe(&d, true);
+
+    BOOST_CHECK(d.frameRemovedEvents.size() == 3);
+    BOOST_CHECK(d.edgeRemovedEvents.size() == 4);
 }
 
+BOOST_AUTO_TEST_CASE(publish_current_state_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    Gra graph;
+    EdgeProp ep;
 
+    graph.add_edge(a, b, ep);
+    graph.add_edge(a, c, ep);
 
+    Dispatcher d;
+    graph.subscribe(&d, true);
 
+    BOOST_CHECK(d.frameAddedEvents.size() == 3);
+    BOOST_CHECK(d.edgeAddedEvents.size() == 4);
+    BOOST_CHECK(d.frameRemovedEvents.size() == 0);
+    BOOST_CHECK(d.edgeRemovedEvents.size() == 0);
 
+    graph.unsubscribe(&d, true);
+
+    BOOST_CHECK(d.frameRemovedEvents.size() == 3);
+    BOOST_CHECK(d.edgeRemovedEvents.size() == 4);
+}
 
