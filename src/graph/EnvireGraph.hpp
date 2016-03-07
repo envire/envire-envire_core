@@ -169,6 +169,17 @@ protected:
     /**Assert that @p T derives from ItemBase */
     template <class T>
     void assertDerivesFromItemBase() const;
+
+    /**
+     * @brief Publishes the current state of the graph.
+     */
+    virtual void publishCurrentState(GraphEventSubscriber* pSubscriber);
+
+    /**
+     * @brief Unpublishes the current state of the graph.
+     *        Basically the reverse process of publishCurrentState
+     */
+    virtual void unpublishCurrentState(GraphEventSubscriber* pSubscriber);
     
 private:
     /**Grants access to boost serialization */

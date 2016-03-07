@@ -79,6 +79,7 @@ public:
     vector<FrameRemovedEvent> frameRemovedEvents;
     
     Dispatcher(Gra& graph) : GraphEventDispatcher(&graph) {}
+    Dispatcher() : GraphEventDispatcher() {}
     virtual ~Dispatcher() {}
     
     virtual void edgeAdded(const EdgeAddedEvent& e)
@@ -1203,8 +1204,27 @@ BOOST_AUTO_TEST_CASE(ctor_copy_test)
     BOOST_CHECK((*copy)["CCC"].getId() == "CCC");
 }
 
+BOOST_AUTO_TEST_CASE(publish_current_state_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    Gra graph;
+    EdgeProp ep;
 
+    graph.add_edge(a, b, ep);
+    graph.add_edge(a, c, ep);
 
+    Dispatcher d;
+    graph.subscribe(&d, true);
 
+    BOOST_CHECK(d.frameAddedEvents.size() == 3);
+    BOOST_CHECK(d.edgeAddedEvents.size() == 4);
+    BOOST_CHECK(d.frameRemovedEvents.size() == 0);
+    BOOST_CHECK(d.edgeRemovedEvents.size() == 0);
 
+    graph.unsubscribe(&d, true);
 
+    BOOST_CHECK(d.frameRemovedEvents.size() == 3);
+    BOOST_CHECK(d.edgeRemovedEvents.size() == 4);
+}
