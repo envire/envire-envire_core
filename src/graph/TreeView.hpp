@@ -8,7 +8,7 @@ namespace envire { namespace core
     struct VertexRelation
     {
         VertexRelation* parentRelation; /**<can be NULL */
-        GraphTraits::vertex_descriptor parent;
+        GraphTraits::vertex_descriptor parent; /**<can be null_vertex */
         std::unordered_set<GraphTraits::vertex_descriptor> children;
     };
 
@@ -42,109 +42,31 @@ namespace envire { namespace core
         TreeView() : root(GraphTraits::null_vertex()) {}
         
         /**Creates a copy ***without*** retaining the treeUpdated subscribers  */
-        TreeView(const TreeView& other)
-        {
-            *this = other;
-        }
+        TreeView(const TreeView& other) {*this = other;}
         
         /**Creates a copy ***without*** retaining the treeUpdated subscribers  */
-        TreeView& operator=(const TreeView& other)
-        {
-            //this operator has to be here because the default
-            //operator= wants to copy treeUpdated, which is is not possible.
-            
-            //WARNING If you add members to this class, make sure
-            //        to copy them!
-            publisher = other.publisher;
-            tree = other.tree;
-            crossEdges = other.crossEdges;
-            root = other.root;
-            return *this;
-        }
+        TreeView& operator=(const TreeView& other);
         
-        TreeView(TreeView&& other) noexcept : tree(std::move(other.tree)),
-                                              crossEdges(std::move(other.crossEdges)),
-                                              root(std::move(other.root))
-        {
-            //if the other TreeView was subscribed, unsubscribe it and 
-            //subscribe this instead
-            if(other.publisher != nullptr)
-            {
-              other.publisher->unsubscribeTreeView(&other);
-              other.publisher->subscribeTreeView(this); //sets this.publisher
-              other.publisher = nullptr;
-            }
-            treeUpdated.swap(other.treeUpdated); //there is no move ctor, therfore swap
-        }
+        TreeView(TreeView&& other) noexcept;
         
-        
-        virtual ~TreeView()
-        {
-            if(nullptr != publisher)
-            {
-                //automatic unsubscribe
-                publisher->unsubscribeTreeView(this);
-                publisher = nullptr;
-            }
-        }
+        virtual ~TreeView();
         
         /**If a publisher is set the TreeView will automatically unsubscribe 
         * from the publisher on destruction. */
-        void setPublisher(TreeUpdatePublisher* pub)
-        {
-            assert(publisher == nullptr);
-            publisher = pub;
-        }
+        void setPublisher(TreeUpdatePublisher* pub);
 
-        bool isRoot(const GraphTraits::vertex_descriptor vd) const
-        {
-            return vd == root;
-        }
+        bool isRoot(const GraphTraits::vertex_descriptor vd) const;
         
         /**Removes all content from this TreeView */
-        void clear()
-        {
-            tree.clear();
-            crossEdges.clear();
-        }
+        void clear();
         
         /**Unsibscribe from the currently subscribed publisher */
-        void unsubscribe()
-        {
-            if(publisher != nullptr)
-            {
-                publisher->unsubscribeTreeView(this);
-                publisher = nullptr;
-            }
-        }
+        void unsubscribe();
         
         /**Returns true if an edge between a and b exists in @p view.*/
-        bool edgeExists(const GraphTraits::vertex_descriptor a, const GraphTraits::vertex_descriptor b) const
-        {
-            //an edge exists if either a is the parent of b and aChildren contains b
-            //or the other way around.
-            if(tree.find(a) == tree.end() || tree.find(b) == tree.end())
-            {
-                return false;
-            }
-            const VertexRelation& aRelation = tree.at(a);
-            const VertexRelation& bRelation = tree.at(b);
-
-            //If we assume that we made no mistake when populating the tree we could just 
-            //return (aRelation.parent == b || bRelation.parent == a)
-            //but using asserts is always better :D
-
-            //the if will be optimized out if asserts are disabled
-            if(aRelation.parent == b) //b is parent of a
-            {
-              assert(bRelation.children.find(a) != bRelation.children.end());
-            }
-            else if(bRelation.parent == a) //a is parent of b
-            {
-              assert(aRelation.children.find(b) != aRelation.children.end());
-            }
-            return aRelation.parent == b || bRelation.parent == a;
-        }
+        bool edgeExists(const GraphTraits::vertex_descriptor a, const GraphTraits::vertex_descriptor b) const;
+        /**Returns true if @p vd exists in the view. */
+        bool vertexExists(const GraphTraits::vertex_descriptor vd) const;
         
         /**visits all vertices in the tree starting at @p node in dfs order.
          * I.e. it first visits node, then all its children.
@@ -161,13 +83,28 @@ namespace envire { namespace core
           }
         }
         
-        /**This signal is invoked whenever the tree is updated by the TransformGraph
-        * @note This is only the case if you requested an updating TreeView. 
-        *       Otherwise this signal will never be invoked.
-        */
-        boost::signals2::signal<void ()> treeUpdated;
+        /**Add a cross edge to the view.
+         * Emits crossEdgeAdded event */
+        void addCrossEdge(const GraphTraits::edge_descriptor edge);
         
-        VertexRelationMap tree;
+        /**Add an edge to the view.
+         * Emits edgeAdded*/
+        void addEdge(GraphTraits::vertex_descriptor origin, GraphTraits::vertex_descriptor target);
+        
+        /**Adds the initial root node to the TreeView */
+        void addRoot(GraphTraits::vertex_descriptor root);
+        
+        //FIXME comment exception?!
+        GraphTraits::vertex_descriptor getParent(GraphTraits::vertex_descriptor node) const;
+        
+        /**The signals are invoked whenever the tree is updated by the TransformGraph
+        * @note This is only the case if you requested an updating TreeView. 
+        *       Otherwise they'll never be invoked.
+        */
+        boost::signals2::signal<void (GraphTraits::edge_descriptor)> crossEdgeAdded;
+        boost::signals2::signal<void (GraphTraits::vertex_descriptor origin,
+                                      GraphTraits::vertex_descriptor target)> edgeAdded;
+        
 
         /* The edges, that had to be removed to create the tree.
          * I.e. All edges that lead to a vertex that has already been discovered.
@@ -182,6 +119,7 @@ namespace envire { namespace core
         GraphTraits::vertex_descriptor root;
               
     protected:
+        VertexRelationMap tree;
         TreeUpdatePublisher* publisher = nullptr;/*< Used for automatic unsubscribing in dtor */
     };
 }}

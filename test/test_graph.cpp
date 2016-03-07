@@ -484,32 +484,6 @@ BOOST_AUTO_TEST_CASE(tree_view_cross_edge_test)
     BOOST_CHECK(src == vD);
 }
 
-BOOST_AUTO_TEST_CASE(tree_view_update_event_test)
-{
-    Gra graph;
-    EdgeProp ep;
-    
-    FrameId A("A");
-    FrameId B("B");
-    FrameId C("C");
-
-    graph.addFrame(A);
-    graph.addFrame(B);
-    graph.addFrame(C);
-    graph.add_edge(A, B, ep);
-
-    TreeView view;
-    bool updateCalled = false;
-    view.treeUpdated.connect([&updateCalled] () 
-      {
-          updateCalled = true;
-      });
-    graph.getTree(A, true, &view);
-    
-    graph.add_edge(B, C, ep);
-    BOOST_CHECK(updateCalled);    
-}
-
 BOOST_AUTO_TEST_CASE(tree_view_move_semantics_test)
 {
     Gra graph;
@@ -525,17 +499,17 @@ BOOST_AUTO_TEST_CASE(tree_view_move_semantics_test)
     
     graph.add_edge(A, B, ep);
     TreeView view;
-    bool updateCalled = false;
-    view.treeUpdated.connect([&updateCalled] () 
-      {
-          updateCalled = true;
-      });
     graph.getTree(A, true, &view);
-    
+    bool edgeCallback = false;
+    view.edgeAdded.connect([&](GraphTraits::vertex_descriptor, GraphTraits::vertex_descriptor)
+        {
+            edgeCallback = true;
+        });
     TreeView newView = std::move(view);
     BOOST_CHECK(view.publisher == nullptr);
     graph.add_edge(B, C, ep);
-    BOOST_CHECK(updateCalled);    
+    BOOST_CHECK(edgeCallback);
+
 }
 
 
@@ -651,27 +625,29 @@ BOOST_AUTO_TEST_CASE(tree_view_automatic_update_remove_test)
     graph.add_edge(B, C, ep);
 
     TreeView view;
-    bool updateCalled = false;
-    view.treeUpdated.connect([&updateCalled] () 
-    {
-        updateCalled = true;
-    });
+    bool edgeAddedCalled = false;
     graph.getTree(A, true, &view);
+    view.edgeAdded.connect([&edgeAddedCalled] (GraphTraits::vertex_descriptor,
+                                               GraphTraits::vertex_descriptor) 
+    {
+        edgeAddedCalled = true;
+    });
     
-    graph.remove_edge(A, B);
+    graph.remove_edge(B, C);
     
     GraphTraits::vertex_descriptor vA = graph.getVertex(A);
     GraphTraits::vertex_descriptor vB = graph.getVertex(B);
     GraphTraits::vertex_descriptor vC = graph.getVertex(C);
     
     BOOST_CHECK(view.crossEdges.size() == 0);
+    
     BOOST_CHECK(view.tree.find(vA) != view.tree.end());
-    BOOST_CHECK(view.tree.find(vB) == view.tree.end());
+    BOOST_CHECK(view.tree.find(vB) != view.tree.end());
     BOOST_CHECK(view.tree.find(vC) == view.tree.end());
-    BOOST_CHECK(view.tree[vA].children.size() == 0);
+    BOOST_CHECK(view.tree[vA].children.size() == 1);
     BOOST_CHECK(view.tree[vA].parent == graph.null_vertex());
     BOOST_CHECK(view.tree[vA].parentRelation == nullptr);
-    BOOST_CHECK(updateCalled);
+    BOOST_CHECK(edgeAddedCalled);
 }
 
 BOOST_AUTO_TEST_CASE(tree_edge_exists_test)
@@ -1201,6 +1177,59 @@ BOOST_AUTO_TEST_CASE(ctor_copy_test)
     BOOST_CHECK((*copy)["AAA"].getId() == "AAA");
     BOOST_CHECK((*copy)["BBB"].getId() == "BBB");
     BOOST_CHECK((*copy)["CCC"].getId() == "CCC");
+}
+
+BOOST_AUTO_TEST_CASE(test_tree_view_events_test)
+{
+    using vertex_descriptor = GraphTraits::vertex_descriptor;
+    using edge_descriptor = GraphTraits::edge_descriptor;
+    Gra graph;
+    EdgeProp ep;
+    TreeView tv;
+    std::vector<vertex_descriptor> origins;
+    std::vector<vertex_descriptor> targets;
+    tv.edgeAdded.connect([&](vertex_descriptor origin, vertex_descriptor target) 
+        {
+            origins.push_back(origin);
+            targets.push_back(target);
+        });
+    
+    std::vector<edge_descriptor> crossEdges;
+    tv.crossEdgeAdded.connect([&](edge_descriptor edge)
+        {
+            crossEdges.push_back(edge);
+        });
+
+    FrameId a = "frame_a";
+    graph.addFrame(a);
+    graph.getTree(a, true, &tv);
+    
+
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    FrameId d = "frame_d";
+    FrameId e = "frame_e";
+
+    graph.add_edge(a, b, ep);
+    BOOST_CHECK(origins[0] == graph.getVertex(a));
+    BOOST_CHECK(targets[0] == graph.getVertex(b));
+    
+    graph.add_edge(a, c, ep);
+    BOOST_CHECK(origins[1] == graph.getVertex(a));
+    BOOST_CHECK(targets[1] == graph.getVertex(c));
+    
+    graph.add_edge(c, d, ep);
+    BOOST_CHECK(origins[2] == graph.getVertex(c));
+    BOOST_CHECK(targets[2] == graph.getVertex(d));
+    
+    graph.add_edge(d, e, ep);
+    BOOST_CHECK(origins[3] == graph.getVertex(d));
+    BOOST_CHECK(targets[3] == graph.getVertex(e));
+    
+    graph.add_edge(b, e, ep);
+    BOOST_CHECK(origins.size() == 4);
+    BOOST_CHECK(targets.size() == 4);
+    BOOST_CHECK(crossEdges[0] == graph.getEdge(e, b));
 }
 
 

@@ -152,33 +152,29 @@ namespace envire { namespace core
 
         /** Get transformation from origin to the root **/
         vertex_descriptor od = originVertex;
-        const VertexRelation* odRelation = &view.tree.at(od);
         while(!view.isRoot(od))
         {
-            EdgePair pair(boost::edge(od, odRelation->parent, *this));
+            EdgePair pair(boost::edge(od, view.getParent(od), *this));
             if (pair.second)
             {
                 origin_tf = origin_tf * (*this)[pair.first].transform;
             }
-            od = odRelation->parent;
-            odRelation = odRelation->parentRelation;
+            od = view.getParent(od);
         }
 
         base::TransformWithCovariance target_tf = base::TransformWithCovariance::Identity(); // An identity transformation
 
         /** Get transformation from target to the root **/
         vertex_descriptor td = targetVertex;
-        const VertexRelation* tdRelation = &view.tree.at(td);
         while(!view.isRoot(td))
         {
             EdgePair pair;
-            pair = boost::edge(td, tdRelation->parent, *this);
+            pair = boost::edge(td, view.getParent(td), *this);
             if (pair.second)
             {
                 target_tf = target_tf * (*this)[pair.first].transform;
             }
-            td = tdRelation->parent;
-            tdRelation = tdRelation->parentRelation;
+            td = view.getParent(td);
         }
 
         return origin_tf * target_tf.inverse();

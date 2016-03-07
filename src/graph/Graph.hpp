@@ -481,20 +481,9 @@ void Graph<F,E>::getTree(const FrameId rootId, const bool keepTreeUpdated, TreeV
 template <class F, class E>
 void Graph<F,E>::getTree(const vertex_descriptor root, TreeView* outView) const
 {
-    outView->root = root;
-    
-    if(boost::degree(root, graph()) == 0)
-    {
-        //the TreeBuilderVisitor only looks at the edges, if there are no dges
-        //it wouldn't add the root node
-        outView->tree[root].parent = null_vertex();
-        outView->tree[root].parentRelation = nullptr;
-    }
-    else
-    {
-        TreeBuilderVisitor<Graph<F,E>> visitor(*outView, *this);
-        boost::breadth_first_search(*this, root, boost::visitor(visitor));
-    }
+    outView->addRoot(root);
+    TreeBuilderVisitor<Graph<F,E>> visitor(*outView, *this);
+    boost::breadth_first_search(*this, root, boost::visitor(visitor));
 }
 
 template <class F, class E>
@@ -650,7 +639,6 @@ void Graph<F,E>::addEdgeToTreeViews(edge_descriptor newEdge) const
     for(TreeView* view : subscribedTreeViews)
     {
         addEdgeToTreeView(newEdge, view);
-        view->treeUpdated();//notify owners of the view, that it has been updated.
     }
 }
 
@@ -663,8 +651,8 @@ void Graph<F,E>::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) cons
     
     const vertex_descriptor src = source(newEdge);
     const vertex_descriptor tar = target(newEdge);
-    const bool srcInView = view->tree.find(src) != view->tree.end();
-    const bool tarInView = view->tree.find(tar) != view->tree.end();
+    const bool srcInView = view->vertexExists(src);
+    const bool tarInView = view->vertexExists(tar);
     
     
     vertex_descriptor inView = null_vertex(); //the vertex that is already in the tree
@@ -677,7 +665,7 @@ void Graph<F,E>::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) cons
         {
             //if both vertices are in the tree but there is no edge between them
             //this is a cross edge
-            view->crossEdges.push_back(newEdge);
+            view->addCrossEdge(newEdge);
             return;
         }
         else
@@ -703,13 +691,11 @@ void Graph<F,E>::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) cons
     }
     else
     {
-        //this should never happend if the above logic is correct
+        //this should never happen if the above logic is correct
         assert(false);
     }
     
-    view->tree[inView].children.insert(notInView);
-    view->tree[notInView].parent = inView; 
-    view->tree[notInView].parentRelation = &view->tree[inView]; 
+    view->addEdge(inView, notInView);
     
     //there might be a whole tree connected to notInView which should
     //be added to the tree
@@ -753,7 +739,6 @@ void Graph<F,E>::rebuildTreeViews() const
     {
         view->clear();
         getTree(view->root, view);
-        view->treeUpdated();//notify owners of the view, that it has been updated.
     }
 }
 

@@ -46,6 +46,7 @@ set(sources items/ItemBase.cpp
             events/GraphEventDispatcher.cpp
             events/GraphEventSubscriber.cpp
             graph/EnvireGraph.cpp
+            graph/TreeView.cpp
             serialization/Serialization.cpp
             util/Demangle.cpp)
             

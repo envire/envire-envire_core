@@ -92,17 +92,12 @@ namespace envire { namespace core
             //note: graph is used in here instead of g because otherwise
             //      the visitor wouldn't work with boost::filtered_graph.
             //      Because the signature for source() and target() is different
-            //      on filtered_graphs. Dunno why exactly that happens but using
+            //      on filtered_graphs. Don't know why exactly that happens but using
             //      the original graph works fine :-)
             const typename GRAPH::vertex_descriptor source = boost::source(e, graph);
             const typename GRAPH::vertex_descriptor target = boost::target(e, graph);
 
-            /** Insert children **/
-            view.tree[source].children.insert(target);
-
-            /** Insert parent **/
-            view.tree[target].parent = source;
-            view.tree[target].parentRelation = &view.tree[source];
+            view.addEdge(source, target);
         }
         
         /**This is only invoked on cross edges, not on back edges
@@ -112,7 +107,7 @@ namespace envire { namespace core
         template <typename Edge, typename Graph>
         void gray_target(Edge e, Graph& g)
         {
-            view.crossEdges.push_back(e);
+            view.addCrossEdge(e);
         }
         
         TreeView& view;
