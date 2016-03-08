@@ -28,6 +28,8 @@ namespace envire { namespace core
          */
         Type getType() const { return type; }
 
+        friend std::ostream& operator<<(std::ostream&, const GraphEvent&);
+
     protected:
         explicit GraphEvent(const Type type) : type(type) {}
 

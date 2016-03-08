@@ -42,6 +42,7 @@ set(headers items/ItemBase.hpp
             
 set(sources items/ItemBase.cpp
             items/AlignedBoundingBox.cpp
+            events/GraphEvent.cpp
             events/GraphEventPublisher.cpp
             events/GraphEventDispatcher.cpp
             events/GraphEventSubscriber.cpp
