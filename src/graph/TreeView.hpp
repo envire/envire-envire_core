@@ -117,9 +117,8 @@ namespace envire { namespace core
         
         /**The root node of this TreeView */
         GraphTraits::vertex_descriptor root;
-              
+        VertexRelationMap tree;   
     protected:
-        VertexRelationMap tree;
         TreeUpdatePublisher* publisher = nullptr;/*< Used for automatic unsubscribing in dtor */
     };
 }}
