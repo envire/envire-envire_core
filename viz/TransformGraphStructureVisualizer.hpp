@@ -95,7 +95,7 @@ void TransformGraphStructureVisualizer<F>::init(GraphPtr graph, const FrameId& r
   transformerGraph = TransformerGraph::create("transform_graph_world")->asGroup();
   rootNode = root;
   
-      //Lambda to call edgeAdded event handler
+  //Lambda to call edgeAdded event handler
   auto edgeAddedLambda = std::bind(&TransformGraphStructureVisualizer<F>::edgeAdded,
                                    this, std::placeholders::_1, std::placeholders::_2);
   treeView.edgeAdded.connect(edgeAddedLambda);
@@ -106,18 +106,15 @@ void TransformGraphStructureVisualizer<F>::init(GraphPtr graph, const FrameId& r
   
   graph->getTree(root, true, &treeView); //this will cause lots of edgeAdded events which will add the edges
   TransformerGraph::makeRoot(*transformerGraph, root);
-  //addTreeview(treeView, rootNode);
   subscribe(&*graph);
   initialized = true;
 }
  
-
 template <class F>
 void TransformGraphStructureVisualizer<F>::setTransformation(const FrameId& source,
                                                              const FrameId& target,
                                                              const Transform& tf)
 {
-  //normalizing is important, otherwise osg will break when switching the root.
   osg::Quat orientation;
   osg::Vec3d translation;
   std::tie(orientation, translation) = convertTransform(tf);
@@ -133,20 +130,16 @@ void TransformGraphStructureVisualizer<F>::changeRoot(const FrameId& newRoot)
   //change the root. Otherwise the whole tree needs to be re-generated.
   //This only happens when the graph consists of multiple disconnected graphs
   const vertex_descriptor newRootDesc = graph->getVertex(newRoot);
-  if(treeView.vertexExists(newRootDesc))
-  {
-    TransformerGraph::makeRoot(*transformerGraph, newRoot);
-  }
-  else
+  if(!treeView.vertexExists(newRootDesc))
   {
     treeView.unsubscribe();
     treeView.clear();
     vizkit3d::TransformerGraph::removeFrame(*transformerGraph, rootNode);//clear the visualization
     //resubscribe the now empty treeview, this will cause a whole new bunch of edgeAdded events
     graph->getTree(newRoot, true, &treeView);
-    rootNode = newRoot;
-    TransformerGraph::makeRoot(*transformerGraph, newRoot);
   }
+  TransformerGraph::makeRoot(*transformerGraph, newRoot);
+  rootNode = newRoot;
 }
 
 template <class F>
@@ -213,6 +206,7 @@ void TransformGraphStructureVisualizer<F>::crossEdgeAdded(edge_descriptor edge)
 template <class F>
 std::pair<osg::Quat, osg::Vec3d> TransformGraphStructureVisualizer<F>::convertTransform(const Transform& tf) const
 {
+  //normalizing is important, otherwise osg will break when switching the root.
   const base::Quaterniond& rot = tf.transform.orientation.normalized();
   const base::Position& pos = tf.transform.translation;
   const osg::Quat orientation(rot.x(), rot.y(), rot.z(), rot.w());
