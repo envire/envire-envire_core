@@ -20,7 +20,7 @@ GraphEventDispatcher::GraphEventDispatcher()
 
 void GraphEventDispatcher::notifyGraphEvent(const GraphEvent& event)
 {
-    switch(event.type)
+    switch(event.getType())
     {
     case GraphEvent::EDGE_ADDED:
         edgeAdded(dynamic_cast<const EdgeAddedEvent&>(event));
