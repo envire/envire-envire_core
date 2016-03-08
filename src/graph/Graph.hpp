@@ -568,8 +568,8 @@ void Graph<F,E>::add_edge(const vertex_descriptor origin,
     }
   
     EdgePair edge_pair =  boost::add_edge(origin, target, edgeProperty, *this);
-    edge_pair =  boost::add_edge(target, origin, edgeProperty.inverse(), *this);
-    assert(edge_pair.second);//origin->target has already been checkd before
+    EdgePair edge_pair_inv =  boost::add_edge(target, origin, edgeProperty.inverse(), *this);
+    assert(edge_pair_inv.second);//origin->target has already been checkd before
     
     //note: we only need to add one of the edges to the tree, because the tree
     //      does not care about the edge direction.
@@ -622,7 +622,6 @@ void Graph<F,E>::remove_edge(const FrameId& origin, const FrameId& target,
     notify(envire::core::EdgeRemovedEvent(origin, target));
     
     boost::remove_edge(targetToOrigin.first, *this);
-    notify(envire::core::EdgeRemovedEvent(target, origin));
     
     //removing an edge might invalidate the TreeViews.
     //This is a brute-force solution to the problem.

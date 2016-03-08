@@ -480,9 +480,9 @@ BOOST_AUTO_TEST_CASE(tree_view_cross_edge_test)
     const GraphTraits::vertex_descriptor src = graph.source(view.crossEdges[0]);
     const GraphTraits::vertex_descriptor tar = graph.target(view.crossEdges[0]);
     //note: it is not specified whether src->tar or tar->src ends up in the cross
-    //      edges. The current implementation adds tar->src but that can change.
-    BOOST_CHECK(tar == vC);
-    BOOST_CHECK(src == vD);
+    //      edges. The current implementation adds src->tar but that can change.
+    BOOST_CHECK(tar == vD);
+    BOOST_CHECK(src == vC);
 }
 
 BOOST_AUTO_TEST_CASE(tree_view_move_semantics_test)
@@ -750,11 +750,9 @@ BOOST_AUTO_TEST_CASE(remove_transform_event_test)
     graph.add_edge(a, b, ep);
     Dispatcher d(graph);
     graph.remove_edge(a, b);
-    BOOST_CHECK(d.edgeRemovedEvents.size() == 2);
+    BOOST_CHECK(d.edgeRemovedEvents.size() == 1);
     BOOST_CHECK(d.edgeRemovedEvents[0].origin == a);
     BOOST_CHECK(d.edgeRemovedEvents[0].target == b);
-    BOOST_CHECK(d.edgeRemovedEvents[1].origin == b);
-    BOOST_CHECK(d.edgeRemovedEvents[1].target == a);
 }
 
 BOOST_AUTO_TEST_CASE(frame_added_event_test)
@@ -1021,16 +1019,11 @@ BOOST_AUTO_TEST_CASE(disconnect_frame_event_test)
     
     Dispatcher d(graph);
     graph.disconnectFrame(a);
-    BOOST_CHECK(d.edgeRemovedEvents.size() == 4);
+    BOOST_CHECK(d.edgeRemovedEvents.size() == 2);
     BOOST_CHECK(d.edgeRemovedEvents[0].origin == a);
     BOOST_CHECK(d.edgeRemovedEvents[0].target == b);
-    BOOST_CHECK(d.edgeRemovedEvents[1].origin == b);
-    BOOST_CHECK(d.edgeRemovedEvents[1].target == a);
-    BOOST_CHECK(d.edgeRemovedEvents[2].origin == a);
-    BOOST_CHECK(d.edgeRemovedEvents[2].target == c);
-    BOOST_CHECK(d.edgeRemovedEvents[3].origin == c);
-    BOOST_CHECK(d.edgeRemovedEvents[3].target == a);
-  
+    BOOST_CHECK(d.edgeRemovedEvents[1].origin == a);
+    BOOST_CHECK(d.edgeRemovedEvents[1].target == c);
 }
 
 
@@ -1252,7 +1245,7 @@ BOOST_AUTO_TEST_CASE(publish_current_state_test)
     graph.subscribe(&d, true);
 
     BOOST_CHECK(d.frameAddedEvents.size() == 3);
-    BOOST_CHECK(d.edgeAddedEvents.size() == 4);
+    BOOST_CHECK(d.edgeAddedEvents.size() == 2);
     BOOST_CHECK(d.frameRemovedEvents.size() == 0);
     BOOST_CHECK(d.edgeRemovedEvents.size() == 0);
 
