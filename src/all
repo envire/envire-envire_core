@@ -23,10 +23,8 @@
 #include "events/GraphEventPublisher.hpp"
 #include "events/ItemAddedEvent.hpp"
 #include "events/ItemRemovedEvent.hpp"
-#include "events/FrameAddedEvent.hpp"
+#include "events/FrameEvents.hpp"
 #include "events/GraphItemEventDispatcher.hpp"
-#include "events/EdgeAddedEvent.hpp"
-#include "events/EdgeRemovedEvent.hpp"
-#include "events/EdgeModifiedEvent.hpp"
+#include "events/EdgeEvents.hpp"
 
 #endif // ENVIRE_CORE_H

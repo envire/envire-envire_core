@@ -1,12 +1,9 @@
 #include "GraphEventDispatcher.hpp"
 #include "GraphEvent.hpp"
-#include "EdgeAddedEvent.hpp"
-#include "EdgeModifiedEvent.hpp"
-#include "EdgeRemovedEvent.hpp"
+#include "EdgeEvents.hpp"
 #include "ItemAddedEvent.hpp"
 #include "ItemRemovedEvent.hpp"
-#include "FrameAddedEvent.hpp"
-#include "FrameRemovedEvent.hpp"
+#include "FrameEvents.hpp"
 
 #include <cassert>
 

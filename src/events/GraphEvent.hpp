@@ -1,8 +1,9 @@
 #pragma once
+#include "GraphEventExceptions.hpp"
 
 namespace envire { namespace core
 {
-    
+
     /** TODO comment
      */
     class GraphEvent
@@ -24,9 +25,24 @@ namespace envire { namespace core
         virtual ~GraphEvent() {}
 
         /**
+         * This method is used to identify if a new event supersedes and existing event.
+         * @returns true if the given event supersedes this one.
+         */
+        virtual bool mergeable(const GraphEvent& event)
+        {
+            // not implemented
+            return false;
+        }
+
+        /**
          * @returns the type
          */
         Type getType() const { return type; }
+
+        /**
+         * This method can be overloaded to allow the event to be cloned.
+         */
+        virtual GraphEvent* clone() const { throw CloneMethodNotImplementedException(); }
 
         friend std::ostream& operator<<(std::ostream&, const GraphEvent&);
 
@@ -35,4 +51,5 @@ namespace envire { namespace core
 
         Type type;
     };
+
 }}

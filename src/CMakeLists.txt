@@ -22,14 +22,13 @@ set(headers items/ItemBase.hpp
             events/GraphEventSubscriber.hpp
             events/GraphEventDispatcher.hpp
             events/GraphEventPublisher.hpp
-            events/EdgeAddedEvent.hpp
-            events/EdgeModifiedEvent.hpp
-            events/EdgeRemovedEvent.hpp
+            events/GraphEventQueue.hpp
+            events/EdgeEvents.hpp
             events/ItemAddedEvent.hpp
             events/ItemRemovedEvent.hpp
-            events/FrameAddedEvent.hpp
-            events/FrameRemovedEvent.hpp
+            events/FrameEvents.hpp
             events/GraphItemEventDispatcher.hpp
+            events/GraphEventExceptions.hpp
             serialization/Serialization.hpp
             serialization/SerializationHandle.hpp
             serialization/SerializationRegistration.hpp
@@ -46,6 +45,7 @@ set(sources items/ItemBase.cpp
             events/GraphEventPublisher.cpp
             events/GraphEventDispatcher.cpp
             events/GraphEventSubscriber.cpp
+            events/GraphEventQueue.cpp
             graph/EnvireGraph.cpp
             graph/TreeView.cpp
             serialization/Serialization.cpp

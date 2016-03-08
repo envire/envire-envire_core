@@ -9,6 +9,7 @@
 #include <envire_core/graph/Graph.hpp>
 #include <envire_core/events/GraphEventDispatcher.hpp>
 #include <envire_core/graph/GraphViz.hpp>
+#include <envire_core/events/GraphEventQueue.hpp>
 #include <vector>
 #include <string>
  
@@ -108,6 +109,24 @@ public:
     void itemRemoved(const ItemRemovedEvent& e) override
     {
     }
+};
+
+class EventQueue : public GraphEventQueue
+{
+
+public:
+    EventQueue(Gra& graph) : GraphEventQueue(&graph) {}
+    EventQueue() : GraphEventQueue() {}
+    virtual ~EventQueue() {}
+
+    virtual void process( const GraphEvent& event )
+    {
+        dispatcher.notifyGraphEvent(event);
+        //events.push_back(event);
+    }
+
+    Dispatcher dispatcher;
+    vector<GraphEvent> events;
 };
 
 BOOST_AUTO_TEST_CASE(simple_add_remove_edge_test)
@@ -764,18 +783,18 @@ BOOST_AUTO_TEST_CASE(frame_added_event_test)
     Dispatcher d(graph);
     graph.addFrame(a);
     BOOST_CHECK(d.frameAddedEvents.size() == 1);
-    BOOST_CHECK(d.frameAddedEvents[0].addedFrame == a);
+    BOOST_CHECK(d.frameAddedEvents[0].frame == a);
     
     graph.add_edge(a, b, ep);
     BOOST_CHECK(d.frameAddedEvents.size() == 2);
-    BOOST_CHECK(d.frameAddedEvents[1].addedFrame == b);
+    BOOST_CHECK(d.frameAddedEvents[1].frame == b);
 
     FrameId c = "frame_c";
     FrameId e = "frame_d";
     graph.add_edge(c, e, ep);
     BOOST_CHECK(d.frameAddedEvents.size() == 4);
-    BOOST_CHECK(d.frameAddedEvents[2].addedFrame == c);
-    BOOST_CHECK(d.frameAddedEvents[3].addedFrame == e);
+    BOOST_CHECK(d.frameAddedEvents[2].frame == c);
+    BOOST_CHECK(d.frameAddedEvents[3].frame == e);
 }
 
 
@@ -809,10 +828,10 @@ BOOST_AUTO_TEST_CASE(frame_removed_event_test)
     Dispatcher d(graph);
     graph.removeFrame(a);
     BOOST_CHECK(d.frameRemovedEvents.size() == 1);
-    BOOST_CHECK(d.frameRemovedEvents[0].removedFrame == a);
+    BOOST_CHECK(d.frameRemovedEvents[0].frame == a);
     graph.removeFrame(b);
     BOOST_CHECK(d.frameRemovedEvents.size() == 2);
-    BOOST_CHECK(d.frameRemovedEvents[1].removedFrame == b);
+    BOOST_CHECK(d.frameRemovedEvents[1].frame == b);
     
 }
 
@@ -1253,5 +1272,40 @@ BOOST_AUTO_TEST_CASE(publish_current_state_test)
 
     BOOST_CHECK(d.frameRemovedEvents.size() == 3);
     BOOST_CHECK(d.edgeRemovedEvents.size() == 4);
+}
+
+BOOST_AUTO_TEST_CASE(event_queue_test)
+{
+    Gra graph;
+    EventQueue queue(graph);
+
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    EdgeProp ep;
+    EdgeProp ep_1;
+    EdgeProp ep_2;
+
+    graph.addFrame(a);
+
+    graph.add_edge(a, b, ep);
+    graph.add_edge(a, c, ep);
+
+    graph.setEdgeProperty(a,b,ep_1);
+    graph.setEdgeProperty(a,b,ep_2);
+    graph.setEdgeProperty(a,c,ep_1);
+    graph.setEdgeProperty(a,c,ep_2);
+
+    graph.remove_edge(a,c);
+
+    graph.removeFrame(c);
+
+    queue.flush();
+
+    BOOST_CHECK(queue.dispatcher.frameAddedEvents.size() == 2);
+    BOOST_CHECK(queue.dispatcher.frameRemovedEvents.size() == 0);
+    BOOST_CHECK(queue.dispatcher.edgeAddedEvents.size() == 1);
+    BOOST_CHECK(queue.dispatcher.edgeModifiedEvents.size() == 1);
+    BOOST_CHECK(queue.dispatcher.edgeRemovedEvents.size() == 0);
 }
 

@@ -3,11 +3,8 @@
 #include <type_traits>
 
 #include <envire_core/events/GraphEventPublisher.hpp>
-#include <envire_core/events/FrameAddedEvent.hpp>
-#include <envire_core/events/FrameRemovedEvent.hpp>
-#include <envire_core/events/EdgeAddedEvent.hpp>
-#include <envire_core/events/EdgeModifiedEvent.hpp>
-#include <envire_core/events/EdgeRemovedEvent.hpp>
+#include <envire_core/events/FrameEvents.hpp>
+#include <envire_core/events/EdgeEvents.hpp>
 
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/copy.hpp>
