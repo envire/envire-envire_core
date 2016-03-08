@@ -856,11 +856,19 @@ void Graph<F,E>::publishCurrentState(GraphEventSubscriber* pSubscriber)
 
     // publish edges
     typename boost::graph_traits<Graph<F,E>>::edge_iterator edge_it, edge_end;
+    std::vector<edge_descriptor> published_edges;
     for (boost::tie( edge_it, edge_end ) = boost::edges( graph() ); edge_it != edge_end; ++edge_it)
     {
-        const vertex_descriptor src = source(*edge_it);
-        const vertex_descriptor tar = target(*edge_it);
-        notifySubscriber(pSubscriber, EdgeAddedEvent(getFrameId(src), getFrameId(tar), *edge_it));
+        std::vector<edge_descriptor>::const_iterator it = std::find(published_edges.begin(), published_edges.end(), *edge_it);
+        if(it == published_edges.end())
+        {
+            const vertex_descriptor src = source(*edge_it);
+            const vertex_descriptor tar = target(*edge_it);
+            notifySubscriber(pSubscriber, EdgeAddedEvent(getFrameId(src), getFrameId(tar), *edge_it));
+
+            // save inverse edge in order to not send it twice
+            published_edges.push_back(getEdge(tar, src));
+        }
     }
 }
 
@@ -869,11 +877,19 @@ void Graph<F,E>::unpublishCurrentState(GraphEventSubscriber* pSubscriber)
 {
     // unpublish edges
     typename boost::graph_traits<Graph<F,E>>::edge_iterator edge_it, edge_end;
+    std::vector<edge_descriptor> unpublished_edges;
     for (boost::tie( edge_it, edge_end ) = boost::edges( graph() ); edge_it != edge_end; ++edge_it)
     {
-        const vertex_descriptor src = source(*edge_it);
-        const vertex_descriptor tar = target(*edge_it);
-        notifySubscriber(pSubscriber, EdgeRemovedEvent(getFrameId(src), getFrameId(tar)));
+        std::vector<edge_descriptor>::const_iterator it = std::find(unpublished_edges.begin(), unpublished_edges.end(), *edge_it);
+        if(it == unpublished_edges.end())
+        {
+            const vertex_descriptor src = source(*edge_it);
+            const vertex_descriptor tar = target(*edge_it);
+            notifySubscriber(pSubscriber, EdgeRemovedEvent(getFrameId(src), getFrameId(tar)));
+
+            // save inverse edge in order to not send it twice
+            unpublished_edges.push_back(getEdge(tar, src));
+        }
     }
 
     // unpublish frames

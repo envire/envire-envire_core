@@ -1271,7 +1271,7 @@ BOOST_AUTO_TEST_CASE(publish_current_state_test)
     graph.unsubscribe(&d, true);
 
     BOOST_CHECK(d.frameRemovedEvents.size() == 3);
-    BOOST_CHECK(d.edgeRemovedEvents.size() == 4);
+    BOOST_CHECK(d.edgeRemovedEvents.size() == 2);
 }
 
 BOOST_AUTO_TEST_CASE(event_queue_test)
