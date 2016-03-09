@@ -1246,7 +1246,6 @@ BOOST_AUTO_TEST_CASE(test_tree_view_events_test)
     //check that a cross edge has been added instead
     BOOST_CHECK(crossEdges[0] == graph.getEdge(e, b));
 
-    //FIXME cross-edges test noch machen
 }
 
 BOOST_AUTO_TEST_CASE(publish_current_state_test)
