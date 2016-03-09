@@ -55,6 +55,7 @@ void EnvireGraphStructureVisualization::updateMainNode ( osg::Node* node )
   {
     p->rootGroup->removeChildren(0, p->rootGroup->getNumChildren());
     p->rootGroup->addChild(p->nextNode);
+    emit propertyChanged("rootNode");
   }
 }
 
@@ -82,7 +83,6 @@ void EnvireGraphStructureVisualization::initNodeList(envire::core::EnvireGraph c
   {
     p->currentRoot = p->nodes.front().toStdString();
   }
-  emit propertyChanged("rootNode");
 }
 
 void EnvireGraphStructureVisualization::updateData(envire::core::EnvireGraph const &sample)
