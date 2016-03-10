@@ -14,7 +14,7 @@ namespace envire { namespace core
 
 namespace vizkit3d
 {
-  class EnvireGraphStructureVisualization
+  class EnvireGraphStructureVisualization 
       : public vizkit3d::Vizkit3DPlugin<envire::core::EnvireGraph>
       , boost::noncopyable
   {
@@ -27,6 +27,7 @@ namespace vizkit3d
 
     Q_INVOKABLE void updateData(envire::core::EnvireGraph const &sample);
   
+  public slots:
     QStringList getNodes();
     void setNodes(const QStringList& values);
   
@@ -38,6 +39,9 @@ namespace vizkit3d
       
   private:
     void initNodeList(envire::core::EnvireGraph const &graph);
+    
+    /** Check if two lists have the same content*/
+    bool areSame(const QStringList& a, const QStringList& b) const;
     
     /**Convert envire transform to osg transform */
     std::pair<osg::Quat, osg::Vec3d> convertTransform(const envire::core::Transform& tf) const;

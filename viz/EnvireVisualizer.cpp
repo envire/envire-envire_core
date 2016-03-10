@@ -33,7 +33,7 @@ int main()
 
 
   graph.addTransform("A", "B", ab);
-  graph.addTransform("A", "C", ac);
+  graph.addTransform("A", "C", ac); 
   graph.addTransform("C", "D", cd);
 
   Transform bd = graph.getTransform("B", "D");  
