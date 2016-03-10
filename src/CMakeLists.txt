@@ -57,13 +57,10 @@ if(ENABLE_PLUGINS)
 
   set(headers ${headers}
               plugin/ClassLoader.hpp
-              plugin/Plugin.hpp
-              plugin/PluginInfo.hpp
-              plugin/PluginManager.hpp)
+              plugin/Plugin.hpp)
   set(sources ${sources}
-              plugin/ClassLoader.cpp
-              plugin/PluginManager.cpp)
-  set(deps_pkg_config ${deps_pkg_config} class_loader tinyxml)
+              plugin/ClassLoader.cpp)
+  set(deps_pkg_config ${deps_pkg_config} class_loader plugin_manager)
   
 endif()
 

@@ -1,2 +1,0 @@
-list(APPEND CMAKE_MODULE_PATH @CMAKE_INSTALL_PREFIX@/share/rock/cmake)
-include(PluginManager)

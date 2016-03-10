@@ -17,9 +17,6 @@ if(ENABLE_PLUGINS)
         DEPS_CMAKE Boost
         DEPS envire_core
         DEPS_PKGCONFIG class_loader boost_serialization)
-
-    install(FILES vector_plugin.xml string_plugin.xml
-            DESTINATION lib/plugin_manager)
     
 endif()
 
