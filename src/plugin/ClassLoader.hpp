@@ -16,7 +16,7 @@ namespace envire { namespace core
  * @brief A singleton class used to load class loader based plugins
  * This class inherits from the PluginManager
  */
-class ClassLoader : public plugin_manager::PluginLoader, public boost::noncopyable
+class ClassLoader : public plugin_manager::PluginLoader
 {
     friend class base::Singleton<ClassLoader>;
     static constexpr char envire_item_base_class[] = "envire::core::ItemBase";
