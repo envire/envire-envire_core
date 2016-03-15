@@ -45,6 +45,7 @@ public:
      using edges_size_type = GraphTraits::edges_size_type;
      using out_edge_iterator = typename Base::out_edge_iterator;
      using vertex_iterator = typename Base::vertex_iterator;
+     using edge_iterator = typename Base::edge_iterator;
      using Base::vertex;
     
     Graph();
@@ -187,6 +188,9 @@ public:
     std::pair<vertex_iterator, vertex_iterator>
     getVertices() const;
     
+    /** Returns a pair of iterators containing all edges*/
+    std::pair<edge_iterator, edge_iterator>
+    getEdges() const;
 
     /**Builds a TreeView containing all vertices that are accessible starting
       * from @p root.
@@ -947,6 +951,13 @@ void Graph<F,E>::regernateLabelMap()
         const FrameId id = getFrameId(*it);
         _map[id] = *it;
     }
+}
+
+template<class F, class E>
+std::pair<typename Graph<F,E>::edge_iterator, typename Graph<F,E>::edge_iterator>
+Graph<F,E>::getEdges() const
+{
+  return boost::edges(graph());
 }
 
 }}
