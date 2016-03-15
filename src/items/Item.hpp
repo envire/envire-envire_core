@@ -82,9 +82,14 @@ namespace envire { namespace core
         _ItemData& getData() { return this->user_data; }
         const _ItemData& getData() const { return this->user_data; }
 
-        virtual std::type_index getTypeIndex() const
+        virtual const std::type_info* getTypeInfo() const 
         {
-            return std::type_index(typeid(envire::core::Item<_ItemData>));
+          return &typeid(envire::core::Item<_ItemData>);
+        }
+        
+        virtual const std::type_info* getEmbeddedTypeInfo() const
+        {
+          return &typeid(_ItemData);
         }
 
     private:

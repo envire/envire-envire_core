@@ -33,12 +33,8 @@ namespace envire { namespace core
     protected:
 
         base::Time time; /** Timestamp */
-
         boost::uuids::uuid uuid; /** Unique Identifier */
-
         FrameId frame_name; /** Frame name in which the Item is located */
-
-        // TBD: do we want/need this pointer?
         void* user_data_ptr; /** Pointer to the user data */
 
     public:
@@ -101,9 +97,27 @@ namespace envire { namespace core
         */
         virtual std::string getClassName() const { return "UnknownItem"; }
 
-        virtual std::type_index getTypeIndex() const = 0;
-
+        std::type_index getTypeIndex() const
+        {
+          return std::type_index(*getTypeInfo());
+        }
+        
+        /**Returns the data type of the embedded data*/
+        std::type_index getEmbeddedTypeIndex() const
+        {
+          return std::type_index(*getEmbeddedTypeInfo());
+        }
+        
+        
+        /**The lifetime of std::type_info is till the end of the program. Thus
+         * storing and using pointers to std::type_info is safe*/
+        virtual const std::type_info* getTypeInfo() const = 0;
+        
         void* getRawData() const { return user_data_ptr; }
+        
+        /**Returns the data type of the embedded data*/
+        virtual const std::type_info* getEmbeddedTypeInfo() const = 0;
+        
 
     private:
         /**Grands access to boost serialization */
