@@ -33,7 +33,7 @@ namespace envire { namespace core
         
         void notifyGraphEvent(const GraphEvent& event)
         {
-            switch(event.type)
+            switch(event.getType())
             {
                 case GraphEvent::ITEM_ADDED_TO_FRAME:
                 {
