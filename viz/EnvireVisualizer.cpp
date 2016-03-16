@@ -1,5 +1,6 @@
 #include <vizkit3d/Vizkit3DWidget.hpp>
 #include <vizkit3d/QtThreadedWidget.hpp>
+#include <vizkit3d/QVizkitMainWindow.hpp>
 #include <iostream>
 #include "EnvireGraphVisualizer.hpp"
 #include <envire_core/graph/EnvireGraph.hpp>
@@ -57,15 +58,32 @@ int main(int argc, char **argv)
 //   graph.addTransform("other_a", "other_c", oac);
 //   graph.addTransform("other_a", "other_d", oad);
   
-  //  QtThreadedWidget<Vizkit3DWidget> app;
-  //  app.start();
-  //  Vizkit3DWidget* widget = dynamic_cast<Vizkit3DWidget*>(app.getWidget());
+    QtThreadedWidget<Vizkit3DWidget> app;
+    app.start();
+ // QApplication app(argc, argv);
+ // QVizkitMainWindow window;
+ // window.show();
+ // Vizkit3DWidget* widget = window.getVizkitWidget();
+    Vizkit3DWidget* widget = dynamic_cast<Vizkit3DWidget*>(app.getWidget());
 
   // envire::viz::EnvireGraphVisualizer visualizer(graph, widget, "A");
-  QApplication app(argc, argv);
-  Vizkit3DWidget* widget2 = new Vizkit3DWidget();
-  widget2->show();
-  envire::viz::EnvireGraphVisualizer visualizer(graph, widget2, "A");
+
+//  Vizkit3DWidget* widget2 = new Vizkit3DWidget();
+//  widget2->show();
+  envire::viz::EnvireGraphVisualizer visualizer(graph, widget, "A");
+//  usleep(900000);
   visualizer.addPluginInfo(ocTree->getTypeIndex(), "OcTreeVisualization");
-  return app.exec();
+  
+  while(true){}
+  
+ /* while(true) 
+  {
+    usleep(200000);
+    Transform tf = graph.getTransform("A", "B");
+    tf.transform.orientation *= Eigen::Quaterniond(Eigen::AngleAxisd(0.3, base::Position(1, 0, 0)));
+    graph.updateTransform("A", "B", tf);
+  }
+  */
+  
+ // return app.exec();
 }

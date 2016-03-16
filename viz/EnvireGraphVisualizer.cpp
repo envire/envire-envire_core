@@ -73,11 +73,11 @@ void EnvireGraphVisualizer::loadItems(const vertex_descriptor vertex)
       //FIXME hier später nicht immer neue plugins erzeugen
       QObject* plugin = widget->loadPlugin("", pluginName);
       ASSERT_NOT_NULL(plugin);
-    //  widget->setPluginDataFrame(QString::fromStdString(item->getFrame()), plugin);
+      const QString qFrame = QString::fromStdString(item->getFrame());
       VizPluginBase* vizPlugin = dynamic_cast<VizPluginBase*>(plugin);
       ASSERT_NOT_NULL(vizPlugin);
       vizPlugin->updateDataRaw(item->getRawData(), item->getEmbeddedTypeInfo());
-
+      vizPlugin->setVisualizationFrame(qFrame);
     }
   }
 }
