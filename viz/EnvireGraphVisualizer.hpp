@@ -5,6 +5,8 @@
 #include <vizkit3d/Vizkit3DWidget.hpp>
 #include <envire_core/graph/GraphTypes.hpp>
 #include <envire_core/graph/TreeView.hpp>
+#include <envire_core/events/GraphEventDispatcher.hpp>
+#include <envire_core/items/ItemBase.hpp>
 
 namespace envire { namespace core 
 {
@@ -15,10 +17,11 @@ namespace envire { namespace core
 namespace envire { namespace viz
 {
 
-class EnvireGraphVisualizer
+class EnvireGraphVisualizer : envire::core::GraphEventDispatcher
 {
   using vertex_descriptor = envire::core::GraphTraits::vertex_descriptor;
   using edge_descriptor = envire::core::GraphTraits::edge_descriptor;
+  using FrameId = envire::core::FrameId;
 public:
   
   /**
@@ -27,6 +30,10 @@ public:
                         vizkit3d::Vizkit3DWidget* widget, 
                         const envire::core::FrameId& rootNode);
   void addPluginInfo(std::type_index type, const QString& pluginName);
+  
+protected:
+  /**Is invoked whenever a transform changes in the graph */
+  virtual void edgeModified(const envire::core::EdgeModifiedEvent& e);
   
 private:
   void loadPlugins();
@@ -37,7 +44,10 @@ private:
   /**Display all items that are in @p vertex */
   void loadItems(const vertex_descriptor vertex);
    
-  
+  /**Gets the current transformation between @p origin and @p target from the
+   * graph and sets it in the widget*/
+  void setTransformation(const FrameId& origin, const FrameId& target);
+  void setTransformation(const vertex_descriptor origin, const vertex_descriptor target);
   
   
   std::pair<QQuaternion, QVector3D> convertTransform(const envire::core::Transform& tf) const;

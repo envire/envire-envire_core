@@ -1,6 +1,7 @@
 #include "EnvireGraphVisualizer.hpp"
 #include <envire_core/items/Transform.hpp>
 #include <envire_core/graph/EnvireGraph.hpp>
+#include <envire_core/events/EdgeEvents.hpp>
 #include <string>
 
 using namespace envire::core;
@@ -24,7 +25,7 @@ namespace envire { namespace viz
 EnvireGraphVisualizer::EnvireGraphVisualizer(EnvireGraph& graph,
                                              Vizkit3DWidget* widget, 
                                              const FrameId& rootNode) :
-  graph(graph), widget(widget)
+ GraphEventDispatcher(&graph), graph(graph), widget(widget)
 { 
   auto edgeLambda = std::bind(&EnvireGraphVisualizer::edgeAddedToTree, this,
                               std::placeholders::_1, std::placeholders::_2);
@@ -36,16 +37,9 @@ EnvireGraphVisualizer::EnvireGraphVisualizer(EnvireGraph& graph,
 
 void EnvireGraphVisualizer::edgeAddedToTree(vertex_descriptor origin, vertex_descriptor target)
 {
-    const Transform tf = graph.getTransform(origin, target);
-    QQuaternion rot;
-    QVector3D trans;
-    std::tie(rot, trans)= convertTransform(tf);
-    const QString qSrc = QString::fromStdString(graph.getFrameId(origin));
-    const QString qTarget = QString::fromStdString(graph.getFrameId(target));
-    widget->setTransformation(qSrc, qTarget, trans, rot);
+    setTransformation(origin, target);
     loadItems(target);
 }
-
 
 std::pair<QQuaternion, QVector3D> EnvireGraphVisualizer::convertTransform(const Transform& tf) const
 {
@@ -79,10 +73,11 @@ void EnvireGraphVisualizer::loadItems(const vertex_descriptor vertex)
       //FIXME hier später nicht immer neue plugins erzeugen
       QObject* plugin = widget->loadPlugin("", pluginName);
       ASSERT_NOT_NULL(plugin);
+    //  widget->setPluginDataFrame(QString::fromStdString(item->getFrame()), plugin);
       VizPluginBase* vizPlugin = dynamic_cast<VizPluginBase*>(plugin);
       ASSERT_NOT_NULL(vizPlugin);
-      std::cout << "AAAAAAAAAAAAAAAAAAAAAa" << std::endl;
       vizPlugin->updateDataRaw(item->getRawData(), item->getEmbeddedTypeInfo());
+
     }
   }
 }
@@ -103,5 +98,35 @@ void EnvireGraphVisualizer::addPluginInfo(std::type_index type, const QString& p
     loadItems(node);
   });
 }
+
+void EnvireGraphVisualizer::edgeModified(const EdgeModifiedEvent& e)
+{
+  //only update if this is an edge of the current tree and not a cross-edge
+  const vertex_descriptor origin = graph.getVertex(e.origin);
+  const vertex_descriptor target = graph.getVertex(e.target);
+  if(tree.edgeExists(origin, target))
+  {
+    setTransformation(origin, target);
+  }
+}
+
+void EnvireGraphVisualizer::setTransformation(const vertex_descriptor origin,
+                                              const vertex_descriptor target)
+{
+  const Transform tf = graph.getTransform(origin, target);
+  QQuaternion rot;
+  QVector3D trans;
+  std::tie(rot, trans) = convertTransform(tf);
+  const QString qSrc = QString::fromStdString(graph.getFrameId(origin));
+  const QString qTarget = QString::fromStdString(graph.getFrameId(target));
+  widget->setTransformation(qSrc, qTarget, trans, rot);  
+}
+
+void EnvireGraphVisualizer::setTransformation(const FrameId& origin, const FrameId& target)
+{
+  setTransformation(graph.getVertex(origin), graph.getVertex(target));
+}
+
+
 
 }}
