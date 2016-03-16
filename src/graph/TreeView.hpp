@@ -63,7 +63,8 @@ namespace envire { namespace core
         /**Unsibscribe from the currently subscribed publisher */
         void unsubscribe();
         
-        /**Returns true if an edge between a and b exists in @p view.*/
+        /**Returns true if an edge between a and b exists in @p view 
+         * and is not a cross-edge*/
         bool edgeExists(const GraphTraits::vertex_descriptor a, const GraphTraits::vertex_descriptor b) const;
         /**Returns true if @p vd exists in the view. */
         bool vertexExists(const GraphTraits::vertex_descriptor vd) const;
