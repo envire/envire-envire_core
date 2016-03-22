@@ -16,11 +16,16 @@ rock_vizkit_plugin(envire_core-viz
 rock_executable(envire_visualizer 
                 SOURCES EnvireVisualizer.cpp
                         EnvireGraphVisualizer.cpp
+                        Vizkit3dPluginInformation.cpp
                 HEADERS EnvireGraphVisualizer.hpp
                         EnvireGraphStructureVisualization.hpp
+                        Vizkit3dPluginInformation.hpp
                 DEPS_PKGCONFIG vizkit3d
                 DEPS envire_core
                 DEPS envire_core-viz
                 DEPS_PKGCONFIG plugin_manager
                 DEPS_PKGCONFIG envire_octomap #FIMXE remove later, only for testing
+                DEPS_PKGCONFIG envire_pcl
+                DEPS_PKGCONFIG pcl_common-1.7
+                DEPS_PKGCONFIG pcl_io-1.7
                 LIBS ${Boost_SYSTEM_LIBRARY})

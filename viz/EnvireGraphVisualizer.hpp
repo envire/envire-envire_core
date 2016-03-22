@@ -7,6 +7,7 @@
 #include <envire_core/graph/TreeView.hpp>
 #include <envire_core/events/GraphEventDispatcher.hpp>
 #include <envire_core/items/ItemBase.hpp>
+#include "Vizkit3dPluginInformation.hpp"
 
 namespace envire { namespace core 
 {
@@ -28,8 +29,8 @@ public:
    * @param rootNode the name of the frame that should be placed in the world origin*/
   EnvireGraphVisualizer(envire::core::EnvireGraph& graph,
                         vizkit3d::Vizkit3DWidget* widget, 
-                        const envire::core::FrameId& rootNode);
-  void addPluginInfo(std::type_index type, const QString& pluginName);
+                        const envire::core::FrameId& rootNode,
+                        const Vizkit3dPluginInformation& pluginInfos);
   
 protected:
   /**Is invoked whenever a transform changes in the graph */
@@ -49,15 +50,15 @@ private:
   void setTransformation(const FrameId& origin, const FrameId& target);
   void setTransformation(const vertex_descriptor origin, const vertex_descriptor target);
   
+  void updateData(QObject* obj, const std::string& parameterType, const void* parameter) const;
   
   std::pair<QQuaternion, QVector3D> convertTransform(const envire::core::Transform& tf) const;
   
-  
-  /**Mapping from item type to the name of the plugin that can display this type*/
-  std::unordered_map<std::type_index, QString> pluginsNames;
+
   envire::core::EnvireGraph& graph; /**< the graph that is visualized*/
   envire::core::TreeView tree;
   vizkit3d::Vizkit3DWidget* widget;
+  const Vizkit3dPluginInformation& pluginInfos;
 };
 
 }}
