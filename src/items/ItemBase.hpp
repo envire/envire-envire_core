@@ -13,6 +13,7 @@
 #include <type_traits>
 #include <typeindex>
 #include <boost_serialization/BoostTypes.hpp>
+#include "ItemMetadata.hpp"
 
 namespace envire { namespace core
 {
