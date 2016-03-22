@@ -102,7 +102,13 @@ public:
     /** @throw UnknownFrameException if @p frame is not part of this graph*/                                                  
     const envire::core::Frame::ItemList& getItems(const FrameId& frame,
                                                   const std::type_index& type) const;
-                                                 
+                                                  
+    /**Visits all items in the given frame (ignoring the type).
+     * @param func should be a callable with operator(const ItemBase::Ptr)
+     * @throw UnknownFrameException if @p frame is not part of this graph */
+    template <class T>
+    void visitItems(const FrameId& frame, T func) const;                                                  
+                                                  
     /**Convenience method that returns an iterator to the @p i'th item of type @p T from @p frame.
       * @param T has to derive from ItemBase.
       * @throw UnknownFrameException if the @p frame id is invalid.
@@ -212,6 +218,14 @@ EnvireGraph::getItems(const FrameId& frame) const
     }
 
     return getItemsInternal<T>(desc, frame);
+}
+
+template <class T>
+void EnvireGraph::visitItems(const FrameId& frameId, T func) const
+{
+  checkFrameValid(frameId);
+  const Frame& frame = (*this)[frameId];
+  frame.visitItems(func);
 }
 
 template<class T>

@@ -76,6 +76,21 @@ namespace envire { namespace core
             out << "}\"" << ",style=filled,fillcolor=lightblue]";
             return out.str();
         }
+        
+        /**Visits all items in this frame.
+         * @param func should have an operator(const ItemBase::Ptr)*/
+        template <class T>
+        void visitItems(T func) const
+        {
+            for(ItemMap::const_iterator it = items.begin(); it != items.end(); ++it)
+            {
+                const ItemList& list = it->second;
+                for(const ItemBase::Ptr& item : list)
+                {
+                    func(item);
+                }
+            }
+        }
 
     private:
         /**Grants access to boost serialization */
