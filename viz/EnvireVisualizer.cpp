@@ -11,6 +11,8 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <vector>
+#include <boost/uuid/uuid.hpp>
 
 #include <envire_pcl/PointCloud.hpp>
 #include <pcl/io/pcd_io.h>
@@ -57,7 +59,10 @@ int testPcl(int argc, char **argv)
   graph.addTransform("B", "C", ab);  
   Transform cd(base::Position(0, 2, -1), Eigen::Quaterniond(Eigen::AngleAxisd(-0.8, Eigen::Vector3d(0,0,1))));
   graph.addTransform("C", "D", cd);  
-
+  
+  graph.addFrame("randTree");
+  Transform aToForrest(base::Position(0, -3, -2), Eigen::Quaterniond(Eigen::AngleAxisd(0, Eigen::Vector3d(0,0,1))));
+  graph.addTransform("A", "randTree", aToForrest);
   QApplication app(argc, argv);
   QVizkitMainWindow window;
   Vizkit3DWidget* widget = window.getVizkitWidget();
@@ -69,13 +74,24 @@ int testPcl(int argc, char **argv)
   {
     //because the graph is not thread safe, yet  
     std::this_thread::sleep_for(std::chrono::seconds(4));
+    
+    std::vector<FrameId> randTreeNodes;
+    randTreeNodes.push_back("randTree");
+    boost::uuids::random_generator generator;
+    int i = 0;
+    
     while(true)
     {
+      ++i;
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      
+      //rotate transformation
       Transform tf = graph.getTransform("A", "B");
       tf.transform.orientation *= base::Quaterniond(Eigen::AngleAxisd(0.23, base::Position(1, 0, 0)));
       graph.updateTransform("A", "B", tf);
       
+      
+      //change length of transformation
       tf = graph.getTransform("C", "D");
       if(tf.transform.translation.norm() >= 10)
       {
@@ -86,6 +102,20 @@ int testPcl(int argc, char **argv)
         tf.transform.translation.x() += 0.1;
       }
       graph.updateTransform("C", "D", tf);
+      
+      //random growing tree
+      if((i % 15) == 0)
+      {
+        const int forrestElem = rand() % randTreeNodes.size();
+        boost::uuids::uuid id = generator();
+        const FrameId nextName = boost::uuids::to_string(id);
+        graph.addFrame(nextName);
+        tf.transform.orientation = base::Quaterniond(Eigen::AngleAxisd(0.0, base::Position(0, 0, 1)));
+        tf.transform.translation << (rand() % 40) / 20.0, (rand() % 40) / 20.0, 0;
+        graph.addTransform(randTreeNodes[forrestElem], nextName, tf);
+        randTreeNodes.push_back(nextName);
+      }
+      
     }
   });
   app.exec(); 
