@@ -39,6 +39,17 @@ void EnvireGraphVisualizer::edgeAddedToTree(vertex_descriptor origin, vertex_des
     //FIXME this will not load items in the root node
 }
 
+void EnvireGraphVisualizer::itemAdded(const envire::core::ItemAddedEvent& e)
+{
+  const GraphTraits::vertex_descriptor vd = graph.getVertex(e.frame);
+  //if the vertex that the item was added to is part of the current tree
+  if(tree.vertexExists(vd))
+  {
+    loadItem(e.item);
+  }
+}
+
+
 std::pair<QQuaternion, QVector3D> EnvireGraphVisualizer::convertTransform(const Transform& tf) const
 {
   //normalizing is important, otherwise the transfirmation in osg will break when switching the root.
@@ -55,49 +66,55 @@ void EnvireGraphVisualizer::loadItems(const vertex_descriptor vertex)
   
   graph.visitItems(frame, [this] (const ItemBase::Ptr item)
   {
-    if(itemVisuals.find(item->getID()) != itemVisuals.end())
-    {
-      LOG(ERROR) << "Skipping item " << item->getIDString() << ". It already has a visual.";
-    }
-    
-    const std::string parameterType = ItemMetadataMapping::getMetadata(*(item->getTypeInfo())).embeddedTypename;
-    const QString qParameterType = QString::fromStdString(parameterType);
-    const TypeToUpdateMapping& typeToUpdateMethod = pluginInfos.getTypeToUpdateMethodMapping();
-    
-    TypeToUpdateMapping::ConstIterator it = typeToUpdateMethod.find(qParameterType);
-    
-    if(typeToUpdateMethod.count(qParameterType) > 1)
-    {
-      LOG(WARNING) << "Multiple update methods registered for type " 
-                   << parameterType << ". Using the most recently added one from: "
-                   << it->libName.toStdString();
-    }
-    
-    if(it != typeToUpdateMethod.end())
-    {
-      const Vizkit3dPluginInformation::UpdateMethod& info = it.value();
-      QObject* plugin = nullptr;
-      const Qt::ConnectionType conType = Helpers::determineConnectionType(widget);
-      QMetaObject::invokeMethod(widget, "loadPlugin", conType,
-                                Q_RETURN_ARG(QObject*, plugin),
-                                Q_ARG(QString, info.libName), Q_ARG(QString, ""));
-      ASSERT_NOT_NULL(plugin);//loading should never fail (has been loaded successfully before)
-      VizPluginBase* vizPlugin = dynamic_cast<VizPluginBase*>(plugin);
-      ASSERT_NOT_NULL(vizPlugin);//everything loaded with vizkit should inherit from VizPluginBase
-
-      //call the updateData method
-      it->method.invoke(plugin, conType, QGenericArgument(parameterType.c_str(), item->getRawData()));
-      
-      const QString qFrame = QString::fromStdString(item->getFrame());
-      vizPlugin->setVisualizationFrame(qFrame);
-      
-      itemVisuals[item->getID()] = vizPlugin;
-    }
-    else
-    {
-      LOG(WARNING) << "No visualizer found for item type " << parameterType;
-    }
+    loadItem(item);
   });
+}
+
+void EnvireGraphVisualizer::loadItem(const envire::core::ItemBase::Ptr item)
+{
+  if(itemVisuals.find(item->getID()) != itemVisuals.end())
+  {
+    LOG(ERROR) << "Ignoring item " << item->getIDString() << ". It already has a visual.";
+    return;
+  }
+  
+  const std::string parameterType = ItemMetadataMapping::getMetadata(*(item->getTypeInfo())).embeddedTypename;
+  const QString qParameterType = QString::fromStdString(parameterType);
+  const TypeToUpdateMapping& typeToUpdateMethod = pluginInfos.getTypeToUpdateMethodMapping();
+  
+  TypeToUpdateMapping::ConstIterator it = typeToUpdateMethod.find(qParameterType);
+  
+  if(typeToUpdateMethod.count(qParameterType) > 1)
+  {
+    LOG(WARNING) << "Multiple update methods registered for type " 
+                  << parameterType << ". Using the most recently added one from: "
+                  << it->libName.toStdString();
+  }
+  
+  if(it != typeToUpdateMethod.end())
+  {
+    const Vizkit3dPluginInformation::UpdateMethod& info = it.value();
+    QObject* plugin = nullptr;
+    const Qt::ConnectionType conType = Helpers::determineConnectionType(widget);
+    QMetaObject::invokeMethod(widget, "loadPlugin", conType,
+                              Q_RETURN_ARG(QObject*, plugin),
+                              Q_ARG(QString, info.libName), Q_ARG(QString, ""));
+    ASSERT_NOT_NULL(plugin);//loading should never fail (has been loaded successfully before)
+    VizPluginBase* vizPlugin = dynamic_cast<VizPluginBase*>(plugin);
+    ASSERT_NOT_NULL(vizPlugin);//everything loaded with vizkit should inherit from VizPluginBase
+
+    //call the updateData method
+    it->method.invoke(plugin, conType, QGenericArgument(parameterType.c_str(), item->getRawData()));
+    
+    const QString qFrame = QString::fromStdString(item->getFrame());
+    vizPlugin->setVisualizationFrame(qFrame);
+    
+    itemVisuals[item->getID()] = vizPlugin;
+  }
+  else
+  {
+    LOG(WARNING) << "No visualizer found for item type " << parameterType;
+  }  
 }
 
 

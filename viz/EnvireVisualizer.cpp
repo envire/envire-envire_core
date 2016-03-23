@@ -28,7 +28,7 @@ int testPcl(int argc, char **argv)
   envire::core::ItemBase::Ptr cloudItem;
   envire::core::ItemBase::Ptr cloudItem2;
   loader->createInstance("envire::pcl::PointCloud", cloudItem);
-    loader->createInstance("envire::pcl::PointCloud", cloudItem2);
+  loader->createInstance("envire::pcl::PointCloud", cloudItem2);
   envire::pcl::PointCloud::Ptr cloud = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(cloudItem);
   envire::pcl::PointCloud::Ptr cloud2 = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(cloudItem2);
   
@@ -70,7 +70,7 @@ int testPcl(int argc, char **argv)
   envire::viz::Vizkit3dPluginInformation info(widget);
   envire::viz::EnvireGraphVisualizer visualizer(graph, widget, "A", info);
 
-  std::thread t([&graph]()
+  std::thread t([&graph, &loader, &reader]()
   {
     //because the graph is not thread safe, yet  
     std::this_thread::sleep_for(std::chrono::seconds(4));
@@ -106,14 +106,28 @@ int testPcl(int argc, char **argv)
       //random growing tree
       if((i % 15) == 0)
       {
-        const int forrestElem = rand() % randTreeNodes.size();
+        const int elem = rand() % randTreeNodes.size();
         boost::uuids::uuid id = generator();
         const FrameId nextName = boost::uuids::to_string(id);
         graph.addFrame(nextName);
         tf.transform.orientation = base::Quaterniond(Eigen::AngleAxisd(0.0, base::Position(0, 0, 1)));
         tf.transform.translation << (rand() % 40) / 20.0, (rand() % 40) / 20.0, 0;
-        graph.addTransform(randTreeNodes[forrestElem], nextName, tf);
+        graph.addTransform(randTreeNodes[elem], nextName, tf);
         randTreeNodes.push_back(nextName);
+      }
+      
+      //randomly add items to the growing tree
+      if((i % 30) == 0)
+      {
+        //FIXME path
+        envire::core::ItemBase::Ptr item;
+        loader->createInstance("envire::pcl::PointCloud", item);
+        envire::pcl::PointCloud::Ptr milk = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(item);
+        if(reader.read("/home/arne/git/rock-entern/slam/pcl/test/bunny.pcd", milk->getData()) == 0)
+        {
+          const int elem = rand() % randTreeNodes.size();
+          graph.addItemToFrame(randTreeNodes[elem], milk);
+        }
       }
       
     }

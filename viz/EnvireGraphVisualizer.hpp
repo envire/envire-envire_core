@@ -40,16 +40,22 @@ protected:
 private:
   void loadPlugins();
   
-  /**event handler*/
+  /**Is invoked whenever a new edge is added to the current tree*/
   void edgeAddedToTree(vertex_descriptor origin, vertex_descriptor target);
+  /**Is invoked whenever a new item is added to the graph*/
+  virtual void itemAdded(const envire::core::ItemAddedEvent& e);
   
   /**Display all items that are in @p vertex */
   void loadItems(const vertex_descriptor vertex);
-   
+  /**Display @p item */
+  void loadItem(const envire::core::ItemBase::Ptr item);
+  
   /**Gets the current transformation between @p origin and @p target from the
    * graph and sets it in the widget*/
   void setTransformation(const FrameId& origin, const FrameId& target);
   void setTransformation(const vertex_descriptor origin, const vertex_descriptor target);
+  
+
 
   
   std::pair<QQuaternion, QVector3D> convertTransform(const envire::core::Transform& tf) const;
