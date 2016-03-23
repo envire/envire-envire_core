@@ -49,8 +49,7 @@ private:
    * graph and sets it in the widget*/
   void setTransformation(const FrameId& origin, const FrameId& target);
   void setTransformation(const vertex_descriptor origin, const vertex_descriptor target);
-  
-  void updateData(QObject* obj, const std::string& parameterType, const void* parameter) const;
+
   
   std::pair<QQuaternion, QVector3D> convertTransform(const envire::core::Transform& tf) const;
   

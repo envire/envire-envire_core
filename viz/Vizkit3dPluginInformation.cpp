@@ -54,7 +54,7 @@ void Vizkit3dPluginInformation::loadPluginData(const QObject* plugin,
       QList<QByteArray> paramTypes = method.parameterTypes();
       if(paramTypes.size() == 1 && typeName.isEmpty()) //isEmpty means "void"
       { 
-        typeToPlugin.insert(QString(paramTypes.at(0)), {method.signature(), libName});
+        typeToPlugin.insert(QString(paramTypes.at(0)), {method, libName});
         std::cout << "found method: " << method.signature() << 
                      " for type: " << QString(paramTypes[0]).toStdString() << std::endl;
         

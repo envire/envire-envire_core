@@ -47,20 +47,23 @@ std::pair<QQuaternion, QVector3D> EnvireGraphVisualizer::convertTransform(const 
 
 void EnvireGraphVisualizer::loadItems(const vertex_descriptor vertex)
 {
-  
+  //FIXME refactor and make more readable
   const FrameId frame = graph.getFrameId(vertex);
   
   graph.visitItems(frame, [this] (const ItemBase::Ptr item)
   {
-    const QString parameterType = QString::fromStdString(ItemMetadataMapping::getMetadata(*(item->getTypeInfo())).embeddedTypename);
+    const std::string parameterType = ItemMetadataMapping::getMetadata(*(item->getTypeInfo())).embeddedTypename;
+    const QString qParameterType = QString::fromStdString(parameterType);
     const Vizkit3dPluginInformation::TypeToUpdateMapping& typeToUpdateMethod = pluginInfos.getTypeToUpdateMethodMapping();
-    if(typeToUpdateMethod.count(parameterType) > 1)
+    
+    if(typeToUpdateMethod.count(qParameterType) > 1)
     {
       std::cerr << "WARNING: multiple update methods registered for type " 
-                << parameterType.toStdString() << ". Using the most recently added one." << std::endl;
+                << parameterType << ". Using the most recently added one." << std::endl;
     }
+    
     Vizkit3dPluginInformation::TypeToUpdateMapping::ConstIterator it;
-    it = typeToUpdateMethod.find(parameterType);
+    it = typeToUpdateMethod.find(qParameterType);
     if(it != typeToUpdateMethod.end())
     {
       const Vizkit3dPluginInformation::UpdateMethod& info = it.value();
@@ -69,68 +72,21 @@ void EnvireGraphVisualizer::loadItems(const vertex_descriptor vertex)
       QMetaObject::invokeMethod(widget, "loadPlugin", conType,
                                 Q_RETURN_ARG(QObject*, plugin),
                                 Q_ARG(QString, info.libName), Q_ARG(QString, ""));
-      //the plugin has already been loaded once before while creating Vizkit3dPluginInformation
-      //therefore the loading should never fail
-      ASSERT_NOT_NULL(plugin);
+      ASSERT_NOT_NULL(plugin);//loading should never fail (has been loaded successfully before)
       VizPluginBase* vizPlugin = dynamic_cast<VizPluginBase*>(plugin);
       ASSERT_NOT_NULL(vizPlugin);//everything loaded with vizkit should inherit from VizPluginBase
+
+      //call the updateData method
+      it->method.invoke(plugin, conType, QGenericArgument(parameterType.c_str(), item->getRawData()));
       
       const QString qFrame = QString::fromStdString(item->getFrame());
-      updateData(vizPlugin, parameterType.toStdString(), item->getRawData());
       vizPlugin->setVisualizationFrame(qFrame);
     }
     else
     {
-      std::cerr << "WARNING: No visualizer found for item type " << parameterType.toStdString() << std::endl;
+      std::cerr << "WARNING: No visualizer found for item type " << parameterType << std::endl;
     }
   });
-  
-  /*
-  
-  
-  
-  
-  //FIXME ausführlich dokumentieren
-  for (const auto& it : pluginsNames)
-  {
-    const std::type_index type = it.first;
-    const QString pluginName = it.second;
-    
-    if(!graph.containsItems(vertex, type))
-      continue;
-    
-    const Frame::ItemList& items = graph.getItems(vertex, type);
-    for(ItemBase::Ptr item : items)
-    { 
-      //FIXME hier später nicht immer neue plugins erzeugen
-      
-      QObject* plugin = nullptr;
-      const Qt::ConnectionType conType = Helpers::determineConnectionType(widget);
-      QMetaObject::invokeMethod(widget, "loadPlugin", conType,
-                                Q_RETURN_ARG(QObject*, plugin),
-                                Q_ARG(QString, ""), Q_ARG(QString, pluginName));
-      ASSERT_NOT_NULL(plugin);
-      
-      const QString qFrame = QString::fromStdString(item->getFrame());
-      VizPluginBase* vizPlugin = dynamic_cast<VizPluginBase*>(plugin);
-      ASSERT_NOT_NULL(vizPlugin);
-      const std::string parameterType = ItemMetadataMapping::getMetadata(*(item->getTypeInfo())).embeddedTypename;
-      updateData(vizPlugin, parameterType, item->getRawData());
-      vizPlugin->setVisualizationFrame(qFrame);
-    }
-  }*/
-}
-
-void EnvireGraphVisualizer::updateData(QObject* obj, const std::string& parameterType, const void* parameter) const
-{
-  //FIXME replace hard coded method name with something
-  const Qt::ConnectionType conType = Helpers::determineConnectionType(obj);
-  const bool result = QMetaObject::invokeMethod(obj, "updateData", conType, QGenericArgument(parameterType.c_str(), parameter));
-  if(!result)
-  {
-    //FIXME more detailed error
-    throw std::runtime_error("Invoking of method failed");
-  }
 }
 
 
