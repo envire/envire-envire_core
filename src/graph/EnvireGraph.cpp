@@ -91,7 +91,8 @@ void EnvireGraph::removeFrame(const FrameId& frame)
 
 void EnvireGraph::removeItemFromFrame(const ItemBase::Ptr item)
 {
-    const vertex_descriptor frame = getVertex(item->getFrame()); //may throw UnknownFrameException
+    const FrameId frameId = item->getFrame();
+    const vertex_descriptor frame = getVertex(frameId); //may throw UnknownFrameException
     //the const_cast is fine because we are inside the EnvireGraph and know what
     //we are doing. The method returns const because the user should not be
     //able to manipulate the ItemLists directly.
@@ -100,11 +101,13 @@ void EnvireGraph::removeItemFromFrame(const ItemBase::Ptr item)
     Frame::ItemList::iterator itemIt = std::find(items.begin(), items.end(), item);
     if(itemIt == items.end())
     {
-        throw UnknownItemException(item->getFrame(), item->getID());
+        throw UnknownItemException(frameId, item->getID());
     }
-    items.erase(itemIt);   
+    items.erase(itemIt);
+    
     item->setFrame("");
-    notify(ItemRemovedEvent(item->getFrame(), item));
+    notify(ItemRemovedEvent(frameId, item));
+
 }
 
 void EnvireGraph::publishCurrentState(GraphEventSubscriber* pSubscriber)
