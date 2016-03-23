@@ -76,6 +76,7 @@ int testPcl(int argc, char **argv)
     std::this_thread::sleep_for(std::chrono::seconds(4));
     
     std::vector<FrameId> randTreeNodes;
+    std::vector<ItemBase::Ptr> randTreeItems;
     randTreeNodes.push_back("randTree");
     boost::uuids::random_generator generator;
     int i = 0;
@@ -104,7 +105,7 @@ int testPcl(int argc, char **argv)
       graph.updateTransform("C", "D", tf);
       
       //random growing tree
-      if((i % 15) == 0)
+      if((i % 10) == 0)
       {
         const int elem = rand() % randTreeNodes.size();
         boost::uuids::uuid id = generator();
@@ -117,7 +118,7 @@ int testPcl(int argc, char **argv)
       }
       
       //randomly add items to the growing tree
-      if((i % 30) == 0)
+      if((i % 20) == 0)
       {
         //FIXME path
         envire::core::ItemBase::Ptr item;
@@ -127,9 +128,16 @@ int testPcl(int argc, char **argv)
         {
           const int elem = rand() % randTreeNodes.size();
           graph.addItemToFrame(randTreeNodes[elem], milk);
+          randTreeItems.push_back(milk);
         }
       }
-      
+      //remove items from the tree
+      if((i % 30) == 0 && randTreeItems.size() > 0)
+      {
+        LOG(INFO) << "removing item from frame " << randTreeItems.back()->getFrame();
+        graph.removeItemFromFrame(randTreeItems.back());
+        randTreeItems.pop_back();
+      }      
     }
   });
   app.exec(); 

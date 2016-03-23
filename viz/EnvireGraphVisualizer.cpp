@@ -49,6 +49,18 @@ void EnvireGraphVisualizer::itemAdded(const envire::core::ItemAddedEvent& e)
   }
 }
 
+void EnvireGraphVisualizer::itemRemoved(const envire::core::ItemRemovedEvent& e)
+{
+  const GraphTraits::vertex_descriptor vd = graph.getVertex(e.frame);
+  if(tree.vertexExists(vd))
+  {
+    VizPluginBase* itemViz = itemVisuals.at(e.item->getID());//may throw
+    ASSERT_NOT_NULL(itemViz);
+    Qt::ConnectionType conType = Helpers::determineConnectionType(widget);
+    QMetaObject::invokeMethod(widget, "removePlugin", conType, Q_ARG(QObject*, itemViz));
+  }
+}
+
 
 std::pair<QQuaternion, QVector3D> EnvireGraphVisualizer::convertTransform(const Transform& tf) const
 {

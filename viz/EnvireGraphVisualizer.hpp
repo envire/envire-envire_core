@@ -44,6 +44,8 @@ private:
   void edgeAddedToTree(vertex_descriptor origin, vertex_descriptor target);
   /**Is invoked whenever a new item is added to the graph*/
   virtual void itemAdded(const envire::core::ItemAddedEvent& e);
+  /**Is invoked whenever an item is deleted from the graph */
+  virtual void itemRemoved(const envire::core::ItemRemovedEvent& e);
   
   /**Display all items that are in @p vertex */
   void loadItems(const vertex_descriptor vertex);
