@@ -21,23 +21,22 @@ class ItemMetadataMapping
 {
 public:
    
-    /**Return the name corresponding to @p type or an empty string if no mapping
-     * exists.
+    /**Return the meta-data corresponding to @p type.
      * The returned reference has static storage duration.
      * This method is thread-safe.
-     * @exception std::out_of_range if type is not part of the mapping */
+     * @throw std::out_of_range if type is not part of the mapping */
     static const ItemMetadata& getMetadata(const std::type_info& type);
 
 private:
     /**Add meta data for a new type.
      * Is thread-safe.*/
-    static void addMapping(const std::type_info& id, const ItemMetadata& name);
+    static void addMapping(const std::type_info& id, const ItemMetadata& data);
 
     using TypeMap = std::unordered_map<std::type_index, ItemMetadata>;
     static TypeMap mapping;
     static std::mutex mappingMutex; 
     
-    friend class MetadataInitializer;
+    friend class MetadataInitializer;//needs access to addMapping()
 };
 
 /**Used to add meta data at program startup */

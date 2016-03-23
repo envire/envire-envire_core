@@ -23,12 +23,22 @@ int testPcl(int argc, char **argv)
 {
   
   plugin_manager::PluginLoader* loader = plugin_manager::PluginLoader::getInstance();
-  envire::core::ItemBase::Ptr itemBase;
-  loader->createInstance("envire::pcl::PointCloud", itemBase);
-  envire::pcl::PointCloud::Ptr cloud = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(itemBase);
+  envire::core::ItemBase::Ptr cloudItem;
+  envire::core::ItemBase::Ptr cloudItem2;
+  loader->createInstance("envire::pcl::PointCloud", cloudItem);
+    loader->createInstance("envire::pcl::PointCloud", cloudItem2);
+  envire::pcl::PointCloud::Ptr cloud = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(cloudItem);
+  envire::pcl::PointCloud::Ptr cloud2 = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(cloudItem2);
   
+  //FIXME path relative to rock instead of absolut?
   pcl::PCDReader reader;
   if(reader.read("/home/arne/git/rock-entern/slam/pcl/test/bunny.pcd", cloud->getData()) != 0) 
+  {
+    std::cerr << "UNABLE TO READ PCD FILE" << std::endl;
+    exit(1);
+  }
+    
+  if(reader.read("/home/arne/git/rock-entern/slam/pcl/test/bunny.pcd", cloud2->getData()) != 0) 
   {
     std::cerr << "UNABLE TO READ PCD FILE" << std::endl;
     exit(1);
@@ -37,11 +47,16 @@ int testPcl(int argc, char **argv)
   EnvireGraph graph;
   graph.addFrame("A");
   graph.addFrame("B");
+  graph.addFrame("C");
+  graph.addFrame("D");
   graph.addItemToFrame("B", cloud);
-  Eigen::Quaterniond q1(Eigen::AngleAxisd(0.5, Eigen::Vector3d(1,2,3)));
-  Transform ab(base::Position(1, 1, 1), q1);
+  graph.addItemToFrame("D", cloud2);
+  Transform ab(base::Position(1, 1, 1), Eigen::Quaterniond (Eigen::AngleAxisd(0.5, Eigen::Vector3d(1,2,3))));
   graph.addTransform("A", "B", ab);
-  
+  Transform bc(base::Position(1, 0, 0.3), Eigen::Quaterniond(Eigen::AngleAxisd(0.3, Eigen::Vector3d(1,0,3))));
+  graph.addTransform("B", "C", ab);  
+  Transform cd(base::Position(0, 2, -1), Eigen::Quaterniond(Eigen::AngleAxisd(-0.8, Eigen::Vector3d(0,0,1))));
+  graph.addTransform("C", "D", cd);  
 
   QApplication app(argc, argv);
   QVizkitMainWindow window;
@@ -60,6 +75,17 @@ int testPcl(int argc, char **argv)
       Transform tf = graph.getTransform("A", "B");
       tf.transform.orientation *= base::Quaterniond(Eigen::AngleAxisd(0.23, base::Position(1, 0, 0)));
       graph.updateTransform("A", "B", tf);
+      
+      tf = graph.getTransform("C", "D");
+      if(tf.transform.translation.norm() >= 10)
+      {
+        tf.transform.translation << 0, 1, 0;
+      }
+      else
+      {
+        tf.transform.translation.x() += 0.1;
+      }
+      graph.updateTransform("C", "D", tf);
     }
   });
   app.exec(); 

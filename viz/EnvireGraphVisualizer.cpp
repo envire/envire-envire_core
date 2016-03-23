@@ -4,13 +4,17 @@
 #include <envire_core/events/EdgeEvents.hpp>
 #include "Helpers.hpp"
 #include <string>
+#include <glog/logging.h>
 
 using namespace envire::core;
 using namespace vizkit3d;
 
 
+
 namespace envire { namespace viz 
 {
+using TypeToUpdateMapping = Vizkit3dPluginInformation::TypeToUpdateMapping;  
+
   
 EnvireGraphVisualizer::EnvireGraphVisualizer(EnvireGraph& graph,
                                              Vizkit3DWidget* widget, 
@@ -47,23 +51,28 @@ std::pair<QQuaternion, QVector3D> EnvireGraphVisualizer::convertTransform(const 
 
 void EnvireGraphVisualizer::loadItems(const vertex_descriptor vertex)
 {
-  //FIXME refactor and make more readable
   const FrameId frame = graph.getFrameId(vertex);
   
   graph.visitItems(frame, [this] (const ItemBase::Ptr item)
   {
+    if(itemVisuals.find(item->getID()) != itemVisuals.end())
+    {
+      LOG(ERROR) << "Skipping item " << item->getIDString() << ". It already has a visual.";
+    }
+    
     const std::string parameterType = ItemMetadataMapping::getMetadata(*(item->getTypeInfo())).embeddedTypename;
     const QString qParameterType = QString::fromStdString(parameterType);
-    const Vizkit3dPluginInformation::TypeToUpdateMapping& typeToUpdateMethod = pluginInfos.getTypeToUpdateMethodMapping();
+    const TypeToUpdateMapping& typeToUpdateMethod = pluginInfos.getTypeToUpdateMethodMapping();
+    
+    TypeToUpdateMapping::ConstIterator it = typeToUpdateMethod.find(qParameterType);
     
     if(typeToUpdateMethod.count(qParameterType) > 1)
     {
-      std::cerr << "WARNING: multiple update methods registered for type " 
-                << parameterType << ". Using the most recently added one." << std::endl;
+      LOG(WARNING) << "Multiple update methods registered for type " 
+                   << parameterType << ". Using the most recently added one from: "
+                   << it->libName.toStdString();
     }
     
-    Vizkit3dPluginInformation::TypeToUpdateMapping::ConstIterator it;
-    it = typeToUpdateMethod.find(qParameterType);
     if(it != typeToUpdateMethod.end())
     {
       const Vizkit3dPluginInformation::UpdateMethod& info = it.value();
@@ -81,10 +90,12 @@ void EnvireGraphVisualizer::loadItems(const vertex_descriptor vertex)
       
       const QString qFrame = QString::fromStdString(item->getFrame());
       vizPlugin->setVisualizationFrame(qFrame);
+      
+      itemVisuals[item->getID()] = vizPlugin;
     }
     else
     {
-      std::cerr << "WARNING: No visualizer found for item type " << parameterType << std::endl;
+      LOG(WARNING) << "No visualizer found for item type " << parameterType;
     }
   });
 }

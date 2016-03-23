@@ -28,4 +28,5 @@ rock_executable(envire_visualizer
                 DEPS_PKGCONFIG envire_pcl
                 DEPS_PKGCONFIG pcl_common-1.7
                 DEPS_PKGCONFIG pcl_io-1.7
+                DEPS_CMAKE Glog
                 LIBS ${Boost_SYSTEM_LIBRARY})

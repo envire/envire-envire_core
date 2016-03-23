@@ -7,6 +7,7 @@
 #include <envire_core/graph/TreeView.hpp>
 #include <envire_core/events/GraphEventDispatcher.hpp>
 #include <envire_core/items/ItemBase.hpp>
+#include <boost/uuid/uuid.hpp>
 #include "Vizkit3dPluginInformation.hpp"
 
 namespace envire { namespace core 
@@ -58,6 +59,9 @@ private:
   envire::core::TreeView tree;
   vizkit3d::Vizkit3DWidget* widget;
   const Vizkit3dPluginInformation& pluginInfos;
+  /**Map of all items that are currently visualized and the plugin visualizing them*/
+  std::unordered_map<boost::uuids::uuid, vizkit3d::VizPluginBase*, boost::hash<boost::uuids::uuid>> itemVisuals;
+  
 };
 
 }}

@@ -1,5 +1,6 @@
 #include "Vizkit3dPluginInformation.hpp"
 #include "Helpers.hpp"
+#include <glog/logging.h>
 
 namespace envire { namespace viz
 {
@@ -17,7 +18,6 @@ void Vizkit3dPluginInformation::loadData()
    * jeweils gucken welche updateData methoden es gibt und welche typen die haben
    * das alles in ner map aufschreiben
    */
-  
   QStringList* availablePlugins = mainWidget->getAvailablePlugins();
   
   Qt::ConnectionType conType = Helpers::determineConnectionType(mainWidget);
@@ -55,8 +55,8 @@ void Vizkit3dPluginInformation::loadPluginData(const QObject* plugin,
       if(paramTypes.size() == 1 && typeName.isEmpty()) //isEmpty means "void"
       { 
         typeToPlugin.insert(QString(paramTypes.at(0)), {method, libName});
-        std::cout << "found method: " << method.signature() << 
-                     " for type: " << QString(paramTypes[0]).toStdString() << std::endl;
+        LOG(INFO) << "found method: " << method.signature() << 
+                     " for type: " << QString(paramTypes[0]).toStdString();
         
       }
     }
