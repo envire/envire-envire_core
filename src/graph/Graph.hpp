@@ -131,7 +131,7 @@ public:
     
     /**Removes the specified edge from the graph.
     * Also removes the inverse edge.
-    * Causes EdgeRemovedEvent for both edges.
+    * Emits EdgeRemovedEvent for the origin->target edge only.
     * @throw UnknownEdgeException if there is no edge from @p origin to @p target
     **/
     void remove_edge(const vertex_descriptor origin,
