@@ -507,7 +507,7 @@ BOOST_AUTO_TEST_CASE(contains_item_test)
     FrameId a("a");
     Item<string>::Ptr item(new Item<string>("For a moment, nothing happened. Then, after a second or so, nothing continued to happen."));
     
-    BOOST_CHECK_THROW(graph.containsItems<Item<string>>(a), UnknownFrameException)
+    BOOST_CHECK_THROW(graph.containsItems<Item<string>>(a), UnknownFrameException);
     graph.addFrame(a);
     graph.addItemToFrame(a, item);
     BOOST_CHECK(graph.containsItems<Item<string>>(a));
