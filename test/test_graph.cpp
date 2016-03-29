@@ -1155,6 +1155,52 @@ BOOST_AUTO_TEST_CASE(treeview_dfsVisit_test)
       });
 }
 
+
+BOOST_AUTO_TEST_CASE(treeview_bfsVisit_test)
+{
+    FrameId a = "a";
+    FrameId b = "b";
+    FrameId c = "c";
+    FrameId d = "d";
+    FrameId e = "e";
+    FrameId f = "f";
+    FrameId g = "g";
+    
+    Gra graph;
+    EdgeProp ep;
+    graph.add_edge(a, b, ep);
+    graph.add_edge(a, c, ep);
+    graph.add_edge(b, d, ep);
+    graph.add_edge(b, e, ep);
+    graph.add_edge(e, f, ep);
+    graph.add_edge(c, g, ep);
+
+    TreeView tv = graph.getTree(a);
+    
+    //the order could just as well be a b c d e g f, this is just how it is
+    //implemented right now. 
+    FrameId expectedOrder[] = {"a", "c", "b", "g", "e", "d", "f"};
+    FrameId expectedParent[] = {"", "a", "a", "c", "b", "b", "e"};
+    
+    int i = 0;
+    tv.visitBfs(graph.getVertex(a), [&](GraphTraits::vertex_descriptor vd, 
+                                        GraphTraits::vertex_descriptor parent)
+      { 
+        const FrameId id = graph.getFrameId(vd);
+        BOOST_CHECK(id == expectedOrder[i]);
+        if(expectedParent[i] == "") 
+          BOOST_CHECK(parent == GraphTraits::null_vertex());
+        else
+        {
+          const FrameId parentId = graph.getFrameId(parent);
+          BOOST_CHECK(expectedParent[i] == parentId);
+        }
+        ++i;
+      });
+}
+
+
+
 BOOST_AUTO_TEST_CASE(ctor_copy_test)
 {
   Gra* copy;
@@ -1244,7 +1290,7 @@ BOOST_AUTO_TEST_CASE(test_tree_view_events_test)
     BOOST_CHECK(origins.size() == 4);
     BOOST_CHECK(targets.size() == 4);
     //check that a cross edge has been added instead
-    BOOST_CHECK(crossEdges[0] == graph.getEdge(e, b));
+    BOOST_CHECK(crossEdges[0] == graph.getEdge(b, e) || crossEdges[0] == graph.getEdge(e, b));
 
 }
 

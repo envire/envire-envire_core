@@ -84,6 +84,26 @@ namespace envire { namespace core
           }
         }
         
+        /**visits all vertices in the tree starting at @p node in bfs order.
+         * Calls @p f(vertex_descriptor node, vertex_descriptor parent) for each node.*/
+        template <class Func>
+        void visitBfs(const GraphTraits::vertex_descriptor node, Func f)
+        {
+            std::deque<GraphTraits::vertex_descriptor> nodesToVisit;
+            nodesToVisit.push_back(node);
+            while(nodesToVisit.size() > 0)
+            {
+                const GraphTraits::vertex_descriptor current = nodesToVisit.front();
+                nodesToVisit.pop_front();
+                const GraphTraits::vertex_descriptor parent = getParent(current);
+                f(current, parent);
+                for(GraphTraits::vertex_descriptor child : tree[current].children)
+                {
+                    nodesToVisit.push_back(child);
+                }
+            }
+        }
+        
         /**Add a cross edge to the view.
          * Emits crossEdgeAdded event */
         void addCrossEdge(const GraphTraits::edge_descriptor edge);
