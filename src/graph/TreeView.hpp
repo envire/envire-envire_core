@@ -37,6 +37,17 @@ namespace envire { namespace core
     {
     public:
              
+        struct CrossEdge
+        {
+            GraphTraits::vertex_descriptor origin;
+            GraphTraits::vertex_descriptor target;
+            GraphTraits::edge_descriptor edge;
+            CrossEdge(GraphTraits::vertex_descriptor origin,
+                      GraphTraits::vertex_descriptor target,
+                      GraphTraits::edge_descriptor edge) :
+                origin(origin), target(target), edge(edge) {}
+        };
+      
         TreeView(GraphTraits::vertex_descriptor root) : root(root) {}
         
         TreeView() : root(GraphTraits::null_vertex()) {}
@@ -106,7 +117,9 @@ namespace envire { namespace core
         
         /**Add a cross edge to the view.
          * Emits crossEdgeAdded event */
-        void addCrossEdge(const GraphTraits::edge_descriptor edge);
+        void addCrossEdge(const GraphTraits::vertex_descriptor origin,
+                          const GraphTraits::vertex_descriptor target,
+                          const GraphTraits::edge_descriptor edge);
         
         /**Add an edge to the view.
          * Emits edgeAdded*/
@@ -122,7 +135,7 @@ namespace envire { namespace core
         * @note This is only the case if you requested an updating TreeView. 
         *       Otherwise they'll never be invoked.
         */
-        boost::signals2::signal<void (GraphTraits::edge_descriptor)> crossEdgeAdded;
+        boost::signals2::signal<void (const CrossEdge&)> crossEdgeAdded;
         boost::signals2::signal<void (GraphTraits::vertex_descriptor origin,
                                       GraphTraits::vertex_descriptor target)> edgeAdded;
         
@@ -134,7 +147,7 @@ namespace envire { namespace core
          * @note The TransformGraph always contains two edges between connected nodes (the edge and the inverse edge)
          *       However only one of them will be in the crossEdges. The other one automatically becomes a back-edge 
          *       and is ignored. */
-        std::vector<GraphTraits::edge_descriptor> crossEdges;
+        std::vector<CrossEdge> crossEdges;
         
         /**The root node of this TreeView */
         GraphTraits::vertex_descriptor root;

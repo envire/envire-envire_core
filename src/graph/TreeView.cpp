@@ -103,10 +103,12 @@ bool TreeView::vertexExists(const vertex_descriptor vd) const
   return tree.find(vd) != tree.end();
 }
 
-void TreeView::addCrossEdge(const edge_descriptor edge)
+void TreeView::addCrossEdge(const GraphTraits::vertex_descriptor origin,
+                            const GraphTraits::vertex_descriptor target,
+                            const GraphTraits::edge_descriptor edge)
 {
-    crossEdges.push_back(edge);
-    crossEdgeAdded(edge);
+    crossEdges.emplace_back(origin, target, edge);
+    crossEdgeAdded(crossEdges.back());
 }
 
 void TreeView::addEdge(vertex_descriptor origin, vertex_descriptor target)

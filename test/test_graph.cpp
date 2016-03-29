@@ -381,9 +381,9 @@ BOOST_AUTO_TEST_CASE(non_tree_edges_test)
     BOOST_CHECK(view.root == graph.getVertex(a));
     BOOST_CHECK(view.crossEdges.size() == 1);
     
-    GraphTraits::edge_descriptor edge = view.crossEdges[0];
-    GraphTraits::vertex_descriptor source = graph.source(edge);
-    GraphTraits::vertex_descriptor target = graph.target(edge);
+    TreeView::CrossEdge edge = view.crossEdges[0];
+    GraphTraits::vertex_descriptor source = edge.origin;
+    GraphTraits::vertex_descriptor target = edge.target;
     BOOST_CHECK(graph.vertex(c) == source);
     BOOST_CHECK(graph.vertex(e) == target);
 }
@@ -496,8 +496,8 @@ BOOST_AUTO_TEST_CASE(tree_view_cross_edge_test)
     BOOST_CHECK(view.tree[vD].children.size() == 0);
     //C -> D or D -> C should be part of the cross edges
     BOOST_CHECK(view.crossEdges.size() == 1);
-    const GraphTraits::vertex_descriptor src = graph.source(view.crossEdges[0]);
-    const GraphTraits::vertex_descriptor tar = graph.target(view.crossEdges[0]);
+    const GraphTraits::vertex_descriptor src = view.crossEdges[0].origin;
+    const GraphTraits::vertex_descriptor tar = view.crossEdges[0].target;
     //note: it is not specified whether src->tar or tar->src ends up in the cross
     //      edges. The current implementation adds src->tar but that can change.
     BOOST_CHECK(tar == vD);
@@ -1253,8 +1253,8 @@ BOOST_AUTO_TEST_CASE(test_tree_view_events_test)
             targets.push_back(target);
         });
     
-    std::vector<edge_descriptor> crossEdges;
-    tv.crossEdgeAdded.connect([&](edge_descriptor edge)
+    std::vector<TreeView::CrossEdge> crossEdges;
+    tv.crossEdgeAdded.connect([&](const TreeView::CrossEdge& edge)
         {
             crossEdges.push_back(edge);
         });
@@ -1290,7 +1290,7 @@ BOOST_AUTO_TEST_CASE(test_tree_view_events_test)
     BOOST_CHECK(origins.size() == 4);
     BOOST_CHECK(targets.size() == 4);
     //check that a cross edge has been added instead
-    BOOST_CHECK(crossEdges[0] == graph.getEdge(b, e) || crossEdges[0] == graph.getEdge(e, b));
+    BOOST_CHECK(crossEdges[0].edge == graph.getEdge(b, e) || crossEdges[0].edge == graph.getEdge(e, b));
 
 }
 

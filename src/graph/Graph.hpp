@@ -676,7 +676,7 @@ void Graph<F,E>::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) cons
         {
             //if both vertices are in the tree but there is no edge between them
             //this is a cross edge
-            view->addCrossEdge(newEdge);
+            view->addCrossEdge(src, tar, newEdge);
             return;
         }
         else
