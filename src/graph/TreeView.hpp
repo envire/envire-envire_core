@@ -75,13 +75,13 @@ namespace envire { namespace core
         template <class Func>
         void visitDfs(const GraphTraits::vertex_descriptor node, Func f)
         {
-          const auto& parent = tree[node].parent;
-          const auto& children = tree[node].children;
-          f(node, parent);
-          for(const GraphTraits::vertex_descriptor child : children)
-          {
-            visitDfs(child, f);
-          }
+            const auto& parent = tree[node].parent;
+            const auto& children = tree[node].children;
+            f(node, parent);
+            for(const GraphTraits::vertex_descriptor child : children)
+            {
+                visitDfs(child, f);
+            }
         }
         
         /**visits all vertices in the tree starting at @p node in bfs order.
