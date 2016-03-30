@@ -139,11 +139,11 @@ void TreeView::removeEdge(vertex_descriptor origin, vertex_descriptor target)
   //a map to map from vertex_descriptor to edge_descriptor.
   //It is a multimap because multiple cross-edges might be connected
   //to the same vertex.
-  std::multimap<vertex_descriptor, edge_descriptor> vertexToCrossEdge;
-  for(const CrossEdge& edge : crossEdges)
+  std::multimap<vertex_descriptor, std::vector<CrossEdge>::iterator> vertexToCrossEdge;
+  for(std::vector<CrossEdge>::iterator edge = crossEdges.begin(); edge != crossEdges.end(); ++edge)
   {
-      vertexToCrossEdge.emplace(edge.origin, edge.edge);
-      vertexToCrossEdge.emplace(edge.target, edge.edge);
+      vertexToCrossEdge.emplace(edge->origin, edge);
+      vertexToCrossEdge.emplace(edge->target, edge);
   }
   
   vertex_descriptor realOrigin;
@@ -167,9 +167,7 @@ void TreeView::removeEdge(vertex_descriptor origin, vertex_descriptor target)
   }
   
   //will contain the list of cross-edges that are connected to the sub-tree
-  std::set<edge_descriptor> crossEdges;
-  //will contain the sub-tree internal cross-edges (that have to be removed as well)
-  std::vector<edge_descriptor> crossEdgesToRemove;
+  std::set<std::vector<CrossEdge>::iterator> treeLeavingCrossEdges;
   //stores all visited vertices that should be removed later
   std::vector<vertex_descriptor> vertices;
   
@@ -179,17 +177,17 @@ void TreeView::removeEdge(vertex_descriptor origin, vertex_descriptor target)
       auto range = vertexToCrossEdge.equal_range(node);
       for (auto it = range.first; it != range.second; ++it)
       {
-          const edge_descriptor crossEdge = it->second;
-          if(crossEdges.find(crossEdge) == crossEdges.end())
+          std::vector<CrossEdge>::iterator crossEdge = it->second;
+          if(treeLeavingCrossEdges.find(crossEdge) == treeLeavingCrossEdges.end())
           {
-              crossEdges.insert(crossEdge);
-          }
+              treeLeavingCrossEdges.insert(crossEdge);
+          } 
           else
           {
               //if we found an edge for the second time it is internal
               //in the sub-tree and should be removed as well.
+              treeLeavingCrossEdges.erase(crossEdge);
               crossEdges.erase(crossEdge);
-              crossEdgesToRemove.push_back(crossEdge);
           }
       }
   });
@@ -200,20 +198,18 @@ void TreeView::removeEdge(vertex_descriptor origin, vertex_descriptor target)
   {
       const vertex_descriptor node = vertices.back();
       vertices.pop_back();
-      VertexRelation& parentRelation = *tree[node].parentRelation;
       VertexRelation& relation = tree[node];
-      parentRelation.children.erase(node);
+      const vertex_descriptor parent = relation.parent;
+      tree[parent].children.erase(node);
       //since we are removing bottom-up, all children should have been removed already.
       assert(relation.children.size() == 0);
-      const vertex_descriptor parent = relation.parent;
+
       tree.erase(node);
       edgeRemoved(parent, node);
   }
-  //TODO remove cross-edges
+  
   //TODO if cross-edge is present, readd new tree
-  
-  
-  
+
 }
 
 void TreeView::addRoot(vertex_descriptor root)

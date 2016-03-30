@@ -151,6 +151,10 @@ namespace envire { namespace core
         boost::signals2::signal<void (const CrossEdge&)> crossEdgeAdded;
         boost::signals2::signal<void (GraphTraits::vertex_descriptor origin,
                                       GraphTraits::vertex_descriptor target)> edgeAdded;
+        
+                                      /**Is emitted when a an edge is removed.
+         * When the signal is emitted, @p target is no longer part of the tree.
+         * @p origin is still part of the tree.*/
         boost::signals2::signal<void (GraphTraits::vertex_descriptor origin,
                                       GraphTraits::vertex_descriptor target)> edgeRemoved;
 

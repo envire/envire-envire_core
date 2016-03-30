@@ -1304,66 +1304,117 @@ BOOST_AUTO_TEST_CASE(tree_view_consistency_test)
     BOOST_CHECK(tv.tree[d].children.size() == 0);
     
     BOOST_CHECK(tv.tree[a].parent == GraphTraits::null_vertex());
-    BOOST_CHECK(tv.tree[a].parentRelation == nullptr);
     BOOST_CHECK(tv.tree[b].parent == a);
     BOOST_CHECK(tv.tree[c].parent = b);
     BOOST_CHECK(tv.tree[d].parent = a);
     
-    BOOST_CHECK(tv.tree[b].parentRelation == &(tv.tree[a]));
-    BOOST_CHECK(tv.tree[c].parentRelation == &(tv.tree[b]));
-    BOOST_CHECK(tv.tree[d].parentRelation == &(tv.tree[a]));
+
 
 }
 
 BOOST_AUTO_TEST_CASE(tree_view_remove_edge_simple_test)
 {
 
-//     using vertex_descriptor = GraphTraits::vertex_descriptor;
-//     using edge_descriptor = GraphTraits::edge_descriptor;
-//     Gra graph;
-//     EdgeProp ep;
-//     TreeView tv;
-//   
-//     graph.add_edge("a", "b", ep);
-//     graph.add_edge("a", "d", ep);
-//     graph.add_edge("b", "c", ep);
-//     
-//     tv = graph.getTree("a");
-//     std::vector<vertex_descriptor> origins;
-//     std::vector<vertex_descriptor> targets;
-//     tv.edgeRemoved.connect([&](vertex_descriptor origin, vertex_descriptor target) 
-//         {
-//             origins.push_back(origin);
-//             targets.push_back(target);
-//         });
-//     
-//     const vertex_descriptor a = graph.getVertex("a");
-//     const vertex_descriptor b = graph.getVertex("b");
-//     const vertex_descriptor c = graph.getVertex("c");
-//     const vertex_descriptor d = graph.getVertex("d");
-//     
-//     tv.removeEdge(a, b, [&](vertex_descriptor desc)
-//     {
-//       std::cout << graph.getFrameId(desc) << std::endl;
-//     });
-//     
-//     BOOST_CHECK(!tv.edgeExists(a, b));
-//     BOOST_CHECK(!tv.edgeExists(b, a));
-//     BOOST_CHECK(!tv.edgeExists(b, c));
-//     BOOST_CHECK(!tv.edgeExists(c, b));
-//     BOOST_CHECK(tv.edgeExists(a, d));
-//     
-//     BOOST_CHECK(origins.size() == 2);
-//     BOOST_CHECK(targets.size() == 2);
-//     
-//     //check if removed in correct order
-//     BOOST_CHECK(origins[0] == b);
-//     BOOST_CHECK(origins[1] == a);
-//     BOOST_CHECK(targets[0] == c);
-//     BOOST_CHECK(targets[1] == b);
+    using vertex_descriptor = GraphTraits::vertex_descriptor;
+    using edge_descriptor = GraphTraits::edge_descriptor;
+    Gra graph;
+    EdgeProp ep;
+    TreeView tv;
+  
+    graph.add_edge("a", "b", ep);
+    graph.add_edge("a", "d", ep);
+    graph.add_edge("b", "c", ep);
+    
+    tv = graph.getTree("a");
+    std::vector<vertex_descriptor> origins;
+    std::vector<vertex_descriptor> targets;
+    tv.edgeRemoved.connect([&](vertex_descriptor origin, vertex_descriptor target) 
+        {
+            origins.push_back(origin);
+            targets.push_back(target);
+        });
+    
+    const vertex_descriptor a = graph.getVertex("a");
+    const vertex_descriptor b = graph.getVertex("b");
+    const vertex_descriptor c = graph.getVertex("c");
+    const vertex_descriptor d = graph.getVertex("d");
+    
+    tv.removeEdge(a, b);
+    
+    BOOST_CHECK(!tv.edgeExists(a, b));
+    BOOST_CHECK(!tv.edgeExists(b, a));
+    BOOST_CHECK(!tv.edgeExists(b, c));
+    BOOST_CHECK(!tv.edgeExists(c, b));
+    BOOST_CHECK(tv.edgeExists(a, d));
+    
+    BOOST_CHECK(origins.size() == 2);
+    BOOST_CHECK(targets.size() == 2);
+    
+    //check if removed in correct order
+    BOOST_CHECK(origins[0] == b);
+    BOOST_CHECK(origins[1] == a);
+    BOOST_CHECK(targets[0] == c);
+    BOOST_CHECK(targets[1] == b);
+}
+
+BOOST_AUTO_TEST_CASE(tree_view_remove_edge_cross_edge_test)
+{
+
+    using vertex_descriptor = GraphTraits::vertex_descriptor;
+    using edge_descriptor = GraphTraits::edge_descriptor;
+    Gra graph;
+    EdgeProp ep;
+    TreeView tv;
+  
+    graph.add_edge("a", "b", ep);
+    graph.add_edge("a", "e", ep);
+    graph.add_edge("b", "c", ep);
+    graph.add_edge("b", "d", ep);
+    graph.add_edge("c", "d", ep);
+    
+    tv = graph.getTree("a");
+    std::vector<vertex_descriptor> origins;
+    std::vector<vertex_descriptor> targets;
+    tv.edgeRemoved.connect([&](vertex_descriptor origin, vertex_descriptor target) 
+        {
+            origins.push_back(origin);
+            targets.push_back(target);
+        });
+    
+    const vertex_descriptor a = graph.getVertex("a");
+    const vertex_descriptor b = graph.getVertex("b");
+    const vertex_descriptor c = graph.getVertex("c");
+    const vertex_descriptor d = graph.getVertex("d");
+    const vertex_descriptor e = graph.getVertex("e");
+    
+    BOOST_CHECK(tv.crossEdges.size() == 1);
+    
+    tv.removeEdge(a, b);
+    
+    BOOST_CHECK(!tv.edgeExists(a, b));
+    BOOST_CHECK(!tv.edgeExists(b, a));
+    BOOST_CHECK(!tv.edgeExists(b, c));
+    BOOST_CHECK(!tv.edgeExists(c, b));
+    BOOST_CHECK(!tv.edgeExists(b, d));
+    BOOST_CHECK(!tv.edgeExists(d, b));
+    BOOST_CHECK(!tv.edgeExists(c, d));
+    BOOST_CHECK(!tv.edgeExists(d, c));
+    BOOST_CHECK(tv.crossEdges.size() == 0);
+    
+    BOOST_CHECK(origins.size() == 3);
+    BOOST_CHECK(targets.size() == 3);
+    
+    //check if removed in correct order
+    BOOST_CHECK(origins[0] == b);
+    BOOST_CHECK(targets[0] == c);
+    BOOST_CHECK(origins[1] == b);
+    BOOST_CHECK(targets[1] == d);
+    BOOST_CHECK(origins[2] == a);
+    BOOST_CHECK(targets[2] == b);
     
     
 }
+
 
 
 
