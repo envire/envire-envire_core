@@ -115,14 +115,12 @@ void TreeView::addEdge(vertex_descriptor origin, vertex_descriptor target)
 {
     tree[origin].children.insert(target);
     tree[target].parent = origin;
-    tree[target].parentRelation = &tree[origin];
     edgeAdded(origin, target);
 }
 
 void TreeView::addRoot(vertex_descriptor root)
 {
     tree[root].parent = GraphTraits::null_vertex();
-    tree[root].parentRelation = nullptr;
     this->root = root;
 }
 

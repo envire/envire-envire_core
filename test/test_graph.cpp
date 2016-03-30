@@ -241,15 +241,10 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     BOOST_CHECK(tree[graph.vertex(c)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(e)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(a)].parent == Gra::null_vertex()); //check parent
-    BOOST_CHECK(tree[graph.vertex(a)].parentRelation == nullptr); //check parent
     BOOST_CHECK(tree[graph.vertex(b)].parent == graph.vertex(a));
-    BOOST_CHECK(tree[graph.vertex(b)].parentRelation == &tree[graph.vertex(a)]);
     BOOST_CHECK(tree[graph.vertex(d)].parent == graph.vertex(c));
-    BOOST_CHECK(tree[graph.vertex(d)].parentRelation == &tree[graph.vertex(c)]);
     BOOST_CHECK(tree[graph.vertex(f)].parent == graph.vertex(e));
-    BOOST_CHECK(tree[graph.vertex(f)].parentRelation == &tree[graph.vertex(e)]);
     BOOST_CHECK(tree[graph.vertex(g)].parent == graph.vertex(e));
-    BOOST_CHECK(tree[graph.vertex(g)].parentRelation == &tree[graph.vertex(e)]);
     std::unordered_set<GraphTraits::vertex_descriptor>& aChildren = tree[graph.vertex(a)].children;
     BOOST_CHECK(aChildren.find(graph.vertex(b)) != aChildren.end());
     BOOST_CHECK(aChildren.find(graph.vertex(c)) != aChildren.end());
@@ -336,9 +331,7 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_with_frameId_test)
     BOOST_CHECK(tree[graph.vertex(a)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(b)].parent == graph.vertex(a));
     BOOST_CHECK(tree[graph.vertex(c)].parent == graph.vertex(a));
-    BOOST_CHECK(tree[graph.vertex(c)].parentRelation == &tree[graph.vertex(a)]);
     BOOST_CHECK(tree[graph.vertex(a)].parent == Gra::null_vertex());
-    BOOST_CHECK(tree[graph.vertex(a)].parentRelation == nullptr);
 }
 
 BOOST_AUTO_TEST_CASE(simple_get_tree_with_invalid_frameId_test)
@@ -426,7 +419,7 @@ BOOST_AUTO_TEST_CASE(tree_view_automatic_update_simple_test)
     //vC has no children and her parent is vA
     BOOST_CHECK(view.tree[vC].children.size() == 0);
     BOOST_CHECK(view.tree[vC].parent == vA);
-    BOOST_CHECK(view.tree[vC].parentRelation == &view.tree[vA]);
+
     
     BOOST_CHECK(bView.tree[vA].children.size() == 1);
     BOOST_CHECK(bView.tree[vA].children.find(vC) != view.tree[vA].children.end());
@@ -445,7 +438,6 @@ BOOST_AUTO_TEST_CASE(tree_view_automatic_update_simple_test)
     BOOST_CHECK(bView.tree[vC].children.size() == 1);
     BOOST_CHECK(bView.tree.find(vD) != bView.tree.end());
     BOOST_CHECK(bView.tree[vD].parent == vC);
-    BOOST_CHECK(bView.tree[vD].parentRelation == &bView.tree[vC]);
     BOOST_CHECK(bView.tree[vD].children.size() == 0);
 }
 
@@ -492,7 +484,6 @@ BOOST_AUTO_TEST_CASE(tree_view_cross_edge_test)
     BOOST_CHECK(view.tree.find(vC) != view.tree.end());
     BOOST_CHECK(view.tree[vC].children.size() == 0);
     BOOST_CHECK(view.tree[vD].parent == vB);
-    BOOST_CHECK(view.tree[vD].parentRelation == &view.tree[vB]);
     BOOST_CHECK(view.tree[vD].children.size() == 0);
     //C -> D or D -> C should be part of the cross edges
     BOOST_CHECK(view.crossEdges.size() == 1);
@@ -595,19 +586,15 @@ BOOST_AUTO_TEST_CASE(tree_view_add_sub_tree_test)
     BOOST_CHECK(view.tree[vD].children.size() == 1);
     BOOST_CHECK(view.tree[vD].children.find(vG) != view.tree[vD].children.end());
     BOOST_CHECK(view.tree[vG].parent == vD);
-    BOOST_CHECK(view.tree[vG].parentRelation == &view.tree[vD]);
     
     BOOST_CHECK(view.tree[vG].children.size() == 2);
     BOOST_CHECK(view.tree[vG].children.find(vH) != view.tree[vG].children.end());
     BOOST_CHECK(view.tree[vG].children.find(vF) != view.tree[vG].children.end());
     
     BOOST_CHECK(view.tree[vF].parent == vG);
-    BOOST_CHECK(view.tree[vF].parentRelation == &view.tree[vG]);
     BOOST_CHECK(view.tree[vH].parent == vG);
-    BOOST_CHECK(view.tree[vH].parentRelation == &view.tree[vG]);
     
     BOOST_CHECK(view.tree[vE].parent == vF);
-    BOOST_CHECK(view.tree[vE].parentRelation == &view.tree[vF]);
     BOOST_CHECK(view.tree[vE].children.size() == 0);
     
     BOOST_CHECK(view.tree[vA].children.size() == 2);
@@ -615,7 +602,6 @@ BOOST_AUTO_TEST_CASE(tree_view_add_sub_tree_test)
     BOOST_CHECK(view.tree[vA].children.find(vC) != view.tree[vA].children.end());
     
     BOOST_CHECK(view.tree[vC].parent == vA);
-    BOOST_CHECK(view.tree[vC].parentRelation == &view.tree[vA]);
     BOOST_CHECK(view.crossEdges.size() == 0);
     
 }
@@ -666,7 +652,6 @@ BOOST_AUTO_TEST_CASE(tree_view_automatic_update_remove_test)
     BOOST_CHECK(view.tree.find(vC) == view.tree.end());
     BOOST_CHECK(view.tree[vA].children.size() == 1);
     BOOST_CHECK(view.tree[vA].parent == graph.null_vertex());
-    BOOST_CHECK(view.tree[vA].parentRelation == nullptr);
     BOOST_CHECK(edgeAddedCalled);
 }
 
@@ -1134,9 +1119,9 @@ BOOST_AUTO_TEST_CASE(treeview_dfsVisit_test)
     graph.add_edge(f, g, ep);
     
     TreeView tv = graph.getTree(a);
-    
-    FrameId expectedOrder[] = {"a", "f", "g", "e", "b", "d", "c"};
-    FrameId expectedParent[] = {"", "a", "f", "a", "a", "b", "b"};
+    //this order is memory layout dependent
+    FrameId expectedOrder[] = {"a", "e", "f", "g", "b", "d", "c"};
+    FrameId expectedParent[] = {"", "a", "a", "f", "a", "b", "b"};
     
     int i = 0;
     tv.visitDfs(graph.getVertex(a), [&](GraphTraits::vertex_descriptor vd, 
@@ -1353,4 +1338,6 @@ BOOST_AUTO_TEST_CASE(event_queue_test)
     BOOST_CHECK(queue.dispatcher.edgeModifiedEvents.size() == 1);
     BOOST_CHECK(queue.dispatcher.edgeRemovedEvents.size() == 0);
 }
+
+
 

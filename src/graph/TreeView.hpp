@@ -7,7 +7,6 @@ namespace envire { namespace core
      */
     struct VertexRelation
     {
-        VertexRelation* parentRelation; /**<can be NULL */
         GraphTraits::vertex_descriptor parent; /**<can be null_vertex */
         std::unordered_set<GraphTraits::vertex_descriptor> children;
     };
