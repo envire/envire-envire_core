@@ -1,7 +1,6 @@
 SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 rock_vizkit_plugin(envire_core-viz
     EnvireGraphStructureVisualization.cpp
-    DEPS envire_core
     MOC EnvireGraphStructureVisualization.hpp
     HEADERS EnvireGraphStructureVisualization.hpp)
 
@@ -18,11 +17,10 @@ rock_executable(envire_visualizer
                         EnvireGraphVisualizer.cpp
                         Vizkit3dPluginInformation.cpp
                 HEADERS EnvireGraphVisualizer.hpp
-                        EnvireGraphStructureVisualization.hpp
                         Vizkit3dPluginInformation.hpp
+                        Helpers.hpp
                 DEPS_PKGCONFIG vizkit3d
                 DEPS envire_core
-                DEPS envire_core-viz
                 DEPS_PKGCONFIG plugin_manager
                 DEPS_PKGCONFIG envire_octomap #FIMXE remove later, only for testing
                 DEPS_PKGCONFIG envire_pcl

@@ -9,6 +9,9 @@ namespace envire { namespace core
     {
         GraphTraits::vertex_descriptor parent; /**<can be null_vertex */
         std::unordered_set<GraphTraits::vertex_descriptor> children;
+        
+        
+        
     };
 
     /**A map that shows the vertex information (parent and children) of the vertices in a tree.
@@ -127,6 +130,17 @@ namespace envire { namespace core
         /**Adds the initial root node to the TreeView */
         void addRoot(GraphTraits::vertex_descriptor root);
         
+        /**Removes an edge from the view.
+         * Also removes the sub-tree below the edge that should be removed.
+         * Emits edgeRemoved for each edge that is removed. The events will be 
+         * emitted starting from the deeps edge in the tree, i.e. you can be sure
+         * that the parent still exists in the tree when handling the event.
+         *
+         * If cross-edges exist that point into the sub-tree that is beeing removed,
+         * the sub-tree will be removed anyway and afterwards it will be re-generated
+         * using the cross-edge as root. I.e. if cross-edges point into the sub-tree
+         * you will get a lot of edgeRemoved events followed by a lot of edgeAdded events.*/
+        void removeEdge(GraphTraits::vertex_descriptor origin, GraphTraits::vertex_descriptor target);
         //FIXME comment exception?!
         GraphTraits::vertex_descriptor getParent(GraphTraits::vertex_descriptor node) const;
         
@@ -137,7 +151,8 @@ namespace envire { namespace core
         boost::signals2::signal<void (const CrossEdge&)> crossEdgeAdded;
         boost::signals2::signal<void (GraphTraits::vertex_descriptor origin,
                                       GraphTraits::vertex_descriptor target)> edgeAdded;
-        
+        boost::signals2::signal<void (GraphTraits::vertex_descriptor origin,
+                                      GraphTraits::vertex_descriptor target)> edgeRemoved;
 
         /* The edges, that had to be removed to create the tree.
          * I.e. All edges that lead to a vertex that has already been discovered.

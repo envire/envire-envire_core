@@ -110,12 +110,110 @@ void TreeView::addCrossEdge(const GraphTraits::vertex_descriptor origin,
     crossEdges.emplace_back(origin, target, edge);
     crossEdgeAdded(crossEdges.back());
 }
-
 void TreeView::addEdge(vertex_descriptor origin, vertex_descriptor target)
 {
     tree[origin].children.insert(target);
     tree[target].parent = origin;
     edgeAdded(origin, target);
+}
+
+
+
+void TreeView::removeEdge(vertex_descriptor origin, vertex_descriptor target)
+{
+  
+
+  /**Algorithm:
+   * (1) bfs visit the sub-tree that will be removed. For each visited vertex:
+   * (2.1) Check if a cross-edge is connected to the vertex.
+   * (2.2) If yes, check if the cross-edge is already part of S. If it is, 
+   *       remove it from S. otherwise add it.
+   * (3) S now contains all cross-edges that connect the sub-tree to the
+   *     graph.
+   * (4) Remove the sub-tree from the graph
+   * (5) If S is not empty, generate a new sub-tree with S[0] as root and
+   *     add it to the tree. 
+   * */
+  
+  
+  //a map to map from vertex_descriptor to edge_descriptor.
+  //It is a multimap because multiple cross-edges might be connected
+  //to the same vertex.
+  std::multimap<vertex_descriptor, edge_descriptor> vertexToCrossEdge;
+  for(const CrossEdge& edge : crossEdges)
+  {
+      vertexToCrossEdge.emplace(edge.origin, edge.edge);
+      vertexToCrossEdge.emplace(edge.target, edge.edge);
+  }
+  
+  vertex_descriptor realOrigin;
+  vertex_descriptor realTarget;
+  //figure out which of the vertices is acutally the origin in the tree
+  if(tree[target].parent == origin)
+  {
+      realOrigin = origin;
+      realTarget = target;
+  }
+  else if(tree[origin].parent == target)
+  {
+      realOrigin = target;
+      realTarget = origin;
+  }
+  else
+  {
+      //happens if one of the vertices isn't part of the tree, in that case this 
+      //method should have never been called in the first place.
+      assert(false);
+  }
+  
+  //will contain the list of cross-edges that are connected to the sub-tree
+  std::set<edge_descriptor> crossEdges;
+  //will contain the sub-tree internal cross-edges (that have to be removed as well)
+  std::vector<edge_descriptor> crossEdgesToRemove;
+  //stores all visited vertices that should be removed later
+  std::vector<vertex_descriptor> vertices;
+  
+  visitBfs(realTarget, [&](vertex_descriptor node, vertex_descriptor parent)
+  {
+      vertices.push_back(node);
+      auto range = vertexToCrossEdge.equal_range(node);
+      for (auto it = range.first; it != range.second; ++it)
+      {
+          const edge_descriptor crossEdge = it->second;
+          if(crossEdges.find(crossEdge) == crossEdges.end())
+          {
+              crossEdges.insert(crossEdge);
+          }
+          else
+          {
+              //if we found an edge for the second time it is internal
+              //in the sub-tree and should be removed as well.
+              crossEdges.erase(crossEdge);
+              crossEdgesToRemove.push_back(crossEdge);
+          }
+      }
+  });
+  
+  //remove vertices in reverse order to ensure that the parent is still in the
+  //tree when the event is emitted.
+  while(vertices.size() > 0)
+  {
+      const vertex_descriptor node = vertices.back();
+      vertices.pop_back();
+      VertexRelation& parentRelation = *tree[node].parentRelation;
+      VertexRelation& relation = tree[node];
+      parentRelation.children.erase(node);
+      //since we are removing bottom-up, all children should have been removed already.
+      assert(relation.children.size() == 0);
+      const vertex_descriptor parent = relation.parent;
+      tree.erase(node);
+      edgeRemoved(parent, node);
+  }
+  //TODO remove cross-edges
+  //TODO if cross-edge is present, readd new tree
+  
+  
+  
 }
 
 void TreeView::addRoot(vertex_descriptor root)
