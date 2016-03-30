@@ -80,6 +80,12 @@ int testPcl(int argc, char **argv)
     randTreeNodes.push_back("randTree");
     boost::uuids::random_generator generator;
     int i = 0;
+    bool removeSubTree = false;
+    
+    Transform tf;
+    tf.transform.orientation = base::Quaterniond(Eigen::AngleAxisd(0.0, base::Position(0, 0, 1)));
+    tf.transform.translation << 1,0,1;
+    graph.addTransform("sub2", "sub4", tf); //part of the sub tree that always remains
     
     while(true)
     {
@@ -87,7 +93,7 @@ int testPcl(int argc, char **argv)
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
       
       //rotate transformation
-      Transform tf = graph.getTransform("A", "B");
+      tf = graph.getTransform("A", "B");
       tf.transform.orientation *= base::Quaterniond(Eigen::AngleAxisd(0.23, base::Position(1, 0, 0)));
       graph.updateTransform("A", "B", tf);
       
@@ -137,6 +143,30 @@ int testPcl(int argc, char **argv)
         LOG(INFO) << "removing item from frame " << randTreeItems.back()->getFrame();
         graph.removeItemFromFrame(randTreeItems.back());
         randTreeItems.pop_back();
+      } 
+      
+      // add a sub tree
+      if((i % 10) == 0) 
+      {
+        if(!removeSubTree)
+        {
+          tf.transform.orientation = base::Quaterniond(Eigen::AngleAxisd(0.0, base::Position(0, 0, 1)));
+          tf.transform.translation << 3,4,5;
+          graph.addTransform("A", "sub1", tf);
+          tf.transform.orientation = base::Quaterniond(Eigen::AngleAxisd(0.0, base::Position(0, 0, 1)));
+          tf.transform.translation << 1,0,2;
+          graph.addTransform("sub1", "sub2", tf);
+          tf.transform.translation << 0,1,2;
+          graph.addTransform("sub1", "sub3", tf);
+          removeSubTree = true;
+        }
+        else
+        {
+          graph.remove_edge("sub1", "sub2");
+          graph.remove_edge("sub1", "sub3");
+          graph.remove_edge("A", "sub1");
+          removeSubTree = false;
+        }
       }      
     }
   });

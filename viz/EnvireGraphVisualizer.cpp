@@ -22,10 +22,15 @@ EnvireGraphVisualizer::EnvireGraphVisualizer(EnvireGraph& graph,
                                              const Vizkit3dPluginInformation& pluginInfos) :
   GraphEventDispatcher(&graph), graph(graph), widget(widget), pluginInfos(pluginInfos)
 { 
-  auto edgeLambda = std::bind(&EnvireGraphVisualizer::edgeAddedToTree, this,
-                              std::placeholders::_1, std::placeholders::_2);
-
-  tree.edgeAdded.connect(edgeLambda);
+  auto edgeAdded = std::bind(&EnvireGraphVisualizer::edgeAddedToTree, this,
+                             std::placeholders::_1, std::placeholders::_2);
+  tree.edgeAdded.connect(edgeAdded);
+  
+  auto edgeRemoved = std::bind(&EnvireGraphVisualizer::edgeRemovedFromTree, this,
+                               std::placeholders::_1, std::placeholders::_2);
+  tree.edgeRemoved.connect(edgeRemoved);
+  
+  
   
   //will cause edgeAdded events which will be handled by EnvireGraphVisualizer::edgeAddedToTree
   graph.getTree(rootNode, true, &tree);
@@ -34,9 +39,18 @@ EnvireGraphVisualizer::EnvireGraphVisualizer(EnvireGraph& graph,
 
 void EnvireGraphVisualizer::edgeAddedToTree(vertex_descriptor origin, vertex_descriptor target)
 {
-    setTransformation(origin, target);
-    loadItems(target);
-    //FIXME this will not load items in the root node
+  setTransformation(origin, target);
+  LOG(INFO) << "Added edge " << graph.getFrameId(origin) << " -- " << graph.getFrameId(target);
+  loadItems(target);
+  //FIXME this will not load items in the root node
+}
+
+void EnvireGraphVisualizer::edgeRemovedFromTree(const vertex_descriptor origin, const vertex_descriptor target)
+{
+  const QString targetId = QString::fromStdString(graph.getFrameId(target));
+  Qt::ConnectionType conType = Helpers::determineConnectionType(widget);
+  QMetaObject::invokeMethod(widget, "removeFrame", conType, Q_ARG(QString, targetId));
+  LOG(INFO) << "Removed edge " << graph.getFrameId(origin) << " -- " << graph.getFrameId(target);
 }
 
 void EnvireGraphVisualizer::itemAdded(const envire::core::ItemAddedEvent& e)

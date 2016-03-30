@@ -42,6 +42,8 @@ private:
   
   /**Is invoked whenever a new edge is added to the current tree*/
   void edgeAddedToTree(vertex_descriptor origin, vertex_descriptor target);
+  /**Is invoked whenever an edge is removed from the current tree */
+  void edgeRemovedFromTree(const vertex_descriptor origin, const vertex_descriptor target);
   /**Is invoked whenever a new item is added to the graph*/
   virtual void itemAdded(const envire::core::ItemAddedEvent& e);
   /**Is invoked whenever an item is deleted from the graph */
