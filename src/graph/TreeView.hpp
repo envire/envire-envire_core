@@ -3,6 +3,7 @@
 #include "GraphTypes.hpp"
 namespace envire { namespace core
 {
+    
     /** Structure to store the parent and children relation for a vertex in a tree.
      */
     struct VertexRelation
@@ -137,9 +138,7 @@ namespace envire { namespace core
          * that the parent still exists in the tree when handling the event.
          *
          * If cross-edges exist that point into the sub-tree that is beeing removed,
-         * the sub-tree will be removed anyway and afterwards it will be re-generated
-         * using the cross-edge as root. I.e. if cross-edges point into the sub-tree
-         * you will get a lot of edgeRemoved events followed by a lot of edgeAdded events.*/
+         * the method will return*/
         void removeEdge(GraphTraits::vertex_descriptor origin, GraphTraits::vertex_descriptor target);
         //FIXME comment exception?!
         GraphTraits::vertex_descriptor getParent(GraphTraits::vertex_descriptor node) const;

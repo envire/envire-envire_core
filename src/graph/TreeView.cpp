@@ -209,6 +209,10 @@ void TreeView::removeEdge(vertex_descriptor origin, vertex_descriptor target)
   }
   
   //TODO if cross-edge is present, readd new tree
+  if(treeLeavingCrossEdges.size() > 0)
+  {
+      throw std::runtime_error("NOT IMPLEMENTED");
+  }
 
 }
 
