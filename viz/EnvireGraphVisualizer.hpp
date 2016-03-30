@@ -59,18 +59,16 @@ private:
   void setTransformation(const FrameId& origin, const FrameId& target);
   void setTransformation(const vertex_descriptor origin, const vertex_descriptor target);
   
-
-
-  
+  /**Converts a transformation from envire format to vizkit3d format */
   std::pair<QQuaternion, QVector3D> convertTransform(const envire::core::Transform& tf) const;
   
+  using ItemVisualMap = std::unordered_map<boost::uuids::uuid, vizkit3d::VizPluginBase*, boost::hash<boost::uuids::uuid>>;
 
   envire::core::EnvireGraph& graph; /**< the graph that is visualized*/
   envire::core::TreeView tree;
-  vizkit3d::Vizkit3DWidget* widget;
-  const Vizkit3dPluginInformation& pluginInfos;
-  /**Map of all items that are currently visualized and the plugin visualizing them*/
-  std::unordered_map<boost::uuids::uuid, vizkit3d::VizPluginBase*, boost::hash<boost::uuids::uuid>> itemVisuals;
+  vizkit3d::Vizkit3DWidget* widget; /**< Is used to display the graph */
+  const Vizkit3dPluginInformation& pluginInfos;/**< meta-data needed to figure out which plugins to load*/
+  ItemVisualMap itemVisuals; /**<Map of all items that are currently visualized and the plugin visualizing them*/
   
 };
 

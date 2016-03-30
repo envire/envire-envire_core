@@ -42,7 +42,14 @@ void EnvireGraphVisualizer::edgeAddedToTree(vertex_descriptor origin, vertex_des
   setTransformation(origin, target);
   LOG(INFO) << "Added edge " << graph.getFrameId(origin) << " -- " << graph.getFrameId(target);
   loadItems(target);
-  //FIXME this will not load items in the root node
+  
+  //Since we are drwing a tree structure every "origin", has been a "target" in
+  //a previous call (except the root node). Thus we only need to load items
+  //from the origin if it is the root.
+  if(tree.isRoot(origin))
+  {
+    loadItems(origin);
+  }
 }
 
 void EnvireGraphVisualizer::edgeRemovedFromTree(const vertex_descriptor origin, const vertex_descriptor target)

@@ -27,32 +27,29 @@ int testPcl(int argc, char **argv)
   plugin_manager::PluginLoader* loader = plugin_manager::PluginLoader::getInstance();
   envire::core::ItemBase::Ptr cloudItem;
   envire::core::ItemBase::Ptr cloudItem2;
+  envire::core::ItemBase::Ptr cloudItem3;
   loader->createInstance("envire::pcl::PointCloud", cloudItem);
   loader->createInstance("envire::pcl::PointCloud", cloudItem2);
+  loader->createInstance("envire::pcl::PointCloud", cloudItem3);
   envire::pcl::PointCloud::Ptr cloud = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(cloudItem);
   envire::pcl::PointCloud::Ptr cloud2 = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(cloudItem2);
+  envire::pcl::PointCloud::Ptr cloud3 = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(cloudItem3);
   
   //FIXME path relative to rock instead of absolut?
   pcl::PCDReader reader;
-  if(reader.read("/home/arne/git/rock-entern/slam/pcl/test/bunny.pcd", cloud->getData()) != 0) 
-  {
-    std::cerr << "UNABLE TO READ PCD FILE" << std::endl;
-    exit(1);
-  }
-    
-  if(reader.read("/home/arne/git/rock-entern/slam/pcl/test/bunny.pcd", cloud2->getData()) != 0) 
-  {
-    std::cerr << "UNABLE TO READ PCD FILE" << std::endl;
-    exit(1);
-  }
+  reader.read("/home/arne/git/rock-entern/slam/pcl/test/bunny.pcd", cloud->getData());
+  reader.read("/home/arne/git/rock-entern/slam/pcl/test/bunny.pcd", cloud2->getData());
+  reader.read("/home/arne/git/rock-entern/slam/pcl/test/cturtle.pcd", cloud3->getData());
   
   EnvireGraph graph;
-  graph.addFrame("A");
+  graph.addFrame("A"); 
   graph.addFrame("B");
   graph.addFrame("C");
   graph.addFrame("D");
   graph.addItemToFrame("B", cloud);
   graph.addItemToFrame("D", cloud2);
+  graph.addItemToFrame("A", cloud3); //special case item in root node
+  
   Transform ab(base::Position(1, 1, 1), Eigen::Quaterniond (Eigen::AngleAxisd(0.5, Eigen::Vector3d(1,2,3))));
   graph.addTransform("A", "B", ab);
   Transform bc(base::Position(1, 0, 0.3), Eigen::Quaterniond(Eigen::AngleAxisd(0.3, Eigen::Vector3d(1,0,3))));
