@@ -258,6 +258,8 @@ protected:
     void addEdgeToTreeViews(edge_descriptor newEdge) const;
     void addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) const;
     
+    void removeEdgeFromTreeViews(vertex_descriptor origin, vertex_descriptor target) const;
+    
     /**Rebuild all subscribed TreeViews */
     void rebuildTreeViews() const;
     
@@ -624,10 +626,8 @@ void Graph<F,E>::remove_edge(const FrameId& origin, const FrameId& target,
     
     boost::remove_edge(targetToOrigin.first, *this);
     
-    //removing an edge might invalidate the TreeViews.
-    //This is a brute-force solution to the problem.
-    //FIXME update TreeViews when removing an edge instead of rebuilding them
-    rebuildTreeViews();    
+    removeEdgeFromTreeViews(originDesc, targetDesc);
+    
 }
 
 template <class F, class E>
@@ -642,6 +642,16 @@ void Graph<F,E>::remove_edge(const FrameId& origin,
                              const FrameId& target)
 {
     remove_edge(origin, target, getVertex(origin), getVertex(target));
+}
+
+template <class F, class E>
+void Graph<F,E>::removeEdgeFromTreeViews(vertex_descriptor origin, vertex_descriptor target) const
+{
+    for(TreeView* view : subscribedTreeViews)
+    {
+        if(view->edgeExists(origin, target))
+            view->removeEdge(origin, target);
+    }    
 }
 
 template <class F, class E>
