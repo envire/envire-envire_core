@@ -1,5 +1,5 @@
 /**Contains two examples showing the usage of the EnvireGraphVisualizer.
- * testThreaded() shows how to use the visualizer in a seperate thread.
+ * minimalExample() shows how to use the visualizer in a seperate thread.
  * test() shows how to use the visualizer in the main thread. */
 #include <vizkit3d/Vizkit3DWidget.hpp>
 #include <vizkit3d/QtThreadedWidget.hpp>
@@ -22,6 +22,25 @@
 using namespace envire::core;
 using namespace vizkit3d;
 
+/** minimal usage example for the viszualizer*/
+void minimalExample(EnvireGraph& graph)
+{
+  QtThreadedWidget<Vizkit3DWidget> app;
+  app.start();
+  
+  Vizkit3DWidget* widget = dynamic_cast<Vizkit3DWidget*>(app.getWidget());
+  
+  //gather information about all available vizkit3d plugins
+  envire::viz::Vizkit3dPluginInformation info(widget);
+  
+  //note: the graph has to contain a node called "rootNode".
+  envire::viz::EnvireGraphVisualizer visualizer(graph, widget, "rootNode", info);
+  
+  while(true)
+  {
+    //keep the program running
+  }  
+}
 
 int testThreaded(int argc, char** argv)
 {
