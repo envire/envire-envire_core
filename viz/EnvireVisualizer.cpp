@@ -86,9 +86,7 @@ int testThreaded(int argc, char** argv)
     else
     {
       graph.addTransform("C", "D", ab);
-    }
-    
-    
+    }   
   }
   return 0;
 }
