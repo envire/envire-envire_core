@@ -67,7 +67,7 @@ int testPcl(int argc, char **argv)
   envire::viz::Vizkit3dPluginInformation info(widget);
   envire::viz::EnvireGraphVisualizer visualizer(graph, widget, "A", info);
 
-  std::thread t([&graph, &loader, &reader]()
+  std::thread t([&]()
   {
     //because the graph is not thread safe, yet  
     std::this_thread::sleep_for(std::chrono::seconds(4));
@@ -141,6 +141,19 @@ int testPcl(int argc, char **argv)
         graph.removeItemFromFrame(randTreeItems.back());
         randTreeItems.pop_back();
       } 
+      
+      
+      if((i % 12 == 0))
+      {
+        if(graph.getTotalItemCount("A") > 0)
+        {
+          graph.clearFrame("A");
+        }
+        else
+        {
+          graph.addItemToFrame("A", cloud3);
+        }
+      }
       
       // add a sub tree
       if((i % 10) == 0) 
