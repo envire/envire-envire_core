@@ -1385,7 +1385,6 @@ BOOST_AUTO_TEST_CASE(tree_view_remove_edge_cross_edge_test)
     const vertex_descriptor b = graph.getVertex("b");
     const vertex_descriptor c = graph.getVertex("c");
     const vertex_descriptor d = graph.getVertex("d");
-    const vertex_descriptor e = graph.getVertex("e");
     
     BOOST_CHECK(tv.crossEdges.size() == 1);
     
