@@ -9,7 +9,7 @@
 
   <depend package="base/cmake" />
   <depend package="base/types" />
-  <depend package="envire/boost_serialization" />
+  <depend package="base/boost_serialization" />
   <depend package="glog" />
   <depend package="tools/class_loader" optional="1"/>
   <depend package="tools/plugin_manager" optional="1"/>
