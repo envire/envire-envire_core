@@ -58,8 +58,14 @@ int testThreaded(int argc, char** argv)
   envire::viz::Vizkit3dPluginInformation info(widget);
   envire::viz::EnvireGraphVisualizer visualizer(graph, widget, "A", info);
   
+     graph.addTransform("D", "E", ab);
+     graph.addTransform("D", "F", bc);
+     graph.addTransform("C", "D", ab);//should add the whole sub-tree at once
+   
   while(true)
   {
+    
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     ab = graph.getTransform("A", "B");
     ab.transform.orientation *= base::Quaterniond(Eigen::AngleAxisd(0.23, base::Position(1, 1, 0)));
     graph.updateTransform("A", "B", ab);
@@ -73,7 +79,16 @@ int testThreaded(int argc, char** argv)
       graph.addTransform("B", "C", ab);
     }
     
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    if(graph.containsEdge("C", "D"))
+    {
+      graph.removeTransform("C", "D");
+    }
+    else
+    {
+      graph.addTransform("C", "D", ab);
+    }
+    
+    
   }
   return 0;
 }
