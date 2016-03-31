@@ -13,7 +13,7 @@ public:
   /**Contains everything needed to invoke a certain update method */
   struct UpdateMethod
   {
-    QMetaMethod method;
+    QMetaMethod method; //meta infos about the method
     QString libName; //name of the library (give to loadPlugin() to get an instance)
   };
   

@@ -1,3 +1,6 @@
+/**Contains two examples showing the usage of the EnvireGraphVisualizer.
+ * testThreaded() shows how to use the visualizer in a seperate thread.
+ * test() shows how to use the visualizer in the main thread. */
 #include <vizkit3d/Vizkit3DWidget.hpp>
 #include <vizkit3d/QtThreadedWidget.hpp>
 #include <vizkit3d/QVizkitMainWindow.hpp>
@@ -7,7 +10,6 @@
 #include <envire_core/graph/EnvireGraph.hpp>
 #include <unordered_map>
 #include <plugin_manager/PluginLoader.hpp>
-#include <envire_octomap/OcTree.hpp> //FIXME eigentlich sollte das ohne gehen?
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -19,7 +21,6 @@
 
 using namespace envire::core;
 using namespace vizkit3d;
-
 
 
 int testThreaded(int argc, char** argv)

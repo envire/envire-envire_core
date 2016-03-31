@@ -13,11 +13,6 @@ Vizkit3dPluginInformation::Vizkit3dPluginInformation(vizkit3d::Vizkit3DWidget* m
 
 void Vizkit3dPluginInformation::loadData()
 {
-  
-  /* über alle plugins laufen
-   * jeweils gucken welche updateData methoden es gibt und welche typen die haben
-   * das alles in ner map aufschreiben
-   */
   QStringList* availablePlugins = mainWidget->getAvailablePlugins();
   
   Qt::ConnectionType conType = Helpers::determineConnectionType(mainWidget);
@@ -57,7 +52,6 @@ void Vizkit3dPluginInformation::loadPluginData(const QObject* plugin,
         typeToPlugin.insert(QString(paramTypes.at(0)), {method, libName});
         LOG(INFO) << "found method: " << method.signature() << 
                      " for type: " << QString(paramTypes[0]).toStdString();
-        
       }
     }
   }
