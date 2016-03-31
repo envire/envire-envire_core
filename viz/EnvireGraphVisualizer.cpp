@@ -76,9 +76,11 @@ void EnvireGraphVisualizer::itemRemoved(const envire::core::ItemRemovedEvent& e)
   if(tree.vertexExists(vd))
   {
     VizPluginBase* itemViz = itemVisuals.at(e.item->getID());//may throw
+    itemVisuals.erase(e.item->getID());
     ASSERT_NOT_NULL(itemViz);
     Qt::ConnectionType conType = Helpers::determineConnectionType(widget);
     QMetaObject::invokeMethod(widget, "removePlugin", conType, Q_ARG(QObject*, itemViz));
+    LOG(INFO) << "Removed item " << e.item->getIDString();
   }
 }
 
@@ -143,6 +145,8 @@ void EnvireGraphVisualizer::loadItem(const envire::core::ItemBase::Ptr item)
     vizPlugin->setVisualizationFrame(qFrame);
     
     itemVisuals[item->getID()] = vizPlugin;
+    
+    LOG(INFO) << "Added item " << e.item->getIDString() << " using vizkit plugin " << info.libName;
   }
   else
   {
