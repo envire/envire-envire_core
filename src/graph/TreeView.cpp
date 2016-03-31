@@ -146,17 +146,14 @@ void TreeView::removeEdge(vertex_descriptor origin, vertex_descriptor target)
       vertexToCrossEdge.emplace(edge->target, edge);
   }
   
-  vertex_descriptor realOrigin;
   vertex_descriptor realTarget;
   //figure out which of the vertices is acutally the origin in the tree
   if(tree[target].parent == origin)
   {
-      realOrigin = origin;
       realTarget = target;
   }
   else if(tree[origin].parent == target)
   {
-      realOrigin = target;
       realTarget = origin;
   }
   else
