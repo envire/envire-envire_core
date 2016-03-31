@@ -29,6 +29,7 @@ std::ostream& operator<<(std::ostream& ostream, const GraphEvent& graph_event)
         case GraphEvent::ITEM_REMOVED_FROM_FRAME:
             ostream << "ITEM_REMOVED_FROM_FRAME";
     }
+    return ostream;
 }
 
 }}
