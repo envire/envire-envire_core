@@ -146,7 +146,7 @@ void EnvireGraphVisualizer::loadItem(const envire::core::ItemBase::Ptr item)
     
     itemVisuals[item->getID()] = vizPlugin;
     
-    LOG(INFO) << "Added item " << e.item->getIDString() << " using vizkit plugin " << info.libName;
+    LOG(INFO) << "Added item " << item->getIDString() << " using vizkit plugin " << info.libName.toStdString();
   }
   else
   {

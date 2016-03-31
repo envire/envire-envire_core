@@ -21,7 +21,64 @@ using namespace envire::core;
 using namespace vizkit3d;
 
 
-int testPcl(int argc, char **argv)
+
+int testThreaded(int argc, char** argv)
+{
+  plugin_manager::PluginLoader* loader = plugin_manager::PluginLoader::getInstance();
+  envire::core::ItemBase::Ptr cloudItem;
+  envire::core::ItemBase::Ptr cloudItem2;
+  envire::core::ItemBase::Ptr cloudItem3;
+  loader->createInstance("envire::pcl::PointCloud", cloudItem);
+  loader->createInstance("envire::pcl::PointCloud", cloudItem2);
+  loader->createInstance("envire::pcl::PointCloud", cloudItem3);
+  envire::pcl::PointCloud::Ptr cloud = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(cloudItem);
+  envire::pcl::PointCloud::Ptr cloud2 = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(cloudItem2);
+  envire::pcl::PointCloud::Ptr cloud3 = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(cloudItem3);
+  pcl::PCDReader reader;
+  reader.read("/home/arne/git/rock-entern/slam/pcl/test/bunny.pcd", cloud->getData());
+  reader.read("/home/arne/git/rock-entern/slam/pcl/test/bunny.pcd", cloud2->getData());
+  reader.read("/home/arne/git/rock-entern/slam/pcl/test/cturtle.pcd", cloud3->getData());
+  
+  EnvireGraph graph;
+  graph.addFrame("A"); 
+  graph.addFrame("B");
+  graph.addFrame("C");
+  graph.addItemToFrame("A", cloud);
+  graph.addItemToFrame("B", cloud2);
+  graph.addItemToFrame("C", cloud3); //special case item in root node
+  
+  Transform ab(base::Position(1, 1, 1), Eigen::Quaterniond (Eigen::AngleAxisd(0.5, Eigen::Vector3d(1,2,3))));
+  graph.addTransform("A", "B", ab);
+  Transform bc(base::Position(1, 0, 0.3), Eigen::Quaterniond(Eigen::AngleAxisd(0.3, Eigen::Vector3d(1,0,3))));
+  graph.addTransform("B", "C", ab);  
+  
+  QtThreadedWidget<Vizkit3DWidget> app;
+  app.start();
+  Vizkit3DWidget* widget = dynamic_cast<Vizkit3DWidget*>(app.getWidget());
+  envire::viz::Vizkit3dPluginInformation info(widget);
+  envire::viz::EnvireGraphVisualizer visualizer(graph, widget, "A", info);
+  
+  while(true)
+  {
+    ab = graph.getTransform("A", "B");
+    ab.transform.orientation *= base::Quaterniond(Eigen::AngleAxisd(0.23, base::Position(1, 1, 0)));
+    graph.updateTransform("A", "B", ab);
+    
+    if(graph.containsEdge("B", "C"))
+    {
+      graph.removeTransform("B", "C");
+    }
+    else
+    {
+      graph.addTransform("B", "C", ab);
+    }
+    
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+  return 0;
+}
+
+int test(int argc, char **argv)
 {
   
   plugin_manager::PluginLoader* loader = plugin_manager::PluginLoader::getInstance();
@@ -70,7 +127,7 @@ int testPcl(int argc, char **argv)
   std::thread t([&]()
   {
     //because the graph is not thread safe, yet  
-    std::this_thread::sleep_for(std::chrono::seconds(4));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     
     std::vector<FrameId> randTreeNodes;
     std::vector<ItemBase::Ptr> randTreeItems;
@@ -182,10 +239,12 @@ int testPcl(int argc, char **argv)
   });
   app.exec(); 
   t.join();
+  return 0;
 }
 
 
 int main(int argc, char **argv)
 {
-  return testPcl(argc, argv);
+  //return test(argc, argv);
+  return testThreaded(argc, argv);
 }
