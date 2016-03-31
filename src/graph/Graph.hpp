@@ -108,6 +108,13 @@ public:
      *          otherwise.*/
     bool containsFrame(const FrameId& frameId) const;
     
+    /**@return true if the graph contains a direct edge between @p origin and 
+     *         @p target.
+     * @throw UnknownFrameException if @p origin or @p target are not part of them
+     *                              graph.*/
+    bool containsEdge(const FrameId& origin, const FrameId& target) const;
+    bool containsEdge(const vertex_descriptor origin, const vertex_descriptor target) const;
+    
     /**Add an edge between two frames.
     *  If the frames do not exist they are created.
     *  The inverse edge is created automatically and added as well.
@@ -967,8 +974,22 @@ template<class F, class E>
 std::pair<typename Graph<F,E>::edge_iterator, typename Graph<F,E>::edge_iterator>
 Graph<F,E>::getEdges() const
 {
-  return boost::edges(graph());
+    return boost::edges(graph());
 }
+
+template<class F, class E>
+bool Graph<F,E>::containsEdge(const FrameId& origin, const FrameId& target) const
+{
+    return containsEdge(getVertex(origin), getVertex(target));
+}
+
+template<class F, class E>
+bool Graph<F,E>::containsEdge(const vertex_descriptor origin, const vertex_descriptor target) const
+{
+    EdgePair e = boost::edge(origin, target, graph());
+    return e.second;   
+}
+  
 
 }}
 
