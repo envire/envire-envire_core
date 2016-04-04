@@ -110,7 +110,8 @@ namespace envire { namespace core
         }
         
         
-        /**The lifetime of std::type_info is till the end of the program. Thus
+        /** Returns the typeinfo of the item. 
+         * @note The lifetime of std::type_info is till the end of the program. Thus
          * storing and using pointers to std::type_info is safe*/
         virtual const std::type_info* getTypeInfo() const = 0;
         
