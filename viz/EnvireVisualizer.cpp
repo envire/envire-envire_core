@@ -8,6 +8,7 @@
 #include "EnvireGraphVisualizer.hpp"
 #include "Vizkit3dPluginInformation.hpp"
 #include <envire_core/graph/EnvireGraph.hpp>
+#include "MainWindow.hpp"
 #include <unordered_map>
 #include <plugin_manager/PluginLoader.hpp>
 #include <iostream>
@@ -21,95 +22,110 @@
 
 using namespace envire::core;
 using namespace vizkit3d;
+using namespace envire::viz;
 
-/** minimal usage example for the viszualizer*/
-void minimalExample(EnvireGraph& graph)
-{
-  QtThreadedWidget<Vizkit3DWidget> app;
-  app.start();
-  
-  Vizkit3DWidget* widget = dynamic_cast<Vizkit3DWidget*>(app.getWidget());
-  
-  //gather information about all available vizkit3d plugins
-  envire::viz::Vizkit3dPluginInformation info(widget);
-  
-  //note: the graph has to contain a node called "rootNode".
-  envire::viz::EnvireGraphVisualizer visualizer(graph, widget, "rootNode", info);
-  
-  while(true)
-  {
-    //keep the program running
-  }  
-}
+// int testWindow(int argc, char** argv)
+// {
+//   EnvireGraph graph;
+//   graph.addFrame("root");
+//   
+//   QApplication app(argc, argv);
+//   MainWindow window(graph, "root");
+//   window.show();
+//   
+//   
+//   return app.exec();
+// }
 
-int testThreaded(int argc, char** argv)
-{
-  plugin_manager::PluginLoader* loader = plugin_manager::PluginLoader::getInstance();
-  envire::core::ItemBase::Ptr cloudItem;
-  envire::core::ItemBase::Ptr cloudItem2;
-  envire::core::ItemBase::Ptr cloudItem3;
-  loader->createInstance("envire::pcl::PointCloud", cloudItem);
-  loader->createInstance("envire::pcl::PointCloud", cloudItem2);
-  loader->createInstance("envire::pcl::PointCloud", cloudItem3);
-  envire::pcl::PointCloud::Ptr cloud = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(cloudItem);
-  envire::pcl::PointCloud::Ptr cloud2 = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(cloudItem2);
-  envire::pcl::PointCloud::Ptr cloud3 = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(cloudItem3);
-  pcl::PCDReader reader;
-  reader.read("/home/arne/git/rock-entern/slam/pcl/test/bunny.pcd", cloud->getData());
-  reader.read("/home/arne/git/rock-entern/slam/pcl/test/bunny.pcd", cloud2->getData());
-  reader.read("/home/arne/git/rock-entern/slam/pcl/test/cturtle.pcd", cloud3->getData());
-  
-  EnvireGraph graph;
-  graph.addFrame("A"); 
-  graph.addFrame("B");
-  graph.addFrame("C");
-  graph.addItemToFrame("A", cloud);
-  graph.addItemToFrame("B", cloud2);
-  graph.addItemToFrame("C", cloud3); //special case item in root node
-  
-  Transform ab(base::Position(1, 1, 1), Eigen::Quaterniond (Eigen::AngleAxisd(0.5, Eigen::Vector3d(1,2,3))));
-  graph.addTransform("A", "B", ab);
-  Transform bc(base::Position(1, 0, 0.3), Eigen::Quaterniond(Eigen::AngleAxisd(0.3, Eigen::Vector3d(1,0,3))));
-  graph.addTransform("B", "C", ab);  
-  
-  QtThreadedWidget<Vizkit3DWidget> app;
-  app.start();
-  Vizkit3DWidget* widget = dynamic_cast<Vizkit3DWidget*>(app.getWidget());
-  envire::viz::Vizkit3dPluginInformation info(widget);
-  envire::viz::EnvireGraphVisualizer visualizer(graph, widget, "A", info);
-  
-     graph.addTransform("D", "E", ab);
-     graph.addTransform("D", "F", bc);
-     graph.addTransform("C", "D", ab);//should add the whole sub-tree at once
-   
-  while(true)
-  {
-    
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    ab = graph.getTransform("A", "B");
-    ab.transform.orientation *= base::Quaterniond(Eigen::AngleAxisd(0.23, base::Position(1, 1, 0)));
-    graph.updateTransform("A", "B", ab);
-    
-    if(graph.containsEdge("B", "C"))
-    {
-      graph.removeTransform("B", "C");
-    }
-    else
-    {
-      graph.addTransform("B", "C", ab);
-    }
-    
-    if(graph.containsEdge("C", "D"))
-    {
-      graph.removeTransform("C", "D");
-    }
-    else
-    {
-      graph.addTransform("C", "D", ab);
-    }   
-  }
-  return 0;
-}
+// /** minimal usage example for the viszualizer*/
+// void minimalExample(EnvireGraph& graph)
+// {
+//   /
+//   QtThreadedWidget<Vizkit3DWidget> app;
+//   app.start();
+//   
+//   Vizkit3DWidget* widget = dynamic_cast<Vizkit3DWidget*>(app.getWidget());
+//   
+//   //gather information about all available vizkit3d plugins
+//   envire::viz::Vizkit3dPluginInformation info(widget);
+//   
+//   //note: the graph has to contain a node called "rootNode".
+//   envire::viz::EnvireGraphVisualizer visualizer(graph, widget, "rootNode", info);
+//   
+//   while(true)
+//   {
+//     //keep the program running
+//   }  
+// }
+// 
+// int testThreaded(int argc, char** argv)
+// {
+//   plugin_manager::PluginLoader* loader = plugin_manager::PluginLoader::getInstance();
+//   envire::core::ItemBase::Ptr cloudItem;
+//   envire::core::ItemBase::Ptr cloudItem2;
+//   envire::core::ItemBase::Ptr cloudItem3;
+//   loader->createInstance("envire::pcl::PointCloud", cloudItem);
+//   loader->createInstance("envire::pcl::PointCloud", cloudItem2);
+//   loader->createInstance("envire::pcl::PointCloud", cloudItem3);
+//   envire::pcl::PointCloud::Ptr cloud = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(cloudItem);
+//   envire::pcl::PointCloud::Ptr cloud2 = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(cloudItem2);
+//   envire::pcl::PointCloud::Ptr cloud3 = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(cloudItem3);
+//   pcl::PCDReader reader;
+//   reader.read("/home/arne/git/rock-entern/slam/pcl/test/bunny.pcd", cloud->getData());
+//   reader.read("/home/arne/git/rock-entern/slam/pcl/test/bunny.pcd", cloud2->getData());
+//   reader.read("/home/arne/git/rock-entern/slam/pcl/test/cturtle.pcd", cloud3->getData());
+//   
+//   EnvireGraph graph;
+//   graph.addFrame("A"); 
+//   graph.addFrame("B");
+//   graph.addFrame("C");
+//   graph.addItemToFrame("A", cloud);
+//   graph.addItemToFrame("B", cloud2);
+//   graph.addItemToFrame("C", cloud3); //special case item in root node
+//   
+//   Transform ab(base::Position(1, 1, 1), Eigen::Quaterniond (Eigen::AngleAxisd(0.5, Eigen::Vector3d(1,2,3))));
+//   graph.addTransform("A", "B", ab);
+//   Transform bc(base::Position(1, 0, 0.3), Eigen::Quaterniond(Eigen::AngleAxisd(0.3, Eigen::Vector3d(1,0,3))));
+//   graph.addTransform("B", "C", ab);  
+//   
+//   QtThreadedWidget<Vizkit3DWidget> app;
+//   app.start();
+//   Vizkit3DWidget* widget = dynamic_cast<Vizkit3DWidget*>(app.getWidget());
+//   envire::viz::Vizkit3dPluginInformation info(widget);
+//   envire::viz::EnvireGraphVisualizer visualizer(graph, widget, "A", info);
+//   
+//      graph.addTransform("D", "E", ab);
+//      graph.addTransform("D", "F", bc);
+//      graph.addTransform("C", "D", ab);//should add the whole sub-tree at once
+//    
+//   while(true)
+//   {
+//     
+//     std::this_thread::sleep_for(std::chrono::milliseconds(200));
+//     ab = graph.getTransform("A", "B");
+//     ab.transform.orientation *= base::Quaterniond(Eigen::AngleAxisd(0.23, base::Position(1, 1, 0)));
+//     graph.updateTransform("A", "B", ab);
+//     
+//     if(graph.containsEdge("B", "C"))
+//     {
+//       graph.removeTransform("B", "C");
+//     }
+//     else
+//     {
+//       graph.addTransform("B", "C", ab);
+//     }
+//     
+//     if(graph.containsEdge("C", "D"))
+//     {
+//       graph.removeTransform("C", "D");
+//     }
+//     else
+//     {
+//       graph.addTransform("C", "D", ab);
+//     }   
+//   }
+//   return 0;
+// }
 
 int test(int argc, char **argv)
 {
@@ -150,12 +166,10 @@ int test(int argc, char **argv)
   graph.addFrame("randTree");
   Transform aToForrest(base::Position(0, -3, -2), Eigen::Quaterniond(Eigen::AngleAxisd(0, Eigen::Vector3d(0,0,1))));
   graph.addTransform("A", "randTree", aToForrest);
+  
   QApplication app(argc, argv);
-  QVizkitMainWindow window;
-  Vizkit3DWidget* widget = window.getVizkitWidget();
+  MainWindow window(graph, "A");
   window.show();
-  envire::viz::Vizkit3dPluginInformation info(widget);
-  envire::viz::EnvireGraphVisualizer visualizer(graph, widget, "A", info);
 
   std::thread t([&]()
   {
@@ -278,6 +292,7 @@ int test(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
+  //return testWindow(argc, argv);
   return test(argc, argv);
  //return testThreaded(argc, argv);
 }

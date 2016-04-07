@@ -8,6 +8,7 @@
 #include <envire_core/events/GraphEventDispatcher.hpp>
 #include <envire_core/items/ItemBase.hpp>
 #include <boost/uuid/uuid.hpp>
+#include <memory>
 #include "Vizkit3dPluginInformation.hpp"
 
 namespace envire { namespace core 
@@ -19,8 +20,10 @@ namespace envire { namespace core
 namespace envire { namespace viz
 {
 
-class EnvireGraphVisualizer : envire::core::GraphEventDispatcher
+/**Draws an envire graph into a Vizkit3DWidget */
+class EnvireGraphVisualizer : QObject,  envire::core::GraphEventDispatcher
 {
+  Q_OBJECT
   using vertex_descriptor = envire::core::GraphTraits::vertex_descriptor;
   using edge_descriptor = envire::core::GraphTraits::edge_descriptor;
   using FrameId = envire::core::FrameId;
@@ -31,11 +34,16 @@ public:
   EnvireGraphVisualizer(envire::core::EnvireGraph& graph,
                         vizkit3d::Vizkit3DWidget* widget, 
                         const envire::core::FrameId& rootNode,
-                        const Vizkit3dPluginInformation& pluginInfos);
+                        std::shared_ptr<Vizkit3dPluginInformation> pluginInfos);
   
 protected:
   /**Is invoked whenever a transform changes in the graph */
   virtual void edgeModified(const envire::core::EdgeModifiedEvent& e);
+  
+  
+private slots:
+  /**Is called whenever the user clicks on one of the visualized objects */
+  void pluginPicked(const float x, const float y, const float z);
   
 private:
   void loadPlugins();
@@ -67,7 +75,7 @@ private:
   envire::core::EnvireGraph& graph; /**< the graph that is visualized*/
   envire::core::TreeView tree;
   vizkit3d::Vizkit3DWidget* widget; /**< Is used to display the graph */
-  const Vizkit3dPluginInformation& pluginInfos;/**< meta-data needed to figure out which plugins to load*/
+  std::shared_ptr<Vizkit3dPluginInformation> pluginInfos; /**< meta-data needed to figure out which plugins to load*/
   ItemVisualMap itemVisuals; /**<Map of all items that are currently visualized and the plugin visualizing them*/
   
 };
