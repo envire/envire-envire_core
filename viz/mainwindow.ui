@@ -20,13 +20,7 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QTreeWidget" name="treeWidget">
-       <column>
-        <property name="text">
-         <string notr="true">1</string>
-        </property>
-       </column>
-      </widget>
+      <widget class="QListWidget" name="listWidget"/>
       <widget class="vizkit3d::Vizkit3DWidget" name="Vizkit3DWidget"/>
      </widget>
     </item>

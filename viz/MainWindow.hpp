@@ -11,28 +11,32 @@ namespace envire { namespace core
 
 namespace envire { namespace viz 
 {
-  class EnvireGraphVisualizer;
-  class Vizkit3dPluginInformation;
   
-  class MainWindow : public QMainWindow
-  {
-    Q_OBJECT
-  public:
-    MainWindow(envire::core::EnvireGraph& graph, const std::string& rootNode);
-    
-  public slots:
-    void addFrame();
-    
-  private slots:
-    void framePicked(const QString&);
-    
-  private:
-    Ui::MainWindow window;
-    envire::core::EnvireGraph& graph;
-    std::shared_ptr<EnvireGraphVisualizer> visualzier;//is ptr for lazy instanziation
-    std::shared_ptr<Vizkit3dPluginInformation> pluginInfos;//is ptr for lazy instanziation
-    QString pickedFrame;//currently selected frame, empty if none
-  };
+class EnvireGraphVisualizer;
+class Vizkit3dPluginInformation;
+
+class MainWindow : public QMainWindow
+{
+  Q_OBJECT
+public:
+  MainWindow(envire::core::EnvireGraph& graph, const std::string& rootNode);
+  
+public slots:
+  void addFrame();
+  
+  void frameNameAdded(const QString& name);
+  void frameNameRemoved(const QString& name);
+  
+private slots:
+  void framePicked(const QString&);
+  
+private:
+  Ui::MainWindow window;
+  envire::core::EnvireGraph& graph;
+  std::shared_ptr<EnvireGraphVisualizer> visualzier;//is ptr for lazy instanziation
+  std::shared_ptr<Vizkit3dPluginInformation> pluginInfos;//is ptr for lazy instanziation
+  QString pickedFrame;//currently selected frame, empty if none
+};
   
   
   

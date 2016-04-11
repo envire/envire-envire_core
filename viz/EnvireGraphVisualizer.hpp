@@ -21,7 +21,7 @@ namespace envire { namespace viz
 {
 
 /**Draws an envire graph into a Vizkit3DWidget */
-class EnvireGraphVisualizer : QObject,  envire::core::GraphEventDispatcher
+class EnvireGraphVisualizer : public QObject, public  envire::core::GraphEventDispatcher
 {
   Q_OBJECT
   using vertex_descriptor = envire::core::GraphTraits::vertex_descriptor;
@@ -36,11 +36,15 @@ public:
                         const envire::core::FrameId& rootNode,
                         std::shared_ptr<Vizkit3dPluginInformation> pluginInfos);
   
+  const QSet<QString>& getFrameNames() const;
+  
 protected:
   /**Is invoked whenever a transform changes in the graph */
   virtual void edgeModified(const envire::core::EdgeModifiedEvent& e);
   
-  
+signals:
+  void frameAdded(const QString& frame);
+  void frameRemoved(const QString& frame);
 private slots:
   /**Is called whenever the user clicks on one of the visualized objects */
   void pluginPicked(const float x, const float y, const float z);
@@ -62,6 +66,12 @@ private:
   /**Display @p item */
   void loadItem(const envire::core::ItemBase::Ptr item);
   
+  /**Adds @p name to frameNames and emits frameAdded*/
+  void addFrameName(const QString& name);
+  /**Removes @p name from frameNames and emits frameRemoved */
+  void removeFrameName(const QString& name);
+  
+  
   /**Gets the current transformation between @p origin and @p target from the
    * graph and sets it in the widget*/
   void setTransformation(const FrameId& origin, const FrameId& target);
@@ -77,7 +87,7 @@ private:
   vizkit3d::Vizkit3DWidget* widget; /**< Is used to display the graph */
   std::shared_ptr<Vizkit3dPluginInformation> pluginInfos; /**< meta-data needed to figure out which plugins to load*/
   ItemVisualMap itemVisuals; /**<Map of all items that are currently visualized and the plugin visualizing them*/
-  
+  QSet<QString> frameNames; //contains the names of all frames in the current tree
 };
 
 }}

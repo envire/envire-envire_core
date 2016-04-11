@@ -40,16 +40,18 @@ EnvireGraphVisualizer::EnvireGraphVisualizer(EnvireGraph& graph,
 void EnvireGraphVisualizer::edgeAddedToTree(vertex_descriptor origin, vertex_descriptor target)
 {
   setTransformation(origin, target);
-  LOG(INFO) << "Added edge " << graph.getFrameId(origin) << " -- " << graph.getFrameId(target);
-  loadItems(target);
-  
   //Since we are drwing a tree structure every "origin", has been a "target" in
   //a previous call (except the root node). Thus we only need to load items
   //from the origin if it is the root.
   if(tree.isRoot(origin))
   {
     loadItems(origin);
+    addFrameName(QString::fromStdString(graph.getFrameId(origin)));
   }
+  loadItems(target);
+  addFrameName(QString::fromStdString(graph.getFrameId(target)));
+  
+  LOG(INFO) << "Added edge " << graph.getFrameId(origin) << " -- " << graph.getFrameId(target);
 }
 
 void EnvireGraphVisualizer::edgeRemovedFromTree(const vertex_descriptor origin, const vertex_descriptor target)
@@ -57,6 +59,9 @@ void EnvireGraphVisualizer::edgeRemovedFromTree(const vertex_descriptor origin, 
   const QString targetId = QString::fromStdString(graph.getFrameId(target));
   Qt::ConnectionType conType = Helpers::determineConnectionType(widget);
   QMetaObject::invokeMethod(widget, "removeFrame", conType, Q_ARG(QString, targetId));
+  
+  removeFrameName(QString::fromStdString(graph.getFrameId(target)));
+  
   LOG(INFO) << "Removed edge " << graph.getFrameId(origin) << " -- " << graph.getFrameId(target);
 }
 
@@ -185,7 +190,6 @@ void EnvireGraphVisualizer::setTransformation(const vertex_descriptor origin,
   QMetaObject::invokeMethod(widget, "setTransformation", Qt::QueuedConnection,
                             Q_ARG(QString, qSrc), Q_ARG(QString, qTarget),
                             Q_ARG(QVector3D, trans), Q_ARG(QQuaternion, rot));
-  //widget->setTransformation(qSrc, qTarget, trans, rot);  
 }
 
 void EnvireGraphVisualizer::setTransformation(const FrameId& origin, const FrameId& target)
@@ -193,6 +197,27 @@ void EnvireGraphVisualizer::setTransformation(const FrameId& origin, const Frame
   setTransformation(graph.getVertex(origin), graph.getVertex(target));
 }
 
+const QSet<QString>& EnvireGraphVisualizer::getFrameNames() const
+{
+  return frameNames;
+}
 
+
+void EnvireGraphVisualizer::addFrameName(const QString& name)
+{
+  if(frameNames.contains(name))
+  {
+    LOG(INFO) << "Ignoring frame name " << name.toStdString() << ". Has already been added";
+    return;
+  }
+  frameNames.insert(name);
+  emit frameAdded(name);
+}
+
+void EnvireGraphVisualizer::removeFrameName(const QString& name)
+{
+  frameNames.remove(name);
+  emit frameRemoved(name);
+}
 
 }}
