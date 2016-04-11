@@ -14,6 +14,8 @@ MainWindow::MainWindow(envire::core::EnvireGraph& graph, const std::string& root
     QMainWindow(), graph(graph)
 {
   window.setupUi(this);
+  window.treeWidget->setHeaderLabel("Frames");
+  
   //has to be done after setupUi because window.Vizkit3DWidget needs to exist
   pluginInfos.reset(new Vizkit3dPluginInformation(window.Vizkit3DWidget));
   visualzier.reset(new EnvireGraphVisualizer(graph, window.Vizkit3DWidget, rootNode, pluginInfos));
@@ -32,6 +34,7 @@ void MainWindow::addFrame()
     {
       try 
       {
+        
         graph.addFrame(text.toStdString());
       }
       catch(FrameAlreadyExistsException& ex)
