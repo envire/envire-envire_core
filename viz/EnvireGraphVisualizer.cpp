@@ -40,7 +40,7 @@ EnvireGraphVisualizer::EnvireGraphVisualizer(EnvireGraph& graph,
 void EnvireGraphVisualizer::edgeAddedToTree(vertex_descriptor origin, vertex_descriptor target)
 {
   setTransformation(origin, target);
-  //Since we are drwing a tree structure every "origin", has been a "target" in
+  //Since we are drawing a tree structure every "origin", has been a "target" in
   //a previous call (except the root node). Thus we only need to load items
   //from the origin if it is the root.
   if(tree.isRoot(origin))
@@ -88,7 +88,6 @@ void EnvireGraphVisualizer::itemRemoved(const envire::core::ItemRemovedEvent& e)
     LOG(INFO) << "Removed item " << e.item->getIDString();
   }
 }
-
 
 std::pair<QQuaternion, QVector3D> EnvireGraphVisualizer::convertTransform(const Transform& tf) const
 {

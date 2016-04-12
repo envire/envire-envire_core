@@ -200,7 +200,7 @@ int test(int argc, char **argv)
       
       
       //change length of transformation
-      tf = graph.getTransform("C", "D");
+   /*   tf = graph.getTransform("C", "D");
       if(tf.transform.translation.norm() >= 10)
       {
         tf.transform.translation << 0, 1, 0;
@@ -210,7 +210,7 @@ int test(int argc, char **argv)
         tf.transform.translation.x() += 0.1;
       }
       graph.updateTransform("C", "D", tf);
-      
+      */
       //random growing tree
       if((i % 10) == 0)
       {
@@ -258,7 +258,7 @@ int test(int argc, char **argv)
           graph.addItemToFrame("A", cloud3);
         }
       }
-      
+      /*
       // add a sub tree
       if((i % 10) == 0) 
       {
@@ -280,8 +280,9 @@ int test(int argc, char **argv)
           graph.remove_edge("sub1", "sub3");
           graph.remove_edge("A", "sub1");
           removeSubTree = false;
-        }
-      }      
+        } 
+        } */
+    
     }
   });
   app.exec(); 

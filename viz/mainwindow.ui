@@ -20,7 +20,27 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QListWidget" name="listWidget"/>
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Frames</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QListWidget" name="listWidget"/>
+        </item>
+       </layout>
+      </widget>
       <widget class="vizkit3d::Vizkit3DWidget" name="Vizkit3DWidget"/>
      </widget>
     </item>
@@ -48,6 +68,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionAdd_Frame"/>
+   <addaction name="actionRemove_Frame"/>
   </widget>
   <action name="actionAdd_Frame">
    <property name="text">
@@ -55,6 +76,14 @@
    </property>
    <property name="toolTip">
     <string>Add a new frame to the envire graph</string>
+   </property>
+  </action>
+  <action name="actionRemove_Frame">
+   <property name="text">
+    <string>Remove Frame</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove the selected frame</string>
    </property>
   </action>
  </widget>
