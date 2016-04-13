@@ -1,5 +1,6 @@
 #pragma once
 #include "ui_mainwindow.h"
+#include "TransformModel.hpp"
 #include <QMainWindow>
 #include <memory>
 
@@ -46,6 +47,7 @@ private:
   std::shared_ptr<EnvireGraphVisualizer> visualzier;//is ptr for lazy instanziation
   std::shared_ptr<Vizkit3dPluginInformation> pluginInfos;//is ptr for lazy instanziation
   QString selectedFrame;//currently selected frame, empty if none
+  TransformModel currentTransform;//model of the currently selected transform
 };
   
   

@@ -1,6 +1,8 @@
 #include "MainWindow.hpp"
 #include "EnvireGraphVisualizer.hpp"
+#include "TransformModel.hpp"
 #include "Vizkit3dPluginInformation.hpp"
+#include "DoubleSpinboxItemDelegate.hpp"
 #include <envire_core/graph/EnvireGraph.hpp>
 #include <QMessageBox>
 #include <QInputDialog>
@@ -8,6 +10,8 @@
 
 
 using namespace envire::core;
+using vertex_descriptor = GraphTraits::vertex_descriptor;
+
 namespace envire { namespace viz
 {
   
@@ -15,13 +19,18 @@ MainWindow::MainWindow(EnvireGraph& graph, const std::string& rootNode) :
     QMainWindow(), graph(graph)
 {
   window.setupUi(this);
+  
+  window.treeView->setModel(&currentTransform);
+  DoubleSpinboxItemDelegate* del = new DoubleSpinboxItemDelegate(window.treeView);
+  window.treeView->setItemDelegateForColumn(1, del);
+  
   //need to call a custom ctor on the vizkit3dwidget to set the correct world_name
   //this is done because I want to see everything in the qt designer. Otherwise
   //we could have just added the vizkit3dwidget manually in the first place
   delete window.Vizkit3DWidget;
-  window.Vizkit3DWidget = new vizkit3d::Vizkit3DWidget(window.splitter, QString::fromStdString(rootNode));
+  window.Vizkit3DWidget = new vizkit3d::Vizkit3DWidget(window.horizontalSplitter, QString::fromStdString(rootNode));
   window.Vizkit3DWidget->setObjectName(QString::fromUtf8("Vizkit3DWidget"));
-  window.splitter->addWidget(window.Vizkit3DWidget);
+  window.horizontalSplitter->addWidget(window.Vizkit3DWidget);
   
   pluginInfos.reset(new Vizkit3dPluginInformation(window.Vizkit3DWidget));
   visualzier.reset(new EnvireGraphVisualizer(graph, window.Vizkit3DWidget, rootNode, pluginInfos));
@@ -93,6 +102,7 @@ void MainWindow::listWidgetItemChanged(QListWidgetItem * current, QListWidgetIte
 
 void MainWindow::selectFrame(const QString& name)
 {  
+  //FIXME aufsplitten
   LOG(ERROR) << "Selected frame: " << name.toStdString();
   if(name != selectedFrame)
   {
@@ -108,6 +118,19 @@ void MainWindow::selectFrame(const QString& name)
       assert(items.size() == 1);
       if(!items.first()->isSelected())
         items.first()->setSelected(true);
+      
+      //display corresponding Transform
+      const vertex_descriptor selectedVertex = graph.getVertex(name.toStdString());
+      const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
+      if(parentVertex != GraphTraits::null_vertex())
+      {
+        const Transform tf = graph.getTransform(parentVertex, selectedVertex);
+        currentTransform.setTransform(tf.transform);
+      }
+      else
+      {
+        //TODO set treeView to readonly, we clicked a root node
+      }
   }
 }
 

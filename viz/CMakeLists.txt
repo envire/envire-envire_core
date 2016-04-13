@@ -9,11 +9,15 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}) #to be able to include ui_mainw
 rock_library(envire_visualizer
              MOC     MainWindow.hpp
                      EnvireGraphVisualizer.hpp
+                     TransformModel.hpp
+                     DoubleSpinboxItemDelegate.hpp
              HEADERS Vizkit3dPluginInformation.hpp
                      Helpers.hpp
                      ${SOURCES_UI_H}
              SOURCES EnvireGraphVisualizer.cpp
                      Vizkit3dPluginInformation.cpp
+                     TransformModel.cpp
+                     DoubleSpinboxItemDelegate.cpp
                      ${SOURCES_MOC}
                      mainwindow.ui #to create a dependency and regen if the ui changes
                      MainWindow.cpp

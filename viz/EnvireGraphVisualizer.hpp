@@ -38,6 +38,9 @@ public:
   
   const QSet<QString>& getFrameNames() const;
   
+  /**Returns a reference to the TreeView that is currently visualized. */
+  const envire::core::TreeView& getTree() const;
+  
 protected:
   /**Is invoked whenever a transform changes in the graph */
   virtual void edgeModified(const envire::core::EdgeModifiedEvent& e);

@@ -219,4 +219,10 @@ void EnvireGraphVisualizer::removeFrameName(const QString& name)
   emit frameRemoved(name);
 }
 
+const TreeView& EnvireGraphVisualizer::getTree() const
+{
+  return tree;
+}
+
+
 }}
