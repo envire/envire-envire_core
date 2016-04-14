@@ -37,6 +37,8 @@ public slots:
 private slots:
   void framePicked(const QString&);
   void listWidgetItemChanged(QListWidgetItem * current, QListWidgetItem * previous);
+  /**Invoked if the user changes a transformation */
+  void transformChanged(const base::TransformWithCovariance& newValue);
   
 private:
 

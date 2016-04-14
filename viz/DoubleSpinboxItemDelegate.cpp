@@ -1,6 +1,7 @@
 #include "DoubleSpinboxItemDelegate.hpp"
 #include <QDoubleSpinBox>
 #include <limits>
+#include <iostream>
 
 namespace envire { namespace viz {
 
@@ -15,9 +16,13 @@ QWidget* DoubleSpinboxItemDelegate::createEditor(QWidget *parent,
 {
     QDoubleSpinBox *editor = new QDoubleSpinBox(parent);
     editor->setFrame(false);
-    editor->setMinimum(std::numeric_limits<double>::min());
-    editor->setMaximum(std::numeric_limits<double>::max());
     editor->setDecimals(decimals);
+    //numeric_limits<int> is used instead of double because setMinimum() and
+    //setMaximum internally round. The rounding breaks for numeric_limits<double>::min()
+    //and just returns 0. Thus we use numeric_limits<int> which should be enough
+    //for the use case.
+    editor->setMinimum(std::numeric_limits<int>::min());
+    editor->setMaximum(std::numeric_limits<int>::max());
     return editor;
 }
 
@@ -29,10 +34,12 @@ void DoubleSpinboxItemDelegate::setDecimals(const unsigned int value)
 void DoubleSpinboxItemDelegate::setEditorData(QWidget *editor,
                                               const QModelIndex &index) const
 {
-  const double value = index.model()->data(index, Qt::EditRole).toDouble();
+  const double value = index.model()->data(index, Qt::DisplayRole).toDouble();
+  std::cout << "EDITVALUE: " << value << std::endl;
 
   QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
   spinBox->setValue(value);
+  std::cout << spinBox->value() << std::endl;
 }
 
 void DoubleSpinboxItemDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,

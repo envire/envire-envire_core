@@ -52,6 +52,8 @@ MainWindow::MainWindow(EnvireGraph& graph, const std::string& rootNode) :
   
   connect(visualzier.get(), SIGNAL(frameAdded(const QString&)), this, SLOT(frameNameAdded(const QString&)));
   connect(visualzier.get(), SIGNAL(frameRemoved(const QString&)), this, SLOT(frameNameRemoved(const QString&)));
+  connect(&currentTransform, SIGNAL(transformChanged(const base::TransformWithCovariance&)),
+          this, SLOT(transformChanged(const base::TransformWithCovariance&)));
 }
 
 void MainWindow::addFrame()
@@ -122,15 +124,27 @@ void MainWindow::selectFrame(const QString& name)
       //display corresponding Transform
       const vertex_descriptor selectedVertex = graph.getVertex(name.toStdString());
       const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
+      
+      //disconnect before changing the transform model because changing the
+      //value triggers events that are indistinguishable from user input
+      disconnect(&currentTransform, SIGNAL(transformChanged(const base::TransformWithCovariance&)),
+          this, SLOT(transformChanged(const base::TransformWithCovariance&)));
       if(parentVertex != GraphTraits::null_vertex())
       {
         const Transform tf = graph.getTransform(parentVertex, selectedVertex);
         currentTransform.setTransform(tf.transform);
+        currentTransform.setEditable(true);
+        window.treeView->setEnabled(true);
       }
       else
       {
-        //TODO set treeView to readonly, we clicked a root node
+        currentTransform.setTransform(base::TransformWithCovariance());
+        currentTransform.setEditable(false);
+        window.treeView->setEnabled(false);
       }
+      connect(&currentTransform, SIGNAL(transformChanged(const base::TransformWithCovariance&)),
+              this, SLOT(transformChanged(const base::TransformWithCovariance&)));
+      
   }
 }
 
@@ -145,4 +159,19 @@ void MainWindow::frameNameRemoved(const QString& name)
   assert(items.size() == 1); //the frame ids are unique and should not be in the list more than once
   delete items.first(); //this will remove the item from the listWidget
 }
+
+void MainWindow::transformChanged(const base::TransformWithCovariance& newValue)
+{
+ 
+  std::cout << "newTrans" << std::endl << newValue.translation.transpose() << std::endl
+  << newValue.orientation.coeffs().transpose() << std::endl;
+ 
+  const vertex_descriptor selectedVertex = graph.getVertex(selectedFrame.toStdString());
+  const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
+  const FrameId source = graph.getFrameId(parentVertex);
+  const FrameId target = selectedFrame.toStdString();
+  graph.updateTransform(source, target, newValue);
+  
+}
+
 }}

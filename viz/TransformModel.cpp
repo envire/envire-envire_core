@@ -76,6 +76,8 @@ TransformModel::TransformModel() :
 void TransformModel::setTransform(const base::TransformWithCovariance& newValue)
 {
   tf = newValue;
+  //block signals while changing the transform programatically, to avoid
+  //infinite loops
   transXItem.setData(QVariant::fromValue<double>(tf.translation.x()) ,Qt::DisplayRole);
   transYItem.setData(QVariant::fromValue<double>(tf.translation.y()) ,Qt::DisplayRole);
   transZItem.setData(QVariant::fromValue<double>(tf.translation.z()) ,Qt::DisplayRole);
@@ -88,7 +90,7 @@ void TransformModel::setTransform(const base::TransformWithCovariance& newValue)
 
 void  TransformModel::itemChangedSlot(QStandardItem * item)
 {
-  const double data = item->data().toDouble();
+  const double data = item->data(Qt::DisplayRole).toDouble();
   if(item == &transXItem)
   {
     tf.translation.x() = data;
@@ -118,6 +120,18 @@ void  TransformModel::itemChangedSlot(QStandardItem * item)
     tf.orientation.w() = data;
   }  
   emit transformChanged(tf);
+}
+
+void TransformModel::setEditable(const bool value)
+{
+  transXItem.setEditable(value);
+  transYItem.setEditable(value);
+  transZItem.setEditable(value);
+  
+  rotXItem.setEditable(value);
+  rotYItem.setEditable(value);
+  rotZItem.setEditable(value);
+  rotWItem.setEditable(value);
 }
   
   

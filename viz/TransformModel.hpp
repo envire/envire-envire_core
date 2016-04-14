@@ -18,9 +18,11 @@ signals:
   void transformChanged(const base::TransformWithCovariance& newValue);
   
 public slots:
-  /** Used to programatically change the transform */
+  /** Used to programatically change the transform
+   * This method should be invoked in the gui thread*/
   void setTransform(const base::TransformWithCovariance& newValue);
-  
+  /*If set to false, the model will be read only */
+  void setEditable(const bool value);
 private slots:
 
   void  itemChangedSlot(QStandardItem * item);
