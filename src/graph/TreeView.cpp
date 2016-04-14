@@ -224,5 +224,10 @@ vertex_descriptor TreeView::getParent(vertex_descriptor node) const
     return tree.at(node).parent;
 }
 
+bool TreeView::isParent(const vertex_descriptor parent, const vertex_descriptor child) const
+{
+  return tree.at(child).parent == parent;
+}
+
 
 }}

@@ -143,6 +143,10 @@ namespace envire { namespace core
         //FIXME comment exception?!
         GraphTraits::vertex_descriptor getParent(GraphTraits::vertex_descriptor node) const;
         
+        /** @return true if @p parent is the parent of @p child in this TreeView
+         * @throw std::out_of_range if child is not part of the TreeView*/
+        bool isParent(const GraphTraits::vertex_descriptor parent, const GraphTraits::vertex_descriptor child) const;
+        
         /**The signals are invoked whenever the tree is updated by the TransformGraph
         * @note This is only the case if you requested an updating TreeView. 
         *       Otherwise they'll never be invoked.

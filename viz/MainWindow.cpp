@@ -1,9 +1,11 @@
 #include "MainWindow.hpp"
 #include "EnvireGraphVisualizer.hpp"
 #include "TransformModel.hpp"
+#include "Helpers.hpp"
 #include "Vizkit3dPluginInformation.hpp"
 #include "DoubleSpinboxItemDelegate.hpp"
 #include <envire_core/graph/EnvireGraph.hpp>
+#include <envire_core/events/EdgeEvents.hpp>
 #include <QMessageBox>
 #include <QInputDialog>
 #include <glog/logging.h>
@@ -16,7 +18,7 @@ namespace envire { namespace viz
 {
   
 MainWindow::MainWindow(EnvireGraph& graph, const std::string& rootNode) :
-    QMainWindow(), graph(graph)
+    QMainWindow(), GraphEventDispatcher(&graph), graph(graph), ignoreEdgeModifiedEvent(false)
 {
   window.setupUi(this);
   
@@ -124,28 +126,33 @@ void MainWindow::selectFrame(const QString& name)
       //display corresponding Transform
       const vertex_descriptor selectedVertex = graph.getVertex(name.toStdString());
       const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
-      
-      //disconnect before changing the transform model because changing the
-      //value triggers events that are indistinguishable from user input
-      disconnect(&currentTransform, SIGNAL(transformChanged(const base::TransformWithCovariance&)),
-          this, SLOT(transformChanged(const base::TransformWithCovariance&)));
-      if(parentVertex != GraphTraits::null_vertex())
-      {
-        const Transform tf = graph.getTransform(parentVertex, selectedVertex);
-        currentTransform.setTransform(tf.transform);
-        currentTransform.setEditable(true);
-        window.treeView->setEnabled(true);
-      }
-      else
-      {
-        currentTransform.setTransform(base::TransformWithCovariance());
-        currentTransform.setEditable(false);
-        window.treeView->setEnabled(false);
-      }
-      connect(&currentTransform, SIGNAL(transformChanged(const base::TransformWithCovariance&)),
-              this, SLOT(transformChanged(const base::TransformWithCovariance&)));
+      updateDisplayedTransform(parentVertex, selectedVertex);
+
       
   }
+}
+
+void MainWindow::updateDisplayedTransform(const vertex_descriptor parent, const vertex_descriptor selected)
+{
+  //disconnect before changing the transform model because changing the
+  //value triggers events that are indistinguishable from user input
+  disconnect(&currentTransform, SIGNAL(transformChanged(const base::TransformWithCovariance&)),
+      this, SLOT(transformChanged(const base::TransformWithCovariance&)));
+  if(parent != GraphTraits::null_vertex())
+  {
+    const Transform tf = graph.getTransform(parent, selected);
+    currentTransform.setTransform(tf.transform);
+    currentTransform.setEditable(true);
+    window.treeView->setEnabled(true);
+  }
+  else
+  {
+    currentTransform.setTransform(base::TransformWithCovariance());
+    currentTransform.setEditable(false);
+    window.treeView->setEnabled(false);
+  }
+  connect(&currentTransform, SIGNAL(transformChanged(const base::TransformWithCovariance&)),
+          this, SLOT(transformChanged(const base::TransformWithCovariance&)));
 }
 
 void MainWindow::frameNameAdded(const QString& name)
@@ -170,8 +177,47 @@ void MainWindow::transformChanged(const base::TransformWithCovariance& newValue)
   const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
   const FrameId source = graph.getFrameId(parentVertex);
   const FrameId target = selectedFrame.toStdString();
-  graph.updateTransform(source, target, newValue);
+  ignoreEdgeModifiedEvent = true;
+  graph.updateTransform(source, target, newValue);//will trigger EdgeModifiedEvent
+  ignoreEdgeModifiedEvent = false;
   
 }
+
+void MainWindow::edgeModified(const EdgeModifiedEvent& e)
+{
+  const QString origin = QString::fromStdString(e.origin);
+  const QString target = QString::fromStdString(e.target);
+  //need to invoke because the graph might have been modified from a different
+  //thread
+  const Qt::ConnectionType conType = Helpers::determineConnectionType(this);
+  QMetaObject::invokeMethod(this, "edgeModifiedInternal", conType,
+                            Q_ARG(QString, origin), Q_ARG(QString, target));  
+}
+
+void MainWindow::edgeModifiedInternal(const QString& originFrame, const QString& targetFrame)
+{
+  vertex_descriptor originVertex = graph.getVertex(originFrame.toStdString());
+  vertex_descriptor targetVertex = graph.getVertex(targetFrame.toStdString());
+  const TreeView& tree = visualzier->getTree();
+  
+  if(tree.vertexExists(originVertex) && tree.vertexExists(targetVertex))
+  {
+    if(selectedFrame == originFrame)
+    {
+      if(tree.isParent(targetVertex, originVertex))
+      {
+        updateDisplayedTransform(targetVertex, originVertex);
+      }
+    }
+    else if(selectedFrame == targetFrame)
+    {
+      if(tree.isParent(originVertex, targetVertex))
+      {
+        updateDisplayedTransform(originVertex, targetVertex);
+      }
+    }
+  }  
+}
+
 
 }}
