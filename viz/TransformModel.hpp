@@ -23,6 +23,8 @@ public slots:
   void setTransform(const base::TransformWithCovariance& newValue);
   /*If set to false, the model will be read only */
   void setEditable(const bool value);
+  
+  const base::TransformWithCovariance& getTransform() const;
 private slots:
 
   void  itemChangedSlot(QStandardItem * item);

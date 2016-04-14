@@ -4,6 +4,7 @@ find_package(Boost COMPONENTS system REQUIRED)
 find_package(Qt4 REQUIRED)
  
 qt4_wrap_ui(SOURCES_UI_H mainwindow.ui)
+qt4_wrap_ui(SOURCES2_UI_H addtransformdialog.ui)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}) #to be able to include ui_mainwindow.h
 
 rock_library(envire_visualizer
@@ -11,15 +12,19 @@ rock_library(envire_visualizer
                      EnvireGraphVisualizer.hpp
                      TransformModel.hpp
                      DoubleSpinboxItemDelegate.hpp
+                     AddTransformDialog.hpp
              HEADERS Vizkit3dPluginInformation.hpp
                      Helpers.hpp
                      ${SOURCES_UI_H}
+                     ${SOURCES2_UI_H}
              SOURCES EnvireGraphVisualizer.cpp
                      Vizkit3dPluginInformation.cpp
                      TransformModel.cpp
                      DoubleSpinboxItemDelegate.cpp
+                     AddTransformDialog.cpp
                      ${SOURCES_MOC}
                      mainwindow.ui #to create a dependency and regen if the ui changes
+                     addtransformdialog.ui
                      MainWindow.cpp
              DEPS_PKGCONFIG vizkit3d
              DEPS_PKGCONFIG envire_core

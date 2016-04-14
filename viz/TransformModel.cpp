@@ -133,6 +133,11 @@ void TransformModel::setEditable(const bool value)
   rotZItem.setEditable(value);
   rotWItem.setEditable(value);
 }
+
+const base::TransformWithCovariance& TransformModel::getTransform() const
+{
+  return tf;
+}
   
   
 }}

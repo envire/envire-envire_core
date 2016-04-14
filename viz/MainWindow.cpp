@@ -4,6 +4,7 @@
 #include "Helpers.hpp"
 #include "Vizkit3dPluginInformation.hpp"
 #include "DoubleSpinboxItemDelegate.hpp"
+#include "AddTransformDialog.hpp"
 #include <envire_core/graph/EnvireGraph.hpp>
 #include <envire_core/events/EdgeEvents.hpp>
 #include <QMessageBox>
@@ -60,22 +61,20 @@ MainWindow::MainWindow(EnvireGraph& graph, const std::string& rootNode) :
 
 void MainWindow::addFrame()
 {
-    bool ok;
-    const QString text = QInputDialog::getText(this, tr("Add Frame"),
-                                              tr("Frame ID:"), QLineEdit::Normal,
-                                              "", &ok);
-    if(ok && !text.isEmpty())
+  AddTransformDialog dialog(this);
+  if(dialog.exec() == QDialog::Accepted)
+  {
+    Transform tf(dialog.getTransform());
+    const FrameId frame = dialog.getFrameId().toStdString();
+    if(frame.size() > 0)
     {
-      try 
-      {
-        
-        graph.addFrame(text.toStdString());
-      }
-      catch(FrameAlreadyExistsException& ex)
-      {
-        QMessageBox::critical(this, tr("Frame already exists"), QString::fromStdString(ex.msg));
-      }
+      graph.addTransform(selectedFrame.toStdString(), frame, tf);
     }
+    else
+    {
+      //TODO do not allow dialog to close without frameId
+    }
+  }
 }
 
 void MainWindow::removeFrame()
@@ -127,8 +126,6 @@ void MainWindow::selectFrame(const QString& name)
       const vertex_descriptor selectedVertex = graph.getVertex(name.toStdString());
       const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
       updateDisplayedTransform(parentVertex, selectedVertex);
-
-      
   }
 }
 
