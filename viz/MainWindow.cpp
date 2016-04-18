@@ -24,6 +24,7 @@ MainWindow::MainWindow(EnvireGraph& graph, const std::string& rootNode) :
   window.setupUi(this);
   
   window.treeView->setModel(&currentTransform);
+  window.treeView->expandAll();
   DoubleSpinboxItemDelegate* del = new DoubleSpinboxItemDelegate(window.treeView);
   window.treeView->setItemDelegateForColumn(1, del);
   
@@ -35,13 +36,15 @@ MainWindow::MainWindow(EnvireGraph& graph, const std::string& rootNode) :
   window.Vizkit3DWidget->setObjectName(QString::fromUtf8("Vizkit3DWidget"));
   window.horizontalSplitter->addWidget(window.Vizkit3DWidget);
   
+  window.listWidget->setSortingEnabled(true);
+  
   pluginInfos.reset(new Vizkit3dPluginInformation(window.Vizkit3DWidget));
   visualzier.reset(new EnvireGraphVisualizer(graph, window.Vizkit3DWidget, rootNode, pluginInfos));
     
   //get initially present frame names
   EnvireGraph::vertex_iterator it, end;
   std::tie(it, end) = graph.getVertices();
-  for(; it != end; it++)
+  for(; it != end; it++) 
   {
     const FrameId& id = graph.getFrameId(*it);
     window.listWidget->addItem(QString::fromStdString(id));

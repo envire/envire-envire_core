@@ -6,60 +6,56 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>920</width>
-    <height>666</height>
+    <width>1054</width>
+    <height>659</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QSplitter" name="horizontalSplitter">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>9</y>
-      <width>1282</width>
-      <height>600</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-    <widget class="QSplitter" name="splitter">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <widget class="QGroupBox" name="frameGroupBox">
-      <property name="title">
-       <string>Selected Frame</string>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QSplitter" name="horizontalSplitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <item>
-        <widget class="QTreeView" name="treeView"/>
-       </item>
-      </layout>
+      <widget class="QSplitter" name="splitter">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <widget class="QGroupBox" name="frameGroupBox">
+        <property name="title">
+         <string>Selected Frame</string>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QTreeView" name="treeView"/>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QGroupBox" name="groupBox_2">
+        <property name="title">
+         <string>Frames</string>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QListWidget" name="listWidget"/>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+      <widget class="vizkit3d::Vizkit3DWidget" name="Vizkit3DWidget"/>
      </widget>
-     <widget class="QGroupBox" name="groupBox_2">
-      <property name="title">
-       <string>Frames</string>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QListWidget" name="listWidget"/>
-       </item>
-      </layout>
-     </widget>
-    </widget>
-    <widget class="vizkit3d::Vizkit3DWidget" name="Vizkit3DWidget"/>
-   </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>920</width>
+     <width>1054</width>
      <height>27</height>
     </rect>
    </property>

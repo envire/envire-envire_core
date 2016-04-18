@@ -7,16 +7,30 @@ TransformModel::TransformModel() :
   QStandardItemModel()
 {
   setColumnCount(2);
-  
+  QStringList headerLabels;
+  headerLabels.append("");
+  headerLabels.append("Value");
+  setHorizontalHeaderLabels(headerLabels);
   
   QStandardItem *parentItem = invisibleRootItem();
-
+  
+  QList<QStandardItem*> transItemList;
   QStandardItem* transItem = new QStandardItem("Translation");
+  QStandardItem* transItemValue = new QStandardItem("");
   transItem->setEditable(false);
-  parentItem->appendRow(transItem);
+  transItemValue->setEditable(false);
+  transItemList.append(transItem);
+  transItemList.append(transItemValue);
+  parentItem->appendRow(transItemList);
+  
+  QList<QStandardItem*> rotItemList;
   QStandardItem* rotItem = new QStandardItem("Orientation");
+  QStandardItem* rotItemValue = new QStandardItem("");
   rotItem->setEditable(false);
-  parentItem->appendRow(rotItem);
+  rotItemValue->setEditable(false);
+  rotItemList.append(rotItem);
+  rotItemList.append(rotItemValue);
+  parentItem->appendRow(rotItemList);
 
   QList<QStandardItem*> transX;
   QList<QStandardItem*> transY;

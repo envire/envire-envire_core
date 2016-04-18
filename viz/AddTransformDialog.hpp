@@ -14,6 +14,9 @@ public:
   QString getFrameId() const;
   const base::TransformWithCovariance& getTransform() const;
   
+private slots:
+  void frameIdChanged(const QString& newId);
+  
 private:
   Ui::AddTransformDialog window;
   TransformModel model;
