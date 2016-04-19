@@ -16,11 +16,11 @@ namespace envire { namespace viz
 using TypeToUpdateMapping = Vizkit3dPluginInformation::TypeToUpdateMapping;  
 
   
-EnvireGraphVisualizer::EnvireGraphVisualizer(EnvireGraph& graph,
+EnvireGraphVisualizer::EnvireGraphVisualizer(std::shared_ptr<envire::core::EnvireGraph> graph,
                                              Vizkit3DWidget* widget, 
                                              const FrameId& rootNode,
                                              std::shared_ptr<Vizkit3dPluginInformation> pluginInfos) :
-  GraphEventDispatcher(&graph), graph(graph), widget(widget), pluginInfos(pluginInfos)
+  GraphEventDispatcher(graph.get()), graph(graph), widget(widget), pluginInfos(pluginInfos)
 { 
   auto edgeAdded = std::bind(&EnvireGraphVisualizer::edgeAddedToTree, this,
                              std::placeholders::_1, std::placeholders::_2);
@@ -33,7 +33,7 @@ EnvireGraphVisualizer::EnvireGraphVisualizer(EnvireGraph& graph,
   
   
   //will cause edgeAdded events which will be handled by EnvireGraphVisualizer::edgeAddedToTree
-  graph.getTree(rootNode, true, &tree);
+  graph->getTree(rootNode, true, &tree);
   widget->setRootFrame(QString::fromStdString(rootNode));
 }
 
@@ -46,28 +46,28 @@ void EnvireGraphVisualizer::edgeAddedToTree(vertex_descriptor origin, vertex_des
   if(tree.isRoot(origin))
   {
     loadItems(origin);
-    addFrameName(QString::fromStdString(graph.getFrameId(origin)));
+    addFrameName(QString::fromStdString(graph->getFrameId(origin)));
   }
   loadItems(target);
-  addFrameName(QString::fromStdString(graph.getFrameId(target)));
+  addFrameName(QString::fromStdString(graph->getFrameId(target)));
   
-  LOG(INFO) << "Added edge " << graph.getFrameId(origin) << " -- " << graph.getFrameId(target);
+  LOG(INFO) << "Added edge " << graph->getFrameId(origin) << " -- " << graph->getFrameId(target);
 }
 
 void EnvireGraphVisualizer::edgeRemovedFromTree(const vertex_descriptor origin, const vertex_descriptor target)
 {
-  const QString targetId = QString::fromStdString(graph.getFrameId(target));
+  const QString targetId = QString::fromStdString(graph->getFrameId(target));
   Qt::ConnectionType conType = Helpers::determineConnectionType(widget);
   QMetaObject::invokeMethod(widget, "removeFrame", conType, Q_ARG(QString, targetId));
   
-  removeFrameName(QString::fromStdString(graph.getFrameId(target)));
+  removeFrameName(QString::fromStdString(graph->getFrameId(target)));
   
-  LOG(INFO) << "Removed edge " << graph.getFrameId(origin) << " -- " << graph.getFrameId(target);
+  LOG(INFO) << "Removed edge " << graph->getFrameId(origin) << " -- " << graph->getFrameId(target);
 }
 
 void EnvireGraphVisualizer::itemAdded(const envire::core::ItemAddedEvent& e)
 {
-  const GraphTraits::vertex_descriptor vd = graph.getVertex(e.frame);
+  const GraphTraits::vertex_descriptor vd = graph->getVertex(e.frame);
   //if the vertex that the item was added to is part of the current tree
   if(tree.vertexExists(vd))
   {
@@ -77,7 +77,7 @@ void EnvireGraphVisualizer::itemAdded(const envire::core::ItemAddedEvent& e)
 
 void EnvireGraphVisualizer::itemRemoved(const envire::core::ItemRemovedEvent& e)
 {
-  const GraphTraits::vertex_descriptor vd = graph.getVertex(e.frame);
+  const GraphTraits::vertex_descriptor vd = graph->getVertex(e.frame);
   if(tree.vertexExists(vd))
   {
     VizPluginBase* itemViz = itemVisuals.at(e.item->getID());//may throw
@@ -101,9 +101,9 @@ std::pair<QQuaternion, QVector3D> EnvireGraphVisualizer::convertTransform(const 
 
 void EnvireGraphVisualizer::loadItems(const vertex_descriptor vertex)
 {
-  const FrameId frame = graph.getFrameId(vertex);
+  const FrameId frame = graph->getFrameId(vertex);
   
-  graph.visitItems(frame, [this] (const ItemBase::Ptr item)
+  graph->visitItems(frame, [this] (const ItemBase::Ptr item)
   {
     loadItem(item);
   });
@@ -168,8 +168,8 @@ void EnvireGraphVisualizer::pluginPicked(const float x, const float y, const flo
 void EnvireGraphVisualizer::edgeModified(const EdgeModifiedEvent& e)
 {
   //only update if this is an edge of the current tree and not a cross-edge
-  const vertex_descriptor origin = graph.getVertex(e.origin);
-  const vertex_descriptor target = graph.getVertex(e.target);
+  const vertex_descriptor origin = graph->getVertex(e.origin);
+  const vertex_descriptor target = graph->getVertex(e.target);
   if(tree.edgeExists(origin, target))
   {
     setTransformation(origin, target);
@@ -179,12 +179,12 @@ void EnvireGraphVisualizer::edgeModified(const EdgeModifiedEvent& e)
 void EnvireGraphVisualizer::setTransformation(const vertex_descriptor origin,
                                               const vertex_descriptor target)
 {
-  const Transform tf = graph.getTransform(origin, target);
+  const Transform tf = graph->getTransform(origin, target);
   QQuaternion rot;
   QVector3D trans;
   std::tie(rot, trans) = convertTransform(tf);
-  const QString qSrc = QString::fromStdString(graph.getFrameId(origin));
-  const QString qTarget = QString::fromStdString(graph.getFrameId(target));
+  const QString qSrc = QString::fromStdString(graph->getFrameId(origin));
+  const QString qTarget = QString::fromStdString(graph->getFrameId(target));
   //needs to be invoked because we might have been called from the non-gui thread
   QMetaObject::invokeMethod(widget, "setTransformation", Qt::QueuedConnection,
                             Q_ARG(QString, qSrc), Q_ARG(QString, qTarget),
@@ -193,7 +193,7 @@ void EnvireGraphVisualizer::setTransformation(const vertex_descriptor origin,
 
 void EnvireGraphVisualizer::setTransformation(const FrameId& origin, const FrameId& target)
 {
-  setTransformation(graph.getVertex(origin), graph.getVertex(target));
+  setTransformation(graph->getVertex(origin), graph->getVertex(target));
 }
 
 const QSet<QString>& EnvireGraphVisualizer::getFrameNames() const

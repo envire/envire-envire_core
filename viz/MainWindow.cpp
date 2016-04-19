@@ -18,48 +18,79 @@ using vertex_descriptor = GraphTraits::vertex_descriptor;
 namespace envire { namespace viz
 {
   
-MainWindow::MainWindow(EnvireGraph& graph, const std::string& rootNode) :
-    QMainWindow(), GraphEventDispatcher(&graph), graph(graph), ignoreEdgeModifiedEvent(false)
+MainWindow::MainWindow(): QMainWindow(), GraphEventDispatcher(),
+rootFrame(""), ignoreEdgeModifiedEvent(false)
+{
+  initGui();
+}
+  
+void MainWindow::initGui()
 {
   window.setupUi(this);
-  
+    
   window.treeView->setModel(&currentTransform);
   window.treeView->expandAll();
   DoubleSpinboxItemDelegate* del = new DoubleSpinboxItemDelegate(window.treeView);
   window.treeView->setItemDelegateForColumn(1, del);
-  
-  //need to call a custom ctor on the vizkit3dwidget to set the correct world_name
-  //this is done because I want to see everything in the qt designer. Otherwise
-  //we could have just added the vizkit3dwidget manually in the first place
-  delete window.Vizkit3DWidget;
-  window.Vizkit3DWidget = new vizkit3d::Vizkit3DWidget(window.horizontalSplitter, QString::fromStdString(rootNode));
-  window.Vizkit3DWidget->setObjectName(QString::fromUtf8("Vizkit3DWidget"));
-  window.horizontalSplitter->addWidget(window.Vizkit3DWidget);
-  
   window.listWidget->setSortingEnabled(true);
   
-  pluginInfos.reset(new Vizkit3dPluginInformation(window.Vizkit3DWidget));
-  visualzier.reset(new EnvireGraphVisualizer(graph, window.Vizkit3DWidget, rootNode, pluginInfos));
-    
-  //get initially present frame names
-  EnvireGraph::vertex_iterator it, end;
-  std::tie(it, end) = graph.getVertices();
-  for(; it != end; it++) 
-  {
-    const FrameId& id = graph.getFrameId(*it);
-    window.listWidget->addItem(QString::fromStdString(id));
-  }
-  
+  connect(window.Vizkit3DWidget, SIGNAL(framePicked(const QString&)), this, SLOT(framePicked(const QString&)));
   connect(window.actionRemove_Frame, SIGNAL(activated(void)), this, SLOT(removeFrame()));
   connect(window.actionAdd_Frame, SIGNAL(activated(void)), this, SLOT(addFrame()));
-  connect(window.Vizkit3DWidget, SIGNAL(framePicked(const QString&)), this, SLOT(framePicked(const QString&)));
   connect(window.listWidget, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
           this, SLOT(listWidgetItemChanged(QListWidgetItem*, QListWidgetItem*)));
   
-  connect(visualzier.get(), SIGNAL(frameAdded(const QString&)), this, SLOT(frameNameAdded(const QString&)));
-  connect(visualzier.get(), SIGNAL(frameRemoved(const QString&)), this, SLOT(frameNameRemoved(const QString&)));
   connect(&currentTransform, SIGNAL(transformChanged(const base::TransformWithCovariance&)),
           this, SLOT(transformChanged(const base::TransformWithCovariance&)));
+  
+  pluginInfos.reset(new Vizkit3dPluginInformation(window.Vizkit3DWidget));
+  
+  //disable everything until a graph is loaded
+  window.treeView->setEnabled(false);
+  window.listWidget->setEnabled(false);
+  window.Vizkit3DWidget->setEnabled(false);
+  window.actionAdd_Frame->setEnabled(false);
+  window.actionRemove_Frame->setEnabled(false);
+  window.actionSave_Graph->setEnabled(false);
+  
+}
+
+void MainWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph, const std::string& rootNode)
+{
+  this->graph = graph;
+  window.Vizkit3DWidget->setWorldName(QString::fromStdString(rootNode));
+  
+  visualzier.reset(new EnvireGraphVisualizer(graph, window.Vizkit3DWidget, rootNode, pluginInfos));
+  
+  connect(visualzier.get(), SIGNAL(frameAdded(const QString&)), this, SLOT(frameNameAdded(const QString&)));
+  connect(visualzier.get(), SIGNAL(frameRemoved(const QString&)), this, SLOT(frameNameRemoved(const QString&)));
+    
+  //get initially present frame names
+  window.listWidget->clear();
+  EnvireGraph::vertex_iterator it, end;
+  std::tie(it, end) = graph->getVertices();
+  for(; it != end; it++) 
+  {
+    const FrameId& id = graph->getFrameId(*it);
+    window.listWidget->addItem(QString::fromStdString(id));
+  }
+  
+  this->rootFrame = QString::fromStdString(rootNode);
+  selectFrame(QString::fromStdString(rootNode));
+  
+   
+  window.treeView->setEnabled(true);
+  window.listWidget->setEnabled(true);
+  window.Vizkit3DWidget->setEnabled(true);
+  window.actionAdd_Frame->setEnabled(true);
+  window.actionRemove_Frame->setEnabled(true);
+  window.actionSave_Graph->setEnabled(true);
+  
+}
+
+void MainWindow::displayGraph(const QString& filePath, const std::string& rootNode)
+{
+  
 }
 
 void MainWindow::addFrame()
@@ -71,11 +102,7 @@ void MainWindow::addFrame()
     const FrameId frame = dialog.getFrameId().toStdString();
     if(frame.size() > 0)
     {
-      graph.addTransform(selectedFrame.toStdString(), frame, tf);
-    }
-    else
-    {
-      //TODO do not allow dialog to close without frameId
+      graph->addTransform(selectedFrame.toStdString(), frame, tf);
     }
   }
 }
@@ -90,8 +117,8 @@ void MainWindow::removeFrame()
     //depend on selectedFrame beeing valid
     selectedFrame = ""; 
     
-    graph.disconnectFrame(frameId);
-    graph.removeFrame(frameId);
+    graph->disconnectFrame(frameId);
+    graph->removeFrame(frameId);
     //this will trigger events, that will remove the frame from the list widget as well.
   }
 }
@@ -108,8 +135,6 @@ void MainWindow::listWidgetItemChanged(QListWidgetItem * current, QListWidgetIte
 
 void MainWindow::selectFrame(const QString& name)
 {  
-  //FIXME aufsplitten
-  LOG(ERROR) << "Selected frame: " << name.toStdString();
   if(name != selectedFrame)
   {
       //highlight in 3d
@@ -117,7 +142,7 @@ void MainWindow::selectFrame(const QString& name)
       //unhighlight old selection
       if(!selectedFrame.isEmpty())//happens if nothing was selected or selection was deleted
         window.Vizkit3DWidget->setFrameHighlight(selectedFrame, false);
-      selectedFrame = name;
+      
       
       //select in list widget
       QList<QListWidgetItem*> items = window.listWidget->findItems(name, Qt::MatchExactly);
@@ -126,9 +151,17 @@ void MainWindow::selectFrame(const QString& name)
         items.first()->setSelected(true);
       
       //display corresponding Transform
-      const vertex_descriptor selectedVertex = graph.getVertex(name.toStdString());
+      const vertex_descriptor selectedVertex = graph->getVertex(name.toStdString());
       const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
       updateDisplayedTransform(parentVertex, selectedVertex);
+      
+      //user should not be able to delete the root frame
+      if(name == rootFrame)
+        window.actionRemove_Frame->setEnabled(false);
+      else
+        window.actionRemove_Frame->setEnabled(true);
+      
+      selectedFrame = name;
   }
 }
 
@@ -140,7 +173,7 @@ void MainWindow::updateDisplayedTransform(const vertex_descriptor parent, const 
       this, SLOT(transformChanged(const base::TransformWithCovariance&)));
   if(parent != GraphTraits::null_vertex())
   {
-    const Transform tf = graph.getTransform(parent, selected);
+    const Transform tf = graph->getTransform(parent, selected);
     currentTransform.setTransform(tf.transform);
     currentTransform.setEditable(true);
     window.treeView->setEnabled(true);
@@ -173,12 +206,12 @@ void MainWindow::transformChanged(const base::TransformWithCovariance& newValue)
   std::cout << "newTrans" << std::endl << newValue.translation.transpose() << std::endl
   << newValue.orientation.coeffs().transpose() << std::endl;
  
-  const vertex_descriptor selectedVertex = graph.getVertex(selectedFrame.toStdString());
+  const vertex_descriptor selectedVertex = graph->getVertex(selectedFrame.toStdString());
   const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
-  const FrameId source = graph.getFrameId(parentVertex);
+  const FrameId source = graph->getFrameId(parentVertex);
   const FrameId target = selectedFrame.toStdString();
   ignoreEdgeModifiedEvent = true;
-  graph.updateTransform(source, target, newValue);//will trigger EdgeModifiedEvent
+  graph->updateTransform(source, target, newValue);//will trigger EdgeModifiedEvent
   ignoreEdgeModifiedEvent = false;
   
 }
@@ -196,8 +229,8 @@ void MainWindow::edgeModified(const EdgeModifiedEvent& e)
 
 void MainWindow::edgeModifiedInternal(const QString& originFrame, const QString& targetFrame)
 {
-  vertex_descriptor originVertex = graph.getVertex(originFrame.toStdString());
-  vertex_descriptor targetVertex = graph.getVertex(targetFrame.toStdString());
+  vertex_descriptor originVertex = graph->getVertex(originFrame.toStdString());
+  vertex_descriptor targetVertex = graph->getVertex(targetFrame.toStdString());
   const TreeView& tree = visualzier->getTree();
   
   if(tree.vertexExists(originVertex) && tree.vertexExists(targetVertex))

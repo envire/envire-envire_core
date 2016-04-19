@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Envire Visualizer</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -71,6 +71,9 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionLoad_Graph"/>
+   <addaction name="actionSave_Graph"/>
+   <addaction name="separator"/>
    <addaction name="actionAdd_Frame"/>
    <addaction name="actionRemove_Frame"/>
   </widget>
@@ -88,6 +91,16 @@
    </property>
    <property name="toolTip">
     <string>Remove the selected frame</string>
+   </property>
+  </action>
+  <action name="actionLoad_Graph">
+   <property name="text">
+    <string>Load Graph</string>
+   </property>
+  </action>
+  <action name="actionSave_Graph">
+   <property name="text">
+    <string>Save Graph</string>
    </property>
   </action>
  </widget>

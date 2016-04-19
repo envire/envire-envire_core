@@ -31,7 +31,7 @@ public:
   
   /**
    * @param rootNode the name of the frame that should be placed in the world origin*/
-  EnvireGraphVisualizer(envire::core::EnvireGraph& graph,
+  EnvireGraphVisualizer(std::shared_ptr<envire::core::EnvireGraph> graph,
                         vizkit3d::Vizkit3DWidget* widget, 
                         const envire::core::FrameId& rootNode,
                         std::shared_ptr<Vizkit3dPluginInformation> pluginInfos);
@@ -85,7 +85,7 @@ private:
   
   using ItemVisualMap = std::unordered_map<boost::uuids::uuid, vizkit3d::VizPluginBase*, boost::hash<boost::uuids::uuid>>;
 
-  envire::core::EnvireGraph& graph; /**< the graph that is visualized*/
+  std::shared_ptr<envire::core::EnvireGraph> graph; /**< the graph that is visualized*/
   envire::core::TreeView tree;
   vizkit3d::Vizkit3DWidget* widget; /**< Is used to display the graph */
   std::shared_ptr<Vizkit3dPluginInformation> pluginInfos; /**< meta-data needed to figure out which plugins to load*/

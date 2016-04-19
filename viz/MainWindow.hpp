@@ -23,14 +23,24 @@ class MainWindow : public QMainWindow, public envire::core::GraphEventDispatcher
 {
   Q_OBJECT
 public:
-  MainWindow(envire::core::EnvireGraph& graph, const std::string& rootNode);
+  
+  /**Create an unitialized envire visualizer that displays nothing.*/
+  MainWindow();
   
   /**called whenever some edge in the graph changes */
   virtual void edgeModified(const envire::core::EdgeModifiedEvent& e);
   
+  /**Display the specified graph */
+  void displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph, const std::string& rootNode);
+  /**Load a graph from a file and display it. */
+  void displayGraph(const QString& filePath, const std::string& rootNode);
+  
 private:
   /**selects the frame named @p name in the 2d listview and 3d window */
   void selectFrame(const QString& name);
+  
+  /**Contains the part of the gui initialization that can be done without a graph */
+  void initGui();
   
 public slots:
   void addFrame();
@@ -56,10 +66,11 @@ private slots:
 private:
   
   Ui::MainWindow window;
-  envire::core::EnvireGraph& graph;
+  std::shared_ptr<envire::core::EnvireGraph> graph;
   std::shared_ptr<EnvireGraphVisualizer> visualzier;//is ptr for lazy instanziation
   std::shared_ptr<Vizkit3dPluginInformation> pluginInfos;//is ptr for lazy instanziation
   QString selectedFrame;//currently selected frame, empty if none
+  QString rootFrame;//the root frame of the displayed tree
   TransformModel currentTransform;//model of the currently selected transform
   bool ignoreEdgeModifiedEvent;
 };
