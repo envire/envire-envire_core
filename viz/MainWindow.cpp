@@ -56,8 +56,10 @@ rootFrame(""), ignoreEdgeModifiedEvent(false)
 void MainWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph,
                               const QString& rootNode)
 {
+  
   this->graph = graph;
-
+  //reset the widget because this might not be the first time the user loads a graph
+  window.Vizkit3DWidget->clear();
   window.Vizkit3DWidget->setWorldName(rootNode);
   
   visualzier.reset(new EnvireGraphVisualizer(graph, window.Vizkit3DWidget,
@@ -86,6 +88,7 @@ void MainWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph,
   window.actionSave_Graph->setEnabled(true);
   
   rootFrame = rootNode;
+  selectedFrame = "";//otherwise we might try to unhighlight a no longer existing frame
   selectFrame(rootNode);//done after enabling gui because it might disable parts of the gui again
 }
 
@@ -160,7 +163,9 @@ void MainWindow::framePicked(const QString& frame)
 
 void MainWindow::listWidgetItemChanged(QListWidgetItem * current, QListWidgetItem * previous)
 {
-  selectFrame(current->text());
+  //current is nullptr if the list is cleared
+  if(current != nullptr)
+    selectFrame(current->text());
 }
 
 void MainWindow::selectFrame(const QString& name)
