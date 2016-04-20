@@ -10,6 +10,8 @@
 #include <QMessageBox>
 #include <QInputDialog>
 #include <glog/logging.h>
+#include <fstream>
+#include <boost/archive/polymorphic_text_iarchive.hpp> //FIXME just for testing
 
 
 using namespace envire::core;
@@ -37,6 +39,7 @@ void MainWindow::initGui()
   connect(window.Vizkit3DWidget, SIGNAL(framePicked(const QString&)), this, SLOT(framePicked(const QString&)));
   connect(window.actionRemove_Frame, SIGNAL(activated(void)), this, SLOT(removeFrame()));
   connect(window.actionAdd_Frame, SIGNAL(activated(void)), this, SLOT(addFrame()));
+  connect(window.actionLoad_Graph, SIGNAL(activated(void)), this, SLOT(loadGraph()));
   connect(window.listWidget, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
           this, SLOT(listWidgetItemChanged(QListWidgetItem*, QListWidgetItem*)));
   
@@ -55,15 +58,20 @@ void MainWindow::initGui()
   
 }
 
-void MainWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph, const std::string& rootNode)
+void MainWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph,
+                              const QString& rootNode)
 {
   this->graph = graph;
-  window.Vizkit3DWidget->setWorldName(QString::fromStdString(rootNode));
+
+  window.Vizkit3DWidget->setWorldName(rootNode);
   
-  visualzier.reset(new EnvireGraphVisualizer(graph, window.Vizkit3DWidget, rootNode, pluginInfos));
+  visualzier.reset(new EnvireGraphVisualizer(graph, window.Vizkit3DWidget,
+                                             rootNode.toStdString(), pluginInfos));
   
-  connect(visualzier.get(), SIGNAL(frameAdded(const QString&)), this, SLOT(frameNameAdded(const QString&)));
-  connect(visualzier.get(), SIGNAL(frameRemoved(const QString&)), this, SLOT(frameNameRemoved(const QString&)));
+  connect(visualzier.get(), SIGNAL(frameAdded(const QString&)), this,
+          SLOT(frameNameAdded(const QString&)));
+  connect(visualzier.get(), SIGNAL(frameRemoved(const QString&)), this,
+          SLOT(frameNameRemoved(const QString&)));
     
   //get initially present frame names
   window.listWidget->clear();
@@ -74,11 +82,7 @@ void MainWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph, 
     const FrameId& id = graph->getFrameId(*it);
     window.listWidget->addItem(QString::fromStdString(id));
   }
-  
-  this->rootFrame = QString::fromStdString(rootNode);
-  selectFrame(QString::fromStdString(rootNode));
-  
-   
+     
   window.treeView->setEnabled(true);
   window.listWidget->setEnabled(true);
   window.Vizkit3DWidget->setEnabled(true);
@@ -86,11 +90,43 @@ void MainWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph, 
   window.actionRemove_Frame->setEnabled(true);
   window.actionSave_Graph->setEnabled(true);
   
+  rootFrame = rootNode;
+  selectFrame(rootNode);//done after enabling gui because it might disable parts of the gui again
 }
 
-void MainWindow::displayGraph(const QString& filePath, const std::string& rootNode)
+void MainWindow::displayGraph(const QString& filePath)
 {
-  
+  std::ifstream file(filePath.toStdString());
+  if(file.is_open())
+  {
+    try 
+    {
+      std::shared_ptr<EnvireGraph> pGraph(new EnvireGraph());
+      boost::archive::polymorphic_binary_iarchive ia(file);
+      ia >> *(pGraph.get());
+      
+      QStringList frames;
+      EnvireGraph::vertex_iterator it, end;
+      std::tie(it, end) = pGraph->getVertices();
+      for(; it != end; it++)
+      {
+        const FrameId id = pGraph->getFrameId(*it);
+        frames << QString::fromStdString(id);
+      }
+
+      bool ok;
+      QString rootNode = QInputDialog::getItem(this, tr("Select World Frame"),
+                                               tr("Frame:"), frames, 0, false, &ok);
+      if (ok && !rootNode.isEmpty())
+      {
+        displayGraph(pGraph, rootNode);
+      }
+    }
+    catch(const boost::archive::archive_exception& ex)
+    {
+      LOG(ERROR) << "Error while loading envire graph: " << ex.what();
+    }
+  }
 }
 
 void MainWindow::addFrame()
@@ -250,6 +286,19 @@ void MainWindow::edgeModifiedInternal(const QString& originFrame, const QString&
       }
     }
   }  
+}
+
+void MainWindow::loadGraph()
+{
+  //DontUseNativeDialog is used because the native dialog on xfce hangs and crashes...
+  const QString file = QFileDialog::getOpenFileName(this, tr("Load Envire Graph"),
+                                                    QDir::homePath(), QString(),
+                                                    0, QFileDialog::DontUseNativeDialog);
+  LOG(INFO) << "Loading graph from " << file.toStdString();
+  if(!file.isEmpty())
+  {
+    displayGraph(file);
+  }
 }
 
 

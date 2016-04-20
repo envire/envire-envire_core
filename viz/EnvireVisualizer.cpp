@@ -12,10 +12,13 @@
 #include <unordered_map>
 #include <plugin_manager/PluginLoader.hpp>
 #include <iostream>
+#include <fstream>
 #include <thread>
 #include <chrono>
 #include <vector>
 #include <boost/uuid/uuid.hpp>
+#include <boost/archive/polymorphic_text_oarchive.hpp>//FIXME remove
+#include <boost/archive/polymorphic_text_iarchive.hpp>
 
 #include <envire_pcl/PointCloud.hpp>
 #include <pcl/io/pcd_io.h>
@@ -147,147 +150,155 @@ int test(int argc, char **argv)
   reader.read("/home/arne/git/rock-entern/slam/pcl/test/bunny.pcd", cloud2->getData());
   reader.read("/home/arne/git/rock-entern/slam/pcl/test/cturtle.pcd", cloud3->getData());
   
-  std::shared_ptr<EnvireGraph> graph(new EnvireGraph);
-  graph->addFrame("A"); 
-  graph->addFrame("B");
-  graph->addFrame("C");
-  graph->addFrame("D");
-  graph->addItemToFrame("B", cloud);
-  graph->addItemToFrame("D", cloud2);
-  graph->addItemToFrame("A", cloud3); //special case item in root node
+  EnvireGraph graph;
+  graph.addFrame("A"); 
+  graph.addFrame("B");
+  graph.addFrame("C");
+  graph.addFrame("D");
+  graph.addItemToFrame("B", cloud);
+  graph.addItemToFrame("D", cloud2);
+  graph.addItemToFrame("A", cloud3); //special case item in root node
   
   Transform ab(base::Position(1, 1, 1), Eigen::Quaterniond (Eigen::AngleAxisd(0.5, Eigen::Vector3d(1,2,3))));
-  graph->addTransform("A", "B", ab);
+  graph.addTransform("A", "B", ab);
   Transform bc(base::Position(1, 0, 0.3), Eigen::Quaterniond(Eigen::AngleAxisd(0.3, Eigen::Vector3d(1,0,3))));
-  graph->addTransform("B", "C", ab);  
+  graph.addTransform("B", "C", ab);  
   Transform cd(base::Position(0, 2, -1), Eigen::Quaterniond(Eigen::AngleAxisd(-0.8, Eigen::Vector3d(0,0,1))));
-  graph->addTransform("C", "D", cd);  
+  graph.addTransform("C", "D", cd);  
   
-  graph->addFrame("randTree");
+  graph.addFrame("randTree");
   Transform aToForrest(base::Position(0, -3, -2), Eigen::Quaterniond(Eigen::AngleAxisd(0, Eigen::Vector3d(0,0,1))));
-  graph->addTransform("A", "randTree", aToForrest);
-  
+  graph.addTransform("A", "randTree", aToForrest);
+
+  {
+    std::ofstream myfile;
+    myfile.open("envire_graph_test23");
+    boost::archive::polymorphic_binary_oarchive oa(myfile);
+    oa << graph;
+  }
+
   QApplication app(argc, argv);
   MainWindow window;
   window.show();
-  window.displayGraph(graph, "A");
-
-  std::thread t([&]()
-  {
-    //because the graph is not thread safe, yet  
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    
-    std::vector<FrameId> randTreeNodes;
-    std::vector<ItemBase::Ptr> randTreeItems;
-    randTreeNodes.push_back("randTree");
-    boost::uuids::random_generator generator;
-    int i = 0;
-    bool removeSubTree = false;
-    
-    Transform tf;
-    tf.transform.orientation = base::Quaterniond(Eigen::AngleAxisd(0.0, base::Position(0, 0, 1)));
-    tf.transform.translation << 1,0,1;
-    graph->addTransform("sub2", "sub4", tf); //part of the sub tree that always remains
-    
-    while(true)
-    {
-      ++i;
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
-      
-      //rotate transformation
-      tf = graph->getTransform("A", "B");
-      tf.transform.orientation *= base::Quaterniond(Eigen::AngleAxisd(0.23, base::Position(1, 0, 0)));
-      graph->updateTransform("A", "B", tf);
-      
-      
-      //change length of transformation
-   /*   tf = graph->getTransform("C", "D");
-      if(tf.transform.translation.norm() >= 10)
-      {
-        tf.transform.translation << 0, 1, 0;
-      }
-      else
-      {
-        tf.transform.translation.x() += 0.1;
-      }
-      graph->updateTransform("C", "D", tf);
-      */
-      //random growing tree
-      if((i % 10) == 0)
-      {
-        const int elem = rand() % randTreeNodes.size();
-        boost::uuids::uuid id = generator();
-        const FrameId nextName = boost::uuids::to_string(id);
-        graph->addFrame(nextName);
-        tf.transform.orientation = base::Quaterniond(Eigen::AngleAxisd(0.0, base::Position(0, 0, 1)));
-        tf.transform.translation << (rand() % 40) / 20.0, (rand() % 40) / 20.0, 0;
-        graph->addTransform(randTreeNodes[elem], nextName, tf);
-        randTreeNodes.push_back(nextName);
-      }
-      
-      //randomly add items to the growing tree
-      if((i % 20) == 0)
-      {
-        //FIXME path
-        envire::core::ItemBase::Ptr item;
-        loader->createInstance("envire::pcl::PointCloud", item);
-        envire::pcl::PointCloud::Ptr milk = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(item);
-        if(reader.read("/home/arne/git/rock-entern/slam/pcl/test/bunny.pcd", milk->getData()) == 0)
-        {
-          const int elem = rand() % randTreeNodes.size();
-          graph->addItemToFrame(randTreeNodes[elem], milk);
-          randTreeItems.push_back(milk);
-        }
-      }
-      //remove items from the tree
-      if((i % 30) == 0 && randTreeItems.size() > 0)
-      {
-        LOG(INFO) << "removing item from frame " << randTreeItems.back()->getFrame();
-        graph->removeItemFromFrame(randTreeItems.back());
-        randTreeItems.pop_back();
-      } 
-      
-      
-      if((i % 12 == 0))
-      {
-        if(graph->getTotalItemCount("A") > 0)
-        {
-          graph->clearFrame("A");
-        }
-        else
-        {
-          graph->addItemToFrame("A", cloud3);
-        }
-      }
-      /*
-      // add a sub tree
-      if((i % 10) == 0) 
-      {
-        if(!removeSubTree)
-        {
-          tf.transform.orientation = base::Quaterniond(Eigen::AngleAxisd(0.0, base::Position(0, 0, 1)));
-          tf.transform.translation << 3,4,5;
-          graph->addTransform("A", "sub1", tf);
-          tf.transform.orientation = base::Quaterniond(Eigen::AngleAxisd(0.0, base::Position(0, 0, 1)));
-          tf.transform.translation << 1,0,2;
-          graph->addTransform("sub1", "sub2", tf);
-          tf.transform.translation << 0,1,2;
-          graph->addTransform("sub1", "sub3", tf);
-          removeSubTree = true;
-        }
-        else
-        {
-          graph->remove_edge("sub1", "sub2");
-          graph->remove_edge("sub1", "sub3");
-          graph->remove_edge("A", "sub1");
-          removeSubTree = false;
-        } 
-        } */
-    
-    }
-  });
+  window.displayGraph("envire_graph_test23");
+  
+  
+//   std::thread t([&]()
+//   {
+//     //because the graph is not thread safe, yet  
+//     std::this_thread::sleep_for(std::chrono::seconds(1));
+//     
+//     std::vector<FrameId> randTreeNodes;
+//     std::vector<ItemBase::Ptr> randTreeItems;
+//     randTreeNodes.push_back("randTree");
+//     boost::uuids::random_generator generator;
+//     int i = 0;
+//     bool removeSubTree = false;
+//     
+//     Transform tf;
+//     tf.transform.orientation = base::Quaterniond(Eigen::AngleAxisd(0.0, base::Position(0, 0, 1)));
+//     tf.transform.translation << 1,0,1;
+//     graph->addTransform("sub2", "sub4", tf); //part of the sub tree that always remains
+//     
+//     while(true)
+//     {
+//       ++i;
+//       std::this_thread::sleep_for(std::chrono::milliseconds(100));
+//       
+//       //rotate transformation
+//       tf = graph->getTransform("A", "B");
+//       tf.transform.orientation *= base::Quaterniond(Eigen::AngleAxisd(0.23, base::Position(1, 0, 0)));
+//       graph->updateTransform("A", "B", tf);
+//       
+//       
+//       //change length of transformation
+//    /*   tf = graph->getTransform("C", "D");
+//       if(tf.transform.translation.norm() >= 10)
+//       {
+//         tf.transform.translation << 0, 1, 0;
+//       }
+//       else
+//       {
+//         tf.transform.translation.x() += 0.1;
+//       }
+//       graph->updateTransform("C", "D", tf);
+//       */
+//       //random growing tree
+//       if((i % 10) == 0)
+//       {
+//         const int elem = rand() % randTreeNodes.size();
+//         boost::uuids::uuid id = generator();
+//         const FrameId nextName = boost::uuids::to_string(id);
+//         graph->addFrame(nextName);
+//         tf.transform.orientation = base::Quaterniond(Eigen::AngleAxisd(0.0, base::Position(0, 0, 1)));
+//         tf.transform.translation << (rand() % 40) / 20.0, (rand() % 40) / 20.0, 0;
+//         graph->addTransform(randTreeNodes[elem], nextName, tf);
+//         randTreeNodes.push_back(nextName);
+//       }
+//       
+//       //randomly add items to the growing tree
+//       if((i % 20) == 0)
+//       {
+//         //FIXME path
+//         envire::core::ItemBase::Ptr item;
+//         loader->createInstance("envire::pcl::PointCloud", item);
+//         envire::pcl::PointCloud::Ptr milk = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(item);
+//         if(reader.read("/home/arne/git/rock-entern/slam/pcl/test/bunny.pcd", milk->getData()) == 0)
+//         {
+//           const int elem = rand() % randTreeNodes.size();
+//           graph->addItemToFrame(randTreeNodes[elem], milk);
+//           randTreeItems.push_back(milk);
+//         }
+//       }
+//       //remove items from the tree
+//       if((i % 30) == 0 && randTreeItems.size() > 0)
+//       {
+//         LOG(INFO) << "removing item from frame " << randTreeItems.back()->getFrame();
+//         graph->removeItemFromFrame(randTreeItems.back());
+//         randTreeItems.pop_back();
+//       } 
+//       
+//       
+//       if((i % 12 == 0))
+//       {
+//         if(graph->getTotalItemCount("A") > 0)
+//         {
+//           graph->clearFrame("A");
+//         }
+//         else
+//         {
+//           graph->addItemToFrame("A", cloud3);
+//         }
+//       }
+//       /*
+//       // add a sub tree
+//       if((i % 10) == 0) 
+//       {
+//         if(!removeSubTree)
+//         {
+//           tf.transform.orientation = base::Quaterniond(Eigen::AngleAxisd(0.0, base::Position(0, 0, 1)));
+//           tf.transform.translation << 3,4,5;
+//           graph->addTransform("A", "sub1", tf);
+//           tf.transform.orientation = base::Quaterniond(Eigen::AngleAxisd(0.0, base::Position(0, 0, 1)));
+//           tf.transform.translation << 1,0,2;
+//           graph->addTransform("sub1", "sub2", tf);
+//           tf.transform.translation << 0,1,2;
+//           graph->addTransform("sub1", "sub3", tf);
+//           removeSubTree = true;
+//         }
+//         else
+//         {
+//           graph->remove_edge("sub1", "sub2");
+//           graph->remove_edge("sub1", "sub3");
+//           graph->remove_edge("A", "sub1");
+//           removeSubTree = false;
+//         } 
+//         } */
+//     
+//     }
+//   });
   app.exec(); 
-  t.join();
+//t.join();
   return 0;
 }
 

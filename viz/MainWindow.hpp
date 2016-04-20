@@ -31,9 +31,9 @@ public:
   virtual void edgeModified(const envire::core::EdgeModifiedEvent& e);
   
   /**Display the specified graph */
-  void displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph, const std::string& rootNode);
-  /**Load a graph from a file and display it. */
-  void displayGraph(const QString& filePath, const std::string& rootNode);
+  void displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph, const QString& rootNode);
+  /**Load a graph and ask the user for the root node*/
+  void displayGraph(const QString& filePath);
   
 private:
   /**selects the frame named @p name in the 2d listview and 3d window */
@@ -49,6 +49,9 @@ public slots:
   
   void frameNameAdded(const QString& name);
   void frameNameRemoved(const QString& name);
+  
+  /**Display a file picker dialog and load a graph from the selected file */
+  void loadGraph();
     
 private slots:
   void framePicked(const QString&);
