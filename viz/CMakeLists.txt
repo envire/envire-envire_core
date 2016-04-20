@@ -32,12 +32,10 @@ rock_library(envire_visualizer
 
 rock_executable(envire_visualizer_bin
                 SOURCES EnvireVisualizer.cpp
-
+                DEPS_PKGCONFIG envire_pcl
                 DEPS_PKGCONFIG vizkit3d
                 DEPS_PKGCONFIG envire_core
                 DEPS_PKGCONFIG plugin_manager
-                DEPS_PKGCONFIG envire_octomap
-                DEPS_PKGCONFIG envire_pcl
                 DEPS_PKGCONFIG pcl_common-1.7
                 DEPS_PKGCONFIG pcl_io-1.7
                 DEPS_CMAKE Glog

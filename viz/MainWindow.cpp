@@ -23,11 +23,6 @@ namespace envire { namespace viz
 MainWindow::MainWindow(): QMainWindow(), GraphEventDispatcher(),
 rootFrame(""), ignoreEdgeModifiedEvent(false)
 {
-  initGui();
-}
-  
-void MainWindow::initGui()
-{
   window.setupUi(this);
     
   window.treeView->setModel(&currentTransform);
@@ -40,6 +35,7 @@ void MainWindow::initGui()
   connect(window.actionRemove_Frame, SIGNAL(activated(void)), this, SLOT(removeFrame()));
   connect(window.actionAdd_Frame, SIGNAL(activated(void)), this, SLOT(addFrame()));
   connect(window.actionLoad_Graph, SIGNAL(activated(void)), this, SLOT(loadGraph()));
+  connect(window.actionSave_Graph, SIGNAL(activated(void)), this, SLOT(storeGraph()));
   connect(window.listWidget, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
           this, SLOT(listWidgetItemChanged(QListWidgetItem*, QListWidgetItem*)));
   
@@ -55,9 +51,8 @@ void MainWindow::initGui()
   window.actionAdd_Frame->setEnabled(false);
   window.actionRemove_Frame->setEnabled(false);
   window.actionSave_Graph->setEnabled(false);
-  
 }
-
+  
 void MainWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph,
                               const QString& rootNode)
 {
@@ -96,36 +91,35 @@ void MainWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph,
 
 void MainWindow::displayGraph(const QString& filePath)
 {
-  std::ifstream file(filePath.toStdString());
-  if(file.is_open())
+  try 
   {
-    try 
+    std::shared_ptr<EnvireGraph> pGraph(new EnvireGraph());
+    pGraph->loadFromFile(filePath.toStdString());
+    
+    QStringList frames;
+    EnvireGraph::vertex_iterator it, end;
+    std::tie(it, end) = pGraph->getVertices();
+    for(; it != end; it++)
     {
-      std::shared_ptr<EnvireGraph> pGraph(new EnvireGraph());
-      boost::archive::polymorphic_binary_iarchive ia(file);
-      ia >> *(pGraph.get());
-      
-      QStringList frames;
-      EnvireGraph::vertex_iterator it, end;
-      std::tie(it, end) = pGraph->getVertices();
-      for(; it != end; it++)
-      {
-        const FrameId id = pGraph->getFrameId(*it);
-        frames << QString::fromStdString(id);
-      }
+      const FrameId id = pGraph->getFrameId(*it);
+      frames << QString::fromStdString(id);
+    }
 
-      bool ok;
-      QString rootNode = QInputDialog::getItem(this, tr("Select World Frame"),
-                                               tr("Frame:"), frames, 0, false, &ok);
-      if (ok && !rootNode.isEmpty())
-      {
-        displayGraph(pGraph, rootNode);
-      }
-    }
-    catch(const boost::archive::archive_exception& ex)
+    bool ok;
+    QString rootNode = QInputDialog::getItem(this, tr("Select World Frame"),
+                                              tr("Frame:"), frames, 0, false, &ok);
+    if (ok && !rootNode.isEmpty())
     {
-      LOG(ERROR) << "Error while loading envire graph: " << ex.what();
+      displayGraph(pGraph, rootNode);
     }
+  }
+  catch(const boost::archive::archive_exception& ex)
+  {
+    LOG(ERROR) << "Error while loading envire graph: " << ex.what();
+  }
+  catch(std::ios_base::failure& ex)
+  {
+    LOG(ERROR) << "Error while loading envire graph: " << ex.what();
   }
 }
 
@@ -292,14 +286,32 @@ void MainWindow::loadGraph()
 {
   //DontUseNativeDialog is used because the native dialog on xfce hangs and crashes...
   const QString file = QFileDialog::getOpenFileName(this, tr("Load Envire Graph"),
-                                                    QDir::homePath(), QString(),
+                                                    QDir::currentPath(), QString(),
                                                     0, QFileDialog::DontUseNativeDialog);
-  LOG(INFO) << "Loading graph from " << file.toStdString();
   if(!file.isEmpty())
   {
+    LOG(INFO) << "Loading graph from " << file.toStdString();
     displayGraph(file);
   }
 }
+
+void MainWindow::storeGraph()
+{
+  //DontUseNativeDialog is used because the native dialog on xfce hangs and crashes...
+  const QString file = QFileDialog::getSaveFileName(this, tr("Save Envire Graph"),
+                                                    QDir::currentPath(), QString(),
+                                                    0, QFileDialog::DontUseNativeDialog);
+
+  if(!file.isEmpty())
+  {
+    LOG(INFO) << "Saving graph to " << file.toStdString();
+    if(graph)
+    {
+      graph->saveToFile(file.toStdString());
+    }
+  }
+}
+
 
 
 }}

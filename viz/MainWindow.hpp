@@ -39,9 +39,6 @@ private:
   /**selects the frame named @p name in the 2d listview and 3d window */
   void selectFrame(const QString& name);
   
-  /**Contains the part of the gui initialization that can be done without a graph */
-  void initGui();
-  
 public slots:
   void addFrame();
   /**Remove the currently selected frame (if any) */
@@ -52,6 +49,9 @@ public slots:
   
   /**Display a file picker dialog and load a graph from the selected file */
   void loadGraph();
+  
+  /**Display a file picker dialog and save the graph to the selected file */
+  void storeGraph();
     
 private slots:
   void framePicked(const QString&);

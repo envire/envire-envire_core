@@ -173,5 +173,4 @@ void EnvireGraph::loadFromFile(const std::string& file)
 }
 
 
-
 }}

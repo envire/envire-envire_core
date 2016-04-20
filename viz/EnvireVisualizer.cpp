@@ -169,18 +169,12 @@ int test(int argc, char **argv)
   graph.addFrame("randTree");
   Transform aToForrest(base::Position(0, -3, -2), Eigen::Quaterniond(Eigen::AngleAxisd(0, Eigen::Vector3d(0,0,1))));
   graph.addTransform("A", "randTree", aToForrest);
-
-  {
-    std::ofstream myfile;
-    myfile.open("envire_graph_test23");
-    boost::archive::polymorphic_binary_oarchive oa(myfile);
-    oa << graph;
-  }
-
+  
+  graph.saveToFile("envire_graph_test23");
+  
   QApplication app(argc, argv);
   MainWindow window;
   window.show();
-  window.displayGraph("envire_graph_test23");
   
   
 //   std::thread t([&]()
