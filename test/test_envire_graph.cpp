@@ -660,3 +660,36 @@ BOOST_AUTO_TEST_CASE(envire_graph_publish_current_state_test)
 
     BOOST_CHECK(d.itemRemovedEvents.size() == 2);
 }
+
+BOOST_AUTO_TEST_CASE(envire_graph_save_load_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    EnvireGraph graph;
+    Transform ab;
+//     ItemBase::Ptr item1(new Item<string>("bla"));
+//     ItemBase::Ptr item2(new Item<int>(42));
+
+    graph.addTransform(a, b, ab);
+    
+    //note: there is no easy way to test with items because we need to load
+    //      them as plugins to get the class name for serialization.
+    //      Thus we only test with a simple transform.
+    
+//     graph.addItemToFrame(a, item1);
+//     graph.addItemToFrame(b, item2);
+    BOOST_CHECK_NO_THROW(graph.saveToFile("save_envire_graph_test"));
+    
+    EnvireGraph loadGraph;
+    BOOST_CHECK_NO_THROW(loadGraph.loadFromFile("save_envire_graph_test"));
+    
+    BOOST_CHECK(loadGraph.containsFrame(a));
+    BOOST_CHECK(loadGraph.containsFrame(b));
+    BOOST_CHECK_NO_THROW(loadGraph.getTransform(a, b));
+    BOOST_CHECK_NO_THROW(loadGraph.getTransform(b, a));
+//     BOOST_CHECK(loadGraph.getItemCount<Item<string>>(a) == 1);
+//     BOOST_CHECK(loadGraph.getItemCount<Item<int>>(b) == 1);
+    
+    
+}
+
