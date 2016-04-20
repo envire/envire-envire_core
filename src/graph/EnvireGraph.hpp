@@ -159,6 +159,20 @@ public:
     *                                      frame. */
     virtual void removeFrame(const FrameId& frame) override;
     
+    /**Stores the graph in @p file.
+     * Boost serialization is used to store the graph.
+     * @throw boost::archive::archive_exception if the serialization failed
+     * @throw std::ios_base::failure if the file operation failed*/
+    void saveToFile(const std::string& file) const;
+    
+    /**Loads the graph from @p file.
+     * Boost serialization is used to load the graph.
+     * Only use this with files that have been created by saveToFile().
+     * @throw boost::archive::archive_exception if the serialization failed
+     * @throw std::ios_base::failure if the file operation failed
+     * FIXME I have no idea what happens when the graph already contains data*/
+    void loadFromFile(const std::string& file);
+    
 protected:
 
     /** @return A range that contains all items of type @p T in frame @p frame
