@@ -21,7 +21,7 @@ namespace envire { namespace viz
 {
   
 MainWindow::MainWindow(): QMainWindow(), GraphEventDispatcher(),
-rootFrame(""), ignoreEdgeModifiedEvent(false)
+rootFrame(""), ignoreEdgeModifiedEvent(false), firstTimeDisplayingItems(true)
 {
   window.setupUi(this);
     
@@ -30,6 +30,8 @@ rootFrame(""), ignoreEdgeModifiedEvent(false)
   DoubleSpinboxItemDelegate* del = new DoubleSpinboxItemDelegate(window.treeView);
   window.treeView->setItemDelegateForColumn(1, del);
   window.listWidget->setSortingEnabled(true);
+  window.tableViewItems->setModel(&currentItems);//tableView will not take ownership
+  window.tableViewItems->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
   
   connect(window.Vizkit3DWidget, SIGNAL(framePicked(const QString&)), this, SLOT(framePicked(const QString&)));
   connect(window.actionRemove_Frame, SIGNAL(activated(void)), this, SLOT(removeFrame()));
@@ -197,6 +199,7 @@ void MainWindow::selectFrame(const QString& name)
         window.actionRemove_Frame->setEnabled(true);
       
       selectedFrame = name;
+      displayItems(selectedFrame);
   }
 }
 
@@ -315,6 +318,28 @@ void MainWindow::storeGraph()
       graph->saveToFile(file.toStdString());
     }
   }
+}
+
+void MainWindow::displayItems(const QString& frame)
+{
+  const FrameId frameId = frame.toStdString();
+  currentItems.clear();
+  bool visited = false;//changed to true if at least one item is visited
+  graph->visitItems(frameId, [this, &visited] (const ItemBase::Ptr item)
+  {
+    this->currentItems.addItem(item);
+    visited = true;
+  });
+  
+  //resize the table on the first time it has some content.
+  //afterwards the user may change it and we not want to override the users
+  //size choice
+  if(firstTimeDisplayingItems && visited)
+  {
+    firstTimeDisplayingItems = false;
+    window.tableViewItems->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+  }
+  
 }
 
 

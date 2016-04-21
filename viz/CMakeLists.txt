@@ -13,6 +13,7 @@ rock_library(envire_visualizer
                      TransformModel.hpp
                      DoubleSpinboxItemDelegate.hpp
                      AddTransformDialog.hpp
+                     ItemTableModel.hpp
              HEADERS Vizkit3dPluginInformation.hpp
                      Helpers.hpp
                      ${SOURCES_UI_H}
@@ -22,6 +23,7 @@ rock_library(envire_visualizer
                      TransformModel.cpp
                      DoubleSpinboxItemDelegate.cpp
                      AddTransformDialog.cpp
+                     ItemTableModel.cpp
                      ${SOURCES_MOC}
                      mainwindow.ui #to create a dependency and regen if the ui changes
                      addtransformdialog.ui

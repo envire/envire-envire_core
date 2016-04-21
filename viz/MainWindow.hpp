@@ -1,6 +1,7 @@
 #pragma once
 #include "ui_mainwindow.h"
 #include "TransformModel.hpp"
+#include "ItemTableModel.hpp"
 #include <QMainWindow>
 #include <memory>
 #include <envire_core/events/GraphEventDispatcher.hpp>
@@ -66,6 +67,9 @@ private slots:
   void updateDisplayedTransform(const envire::core::GraphTraits::vertex_descriptor parent,
                                 const envire::core::GraphTraits::vertex_descriptor selected);
   
+  /**Display the items of @p frame in the itemListWidget */
+  void displayItems(const QString& frame);
+  
 private:
   
   Ui::MainWindow window;
@@ -75,7 +79,9 @@ private:
   QString selectedFrame;//currently selected frame, empty if none
   QString rootFrame;//the root frame of the displayed tree
   TransformModel currentTransform;//model of the currently selected transform
+  ItemTableModel currentItems; //model of the  items of the current frame
   bool ignoreEdgeModifiedEvent;
+  bool firstTimeDisplayingItems; //true if no items have been displayed, yet
 };
   
   
