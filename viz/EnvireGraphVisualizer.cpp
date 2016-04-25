@@ -141,7 +141,6 @@ void EnvireGraphVisualizer::loadItem(const envire::core::ItemBase::Ptr item)
     ASSERT_NOT_NULL(plugin);//loading should never fail (has been loaded successfully before)
     VizPluginBase* vizPlugin = dynamic_cast<VizPluginBase*>(plugin);
     ASSERT_NOT_NULL(vizPlugin);//everything loaded with vizkit should inherit from VizPluginBase
-    connect(vizPlugin, SIGNAL(picked(float, float, float)), this, SLOT(pluginPicked(float, float, float)));
     
     //call the updateData method
     it->method.invoke(plugin, conType, QGenericArgument(parameterType.c_str(), item->getRawData()));
@@ -157,12 +156,6 @@ void EnvireGraphVisualizer::loadItem(const envire::core::ItemBase::Ptr item)
   {
     LOG(WARNING) << "No visualizer found for item type " << parameterType;
   }  
-}
-
-
-void EnvireGraphVisualizer::pluginPicked(const float x, const float y, const float z)
-{
-  std::cout << "PLUGIN PICKED " << x << " " << y << " " << z << std::endl;
 }
 
 void EnvireGraphVisualizer::edgeModified(const EdgeModifiedEvent& e)

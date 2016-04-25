@@ -48,9 +48,6 @@ protected:
 signals:
   void frameAdded(const QString& frame);
   void frameRemoved(const QString& frame);
-private slots:
-  /**Is called whenever the user clicks on one of the visualized objects */
-  void pluginPicked(const float x, const float y, const float z);
   
 private:
   void loadPlugins();
