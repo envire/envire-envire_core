@@ -1,5 +1,5 @@
 #pragma once
-#include "GraphEventSubscriber.hpp"
+#include <envire_core/events/GraphEventSubscriber.hpp>
 
 
 namespace envire { namespace core

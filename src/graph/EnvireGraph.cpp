@@ -1,4 +1,4 @@
-#include "EnvireGraph.hpp"
+#include <envire_core/graph/EnvireGraph.hpp>
 
 namespace envire { namespace core {
 

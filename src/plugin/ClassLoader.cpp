@@ -1,4 +1,4 @@
-#include "ClassLoader.hpp"
+#include <envire_core/plugin/ClassLoader.hpp>
 
 using namespace envire::core;
 

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "GraphTypes.hpp"
+#include <envire_core/graph/GraphTypes.hpp>
+
 namespace envire { namespace core
 {
     /** Structure to store the parent and children relation for a vertex in a tree.

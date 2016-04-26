@@ -6,9 +6,9 @@
  */
 
 #pragma once
-#include "GraphExceptions.hpp"
-#include "GraphTypes.hpp"
-#include "TreeView.hpp"
+#include <envire_core/graph/GraphExceptions.hpp>
+#include <envire_core/graph/GraphTypes.hpp>
+#include <envire_core/graph/TreeView.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/graph/breadth_first_search.hpp>
 

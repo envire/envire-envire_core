@@ -1,4 +1,4 @@
-#include "GraphEventQueue.hpp"
+#include <envire_core/events/GraphEventQueue.hpp>
 #include <typeinfo>
 #include <iostream>
 

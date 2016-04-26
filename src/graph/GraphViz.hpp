@@ -1,5 +1,4 @@
-#ifndef __ENVIRE_CORE_GRAPHVIZ__
-#define __ENVIRE_CORE_GRAPHVIZ__
+#pragma once
 
 #include <fstream> // std::ofstream
 
@@ -85,5 +84,3 @@ namespace envire { namespace core
         }
     };
 }}
-#endif
-
