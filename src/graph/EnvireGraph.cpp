@@ -1,4 +1,5 @@
-#include "EnvireGraph.hpp"
+
+#include <envire_core/graph/EnvireGraph.hpp>
 #include <fstream>
 #include <boost/archive/polymorphic_binary_oarchive.hpp>
 #include <boost/archive/polymorphic_binary_iarchive.hpp>

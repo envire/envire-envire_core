@@ -1,11 +1,5 @@
-/*
- * GraphExceptions.hpp
- *
- *  Created on: Sep 22, 2015
- *      Author: aboeckmann
- */
-
 #pragma once
+
 #include <stdexcept>
 #include <string>
 #include <envire_core/items/Frame.hpp>

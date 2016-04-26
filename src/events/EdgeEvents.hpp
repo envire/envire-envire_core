@@ -2,7 +2,7 @@
 
 #include <envire_core/items/ItemBase.hpp>
 #include <envire_core/graph/GraphTypes.hpp>
-#include "GraphEvent.hpp"
+#include <envire_core/events/GraphEvent.hpp>
 
 namespace envire { namespace core
 {

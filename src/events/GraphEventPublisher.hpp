@@ -7,7 +7,7 @@
 
 #pragma once
 #include <vector>
-#include "GraphEvent.hpp"
+#include <envire_core/events/GraphEvent.hpp>
 
 namespace envire { namespace core
 {

@@ -1,5 +1,5 @@
 #pragma once
-#include "GraphEventExceptions.hpp"
+#include <envire_core/events/GraphEventExceptions.hpp>
 
 namespace envire { namespace core
 {

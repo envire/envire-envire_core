@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 #include <typeindex>
-#include "Demangle.hpp"
+#include <envire_core/util/Demangle.hpp>
 
 namespace envire { namespace core
 {

@@ -1,8 +1,8 @@
 #pragma once
-#include "GraphEventSubscriber.hpp"
-#include "GraphEventPublisher.hpp"
-#include "ItemAddedEvent.hpp"
-#include "ItemRemovedEvent.hpp"
+#include <envire_core/events/GraphEventSubscriber.hpp>
+#include <envire_core/events/GraphEventPublisher.hpp>
+#include <envire_core/events/ItemAddedEvent.hpp>
+#include <envire_core/events/ItemRemovedEvent.hpp>
 #include <typeindex>
 
 

@@ -1,5 +1,5 @@
-#include "GraphEventSubscriber.hpp"
-#include "GraphEventPublisher.hpp"
+#include <envire_core/events/GraphEventSubscriber.hpp>
+#include <envire_core/events/GraphEventPublisher.hpp>
 #include <cassert>
 
 using namespace envire::core;

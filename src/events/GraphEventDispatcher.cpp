@@ -1,9 +1,9 @@
-#include "GraphEventDispatcher.hpp"
-#include "GraphEvent.hpp"
-#include "EdgeEvents.hpp"
-#include "ItemAddedEvent.hpp"
-#include "ItemRemovedEvent.hpp"
-#include "FrameEvents.hpp"
+#include <envire_core/events/GraphEventDispatcher.hpp>
+#include <envire_core/events/GraphEvent.hpp>
+#include <envire_core/events/EdgeEvents.hpp>
+#include <envire_core/events/ItemAddedEvent.hpp>
+#include <envire_core/events/ItemRemovedEvent.hpp>
+#include <envire_core/events/FrameEvents.hpp>
 
 #include <cassert>
 

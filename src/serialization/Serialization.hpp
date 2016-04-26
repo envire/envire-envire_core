@@ -1,7 +1,7 @@
 #pragma once
 
-#include "SerializationHandle.hpp"
-#include "ItemHeader.hpp"
+#include <envire_core/serialization/SerializationHandle.hpp>
+#include <envire_core/serialization/ItemHeader.hpp>
 #include <envire_core/items/ItemBase.hpp>
 
 #include <map>

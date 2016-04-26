@@ -1,6 +1,7 @@
 #pragma once
 
-#include "GraphTypes.hpp"
+#include <envire_core/graph/GraphTypes.hpp>
+
 namespace envire { namespace core
 {
     

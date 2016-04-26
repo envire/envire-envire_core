@@ -10,11 +10,10 @@
 #include <boost/graph/copy.hpp>
 #include <boost/concept_check.hpp>
 
-#include "GraphTypes.hpp"
-#include "TreeView.hpp"
-#include "GraphExceptions.hpp"
-#include "GraphVisitors.hpp"
-
+#include <envire_core/graph/GraphTypes.hpp>
+#include <envire_core/graph/TreeView.hpp>
+#include <envire_core/graph/GraphExceptions.hpp>
+#include <envire_core/graph/GraphVisitors.hpp>
 
 
 namespace envire { namespace core

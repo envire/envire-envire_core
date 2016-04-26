@@ -1,4 +1,5 @@
-#include "TreeView.hpp"
+#include <envire_core/graph/TreeView.hpp>
+
 namespace envire { namespace core
 {
     using vertex_descriptor = GraphTraits::vertex_descriptor;

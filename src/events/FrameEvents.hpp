@@ -1,7 +1,7 @@
 #pragma once
 
 #include <envire_core/items/Frame.hpp>
-#include "GraphEvent.hpp"
+#include <envire_core/events/GraphEvent.hpp>
 
 namespace envire { namespace core
 {

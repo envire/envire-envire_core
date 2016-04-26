@@ -1,4 +1,4 @@
-#include "GraphEvent.hpp"
+#include <envire_core/events/GraphEvent.hpp>
 #include <ostream>
 
 namespace envire { namespace core

@@ -5,8 +5,8 @@
  *      Author: aboeckmann
  */
 #include <algorithm>
-#include "GraphEventPublisher.hpp"
-#include "GraphEventSubscriber.hpp"
+#include <envire_core/events/GraphEventPublisher.hpp>
+#include <envire_core/events/GraphEventSubscriber.hpp>
 #include <cassert>
 
 using namespace envire::core;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TransformGraph.hpp"
+#include <envire_core/graph/TransformGraph.hpp>
 #include <envire_core/items/Frame.hpp>
 #include <envire_core/events/ItemAddedEvent.hpp>
 #include <envire_core/events/ItemRemovedEvent.hpp>
