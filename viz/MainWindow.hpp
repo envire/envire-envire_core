@@ -53,6 +53,9 @@ public slots:
   
   /**Display a file picker dialog and save the graph to the selected file */
   void storeGraph();
+  
+  /**Is called whenever the user wants to move a frame in the ui using the dragger */
+  void frameTranslated(const QString& frame, const base::Vector3d& translation);
     
 private slots:
   void framePicked(const QString&);

@@ -40,6 +40,7 @@ rock_executable(envire_visualizer_bin
                 DEPS_PKGCONFIG plugin_manager
                 DEPS_PKGCONFIG pcl_common-1.7
                 DEPS_PKGCONFIG pcl_io-1.7
+                DEPS_PKGCONFIG osgViz osgVizPlugin
                 DEPS_CMAKE Glog
                 DEPS_PKGCONFIG base-lib
                 DEPS envire_visualizer

@@ -17,8 +17,6 @@
 #include <chrono>
 #include <vector>
 #include <boost/uuid/uuid.hpp>
-#include <boost/archive/polymorphic_text_oarchive.hpp>//FIXME remove
-#include <boost/archive/polymorphic_text_iarchive.hpp>
 
 #include <envire_pcl/PointCloud.hpp>
 #include <pcl/io/pcd_io.h>
@@ -159,7 +157,7 @@ int test(int argc, char **argv)
   graph.addItemToFrame("D", cloud2);
   graph.addItemToFrame("A", cloud3); //special case item in root node
   
-  Transform ab(base::Position(1, 1, 1), Eigen::Quaterniond (Eigen::AngleAxisd(0.5, Eigen::Vector3d(1,2,3))));
+  Transform ab(base::Position(1, 1, 1), Eigen::Quaterniond::Identity());
   graph.addTransform("A", "B", ab);
   Transform bc(base::Position(1, 0, 0.3), Eigen::Quaterniond(Eigen::AngleAxisd(0.3, Eigen::Vector3d(1,0,3))));
   graph.addTransform("B", "C", ab);  

@@ -34,6 +34,8 @@ rootFrame(""), ignoreEdgeModifiedEvent(false), firstTimeDisplayingItems(true)
   window.tableViewItems->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
   
   connect(window.Vizkit3DWidget, SIGNAL(framePicked(const QString&)), this, SLOT(framePicked(const QString&)));
+  connect(window.Vizkit3DWidget, SIGNAL(frameTranslated(const QString&, const base::Vector3d&)),
+          this, SLOT(frameTranslated(const QString&, const base::Vector3d&)));          
   connect(window.actionRemove_Frame, SIGNAL(activated(void)), this, SLOT(removeFrame()));
   connect(window.actionAdd_Frame, SIGNAL(activated(void)), this, SLOT(addFrame()));
   connect(window.actionLoad_Graph, SIGNAL(activated(void)), this, SLOT(loadGraph()));
@@ -61,8 +63,8 @@ void MainWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph,
   
   this->graph = graph;
   //reset the widget because this might not be the first time the user loads a graph
-  window.Vizkit3DWidget->clear();
-  window.Vizkit3DWidget->setWorldName(rootNode);
+  //window.Vizkit3DWidget->clear(); //FIXME reimplement vitkit clear
+  //window.Vizkit3DWidget->setWorldName(rootNode); //FIXME reimplement setWorldName
   
   visualzier.reset(new EnvireGraphVisualizer(graph, window.Vizkit3DWidget,
                                              rootNode.toStdString(), pluginInfos));
@@ -175,10 +177,10 @@ void MainWindow::selectFrame(const QString& name)
   if(name != selectedFrame)
   {
       //highlight in 3d
-      window.Vizkit3DWidget->setFrameHighlight(name, true);
+      //window.Vizkit3DWidget->setFrameHighlight(name, true); //FIXME reimplement setFrameHighlight
       //unhighlight old selection
-      if(!selectedFrame.isEmpty())//happens if nothing was selected or selection was deleted
-        window.Vizkit3DWidget->setFrameHighlight(selectedFrame, false);
+     // if(!selectedFrame.isEmpty())//happens if nothing was selected or selection was deleted
+        //window.Vizkit3DWidget->setFrameHighlight(selectedFrame, false); //FIXME reimplement setFrameHighlight
       
       
       //select in list widget
@@ -340,6 +342,32 @@ void MainWindow::displayItems(const QString& frame)
     window.tableViewItems->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
   }
   
+}
+
+void MainWindow::frameTranslated(const QString& frame, const base::Vector3d& translation)
+{
+  const vertex_descriptor movedVertex = graph->getVertex(frame.toStdString());
+  if(movedVertex != graph->null_vertex() && visualzier->getTree().vertexExists(movedVertex))
+  {
+    const vertex_descriptor parentVertex = visualzier->getTree().tree.at(movedVertex).parent;
+    if(parentVertex != graph->null_vertex())
+    {
+      Transform tf = graph->getTransform(parentVertex, movedVertex);
+      const Transform invTf = graph->getTransform(movedVertex, parentVertex);
+      std::cout << translation.transpose() << std::endl;
+      tf.transform.translation += translation;
+      graph->updateTransform(parentVertex, movedVertex, tf);
+    }
+    else
+    {
+      LOG(ERROR) << "Tried to move the root vertex, this should not be possible";
+    }
+  }
+  else
+  {
+    LOG(ERROR) << "Moved a frame that is not part of the graph: " << frame.toStdString();
+  }
+
 }
 
 
