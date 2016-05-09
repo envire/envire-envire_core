@@ -55,7 +55,7 @@ public slots:
   void storeGraph();
   
   /**Is called whenever the user wants to move a frame in the ui using the dragger */
-  void frameTranslated(const QString& frame, const base::Vector3d& translation);
+  void frameTranslated(const QString& frame, const QVector3D& translation);
     
 private slots:
   void framePicked(const QString&);

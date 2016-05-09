@@ -34,8 +34,8 @@ rootFrame(""), ignoreEdgeModifiedEvent(false), firstTimeDisplayingItems(true)
   window.tableViewItems->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
   
   connect(window.Vizkit3DWidget, SIGNAL(framePicked(const QString&)), this, SLOT(framePicked(const QString&)));
-  connect(window.Vizkit3DWidget, SIGNAL(frameTranslated(const QString&, const base::Vector3d&)),
-          this, SLOT(frameTranslated(const QString&, const base::Vector3d&)));          
+  connect(window.Vizkit3DWidget, SIGNAL(frameTranslated(const QString&, const QVector3D&)),
+          this, SLOT(frameTranslated(const QString&, const QVector3D&)));          
   connect(window.actionRemove_Frame, SIGNAL(activated(void)), this, SLOT(removeFrame()));
   connect(window.actionAdd_Frame, SIGNAL(activated(void)), this, SLOT(addFrame()));
   connect(window.actionLoad_Graph, SIGNAL(activated(void)), this, SLOT(loadGraph()));
@@ -344,7 +344,7 @@ void MainWindow::displayItems(const QString& frame)
   
 }
 
-void MainWindow::frameTranslated(const QString& frame, const base::Vector3d& translation)
+void MainWindow::frameTranslated(const QString& frame, const QVector3D& translation)
 {
   const vertex_descriptor movedVertex = graph->getVertex(frame.toStdString());
   if(movedVertex != graph->null_vertex() && visualzier->getTree().vertexExists(movedVertex))
@@ -353,7 +353,8 @@ void MainWindow::frameTranslated(const QString& frame, const base::Vector3d& tra
     if(parentVertex != graph->null_vertex())
     {
       Transform tf = graph->getTransform(parentVertex, movedVertex);
-      tf.transform.translation += tf.transform.orientation * translation;
+      const base::Vector3d trans(translation.x(), translation.y(), translation.z());
+      tf.transform.translation += tf.transform.orientation * trans;
       graph->updateTransform(parentVertex, movedVertex, tf);
     }
     else
