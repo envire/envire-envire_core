@@ -353,9 +353,7 @@ void MainWindow::frameTranslated(const QString& frame, const base::Vector3d& tra
     if(parentVertex != graph->null_vertex())
     {
       Transform tf = graph->getTransform(parentVertex, movedVertex);
-      const Transform invTf = graph->getTransform(movedVertex, parentVertex);
-      std::cout << translation.transpose() << std::endl;
-      tf.transform.translation += translation;
+      tf.transform.translation += tf.transform.orientation * translation;
       graph->updateTransform(parentVertex, movedVertex, tf);
     }
     else
