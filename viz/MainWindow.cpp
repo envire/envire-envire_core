@@ -34,8 +34,8 @@ rootFrame(""), ignoreEdgeModifiedEvent(false), firstTimeDisplayingItems(true)
   window.tableViewItems->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
   
   connect(window.Vizkit3DWidget, SIGNAL(framePicked(const QString&)), this, SLOT(framePicked(const QString&)));
-  connect(window.Vizkit3DWidget, SIGNAL(frameTranslated(const QString&, const QVector3D&)),
-          this, SLOT(frameTranslated(const QString&, const QVector3D&)));          
+  connect(window.Vizkit3DWidget, SIGNAL(frameMoved(const QString&, const QVector3D&, const QQuaternion)),
+          this, SLOT(frameMoved(const QString&, const QVector3D&, const QQuaternion&)));          
   connect(window.actionRemove_Frame, SIGNAL(activated(void)), this, SLOT(removeFrame()));
   connect(window.actionAdd_Frame, SIGNAL(activated(void)), this, SLOT(addFrame()));
   connect(window.actionLoad_Graph, SIGNAL(activated(void)), this, SLOT(loadGraph()));
@@ -344,7 +344,7 @@ void MainWindow::displayItems(const QString& frame)
   
 }
 
-void MainWindow::frameTranslated(const QString& frame, const QVector3D& translation)
+void MainWindow::frameMoved(const QString& frame, const QVector3D& trans, const QQuaternion& rot)
 {
   const vertex_descriptor movedVertex = graph->getVertex(frame.toStdString());
   if(movedVertex != graph->null_vertex() && visualzier->getTree().vertexExists(movedVertex))
@@ -353,8 +353,15 @@ void MainWindow::frameTranslated(const QString& frame, const QVector3D& translat
     if(parentVertex != graph->null_vertex())
     {
       Transform tf = graph->getTransform(parentVertex, movedVertex);
-      const base::Vector3d trans(translation.x(), translation.y(), translation.z());
-      tf.transform.translation += tf.transform.orientation * trans;
+      const base::Vector3d translation(trans.x(), trans.y(), trans.z());
+      //const base::Vector3d trans(0, 0, 0);
+//       std::cout << "translation         : " << translation.transpose() << std::endl;
+     // std::cout << "parent translation  : " << tf.transform.translation.transpose() << std::endl;
+     // std::cout << "parent rotation  : " << tf.transform.orientation.coeffs().transpose() << std::endl;
+      
+      
+      tf.transform.translation += tf.transform.orientation * translation;
+//       std::cout << "after update trans  : " << tf.transform.translation.transpose() << std::endl;
       graph->updateTransform(parentVertex, movedVertex, tf);
     }
     else
