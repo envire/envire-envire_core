@@ -354,15 +354,21 @@ void MainWindow::frameMoved(const QString& frame, const QVector3D& trans, const 
     {
       Transform tf = graph->getTransform(parentVertex, movedVertex);
       const base::Vector3d translation(trans.x(), trans.y(), trans.z());
-      //const base::Vector3d trans(0, 0, 0);
-//       std::cout << "translation         : " << translation.transpose() << std::endl;
-     // std::cout << "parent translation  : " << tf.transform.translation.transpose() << std::endl;
-     // std::cout << "parent rotation  : " << tf.transform.orientation.coeffs().transpose() << std::endl;
+      const base::Quaterniond rotation(rot.scalar(), rot.x(), rot.y(), rot.z());
       
+      std::cout << "envire: trans before " << graph->getFrameId(parentVertex) << "->" << graph->getFrameId(movedVertex) << ": " << tf.transform.translation.transpose() << std::endl;
+      std::cout << "envire: rot before   " << graph->getFrameId(parentVertex) << "->" << graph->getFrameId(movedVertex) << ": " << tf.transform.orientation.coeffs().transpose() << std::endl;
       
-      tf.transform.translation += tf.transform.orientation * translation;
-//       std::cout << "after update trans  : " << tf.transform.translation.transpose() << std::endl;
+      std::cout << "envire: relative trans " << translation.transpose() << std::endl;
+      std::cout << "envire: relative rot   " << rotation.coeffs().transpose() << std::endl;
+      const base::Quaterniond delta = (tf.transform.orientation * rotation) * tf.transform.orientation.inverse();
+      std::cout << "envire: rot in A " << delta.coeffs().transpose() << std::endl;
+      tf.transform.orientation = delta * tf.transform.orientation;
+      std::cout << "envire: rot applied " << tf.transform.orientation.coeffs().transpose() << std::endl;
+      tf.transform.translation = tf.transform.orientation * translation + tf.transform.translation;
       graph->updateTransform(parentVertex, movedVertex, tf);
+      const Transform tfAfter = graph->getTransform(parentVertex, movedVertex);
+      std::cout << "envire: in graph " << tfAfter.transform.orientation.coeffs().transpose() << std::endl;
     }
     else
     {
