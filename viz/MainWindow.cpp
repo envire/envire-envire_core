@@ -33,9 +33,11 @@ rootFrame(""), ignoreEdgeModifiedEvent(false), firstTimeDisplayingItems(true)
   window.tableViewItems->setModel(&currentItems);//tableView will not take ownership
   window.tableViewItems->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
   
-  connect(window.Vizkit3DWidget, SIGNAL(framePicked(const QString&)), this, SLOT(framePicked(const QString&)));
+  connect(window.Vizkit3DWidget, SIGNAL(frameSelected(const QString&)), this, SLOT(framePicked(const QString&)));
   connect(window.Vizkit3DWidget, SIGNAL(frameMoved(const QString&, const QVector3D&, const QQuaternion)),
           this, SLOT(frameMoved(const QString&, const QVector3D&, const QQuaternion&)));          
+  connect(window.Vizkit3DWidget, SIGNAL(frameMoving(const QString&, const QVector3D&, const QQuaternion)),
+          this, SLOT(frameMoving(const QString&, const QVector3D&, const QQuaternion&)));          
   connect(window.actionRemove_Frame, SIGNAL(activated(void)), this, SLOT(removeFrame()));
   connect(window.actionAdd_Frame, SIGNAL(activated(void)), this, SLOT(addFrame()));
   connect(window.actionLoad_Graph, SIGNAL(activated(void)), this, SLOT(loadGraph()));
@@ -84,7 +86,7 @@ void MainWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph,
     window.listWidget->addItem(QString::fromStdString(id));
   }
      
-  window.treeView->setEnabled(true);
+  window.treeView->setEnabled(false); //leave disabled because initially no frame is selected
   window.listWidget->setEnabled(true);
   window.Vizkit3DWidget->setEnabled(true);
   window.actionAdd_Frame->setEnabled(true);
@@ -93,7 +95,6 @@ void MainWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph,
   
   rootFrame = rootNode;
   selectedFrame = "";//otherwise we might try to unhighlight a no longer existing frame
-  selectFrame(rootNode);//done after enabling gui because it might disable parts of the gui again
 }
 
 void MainWindow::displayGraph(const QString& filePath)
@@ -175,37 +176,36 @@ void MainWindow::listWidgetItemChanged(QListWidgetItem * current, QListWidgetIte
 void MainWindow::selectFrame(const QString& name)
 {  
   if(name != selectedFrame)
-  {
-      //highlight in 3d
-      //window.Vizkit3DWidget->setFrameHighlight(name, true); //FIXME reimplement setFrameHighlight
-      //unhighlight old selection
-     // if(!selectedFrame.isEmpty())//happens if nothing was selected or selection was deleted
-        //window.Vizkit3DWidget->setFrameHighlight(selectedFrame, false); //FIXME reimplement setFrameHighlight
-      
-      
-      //select in list widget
-      QList<QListWidgetItem*> items = window.listWidget->findItems(name, Qt::MatchExactly);
-      assert(items.size() == 1);
-      if(!items.first()->isSelected())
-        items.first()->setSelected(true);
-      
-      //display corresponding Transform
-      const vertex_descriptor selectedVertex = graph->getVertex(name.toStdString());
-      const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
-      updateDisplayedTransform(parentVertex, selectedVertex);
-      
-      //user should not be able to delete the root frame
-      if(name == rootFrame)
-        window.actionRemove_Frame->setEnabled(false);
-      else
-        window.actionRemove_Frame->setEnabled(true);
-      
-      selectedFrame = name;
-      displayItems(selectedFrame);
+  {     
+    //select in list widget
+    QList<QListWidgetItem*> items = window.listWidget->findItems(name, Qt::MatchExactly);
+    assert(items.size() == 1);
+    if(!items.first()->isSelected())
+      items.first()->setSelected(true);
+    
+    //display corresponding Transform
+    const vertex_descriptor selectedVertex = graph->getVertex(name.toStdString());
+    const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
+    Transform tf;
+    if(parentVertex != graph->null_vertex())//happens when the root node is selected
+      tf = graph->getTransform(parentVertex, selectedVertex);
+    updateDisplayedTransform(parentVertex, selectedVertex, tf.transform);
+    
+    //user should not be able to delete the root frame
+    if(name == rootFrame)
+      window.actionRemove_Frame->setEnabled(false);
+    else
+      window.actionRemove_Frame->setEnabled(true);
+    
+    window.Vizkit3DWidget->selectFrame(name, true);
+    selectedFrame = name;
+    displayItems(selectedFrame);
   }
 }
 
-void MainWindow::updateDisplayedTransform(const vertex_descriptor parent, const vertex_descriptor selected)
+void MainWindow::updateDisplayedTransform(const vertex_descriptor parent,
+                                          const vertex_descriptor selected,
+                                          const base::TransformWithCovariance& tf)
 {
   //disconnect before changing the transform model because changing the
   //value triggers events that are indistinguishable from user input
@@ -213,13 +213,12 @@ void MainWindow::updateDisplayedTransform(const vertex_descriptor parent, const 
       this, SLOT(transformChanged(const base::TransformWithCovariance&)));
   if(parent != GraphTraits::null_vertex())
   {
-    const Transform tf = graph->getTransform(parent, selected);
-    currentTransform.setTransform(tf.transform);
+    currentTransform.setTransform(tf);
     currentTransform.setEditable(true);
     window.treeView->setEnabled(true);
   }
   else
-  {
+  { //this is the root node, it should not be edited
     currentTransform.setTransform(base::TransformWithCovariance());
     currentTransform.setEditable(false);
     window.treeView->setEnabled(false);
@@ -242,10 +241,6 @@ void MainWindow::frameNameRemoved(const QString& name)
 
 void MainWindow::transformChanged(const base::TransformWithCovariance& newValue)
 {
- 
-  std::cout << "newTrans" << std::endl << newValue.translation.transpose() << std::endl
-  << newValue.orientation.coeffs().transpose() << std::endl;
- 
   const vertex_descriptor selectedVertex = graph->getVertex(selectedFrame.toStdString());
   const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
   const FrameId source = graph->getFrameId(parentVertex);
@@ -279,14 +274,16 @@ void MainWindow::edgeModifiedInternal(const QString& originFrame, const QString&
     {
       if(tree.isParent(targetVertex, originVertex))
       {
-        updateDisplayedTransform(targetVertex, originVertex);
+        const Transform tf = graph->getTransform(targetVertex, originVertex);
+        updateDisplayedTransform(targetVertex, originVertex, tf.transform);
       }
     }
     else if(selectedFrame == targetFrame)
     {
       if(tree.isParent(originVertex, targetVertex))
       {
-        updateDisplayedTransform(originVertex, targetVertex);
+        const Transform tf = graph->getTransform(originVertex, targetVertex);
+        updateDisplayedTransform(originVertex, targetVertex, tf.transform);
       }
     }
   }  
@@ -344,7 +341,8 @@ void MainWindow::displayItems(const QString& frame)
   
 }
 
-void MainWindow::frameMoved(const QString& frame, const QVector3D& trans, const QQuaternion& rot)
+void MainWindow::internalFrameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot,
+                                     bool finished)
 {
   const vertex_descriptor movedVertex = graph->getVertex(frame.toStdString());
   if(movedVertex != graph->null_vertex() && visualzier->getTree().vertexExists(movedVertex))
@@ -355,20 +353,14 @@ void MainWindow::frameMoved(const QString& frame, const QVector3D& trans, const 
       Transform tf = graph->getTransform(parentVertex, movedVertex);
       const base::Vector3d translation(trans.x(), trans.y(), trans.z());
       const base::Quaterniond rotation(rot.scalar(), rot.x(), rot.y(), rot.z());
-      
-      std::cout << "envire: trans before " << graph->getFrameId(parentVertex) << "->" << graph->getFrameId(movedVertex) << ": " << tf.transform.translation.transpose() << std::endl;
-      std::cout << "envire: rot before   " << graph->getFrameId(parentVertex) << "->" << graph->getFrameId(movedVertex) << ": " << tf.transform.orientation.coeffs().transpose() << std::endl;
-      
-      std::cout << "envire: relative trans " << translation.transpose() << std::endl;
-      std::cout << "envire: relative rot   " << rotation.coeffs().transpose() << std::endl;
       const base::Quaterniond delta = (tf.transform.orientation * rotation) * tf.transform.orientation.inverse();
-      std::cout << "envire: rot in A " << delta.coeffs().transpose() << std::endl;
       tf.transform.orientation = delta * tf.transform.orientation;
-      std::cout << "envire: rot applied " << tf.transform.orientation.coeffs().transpose() << std::endl;
       tf.transform.translation = tf.transform.orientation * translation + tf.transform.translation;
-      graph->updateTransform(parentVertex, movedVertex, tf);
-      const Transform tfAfter = graph->getTransform(parentVertex, movedVertex);
-      std::cout << "envire: in graph " << tfAfter.transform.orientation.coeffs().transpose() << std::endl;
+      
+      if(finished)
+        graph->updateTransform(parentVertex, movedVertex, tf);
+      
+      updateDisplayedTransform(parentVertex, movedVertex, tf.transform);
     }
     else
     {
@@ -378,8 +370,17 @@ void MainWindow::frameMoved(const QString& frame, const QVector3D& trans, const 
   else
   {
     LOG(ERROR) << "Moved a frame that is not part of the graph: " << frame.toStdString();
-  }
+  }  
+}
 
+void MainWindow::frameMoved(const QString& frame, const QVector3D& trans, const QQuaternion& rot)
+{
+  internalFrameMoving(frame, trans, rot, true);
+}
+
+void MainWindow::frameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot)
+{
+  internalFrameMoving(frame, trans, rot, false);
 }
 
 

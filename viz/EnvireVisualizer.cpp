@@ -155,18 +155,18 @@ int test(int argc, char **argv)
   graph.addFrame("D");
   graph.addItemToFrame("B", cloud);
   graph.addItemToFrame("D", cloud2);
-  //graph.addItemToFrame("A", cloud3); //special case item in root node
+  graph.addItemToFrame("A", cloud3); //special case item in root node
   
-  Transform ab(base::Position(1, 1, 1), Eigen::Quaterniond(Eigen::AngleAxisd(1.57, Eigen::Vector3d(0,0,1))));
+  Transform ab(base::Position(1, 1, 1), Eigen::Quaterniond::Identity());
   graph.addTransform("A", "B", ab);
- /* Transform bc(base::Position(1, 0, 0.3), Eigen::Quaterniond(Eigen::AngleAxisd(0.3, Eigen::Vector3d(1,0,3))));
+  Transform bc(base::Position(1, 0, 0.3), Eigen::Quaterniond(Eigen::AngleAxisd(0.3, Eigen::Vector3d(1,0,3))));
   graph.addTransform("B", "C", ab);  
   Transform cd(base::Position(0, 2, -1), Eigen::Quaterniond(Eigen::AngleAxisd(-0.8, Eigen::Vector3d(0,0,1))));
   graph.addTransform("C", "D", cd);  
-  */
- // graph.addFrame("randTree");
-//  Transform aToForrest(base::Position(0, -3, -2), Eigen::Quaterniond(Eigen::AngleAxisd(0, Eigen::Vector3d(0,0,1))));
- // graph.addTransform("A", "randTree", aToForrest);
+  
+  graph.addFrame("randTree");
+  Transform aToForrest(base::Position(0, -3, -2), Eigen::Quaterniond(Eigen::AngleAxisd(0, Eigen::Vector3d(0,0,1))));
+  graph.addTransform("A", "randTree", aToForrest);
   
   graph.saveToFile("envire_graph_test23");
   
@@ -176,7 +176,7 @@ int test(int argc, char **argv)
   window.show();
   
   
-//   std::thread t([&]()
+//   std::thread t([&]() 
 //   {
 //     //because the graph is not thread safe, yet  
 //     std::this_thread::sleep_for(std::chrono::seconds(1));

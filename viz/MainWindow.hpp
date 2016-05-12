@@ -56,6 +56,7 @@ public slots:
   
   /**Is called whenever the user wants to move a frame in the ui using the dragger */
   void frameMoved(const QString& frame, const QVector3D& trans, const QQuaternion& rot);
+  void frameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot);
     
 private slots:
   void framePicked(const QString&);
@@ -68,12 +69,17 @@ private slots:
   
   /**Display the transform from @p parent to @p selected in the transform display */
   void updateDisplayedTransform(const envire::core::GraphTraits::vertex_descriptor parent,
-                                const envire::core::GraphTraits::vertex_descriptor selected);
+                                const envire::core::GraphTraits::vertex_descriptor selected,
+                                const base::TransformWithCovariance& tf);
   
   /**Display the items of @p frame in the itemListWidget */
   void displayItems(const QString& frame);
   
 private:
+  
+  /** @param finished if false, the movement is still ongoing, if true the movement is done */
+  void internalFrameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot,
+                           bool finished);
   
   Ui::MainWindow window;
   std::shared_ptr<envire::core::EnvireGraph> graph;
