@@ -65,7 +65,7 @@ private slots:
   void framePicked(const QString&);
   void listWidgetItemChanged(QListWidgetItem * current, QListWidgetItem * previous);
   /**Invoked if the user changes a transformation */
-  void transformChanged(const base::TransformWithCovariance& newValue);
+  void transformChanged(const envire::core::Transform& newValue);
   
   /**invoked by edgeModified() for thread switch */
   void edgeModifiedInternal(const QString& originFrame, const QString& tagetFrame);

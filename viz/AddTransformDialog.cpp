@@ -20,7 +20,7 @@ QString AddTransformDialog::getFrameId() const
   return window.lineEditFrameId->text();
 }
 
-const base::TransformWithCovariance& AddTransformDialog::getTransform() const
+const envire::core::Transform& AddTransformDialog::getTransform() const
 {
   return model.getTransform();
 }

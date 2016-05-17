@@ -1,6 +1,6 @@
 #pragma once
 #include <QStandardItemModel>
-#include <base/TransformWithCovariance.hpp>
+#include <envire_core/items/Transform.hpp>
 
 namespace envire { namespace viz {
   
@@ -15,22 +15,22 @@ public:
 signals:
   /**Emitted when the transform is changed either by the user or by 
    * setTransform().*/
-  void transformChanged(const base::TransformWithCovariance& newValue);
+  void transformChanged(const envire::core::Transform& newValue);
   
 public slots:
   /** Used to programatically change the transform
    * This method should be invoked in the gui thread*/
-  void setTransform(const base::TransformWithCovariance& newValue);
+  void setTransform(const envire::core::Transform& newValue);
   /*If set to false, the model will be read only */
   void setEditable(const bool value);
   
-  const base::TransformWithCovariance& getTransform() const;
+  const envire::core::Transform& getTransform() const;
 private slots:
 
   void  itemChangedSlot(QStandardItem * item);
 private:
   QStandardItemModel model;
-  base::TransformWithCovariance tf;
+  envire::core::Transform tf;
   
   QStandardItem transXItem;
   QStandardItem transYItem;
@@ -39,6 +39,7 @@ private:
   QStandardItem rotYItem;
   QStandardItem rotZItem;
   QStandardItem rotWItem;
+  QStandardItem timestampItem;
 };
 
 }}

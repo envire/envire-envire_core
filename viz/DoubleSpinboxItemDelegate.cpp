@@ -35,11 +35,9 @@ void DoubleSpinboxItemDelegate::setEditorData(QWidget *editor,
                                               const QModelIndex &index) const
 {
   const double value = index.model()->data(index, Qt::DisplayRole).toDouble();
-  std::cout << "EDITVALUE: " << value << std::endl;
 
   QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
   spinBox->setValue(value);
-  std::cout << spinBox->value() << std::endl;
 }
 
 void DoubleSpinboxItemDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,

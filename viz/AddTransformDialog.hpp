@@ -12,7 +12,7 @@ class AddTransformDialog : public QDialog
 public:
   AddTransformDialog(QWidget* parent = nullptr);
   QString getFrameId() const;
-  const base::TransformWithCovariance& getTransform() const;
+  const envire::core::Transform& getTransform() const;
   
 private slots:
   void frameIdChanged(const QString& newId);

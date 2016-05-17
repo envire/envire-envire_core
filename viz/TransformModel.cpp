@@ -1,4 +1,6 @@
 #include "TransformModel.hpp"
+#include <envire_core/items/Transform.hpp>
+#include <glog/logging.h>
 
 namespace envire { namespace viz {
 
@@ -82,57 +84,79 @@ TransformModel::TransformModel() :
   rotItem->appendRow(rotY);
   rotItem->appendRow(rotZ);
   rotItem->appendRow(rotW);
+
+  QList<QStandardItem*> timestampList;
+  QStandardItem* timestampText = new QStandardItem("Timestamp");
+  timestampText->setEditable(false);
+  timestampList.append(timestampText);
+  timestampList.append(&timestampItem);
+  parentItem->appendRow(timestampList);
+  
   
   connect(this, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedSlot(QStandardItem*)));
   setTransform(tf);//works because tf is default constructed to Identity  
 }
 
-void TransformModel::setTransform(const base::TransformWithCovariance& newValue)
+void TransformModel::setTransform(const envire::core::Transform& newValue)
 {
   tf = newValue;
-  //block signals while changing the transform programatically, to avoid
-  //infinite loops
-  transXItem.setData(QVariant::fromValue<double>(tf.translation.x()) ,Qt::DisplayRole);
-  transYItem.setData(QVariant::fromValue<double>(tf.translation.y()) ,Qt::DisplayRole);
-  transZItem.setData(QVariant::fromValue<double>(tf.translation.z()) ,Qt::DisplayRole);
+  transXItem.setData(QVariant::fromValue<double>(tf.transform.translation.x()) ,Qt::DisplayRole);
+  transYItem.setData(QVariant::fromValue<double>(tf.transform.translation.y()) ,Qt::DisplayRole);
+  transZItem.setData(QVariant::fromValue<double>(tf.transform.translation.z()) ,Qt::DisplayRole);
   
-  rotXItem.setData(QVariant::fromValue<double>(tf.orientation.x()) ,Qt::DisplayRole);
-  rotYItem.setData(QVariant::fromValue<double>(tf.orientation.y()) ,Qt::DisplayRole);
-  rotZItem.setData(QVariant::fromValue<double>(tf.orientation.z()) ,Qt::DisplayRole);
-  rotWItem.setData(QVariant::fromValue<double>(tf.orientation.w()) ,Qt::DisplayRole);
-}
+  rotXItem.setData(QVariant::fromValue<double>(tf.transform.orientation.x()) ,Qt::DisplayRole);
+  rotYItem.setData(QVariant::fromValue<double>(tf.transform.orientation.y()) ,Qt::DisplayRole);
+  rotZItem.setData(QVariant::fromValue<double>(tf.transform.orientation.z()) ,Qt::DisplayRole);
+  rotWItem.setData(QVariant::fromValue<double>(tf.transform.orientation.w()) ,Qt::DisplayRole);
+  
+  timestampItem.setData(QVariant(QString::fromStdString(tf.time.toString())), Qt::DisplayRole);
+} 
 
 void  TransformModel::itemChangedSlot(QStandardItem * item)
 {
   const double data = item->data(Qt::DisplayRole).toDouble();
   if(item == &transXItem)
   {
-    tf.translation.x() = data;
+    tf.transform.translation.x() = data;
   }
   else if(item == &transYItem)
   {
-    tf.translation.y() = data;
+    tf.transform.translation.y() = data;
   }
   else if(item == &transZItem)
   {
-    tf.translation.z() = data;
+    tf.transform.translation.z() = data;
   }
   else if(item == &rotXItem)
   {
-    tf.orientation.x() = data;
+    tf.transform.orientation.x() = data;
   }
   else if(item == &rotYItem)
   {
-    tf.orientation.y() = data;
+    tf.transform.orientation.y() = data;
   }
   else if(item == &rotZItem)
   {
-    tf.orientation.z() = data;
+    tf.transform.orientation.z() = data;
   }
   else if(item == &rotWItem)
   {
-    tf.orientation.w() = data;
+    tf.transform.orientation.w() = data;
   }  
+  else if(item == &timestampItem)
+  {
+    const std::string timeStr = item->data(Qt::DisplayRole).toString().toStdString();
+    try 
+    {
+      std::cout << "TIME: " << timeStr << std::endl;
+      tf.time = base::Time::fromString(timeStr);
+    }
+    catch(const std::runtime_error& ex)
+    {
+      LOG(ERROR) << "Cannot parse timestamp: " << ex.what();
+      timestampItem.setData(QVariant(QString::fromStdString(tf.time.toString())), Qt::DisplayRole);
+    }
+  }
   emit transformChanged(tf);
 }
 
@@ -146,9 +170,11 @@ void TransformModel::setEditable(const bool value)
   rotYItem.setEditable(value);
   rotZItem.setEditable(value);
   rotWItem.setEditable(value);
+  
+  timestampItem.setEditable(value);
 }
 
-const base::TransformWithCovariance& TransformModel::getTransform() const
+const envire::core::Transform& TransformModel::getTransform() const
 {
   return tf;
 }

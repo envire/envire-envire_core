@@ -29,6 +29,7 @@ rootFrame(""), ignoreEdgeModifiedEvent(false), firstTimeDisplayingItems(true)
   window.treeView->expandAll();
   DoubleSpinboxItemDelegate* del = new DoubleSpinboxItemDelegate(window.treeView);
   window.treeView->setItemDelegateForColumn(1, del);
+  window.treeView->setItemDelegateForRow(2, window.treeView->itemDelegate()); //the row delegate will take precedence over the column delegate
   window.listWidget->setSortingEnabled(true);
   window.tableViewItems->setModel(&currentItems);//tableView will not take ownership
   window.tableViewItems->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
@@ -45,8 +46,8 @@ rootFrame(""), ignoreEdgeModifiedEvent(false), firstTimeDisplayingItems(true)
   connect(window.listWidget, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
           this, SLOT(listWidgetItemChanged(QListWidgetItem*, QListWidgetItem*)));
   
-  connect(&currentTransform, SIGNAL(transformChanged(const base::TransformWithCovariance&)),
-          this, SLOT(transformChanged(const base::TransformWithCovariance&)));
+  connect(&currentTransform, SIGNAL(transformChanged(const envire::core::Transform&)),
+          this, SLOT(transformChanged(const envire::core::Transform&)));
   
   pluginInfos.reset(new Vizkit3dPluginInformation(window.Vizkit3DWidget));
   
@@ -219,8 +220,8 @@ void EnvireVisualizerWindow::updateDisplayedTransform(const vertex_descriptor pa
 {
   //disconnect before changing the transform model because changing the
   //value triggers events that are indistinguishable from user input
-  disconnect(&currentTransform, SIGNAL(transformChanged(const base::TransformWithCovariance&)),
-      this, SLOT(transformChanged(const base::TransformWithCovariance&)));
+  disconnect(&currentTransform, SIGNAL(transformChanged(const envire::core::Transform&)),
+      this, SLOT(transformChanged(const envire::core::Transform&)));
   if(parent != GraphTraits::null_vertex())
   {
     currentTransform.setTransform(tf);
@@ -233,8 +234,8 @@ void EnvireVisualizerWindow::updateDisplayedTransform(const vertex_descriptor pa
     currentTransform.setEditable(false);
     window.treeView->setEnabled(false);
   }
-  connect(&currentTransform, SIGNAL(transformChanged(const base::TransformWithCovariance&)),
-          this, SLOT(transformChanged(const base::TransformWithCovariance&)));
+  connect(&currentTransform, SIGNAL(transformChanged(const envire::core::Transform&)),
+          this, SLOT(transformChanged(const envire::core::Transform&)));
 }
 
 void EnvireVisualizerWindow::frameNameAdded(const QString& name)
@@ -249,7 +250,7 @@ void EnvireVisualizerWindow::frameNameRemoved(const QString& name)
   delete items.first(); //this will remove the item from the listWidget
 }
 
-void EnvireVisualizerWindow::transformChanged(const base::TransformWithCovariance& newValue)
+void EnvireVisualizerWindow::transformChanged(const envire::core::Transform& newValue)
 {
   const vertex_descriptor selectedVertex = graph->getVertex(selectedFrame.toStdString());
   const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
@@ -263,6 +264,8 @@ void EnvireVisualizerWindow::transformChanged(const base::TransformWithCovarianc
 
 void EnvireVisualizerWindow::edgeModified(const EdgeModifiedEvent& e)
 {
+  if(ignoreEdgeModifiedEvent)
+    return;
   const QString origin = QString::fromStdString(e.origin);
   const QString target = QString::fromStdString(e.target);
   //need to invoke because the graph might have been modified from a different
