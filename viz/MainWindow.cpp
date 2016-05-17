@@ -258,7 +258,6 @@ void MainWindow::transformChanged(const base::TransformWithCovariance& newValue)
 
 void MainWindow::edgeModified(const EdgeModifiedEvent& e)
 {
-  std::cout << "EDGE MODIFIED WINDOW" << std::endl;
   const QString origin = QString::fromStdString(e.origin);
   const QString target = QString::fromStdString(e.target);
   //need to invoke because the graph might have been modified from a different
