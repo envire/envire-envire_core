@@ -20,13 +20,13 @@ namespace envire { namespace viz
 class EnvireGraphVisualizer;
 class Vizkit3dPluginInformation;
 
-class MainWindow : public QMainWindow, public envire::core::GraphEventDispatcher
+class EnvireVisualizerWindow : public QMainWindow, public envire::core::GraphEventDispatcher
 {
   Q_OBJECT
 public:
   
   /**Create an unitialized envire visualizer that displays nothing.*/
-  MainWindow();
+  EnvireVisualizerWindow();
   
   /**called whenever some edge in the graph changes */
   virtual void edgeModified(const envire::core::EdgeModifiedEvent& e);

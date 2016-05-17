@@ -8,7 +8,7 @@ qt4_wrap_ui(SOURCES2_UI_H addtransformdialog.ui)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}) #to be able to include ui_mainwindow.h
 
 rock_library(envire_visualizer
-             MOC     MainWindow.hpp
+             MOC     EnvireVisualizerWindow.hpp
                      EnvireGraphVisualizer.hpp
                      TransformModel.hpp
                      DoubleSpinboxItemDelegate.hpp
@@ -16,7 +16,7 @@ rock_library(envire_visualizer
                      ItemTableModel.hpp
              HEADERS Vizkit3dPluginInformation.hpp
                      Helpers.hpp
-                     MainWindow.hpp
+                     EnvireVisualizerWindow.hpp
                      EnvireGraphVisualizer.hpp
                      TransformModel.hpp
                      DoubleSpinboxItemDelegate.hpp
@@ -33,7 +33,7 @@ rock_library(envire_visualizer
                      ${SOURCES_MOC}
                      mainwindow.ui #to create a dependency and regen if the ui changes
                      addtransformdialog.ui
-                     MainWindow.cpp
+                     EnvireVisualizerWindow.cpp
              DEPS_PKGCONFIG vizkit3d
              DEPS_PKGCONFIG envire_core
              DEPS_PKGCONFIG base-lib)

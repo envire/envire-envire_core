@@ -1,4 +1,4 @@
-#include "MainWindow.hpp"
+#include "EnvireVisualizerWindow.hpp"
 #include "EnvireGraphVisualizer.hpp"
 #include "TransformModel.hpp"
 #include "Helpers.hpp"
@@ -20,7 +20,7 @@ using vertex_descriptor = GraphTraits::vertex_descriptor;
 namespace envire { namespace viz
 {
   
-MainWindow::MainWindow(): QMainWindow(), GraphEventDispatcher(),
+EnvireVisualizerWindow::EnvireVisualizerWindow(): QMainWindow(), GraphEventDispatcher(),
 rootFrame(""), ignoreEdgeModifiedEvent(false), firstTimeDisplayingItems(true)
 {
   window.setupUi(this);
@@ -59,7 +59,7 @@ rootFrame(""), ignoreEdgeModifiedEvent(false), firstTimeDisplayingItems(true)
   window.actionSave_Graph->setEnabled(false);
 }
   
-void MainWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph,
+void EnvireVisualizerWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph,
                               const QString& rootNode)
 {
   if(this->graph)
@@ -102,10 +102,15 @@ void MainWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph,
   selectedFrame = "";//otherwise we might try to unhighlight a no longer existing frame
 }
 
-void MainWindow::displayGraph(const QString& filePath)
+void EnvireVisualizerWindow::displayGraph(const QString& filePath)
 {
   try 
   {
+    if(!QFile::exists(filePath))
+    {
+      LOG(ERROR) << "Cannot load graph. File doesn't exist: " << filePath.toStdString();
+      return;
+    }
     std::shared_ptr<EnvireGraph> pGraph(new EnvireGraph());
     pGraph->loadFromFile(filePath.toStdString());
     
@@ -136,7 +141,7 @@ void MainWindow::displayGraph(const QString& filePath)
   }
 }
 
-void MainWindow::addFrame()
+void EnvireVisualizerWindow::addFrame()
 {
   AddTransformDialog dialog(this);
   if(dialog.exec() == QDialog::Accepted)
@@ -150,7 +155,7 @@ void MainWindow::addFrame()
   }
 }
 
-void MainWindow::removeFrame()
+void EnvireVisualizerWindow::removeFrame()
 {
   if(!selectedFrame.isEmpty())
   {
@@ -166,19 +171,19 @@ void MainWindow::removeFrame()
   }
 }
 
-void MainWindow::framePicked(const QString& frame)
+void EnvireVisualizerWindow::framePicked(const QString& frame)
 {
   selectFrame(frame);
 }
 
-void MainWindow::listWidgetItemChanged(QListWidgetItem * current, QListWidgetItem * previous)
+void EnvireVisualizerWindow::listWidgetItemChanged(QListWidgetItem * current, QListWidgetItem * previous)
 {
   //current is nullptr if the list is cleared
   if(current != nullptr)
     selectFrame(current->text());
 }
 
-void MainWindow::selectFrame(const QString& name)
+void EnvireVisualizerWindow::selectFrame(const QString& name)
 {  
   if(name != selectedFrame)
   {     
@@ -208,7 +213,7 @@ void MainWindow::selectFrame(const QString& name)
   }
 }
 
-void MainWindow::updateDisplayedTransform(const vertex_descriptor parent,
+void EnvireVisualizerWindow::updateDisplayedTransform(const vertex_descriptor parent,
                                           const vertex_descriptor selected,
                                           const base::TransformWithCovariance& tf)
 {
@@ -232,19 +237,19 @@ void MainWindow::updateDisplayedTransform(const vertex_descriptor parent,
           this, SLOT(transformChanged(const base::TransformWithCovariance&)));
 }
 
-void MainWindow::frameNameAdded(const QString& name)
+void EnvireVisualizerWindow::frameNameAdded(const QString& name)
 {
   window.listWidget->addItem(name);
 }
 
-void MainWindow::frameNameRemoved(const QString& name)
+void EnvireVisualizerWindow::frameNameRemoved(const QString& name)
 {
   QList<QListWidgetItem*> items = window.listWidget->findItems(name, Qt::MatchExactly);
   assert(items.size() == 1); //the frame ids are unique and should not be in the list more than once
   delete items.first(); //this will remove the item from the listWidget
 }
 
-void MainWindow::transformChanged(const base::TransformWithCovariance& newValue)
+void EnvireVisualizerWindow::transformChanged(const base::TransformWithCovariance& newValue)
 {
   const vertex_descriptor selectedVertex = graph->getVertex(selectedFrame.toStdString());
   const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
@@ -256,7 +261,7 @@ void MainWindow::transformChanged(const base::TransformWithCovariance& newValue)
   
 }
 
-void MainWindow::edgeModified(const EdgeModifiedEvent& e)
+void EnvireVisualizerWindow::edgeModified(const EdgeModifiedEvent& e)
 {
   const QString origin = QString::fromStdString(e.origin);
   const QString target = QString::fromStdString(e.target);
@@ -267,7 +272,7 @@ void MainWindow::edgeModified(const EdgeModifiedEvent& e)
                             Q_ARG(QString, origin), Q_ARG(QString, target));  
 }
 
-void MainWindow::edgeModifiedInternal(const QString& originFrame, const QString& targetFrame)
+void EnvireVisualizerWindow::edgeModifiedInternal(const QString& originFrame, const QString& targetFrame)
 {
   vertex_descriptor originVertex = graph->getVertex(originFrame.toStdString());
   vertex_descriptor targetVertex = graph->getVertex(targetFrame.toStdString());
@@ -294,7 +299,7 @@ void MainWindow::edgeModifiedInternal(const QString& originFrame, const QString&
   }  
 }
 
-void MainWindow::loadGraph()
+void EnvireVisualizerWindow::loadGraph()
 {
   //DontUseNativeDialog is used because the native dialog on xfce hangs and crashes...
   const QString file = QFileDialog::getOpenFileName(this, tr("Load Envire Graph"),
@@ -307,7 +312,7 @@ void MainWindow::loadGraph()
   }
 }
 
-void MainWindow::storeGraph()
+void EnvireVisualizerWindow::storeGraph()
 {
   //DontUseNativeDialog is used because the native dialog on xfce hangs and crashes...
   const QString file = QFileDialog::getSaveFileName(this, tr("Save Envire Graph"),
@@ -324,7 +329,7 @@ void MainWindow::storeGraph()
   }
 }
 
-void MainWindow::displayItems(const QString& frame)
+void EnvireVisualizerWindow::displayItems(const QString& frame)
 {
   const FrameId frameId = frame.toStdString();
   currentItems.clear();
@@ -346,7 +351,7 @@ void MainWindow::displayItems(const QString& frame)
   
 }
 
-void MainWindow::internalFrameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot,
+void EnvireVisualizerWindow::internalFrameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot,
                                      bool finished)
 {
   const vertex_descriptor movedVertex = graph->getVertex(frame.toStdString());
@@ -378,17 +383,17 @@ void MainWindow::internalFrameMoving(const QString& frame, const QVector3D& tran
   }  
 }
 
-void MainWindow::frameMoved(const QString& frame, const QVector3D& trans, const QQuaternion& rot)
+void EnvireVisualizerWindow::frameMoved(const QString& frame, const QVector3D& trans, const QQuaternion& rot)
 {
   internalFrameMoving(frame, trans, rot, true);
 }
 
-void MainWindow::frameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot)
+void EnvireVisualizerWindow::frameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot)
 {
   internalFrameMoving(frame, trans, rot, false);
 }
 
-std::shared_ptr<EnvireGraph> MainWindow::getGraph() const
+std::shared_ptr<EnvireGraph> EnvireVisualizerWindow::getGraph() const
 {
   return graph;
 }
