@@ -16,6 +16,12 @@ rock_library(envire_visualizer
                      ItemTableModel.hpp
              HEADERS Vizkit3dPluginInformation.hpp
                      Helpers.hpp
+                     MainWindow.hpp
+                     EnvireGraphVisualizer.hpp
+                     TransformModel.hpp
+                     DoubleSpinboxItemDelegate.hpp
+                     AddTransformDialog.hpp
+                     ItemTableModel.hpp
                      ${SOURCES_UI_H}
                      ${SOURCES2_UI_H}
              SOURCES EnvireGraphVisualizer.cpp
@@ -33,7 +39,7 @@ rock_library(envire_visualizer
              DEPS_PKGCONFIG base-lib)
 
 rock_executable(envire_visualizer_bin
-                SOURCES EnvireVisualizer.cpp
+                SOURCES VisualizerExample.cpp
                 DEPS_PKGCONFIG envire_pcl
                 DEPS_PKGCONFIG vizkit3d
                 DEPS_PKGCONFIG envire_core
