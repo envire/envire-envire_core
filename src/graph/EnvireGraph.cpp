@@ -47,6 +47,12 @@ bool EnvireGraph::containsItems(const vertex_descriptor vertex, const std::type_
   return mapEntry != frame.items.end();     
 }
 
+bool EnvireGraph::containsItems(const FrameId& frame, const std::type_index& type) const
+{
+  const vertex_descriptor vertex = getVertex(frame);
+  return containsItems(vertex, type);
+}
+
 void EnvireGraph::checkFrameValid(const FrameId& frame) const
 {
     if(vertex(frame) == null_vertex())

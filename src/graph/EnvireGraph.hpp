@@ -130,7 +130,7 @@ public:
     /** @return true if @p frame contains at least one item of @p type. 
       *  @param type The described type should derive from ItemBase*/
     bool containsItems(const vertex_descriptor frame, const std::type_index& type) const;
-
+    bool containsItems(const FrameId& frame, const std::type_index& type) const;
     /** @return the number of items of type @p T in @p frame.
       *  @param T should derive from ItemBase
       *  @throw UnknownFrameException if the @p frame id is invalid.*/

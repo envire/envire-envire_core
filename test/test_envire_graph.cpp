@@ -363,6 +363,34 @@ BOOST_AUTO_TEST_CASE(check_item_existence_example)
 
 }
 
+BOOST_AUTO_TEST_CASE(check_item_existence_example_typeId)
+{
+    struct Joint
+    {
+      Joint(int a) : a(a) {}
+      int a;
+    };
+    struct Sensor {};
+    
+    EnvireGraph g;
+    FrameId frame = "frame";
+    g.addFrame(frame);
+    
+    Item<Joint>::Ptr item(new Item<Joint>(42));
+    g.addItemToFrame(frame, item);
+    Item<Sensor>::Ptr item2(new Item<Sensor>());
+    g.addItemToFrame(frame, item2);
+    
+    const std::type_index stringType(typeid(Item<string>));
+    bool contains = g.containsItems(frame, stringType);
+    BOOST_CHECK(!contains);
+    
+    const std::type_index jointType(typeid(Item<Joint>));
+    using Iterator = EnvireGraph::ItemIterator<Item<Joint>>;
+    Iterator begin, end;
+    BOOST_CHECK(g.getItems(frame, jointType).size() > 0);
+}
+
 
 BOOST_AUTO_TEST_CASE(get_item_empty_graph_test)
 {
