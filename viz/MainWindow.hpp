@@ -36,6 +36,9 @@ public:
   /**Load a graph and ask the user for the root node*/
   void displayGraph(const QString& filePath);
   
+  /**Returns a shared_ptr to the currently displayed graph */
+  std::shared_ptr<envire::core::EnvireGraph> getGraph() const;
+  
 private:
   /**selects the frame named @p name in the 2d listview and 3d window */
   void selectFrame(const QString& name);

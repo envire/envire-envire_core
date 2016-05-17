@@ -62,11 +62,16 @@ rootFrame(""), ignoreEdgeModifiedEvent(false), firstTimeDisplayingItems(true)
 void MainWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph,
                               const QString& rootNode)
 {
-  
+  if(this->graph)
+  {
+    this->graph->unsubscribe(this);
+  }
   this->graph = graph;
+  this->graph->subscribe(this);
+  
   //reset the widget because this might not be the first time the user loads a graph
-  //window.Vizkit3DWidget->clear(); //FIXME reimplement vitkit clear
-  //window.Vizkit3DWidget->setWorldName(rootNode); //FIXME reimplement setWorldName
+  window.Vizkit3DWidget->clear();
+ window.Vizkit3DWidget->setWorldName(rootNode);
   
   visualzier.reset(new EnvireGraphVisualizer(graph, window.Vizkit3DWidget,
                                              rootNode.toStdString(), pluginInfos));
@@ -253,6 +258,7 @@ void MainWindow::transformChanged(const base::TransformWithCovariance& newValue)
 
 void MainWindow::edgeModified(const EdgeModifiedEvent& e)
 {
+  std::cout << "EDGE MODIFIED WINDOW" << std::endl;
   const QString origin = QString::fromStdString(e.origin);
   const QString target = QString::fromStdString(e.target);
   //need to invoke because the graph might have been modified from a different
@@ -381,6 +387,11 @@ void MainWindow::frameMoved(const QString& frame, const QVector3D& trans, const 
 void MainWindow::frameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot)
 {
   internalFrameMoving(frame, trans, rot, false);
+}
+
+std::shared_ptr<EnvireGraph> MainWindow::getGraph() const
+{
+  return graph;
 }
 
 
