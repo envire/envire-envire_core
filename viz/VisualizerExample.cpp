@@ -9,27 +9,8 @@
 #include <envire_core/items/ItemBase.hpp>
 #include <envire_pcl/PointCloud.hpp>
 #include <pcl/io/pcd_io.h>
+#include <QFile>
 
-// #include <vizkit3d/Vizkit3DWidget.hpp>
-// #include <vizkit3d/QtThreadedWidget.hpp>
-// #include <vizkit3d/QVizkitMainWindow.hpp>
-// #include <iostream>
-// #include "EnvireGraphVisualizer.hpp"
-// #include "Vizkit3dPluginInformation.hpp"
-// 
-
-// #include <unordered_map>
-// 
-// #include <iostream>
-// #include <fstream>
-
-// #include <vector>
-
-// 
-// 
-
-// using namespace envire::core;
-// using namespace vizkit3d;
 using namespace envire::viz;
 
 void writeGraphToFile(const std::string& file)
@@ -45,12 +26,35 @@ void writeGraphToFile(const std::string& file)
   envire::pcl::PointCloud::Ptr cloud2 = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(cloudItem2);
   envire::pcl::PointCloud::Ptr cloud3 = boost::dynamic_pointer_cast<envire::pcl::PointCloud>(cloudItem3);
   
-  //FIXME path relative to rock instead of absolut?
+  const char* rootPath = std::getenv("AUTOPROJ_CURRENT_ROOT");
+  if(rootPath == nullptr)
+  {
+    std::cerr << "Environment variable AUTOPROJ_CURRENT_ROOT not set. Cannot locate"
+              << " pcl example files. Building graph without pointclouds" << std::endl;
+  }
+
+  const std::string bunnyPcd = std::string(rootPath) + "/slam/pcl/test/bunny.pcd";
+  const std::string turtlePcd = std::string(rootPath) + "/slam/pcl/test/cturtle.pcd";
   pcl::PCDReader reader;
-  reader.read("/home/arne/git/rock-entern/slam/pcl/test/bunny.pcd", cloud->getData());
-  reader.read("/home/arne/git/rock-entern/slam/pcl/test/bunny.pcd", cloud2->getData());
-  reader.read("/home/arne/git/rock-entern/slam/pcl/test/cturtle.pcd", cloud3->getData());
+  if(QFile::exists(QString::fromStdString(bunnyPcd)))
+  {
+    reader.read(bunnyPcd, cloud->getData());
+    reader.read(bunnyPcd, cloud2->getData());
+  }
+  else
+  {
+    std::cerr << bunnyPcd << " does not exist" << std::endl;
+  }
   
+  if(QFile::exists(QString::fromStdString(turtlePcd)))
+  {
+    reader.read(turtlePcd, cloud3->getData());
+  }
+  else
+  {
+    std::cerr << turtlePcd << " does not exist" << std::endl;
+  }
+
   envire::core::EnvireGraph graph;
   graph.addFrame("A"); 
   graph.addFrame("B");
@@ -87,7 +91,8 @@ int main(int argc, char **argv)
   
   std::thread t([&]() 
   {
-    //because the graph is not thread safe, yet  
+    //NOTE: The graph itself is not thread safe, manipulating it from the
+    //      gui at the same time as this thread is running might crash.
     std::this_thread::sleep_for(std::chrono::seconds(1));
     
     envire::core::Transform tf;
