@@ -22,7 +22,16 @@ const ItemMetadata& ItemMetadataMapping::getMetadata(const std::type_info& type)
 {  
   lock_guard<mutex> guard(mappingMutex);
   const type_index id(type);
+  if(mapping.find(id) == mapping.end())
+    LOG(ERROR) << "No mapping for type: " << type.name();
   return mapping.at(id);
+}
+
+bool ItemMetadataMapping::containsMetadata(const std::type_info& type)
+{
+  lock_guard<mutex> guard(mappingMutex);
+  const type_index id(type);
+  return mapping.find(id) != mapping.end();
 }
 
 }}

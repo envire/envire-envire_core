@@ -26,6 +26,9 @@ public:
      * This method is thread-safe.
      * @throw std::out_of_range if type is not part of the mapping */
     static const ItemMetadata& getMetadata(const std::type_info& type);
+    
+    /** Returns true if metadata for the given type is known */
+    static bool containsMetadata(const std::type_info& type);
 
 private:
     /**Add meta data for a new type.

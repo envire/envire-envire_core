@@ -80,6 +80,11 @@ void EnvireGraphVisualizer::itemRemoved(const envire::core::ItemRemovedEvent& e)
   const GraphTraits::vertex_descriptor vd = graph->getVertex(e.frame);
   if(tree.vertexExists(vd))
   {
+    if(itemVisuals.find(e.item->getID()) == itemVisuals.end())
+    {
+      LOG(ERROR) << "No item visual for id: " << e.item->getIDString();
+      return;
+    }
     VizPluginBase* itemViz = itemVisuals.at(e.item->getID());//may throw
     itemVisuals.erase(e.item->getID());
     ASSERT_NOT_NULL(itemViz);
@@ -117,6 +122,12 @@ void EnvireGraphVisualizer::loadItem(const envire::core::ItemBase::Ptr item)
     return;
   }
   
+  const bool hasMetadata = ItemMetadataMapping::containsMetadata(*(item->getTypeInfo()));
+  if(!hasMetadata)
+  {
+    LOG(ERROR) << "Ignoring item " << item->getIDString() << ". No metadata available. This usually means that the type was not loaded using envire plugins";
+    return;
+  }
   const std::string parameterType = ItemMetadataMapping::getMetadata(*(item->getTypeInfo())).embeddedTypename;
   const QString qParameterType = QString::fromStdString(parameterType);
   const TypeToUpdateMapping& typeToUpdateMethod = pluginInfos->getTypeToUpdateMethodMapping();

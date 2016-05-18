@@ -198,6 +198,11 @@ void EnvireVisualizerWindow::selectFrame(const QString& name)
     
     //display corresponding Transform
     const vertex_descriptor selectedVertex = graph->getVertex(name.toStdString());
+    
+    if(visualzier->getTree().tree.find(selectedVertex) == visualzier->getTree().tree.end())
+    {
+      LOG(ERROR) << "vertex not in tree: " << name.toStdString();
+    }
     const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
     Transform tf;
     if(parentVertex != graph->null_vertex())//happens when the root node is selected
@@ -255,6 +260,12 @@ void EnvireVisualizerWindow::frameNameRemoved(const QString& name)
 void EnvireVisualizerWindow::transformChanged(const envire::core::Transform& newValue)
 {
   const vertex_descriptor selectedVertex = graph->getVertex(selectedFrame.toStdString());
+  
+  if(visualzier->getTree().tree.find(selectedVertex) == visualzier->getTree().tree.end())
+  {
+    LOG(ERROR) << "vertex not in tree: " << selectedFrame.toStdString();
+  }
+  
   const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
   const FrameId source = graph->getFrameId(parentVertex);
   const FrameId target = selectedFrame.toStdString();
@@ -272,7 +283,7 @@ void EnvireVisualizerWindow::edgeModified(const EdgeModifiedEvent& e)
   const QString target = QString::fromStdString(e.target);
   //need to invoke because the graph might have been modified from a different
   //thread
-  const Qt::ConnectionType conType = Helpers::determineConnectionType(this);
+  const Qt::ConnectionType conType = Qt::QueuedConnection;//Helpers::determineConnectionType(this);
   QMetaObject::invokeMethod(this, "edgeModifiedInternal", conType,
                             Q_ARG(QString, origin), Q_ARG(QString, target));  
 }

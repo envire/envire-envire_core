@@ -222,6 +222,10 @@ void TreeView::addRoot(vertex_descriptor root)
 
 vertex_descriptor TreeView::getParent(vertex_descriptor node) const
 {
+    if(tree.find(node) == tree.end())
+    {
+      std::cerr << "ERROR: get parent of node not in tree" << std::endl;
+    }
     return tree.at(node).parent;
 }
 
