@@ -10,6 +10,7 @@
 #include <envire_pcl/PointCloud.hpp>
 #include <pcl/io/pcd_io.h>
 #include <QFile>
+#include <QApplication>
 
 using namespace envire::viz;
 

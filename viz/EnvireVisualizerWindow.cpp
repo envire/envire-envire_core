@@ -1,4 +1,5 @@
 #include "EnvireVisualizerWindow.hpp"
+#include "ui_mainwindow.h"
 #include "EnvireGraphVisualizer.hpp"
 #include "TransformModel.hpp"
 #include "Helpers.hpp"
@@ -21,43 +22,44 @@ namespace envire { namespace viz
 {
   
 EnvireVisualizerWindow::EnvireVisualizerWindow(): QMainWindow(), GraphEventDispatcher(),
-rootFrame(""), ignoreEdgeModifiedEvent(false), firstTimeDisplayingItems(true)
+window(new Ui::MainWindow()), rootFrame(""), ignoreEdgeModifiedEvent(false),
+firstTimeDisplayingItems(true)
 {
-  window.setupUi(this);
+  window->setupUi(this);
     
-  window.treeView->setModel(&currentTransform);
-  window.treeView->expandAll();
-  DoubleSpinboxItemDelegate* del = new DoubleSpinboxItemDelegate(window.treeView);
-  window.treeView->setItemDelegateForColumn(1, del);
-  window.treeView->setItemDelegateForRow(2, window.treeView->itemDelegate()); //the row delegate will take precedence over the column delegate
-  window.listWidget->setSortingEnabled(true);
-  window.tableViewItems->setModel(&currentItems);//tableView will not take ownership
-  window.tableViewItems->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
+  window->treeView->setModel(&currentTransform);
+  window->treeView->expandAll();
+  DoubleSpinboxItemDelegate* del = new DoubleSpinboxItemDelegate(window->treeView);
+  window->treeView->setItemDelegateForColumn(1, del);
+  window->treeView->setItemDelegateForRow(2, window->treeView->itemDelegate()); //the row delegate will take precedence over the column delegate
+  window->listWidget->setSortingEnabled(true);
+  window->tableViewItems->setModel(&currentItems);//tableView will not take ownership
+  window->tableViewItems->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
   
-  connect(window.Vizkit3DWidget, SIGNAL(frameSelected(const QString&)), this, SLOT(framePicked(const QString&)));
-  connect(window.Vizkit3DWidget, SIGNAL(frameMoved(const QString&, const QVector3D&, const QQuaternion)),
+  connect(window->Vizkit3DWidget, SIGNAL(frameSelected(const QString&)), this, SLOT(framePicked(const QString&)));
+  connect(window->Vizkit3DWidget, SIGNAL(frameMoved(const QString&, const QVector3D&, const QQuaternion)),
           this, SLOT(frameMoved(const QString&, const QVector3D&, const QQuaternion&)));          
-  connect(window.Vizkit3DWidget, SIGNAL(frameMoving(const QString&, const QVector3D&, const QQuaternion)),
+  connect(window->Vizkit3DWidget, SIGNAL(frameMoving(const QString&, const QVector3D&, const QQuaternion)),
           this, SLOT(frameMoving(const QString&, const QVector3D&, const QQuaternion&)));          
-  connect(window.actionRemove_Frame, SIGNAL(activated(void)), this, SLOT(removeFrame()));
-  connect(window.actionAdd_Frame, SIGNAL(activated(void)), this, SLOT(addFrame()));
-  connect(window.actionLoad_Graph, SIGNAL(activated(void)), this, SLOT(loadGraph()));
-  connect(window.actionSave_Graph, SIGNAL(activated(void)), this, SLOT(storeGraph()));
-  connect(window.listWidget, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
+  connect(window->actionRemove_Frame, SIGNAL(activated(void)), this, SLOT(removeFrame()));
+  connect(window->actionAdd_Frame, SIGNAL(activated(void)), this, SLOT(addFrame()));
+  connect(window->actionLoad_Graph, SIGNAL(activated(void)), this, SLOT(loadGraph()));
+  connect(window->actionSave_Graph, SIGNAL(activated(void)), this, SLOT(storeGraph()));
+  connect(window->listWidget, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
           this, SLOT(listWidgetItemChanged(QListWidgetItem*, QListWidgetItem*)));
   
   connect(&currentTransform, SIGNAL(transformChanged(const envire::core::Transform&)),
           this, SLOT(transformChanged(const envire::core::Transform&)));
   
-  pluginInfos.reset(new Vizkit3dPluginInformation(window.Vizkit3DWidget));
+  pluginInfos.reset(new Vizkit3dPluginInformation(window->Vizkit3DWidget));
   
   //disable everything until a graph is loaded
-  window.treeView->setEnabled(false);
-  window.listWidget->setEnabled(false);
-  window.Vizkit3DWidget->setEnabled(false);
-  window.actionAdd_Frame->setEnabled(false);
-  window.actionRemove_Frame->setEnabled(false);
-  window.actionSave_Graph->setEnabled(false);
+  window->treeView->setEnabled(false);
+  window->listWidget->setEnabled(false);
+  window->Vizkit3DWidget->setEnabled(false);
+  window->actionAdd_Frame->setEnabled(false);
+  window->actionRemove_Frame->setEnabled(false);
+  window->actionSave_Graph->setEnabled(false);
 }
   
 void EnvireVisualizerWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph,
@@ -71,10 +73,10 @@ void EnvireVisualizerWindow::displayGraph(std::shared_ptr<envire::core::EnvireGr
   this->graph->subscribe(this);
   
   //reset the widget because this might not be the first time the user loads a graph
-  window.Vizkit3DWidget->clear();
- window.Vizkit3DWidget->setWorldName(rootNode);
+  window->Vizkit3DWidget->clear();
+ window->Vizkit3DWidget->setWorldName(rootNode);
   
-  visualzier.reset(new EnvireGraphVisualizer(graph, window.Vizkit3DWidget,
+  visualzier.reset(new EnvireGraphVisualizer(graph, window->Vizkit3DWidget,
                                              rootNode.toStdString(), pluginInfos));
   
   connect(visualzier.get(), SIGNAL(frameAdded(const QString&)), this,
@@ -83,21 +85,21 @@ void EnvireVisualizerWindow::displayGraph(std::shared_ptr<envire::core::EnvireGr
           SLOT(frameNameRemoved(const QString&)));
     
   //get initially present frame names
-  window.listWidget->clear();
+  window->listWidget->clear();
   EnvireGraph::vertex_iterator it, end;
   std::tie(it, end) = graph->getVertices();
   for(; it != end; it++) 
   {
     const FrameId& id = graph->getFrameId(*it);
-    window.listWidget->addItem(QString::fromStdString(id));
+    window->listWidget->addItem(QString::fromStdString(id));
   }
      
-  window.treeView->setEnabled(false); //leave disabled because initially no frame is selected
-  window.listWidget->setEnabled(true);
-  window.Vizkit3DWidget->setEnabled(true);
-  window.actionAdd_Frame->setEnabled(true);
-  window.actionRemove_Frame->setEnabled(true);
-  window.actionSave_Graph->setEnabled(true);
+  window->treeView->setEnabled(false); //leave disabled because initially no frame is selected
+  window->listWidget->setEnabled(true);
+  window->Vizkit3DWidget->setEnabled(true);
+  window->actionAdd_Frame->setEnabled(true);
+  window->actionRemove_Frame->setEnabled(true);
+  window->actionSave_Graph->setEnabled(true);
   
   rootFrame = rootNode;
   selectedFrame = "";//otherwise we might try to unhighlight a no longer existing frame
@@ -189,7 +191,7 @@ void EnvireVisualizerWindow::selectFrame(const QString& name)
   if(name != selectedFrame)
   {     
     //select in list widget
-    QList<QListWidgetItem*> items = window.listWidget->findItems(name, Qt::MatchExactly);
+    QList<QListWidgetItem*> items = window->listWidget->findItems(name, Qt::MatchExactly);
     assert(items.size() == 1);
     if(!items.first()->isSelected())
       items.first()->setSelected(true);
@@ -204,11 +206,11 @@ void EnvireVisualizerWindow::selectFrame(const QString& name)
     
     //user should not be able to delete the root frame
     if(name == rootFrame)
-      window.actionRemove_Frame->setEnabled(false);
+      window->actionRemove_Frame->setEnabled(false);
     else
-      window.actionRemove_Frame->setEnabled(true);
+      window->actionRemove_Frame->setEnabled(true);
     
-    window.Vizkit3DWidget->selectFrame(name, true);
+    window->Vizkit3DWidget->selectFrame(name, true);
     selectedFrame = name;
     displayItems(selectedFrame);
   }
@@ -226,13 +228,13 @@ void EnvireVisualizerWindow::updateDisplayedTransform(const vertex_descriptor pa
   {
     currentTransform.setTransform(tf);
     currentTransform.setEditable(true);
-    window.treeView->setEnabled(true);
+    window->treeView->setEnabled(true);
   }
   else
   { //this is the root node, it should not be edited
     currentTransform.setTransform(base::TransformWithCovariance());
     currentTransform.setEditable(false);
-    window.treeView->setEnabled(false);
+    window->treeView->setEnabled(false);
   }
   connect(&currentTransform, SIGNAL(transformChanged(const envire::core::Transform&)),
           this, SLOT(transformChanged(const envire::core::Transform&)));
@@ -240,12 +242,12 @@ void EnvireVisualizerWindow::updateDisplayedTransform(const vertex_descriptor pa
 
 void EnvireVisualizerWindow::frameNameAdded(const QString& name)
 {
-  window.listWidget->addItem(name);
+  window->listWidget->addItem(name);
 }
 
 void EnvireVisualizerWindow::frameNameRemoved(const QString& name)
 {
-  QList<QListWidgetItem*> items = window.listWidget->findItems(name, Qt::MatchExactly);
+  QList<QListWidgetItem*> items = window->listWidget->findItems(name, Qt::MatchExactly);
   assert(items.size() == 1); //the frame ids are unique and should not be in the list more than once
   delete items.first(); //this will remove the item from the listWidget
 }
@@ -349,7 +351,7 @@ void EnvireVisualizerWindow::displayItems(const QString& frame)
   if(firstTimeDisplayingItems && visited)
   {
     firstTimeDisplayingItems = false;
-    window.tableViewItems->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+    window->tableViewItems->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
   }
   
 }

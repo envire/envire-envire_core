@@ -1,12 +1,16 @@
 #pragma once
-#include "ui_mainwindow.h"
 #include "TransformModel.hpp"
 #include "ItemTableModel.hpp"
 #include <QMainWindow>
+#include <QListWidgetItem>
 #include <memory>
 #include <envire_core/events/GraphEventDispatcher.hpp>
 #include <envire_core/graph/GraphTypes.hpp>
 
+namespace Ui 
+{
+  class MainWindow;
+}
 
 namespace envire { namespace core 
 {
@@ -84,7 +88,7 @@ private:
   void internalFrameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot,
                            bool finished);
   
-  Ui::MainWindow window;
+  std::shared_ptr<Ui::MainWindow> window;
   std::shared_ptr<envire::core::EnvireGraph> graph;
   std::shared_ptr<EnvireGraphVisualizer> visualzier;//is ptr for lazy instanziation
   std::shared_ptr<Vizkit3dPluginInformation> pluginInfos;//is ptr for lazy instanziation
