@@ -74,7 +74,8 @@ void EnvireVisualizerWindow::displayGraph(std::shared_ptr<envire::core::EnvireGr
   
   //reset the widget because this might not be the first time the user loads a graph
   window->Vizkit3DWidget->clear();
- window->Vizkit3DWidget->setWorldName(rootNode);
+  window->Vizkit3DWidget->setWorldName(rootNode);
+  window->Vizkit3DWidget->setEnabledManipulators(true);
   
   visualzier.reset(new EnvireGraphVisualizer(graph, window->Vizkit3DWidget,
                                              rootNode.toStdString(), pluginInfos));
