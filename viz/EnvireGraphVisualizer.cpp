@@ -228,5 +228,16 @@ const TreeView& EnvireGraphVisualizer::getTree() const
   return tree;
 }
 
+EnvireGraphVisualizer::~EnvireGraphVisualizer()
+{
+  //unsubscribe manually because we might destroy the graph before 
+  //destroying base. In that case the automatic unsubscribe from base would crash.
+  tree.unsubscribe();
+  unsubscribe();
+  itemVisuals.clear();
+  graph.reset();
+}
+
+
 
 }}

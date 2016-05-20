@@ -35,6 +35,7 @@ public:
                         vizkit3d::Vizkit3DWidget* widget, 
                         const envire::core::FrameId& rootNode,
                         std::shared_ptr<Vizkit3dPluginInformation> pluginInfos);
+  ~EnvireGraphVisualizer();
   
   const QSet<QString>& getFrameNames() const;
   
