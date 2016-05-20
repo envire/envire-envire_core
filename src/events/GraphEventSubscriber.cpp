@@ -25,12 +25,16 @@ void GraphEventSubscriber::subscribe(GraphEventPublisher* pPublisher, bool publi
     this->pPublisher->subscribe(this, publish_current_state);
 }
 
-
-GraphEventSubscriber::~GraphEventSubscriber()
+void GraphEventSubscriber::unsubscribe()
 {
     if(nullptr != pPublisher)
     {
       pPublisher->unsubscribe(this);
       pPublisher = nullptr;
-    }
+    }  
+}
+
+GraphEventSubscriber::~GraphEventSubscriber()
+{
+    unsubscribe();
 }
