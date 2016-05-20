@@ -40,6 +40,7 @@ rock_library(envire_visualizer
 #this is done manually to avoid a circular dependency with envire_pcl             
 pkg_check_modules (ENV_PCL envire_pcl)             
              
+if(ENV_PCL_FOUND)
 rock_executable(envire_visualizer_bin
                 SOURCES VisualizerExample.cpp
                 DEPS_PKGCONFIG vizkit3d
@@ -52,5 +53,8 @@ rock_executable(envire_visualizer_bin
                 DEPS_PKGCONFIG base-lib
                 DEPS envire_visualizer
                 LIBS ${Boost_SYSTEM_LIBRARY} ${ENV__LIBRARY_DIRS})
+else()
+message(WARNING "envire_pcl not found. Cannot build envire visualizer example")
+endif()
        
                 
