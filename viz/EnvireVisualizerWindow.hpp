@@ -71,6 +71,8 @@ private slots:
   /**Invoked if the user changes a transformation */
   void transformChanged(const envire::core::Transform& newValue);
   
+  void displayGraphInternal(std::shared_ptr<envire::core::EnvireGraph> graph, const QString& rootNode);
+  
   /**invoked by edgeModified() for thread switch */
   void edgeModifiedInternal(const QString& originFrame, const QString& tagetFrame);
   

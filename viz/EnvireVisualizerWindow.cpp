@@ -65,6 +65,15 @@ firstTimeDisplayingItems(true)
 void EnvireVisualizerWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph,
                               const QString& rootNode)
 {
+  const Qt::ConnectionType conType = Helpers::determineConnectionType(this);
+  QMetaObject::invokeMethod(this, "displayGraphInternal", conType,
+                            Q_ARG(std::shared_ptr<envire::core::EnvireGraph>, graph),
+                            Q_ARG(QString, rootNode));  
+}
+  
+void EnvireVisualizerWindow::displayGraphInternal(std::shared_ptr<envire::core::EnvireGraph> graph,
+                              const QString& rootNode)
+{ 
   if(this->graph)
   {
     this->graph->unsubscribe(this);
