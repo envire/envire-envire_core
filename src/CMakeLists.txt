@@ -1,4 +1,4 @@
-find_package(Boost COMPONENTS serialization filesystem)
+find_package(Boost COMPONENTS serialization filesystem system)
 
 
 set(headers items/ItemBase.hpp
