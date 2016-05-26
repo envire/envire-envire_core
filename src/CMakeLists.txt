@@ -53,7 +53,7 @@ set(sources items/ItemBase.cpp
             serialization/Serialization.cpp
             util/Demangle.cpp)
             
-set(deps_pkg_config base-types)
+set(deps_pkg_config base-types base-lib)
 
 if(ENABLE_PLUGINS)
 
