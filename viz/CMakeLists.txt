@@ -36,3 +36,8 @@ rock_library(envire_visualizer
              DEPS_PKGCONFIG vizkit3d
              DEPS envire_core
              DEPS_PKGCONFIG base-lib)    
+             
+rock_vizkit_plugin(envire_core-viz
+    EnvireGraphStructureVisualization.cpp
+    MOC EnvireGraphStructureVisualization.hpp
+    HEADERS EnvireGraphStructureVisualization.hpp)
