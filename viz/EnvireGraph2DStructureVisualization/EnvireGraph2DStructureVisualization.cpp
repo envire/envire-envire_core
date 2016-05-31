@@ -5,7 +5,7 @@ EnvireGraph2DStructureVisualization::EnvireGraph2DStructureVisualization(QWidget
 {
     resize(300,120);
 
-    QLabel *label = new QLabel("Rock 'n Robots!");
+    QLabel *label = new QLabel("JOJOJO!!!");
     label->setFont(QFont("Verdana", 20));
     label->setAlignment(Qt::AlignCenter);
 
