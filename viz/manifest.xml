@@ -3,4 +3,5 @@
   </description>
   <author>Sylvain Joyeux/sylvain.joyeux@dfki.de</author>
   <license>GPLv2 or later</license>
+  <depend package="graphviz" />
 </package>

@@ -16,12 +16,13 @@ Vizkit::UiLoader::extend_cplusplus_widget_class "EnvireGraph2DStructureVisualiza
     #called each time new data are available on the 
     #orocos port connected to the widget the name is
     #custom and can be set via register_widget_for
-    def update(sample,port_name)
-        #mySlot(sample)
+    def update(sample, port_name)
+      displayGraph(sample)
     end
 end
 
 # register widget for a specific Typelib type to be 
 # accessible via rock tooling (rock-replay,...)
 # multiple register_widget_for are allowed for each widget
-# Vizkit::UiLoader.register_widget_for("EnvireGraph2DStructureVisualization","/base/Angle",:update)
+ Vizkit::UiLoader.register_widget_for("EnvireGraph2DStructureVisualization","/envire/core/EnvireGraph",:update)
+ 
