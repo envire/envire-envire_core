@@ -29,5 +29,5 @@ rock_library(envire_visualizer
                      addtransformdialog.ui
                      EnvireVisualizerWindow.cpp
              DEPS_PKGCONFIG vizkit3d
-             DEPS envire_core EnvireGraph2DStructureVisualization
+             DEPS envire_core envire_2D_structure_widget
              DEPS_PKGCONFIG base-lib)    

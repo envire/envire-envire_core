@@ -12,8 +12,7 @@
 #include <QInputDialog>
 #include <glog/logging.h>
 #include <fstream>
-#include <boost/archive/polymorphic_text_iarchive.hpp> //FIXME just for testing
-
+#include <envire_core/EnvireGraph2DStructurWidget.hpp>
 
 using namespace envire::core;
 using vertex_descriptor = GraphTraits::vertex_descriptor;
@@ -26,7 +25,9 @@ window(new Ui::MainWindow()), rootFrame(""), ignoreEdgeModifiedEvent(false),
 firstTimeDisplayingItems(true)
 {
   window->setupUi(this);
-    
+  EnvireGraph2DStructurWidget* view2D = new EnvireGraph2DStructurWidget();
+  window->tabWidget->addTab(view2D, "2D View");
+  
   window->treeView->setModel(&currentTransform);
   window->treeView->expandAll();
   DoubleSpinboxItemDelegate* del = new DoubleSpinboxItemDelegate(window->treeView);
