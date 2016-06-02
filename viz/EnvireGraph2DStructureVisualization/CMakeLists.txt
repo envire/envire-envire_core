@@ -12,9 +12,6 @@ rock_library(envire_2D_structure_widget
 rock_vizkit_widget(EnvireGraph2DStructureVisualization
     SOURCES EnvireGraph2DStructureVisualizationPlugin.cpp
     HEADERS EnvireGraph2DStructureVisualization.hpp
-    MOC EnvireGraph2DStructureVisualization.hpp
-        EnvireGraph2DStructureVisualizationPlugin.hpp
-        
-    DEPS envire_2D_structure_widget
-#    UI ${UI_FILES}
-)
+    MOC     EnvireGraph2DStructureVisualization.hpp
+            EnvireGraph2DStructureVisualizationPlugin.hpp
+    DEPS    envire_2D_structure_widget)
