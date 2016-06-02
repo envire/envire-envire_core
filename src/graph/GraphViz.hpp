@@ -63,7 +63,7 @@ namespace envire { namespace core
         template <class FRAME_PROP, class EDGE_PROP>
         static void write(const Graph<FRAME_PROP, EDGE_PROP> &graph, std::ostream& out)
         {
-            boost::write_graphviz (out, graph,
+            boost::write_graphviz(out, graph,
                     make_property_writer(boost::get(boost::vertex_bundle, graph)),
                     make_property_writer(boost::get(boost::edge_bundle, graph)),
                     GraphPropWriter());       

@@ -7,7 +7,7 @@ rock_vizkit_widget(EnvireGraph2DStructureVisualization
     MOC EnvireGraph2DStructureVisualization.hpp
         EnvireGraph2DStructureVisualizationPlugin.hpp
         QZoomableGraphicsView.hpp
-    DEPS_PKGCONFIG QtCore QtGui libgvc
+    DEPS_PKGCONFIG QtCore QtGui QtSvg libgvc
     DEPS envire_core
 #    UI ${UI_FILES}
 )

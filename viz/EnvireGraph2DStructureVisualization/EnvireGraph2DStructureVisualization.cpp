@@ -6,6 +6,7 @@
 #include <gvc.h>
 #include <envire_core/graph/GraphViz.hpp>
 #include <sstream>
+#include <boost/graph/graphviz.hpp>
 
 using namespace envire::core;
 
@@ -20,11 +21,7 @@ EnvireGraph2DStructureVisualization::EnvireGraph2DStructureVisualization(QWidget
     QVBoxLayout* vbox = new QVBoxLayout();
     vbox->addWidget(view);
     setLayout(vbox);
-    
-    QFile f("/home/dfki.uni-bremen.de/aboeckmann/git/rock-entern/envire/envire_core/build/test/envireGraph_complex_graphviz_test.dot");
-    if (!f.open(QFile::ReadOnly | QFile::Text)) return;
-    QTextStream in(&f);
-    displayGraph(in.readAll());    
+      
     show();
 }
 
@@ -58,8 +55,4 @@ void EnvireGraph2DStructureVisualization::displayGraph(const envire::core::Envir
     std::stringstream stream;
     GraphViz::write(graph, stream);
     displayGraph(QString::fromStdString(stream.str()));
-}
-
-EnvireGraph2DStructureVisualization::~EnvireGraph2DStructureVisualization()
-{
 }
