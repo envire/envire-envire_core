@@ -1,4 +1,3 @@
-rock_find_qt4()
 qt4_wrap_ui(SOURCES_UI_H mainwindow.ui)
 qt4_wrap_ui(SOURCES2_UI_H addtransformdialog.ui)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}) #to be able to include ui_mainwindow.h

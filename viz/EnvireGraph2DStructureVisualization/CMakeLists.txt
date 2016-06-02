@@ -1,4 +1,3 @@
-rock_find_qt4()
 rock_vizkit_widget(EnvireGraph2DStructureVisualization
     SOURCES EnvireGraph2DStructureVisualization.cpp
             EnvireGraph2DStructureVisualizationPlugin.cpp

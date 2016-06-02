@@ -37,4 +37,5 @@ if(COVERAGE)
 endif()
 
 rock_init(envire_core 0.1)
+rock_find_qt4()
 rock_standard_layout()
