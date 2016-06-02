@@ -55,7 +55,7 @@ QString EnvireGraph2DStructureVisualizationPlugin::group() const {
 }
 
 QString EnvireGraph2DStructureVisualizationPlugin::includeFile() const {
-    return "EnvireGraph2DStructureVisualization.hpp";
+    return "envire_core/EnvireGraph2DStructureVisualization.hpp";
 }
 
 QString EnvireGraph2DStructureVisualizationPlugin::name() const {

@@ -1,4 +1,4 @@
-#include "EnvireGraph2DStructureVisualization.hpp"
+#include "EnvireGraph2DStructurWidget.hpp"
 #include <QGraphicsScene>
 #include "QZoomableGraphicsView.hpp"
 #include <QtSvg/QGraphicsSvgItem>
@@ -10,8 +10,8 @@
 
 using namespace envire::core;
 
-EnvireGraph2DStructureVisualization::EnvireGraph2DStructureVisualization(QWidget *parent)
-    : QWidget(parent)
+EnvireGraph2DStructurWidget::EnvireGraph2DStructurWidget(QWidget *parent)
+    : QWidget(parent) 
 {
     resize(300,120);
     
@@ -25,7 +25,7 @@ EnvireGraph2DStructureVisualization::EnvireGraph2DStructureVisualization(QWidget
     show();
 }
 
-void EnvireGraph2DStructureVisualization::displayGraph(const QString& dotGraph)
+void EnvireGraph2DStructurWidget::displayGraph(const QString& dotGraph)
 {
     //see: http://www.graphviz.org/doc/libguide/libguide.pdf
     const QByteArray data = dotGraph.toAscii();
@@ -50,7 +50,7 @@ void EnvireGraph2DStructureVisualization::displayGraph(const QString& dotGraph)
     scene->addItem(item);
 }
 
-void EnvireGraph2DStructureVisualization::displayGraph(const envire::core::EnvireGraph& graph)
+void EnvireGraph2DStructurWidget::displayGraph(const envire::core::EnvireGraph& graph)
 {
     std::stringstream stream;
     GraphViz::write(graph, stream);
