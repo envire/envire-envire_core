@@ -84,7 +84,7 @@ void EnvireVisualizerWindow::displayGraphInternal(std::shared_ptr<envire::core::
     this->graph->unsubscribe(this);
   }
   this->graph = graph;
-  view2D->displayGraph(*(graph.get()));
+  view2D->displayGraph(*(this->graph.get()));
   this->graph->subscribe(this);
   
   //reset the widget because this might not be the first time the user loads a graph
@@ -264,6 +264,7 @@ void EnvireVisualizerWindow::updateDisplayedTransform(const vertex_descriptor pa
 void EnvireVisualizerWindow::frameNameAdded(const QString& name)
 {
   window->listWidget->addItem(name);
+  view2D->displayGraph(*(this->graph.get()));
 }
 
 void EnvireVisualizerWindow::frameNameRemoved(const QString& name)
@@ -271,6 +272,7 @@ void EnvireVisualizerWindow::frameNameRemoved(const QString& name)
   QList<QListWidgetItem*> items = window->listWidget->findItems(name, Qt::MatchExactly);
   assert(items.size() == 1); //the frame ids are unique and should not be in the list more than once
   delete items.first(); //this will remove the item from the listWidget
+  view2D->displayGraph(*(this->graph.get()));
 }
 
 void EnvireVisualizerWindow::transformChanged(const envire::core::Transform& newValue)
@@ -288,6 +290,7 @@ void EnvireVisualizerWindow::transformChanged(const envire::core::Transform& new
   ignoreEdgeModifiedEvent = true;
   graph->updateTransform(source, target, newValue);//will trigger EdgeModifiedEvent
   ignoreEdgeModifiedEvent = false;
+  view2D->displayGraph(*(this->graph.get()));
   
 }
 
@@ -418,6 +421,7 @@ void EnvireVisualizerWindow::internalFrameMoving(const QString& frame, const QVe
 void EnvireVisualizerWindow::frameMoved(const QString& frame, const QVector3D& trans, const QQuaternion& rot)
 {
   internalFrameMoving(frame, trans, rot, true);
+  view2D->displayGraph(*(this->graph.get()));
 }
 
 void EnvireVisualizerWindow::frameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot)
