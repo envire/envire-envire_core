@@ -8,6 +8,7 @@ namespace envire { namespace viz {
 TransformModel::TransformModel() :
   QStandardItemModel()
 {
+  tf.setIdentity();
   setColumnCount(2);
   QStringList headerLabels;
   headerLabels.append("");
