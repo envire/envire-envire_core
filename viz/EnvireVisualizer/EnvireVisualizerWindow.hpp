@@ -23,6 +23,7 @@ namespace envire { namespace viz
   
 class EnvireGraphVisualizer;
 class Vizkit3dPluginInformation;
+class EnvireGraph2DStructurWidget;
 
 class EnvireVisualizerWindow : public QMainWindow, public envire::core::GraphEventDispatcher
 {
@@ -100,6 +101,7 @@ private:
   ItemTableModel currentItems; //model of the  items of the current frame
   bool ignoreEdgeModifiedEvent;
   bool firstTimeDisplayingItems; //true if no items have been displayed, yet
+  EnvireGraph2DStructurWidget* view2D; //widget inside the "2D View" tab
 };
   
   

@@ -10,6 +10,8 @@
 
 using namespace envire::core;
 
+namespace envire { namespace viz {
+
 EnvireGraph2DStructurWidget::EnvireGraph2DStructurWidget(QWidget *parent)
     : QWidget(parent) 
 {
@@ -56,3 +58,4 @@ void EnvireGraph2DStructurWidget::displayGraph(const envire::core::EnvireGraph& 
     GraphViz::write(graph, stream);
     displayGraph(QString::fromStdString(stream.str()));
 }
+}}

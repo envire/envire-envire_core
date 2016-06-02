@@ -7,7 +7,7 @@
  * in other applications as well, the whole functionallity is implemented in 
  * EnvireGraph2DStructurWidget.hpp. This file is just a wrapper for the qt 
  * designer stuff */
-class EnvireGraph2DStructureVisualization : public EnvireGraph2DStructurWidget
+class EnvireGraph2DStructureVisualization : public envire::viz::EnvireGraph2DStructurWidget
 {
     Q_OBJECT
 public:

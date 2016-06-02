@@ -3,6 +3,8 @@
 #include <QtGui>
 #include <envire_core/graph/EnvireGraph.hpp>
 
+namespace envire { namespace viz {
+
 class EnvireGraph2DStructurWidget : public QWidget
 {
     Q_OBJECT
@@ -17,3 +19,4 @@ public slots:
 private:
     QGraphicsScene* scene; /**The scene displaying the current graph */
 };
+}}

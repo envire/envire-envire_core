@@ -12,7 +12,11 @@
 #include <QInputDialog>
 #include <glog/logging.h>
 #include <fstream>
-#include <envire_core/EnvireGraph2DStructurWidget.hpp>
+
+//have to use relative import because the header is installed in <envire_core/...>
+//but is not located in that folder at build time thus I cannot include <envire_core/EnvireGraph2DStructurWidget.hpp>
+//because it doesn't exist at build time.
+#include "../EnvireGraph2DStructureVisualization/EnvireGraph2DStructurWidget.hpp"
 
 using namespace envire::core;
 using vertex_descriptor = GraphTraits::vertex_descriptor;
@@ -25,7 +29,7 @@ window(new Ui::MainWindow()), rootFrame(""), ignoreEdgeModifiedEvent(false),
 firstTimeDisplayingItems(true)
 {
   window->setupUi(this);
-  EnvireGraph2DStructurWidget* view2D = new EnvireGraph2DStructurWidget();
+  view2D = new EnvireGraph2DStructurWidget();
   window->tabWidget->addTab(view2D, "2D View");
   
   window->treeView->setModel(&currentTransform);
@@ -80,6 +84,7 @@ void EnvireVisualizerWindow::displayGraphInternal(std::shared_ptr<envire::core::
     this->graph->unsubscribe(this);
   }
   this->graph = graph;
+  view2D->displayGraph(*(graph.get()));
   this->graph->subscribe(this);
   
   //reset the widget because this might not be the first time the user loads a graph
