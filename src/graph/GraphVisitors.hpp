@@ -107,7 +107,7 @@ namespace envire { namespace core
         template <typename Edge, typename Graph>
         void gray_target(Edge e, Graph& g)
         {
-            view.addCrossEdge(e);
+            view.addCrossEdge(boost::source(e, graph), boost::target(e, graph), e);
         }
         
         TreeView& view;

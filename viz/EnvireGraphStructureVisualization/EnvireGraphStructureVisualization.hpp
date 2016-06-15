@@ -14,6 +14,7 @@ namespace envire { namespace core
 
 namespace vizkit3d
 {
+  /**A Vizkit3D plugin, that draws the structure of a given EnvireGraph*/
   class EnvireGraphStructureVisualization 
       : public vizkit3d::Vizkit3DPlugin<envire::core::EnvireGraph>
       , boost::noncopyable

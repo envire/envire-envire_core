@@ -78,7 +78,7 @@ void EnvireGraphStructureVisualization::updateMainNode ( osg::Node* node )
 
 void EnvireGraphStructureVisualization::updateDataIntern(envire::core::EnvireGraph const& graph)
 {
-  initNodeList(graph);
+  initNodeList(graph); //also updates p->currentRoot
   p->nextNode = drawGraphStructure(graph, p->currentRoot);
 }
 
@@ -91,13 +91,21 @@ void EnvireGraphStructureVisualization::initNodeList(envire::core::EnvireGraph c
   {
     p->nextNodes.append(QString(graph.getFrameId(*begin).c_str()));
   }
-  if(!p->currentRoot.empty())
+  
+  if(p->nextNodes.size() == 0)
+  {//special case: empty graph
+    p->currentRoot = "";
+  }
+  else if(p->nextNodes.contains(QString::fromStdString(p->currentRoot)))
   {
+    //if the root is in the list, move it to the front of the list (otherwise it will not be shown as root in the ui)
     p->nextNodes.removeAll(QString::fromStdString(p->currentRoot));
     p->nextNodes.prepend(QString::fromStdString(p->currentRoot));
   }
   else
   {
+    //otherwise the root has never been choosen or the root has been removed
+    //in both cases take the first node as root
     p->currentRoot = p->nextNodes.front().toStdString();
   }
 }
@@ -113,47 +121,49 @@ osg::ref_ptr<osg::Node> EnvireGraphStructureVisualization::drawGraphStructure(co
 {
   TreeView tree;
   osg::ref_ptr<osg::Node> transformerGraph = TransformerGraph::create("transform_graph_world")->asGroup();
+  
+  if(graph.num_vertices() > 0)
+  {
+    tree.edgeAdded.connect([&] (GraphTraits::vertex_descriptor origin, GraphTraits::vertex_descriptor target)
+    {
+      const Transform tf = graph.getTransform(origin, target);
+      const FrameId& originName = graph.getFrameId(origin);
+      const FrameId& targetName = graph.getFrameId(target);
+      osg::Quat orientation;
+      osg::Vec3d translation;
+      std::tie(orientation, translation) = convertTransform(tf);
+      
+      if(TransformerGraph::getFrame(*transformerGraph, originName) == nullptr)
+        TransformerGraph::addFrame(*transformerGraph, originName);
+      
+      if(TransformerGraph::getFrame(*transformerGraph, targetName) == nullptr)
+        TransformerGraph::addFrame(*transformerGraph, targetName);
+      
+      TransformerGraph::setTransformation(*transformerGraph, originName, targetName, orientation, translation);
+    });
+    
+    tree.crossEdgeAdded.connect([&] (const TreeView::CrossEdge& edge)
+    {
+      const FrameId& source = graph.getFrameId(edge.origin);
+      const FrameId& target = graph.getFrameId(edge.target);
+      
+      osg::Node* srcNode = TransformerGraph::getFrame(*transformerGraph, source);
+      osg::Node* tarNode = TransformerGraph::getFrame(*transformerGraph, target);
+      //the frames should always exist, otherwise this edge wouldn't be a cross-edge
+      assert(srcNode);
+      assert(tarNode);
+      
+      //The NodeLink will update its position automatically to reflect changes in src and target
+      osg::Node *link = vizkit::NodeLink::create(srcNode, tarNode, osg::Vec4(255,255,0,255));
+      link->setName("crossEdge");
+      osg::Group* group = TransformerGraph::getFrameGroup(*transformerGraph, source);    
+      group->addChild(link);
+    });
+    
+    graph.getTree(root, &tree); //will cause edgeAdded events and trigger the above lambdas
 
-  
-  tree.edgeAdded.connect([&] (GraphTraits::vertex_descriptor origin, GraphTraits::vertex_descriptor target)
-  {
-    const Transform tf = graph.getTransform(origin, target);
-    const FrameId& originName = graph.getFrameId(origin);
-    const FrameId& targetName = graph.getFrameId(target);
-    osg::Quat orientation;
-    osg::Vec3d translation;
-    std::tie(orientation, translation) = convertTransform(tf);
-    
-    if(TransformerGraph::getFrame(*transformerGraph, originName) == nullptr)
-      TransformerGraph::addFrame(*transformerGraph, originName);
-    
-    if(TransformerGraph::getFrame(*transformerGraph, targetName) == nullptr)
-      TransformerGraph::addFrame(*transformerGraph, targetName);
-    
-    TransformerGraph::setTransformation(*transformerGraph, originName, targetName, orientation, translation);
-  });
-  
-  tree.crossEdgeAdded.connect([&] (GraphTraits::edge_descriptor edge)
-  {
-    const FrameId& source = graph.getFrameId(graph.source(edge));
-    const FrameId& target = graph.getFrameId(graph.target(edge));
-    
-    osg::Node* srcNode = TransformerGraph::getFrame(*transformerGraph, source);
-    osg::Node* tarNode = TransformerGraph::getFrame(*transformerGraph, target);
-    //the frames should always exist, otherwise this edge wouldn't be a cross-edge
-    assert(srcNode);
-    assert(tarNode);
-    
-    //The NodeLink will update its position automatically to reflect changes in src and target
-    osg::Node *link = vizkit::NodeLink::create(srcNode, tarNode, osg::Vec4(255,255,0,255));
-    link->setName("crossEdge");
-    osg::Group* group = TransformerGraph::getFrameGroup(*transformerGraph, source);    
-    group->addChild(link);
-  });
-  
-  
-  graph.getTree(root, &tree); //will cause edgeAdded events and trigger the above lambdas
-  TransformerGraph::makeRoot(*transformerGraph, root);
+    TransformerGraph::makeRoot(*transformerGraph, root);
+  }
   return transformerGraph;
 }
 

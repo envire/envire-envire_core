@@ -161,5 +161,15 @@ namespace envire { namespace core
         return hash;
       }
       const std::shared_ptr<GRAPH> graph;
-    }; 
+    };
+    
+    // A hash function for vertices.
+    struct VertexHash : std::unary_function<GraphTraits::vertex_descriptor, std::size_t> {
+      std::size_t operator()(GraphTraits::vertex_descriptor const& u) const {
+        std::size_t seed = 0;
+        boost::hash_combine(seed, (long)u);
+        return seed;
+      }
+    };
+
 }}

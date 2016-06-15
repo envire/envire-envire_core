@@ -1,4 +1,8 @@
+
 #include <envire_core/graph/EnvireGraph.hpp>
+#include <fstream>
+#include <boost/archive/polymorphic_binary_oarchive.hpp>
+#include <boost/archive/polymorphic_binary_iarchive.hpp>
 
 namespace envire { namespace core {
 
@@ -41,6 +45,12 @@ bool EnvireGraph::containsItems(const vertex_descriptor vertex, const std::type_
 
   auto mapEntry = frame.items.find(type);
   return mapEntry != frame.items.end();     
+}
+
+bool EnvireGraph::containsItems(const FrameId& frame, const std::type_index& type) const
+{
+  const vertex_descriptor vertex = getVertex(frame);
+  return containsItems(vertex, type);
 }
 
 void EnvireGraph::checkFrameValid(const FrameId& frame) const
@@ -91,7 +101,8 @@ void EnvireGraph::removeFrame(const FrameId& frame)
 
 void EnvireGraph::removeItemFromFrame(const ItemBase::Ptr item)
 {
-    const vertex_descriptor frame = getVertex(item->getFrame()); //may throw UnknownFrameException
+    const FrameId frameId = item->getFrame();
+    const vertex_descriptor frame = getVertex(frameId); //may throw UnknownFrameException
     //the const_cast is fine because we are inside the EnvireGraph and know what
     //we are doing. The method returns const because the user should not be
     //able to manipulate the ItemLists directly.
@@ -100,11 +111,13 @@ void EnvireGraph::removeItemFromFrame(const ItemBase::Ptr item)
     Frame::ItemList::iterator itemIt = std::find(items.begin(), items.end(), item);
     if(itemIt == items.end())
     {
-        throw UnknownItemException(item->getFrame(), item->getID());
+        throw UnknownItemException(frameId, item->getID());
     }
-    items.erase(itemIt);   
+    items.erase(itemIt);
+    
     item->setFrame("");
-    notify(ItemRemovedEvent(item->getFrame(), item));
+    notify(ItemRemovedEvent(frameId, item));
+
 }
 
 void EnvireGraph::publishCurrentState(GraphEventSubscriber* pSubscriber)
@@ -146,5 +159,25 @@ void EnvireGraph::unpublishCurrentState(GraphEventSubscriber* pSubscriber)
     // unpublish vertices and edges
     envire::core::Graph< envire::core::Frame, envire::core::Transform >::unpublishCurrentState(pSubscriber);
 }
+
+void EnvireGraph::saveToFile(const std::string& file) const
+{
+    std::ofstream myfile;
+    //set exception bits to ensure that myfile throws in case of error
+    myfile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    myfile.open(file); //may throw
+    boost::archive::polymorphic_binary_oarchive oa(myfile);
+    oa << *this; //may throw archive_exception
+}
+
+void EnvireGraph::loadFromFile(const std::string& file)
+{
+  std::ifstream myfile;
+  myfile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+  myfile.open(file); //may throw  
+  boost::archive::polymorphic_binary_iarchive ia(myfile);
+  ia >> *this;
+}
+
 
 }}

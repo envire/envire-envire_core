@@ -4,13 +4,16 @@
 
 namespace envire { namespace core
 {
+    
     /** Structure to store the parent and children relation for a vertex in a tree.
      */
     struct VertexRelation
     {
-        VertexRelation* parentRelation; /**<can be NULL */
         GraphTraits::vertex_descriptor parent; /**<can be null_vertex */
         std::unordered_set<GraphTraits::vertex_descriptor> children;
+        
+        
+        
     };
 
     /**A map that shows the vertex information (parent and children) of the vertices in a tree.
@@ -38,6 +41,17 @@ namespace envire { namespace core
     {
     public:
              
+        struct CrossEdge
+        {
+            GraphTraits::vertex_descriptor origin;
+            GraphTraits::vertex_descriptor target;
+            GraphTraits::edge_descriptor edge;
+            CrossEdge(GraphTraits::vertex_descriptor origin,
+                      GraphTraits::vertex_descriptor target,
+                      GraphTraits::edge_descriptor edge) :
+                origin(origin), target(target), edge(edge) {}
+        };
+      
         TreeView(GraphTraits::vertex_descriptor root) : root(root) {}
         
         TreeView() : root(GraphTraits::null_vertex()) {}
@@ -64,7 +78,8 @@ namespace envire { namespace core
         /**Unsibscribe from the currently subscribed publisher */
         void unsubscribe();
         
-        /**Returns true if an edge between a and b exists in @p view.*/
+        /**Returns true if an edge between a and b exists in @p view 
+         * and is not a cross-edge*/
         bool edgeExists(const GraphTraits::vertex_descriptor a, const GraphTraits::vertex_descriptor b) const;
         /**Returns true if @p vd exists in the view. */
         bool vertexExists(const GraphTraits::vertex_descriptor vd) const;
@@ -75,18 +90,40 @@ namespace envire { namespace core
         template <class Func>
         void visitDfs(const GraphTraits::vertex_descriptor node, Func f)
         {
-          const auto& parent = tree[node].parent;
-          const auto& children = tree[node].children;
-          f(node, parent);
-          for(const GraphTraits::vertex_descriptor child : children)
-          {
-            visitDfs(child, f);
-          }
+            const auto& parent = tree[node].parent;
+            const auto& children = tree[node].children;
+            f(node, parent);
+            for(const GraphTraits::vertex_descriptor child : children)
+            {
+                visitDfs(child, f);
+            }
+        }
+        
+        /**visits all vertices in the tree starting at @p node in bfs order.
+         * Calls @p f(vertex_descriptor node, vertex_descriptor parent) for each node.*/
+        template <class Func>
+        void visitBfs(const GraphTraits::vertex_descriptor node, Func f)
+        {
+            std::deque<GraphTraits::vertex_descriptor> nodesToVisit;
+            nodesToVisit.push_back(node);
+            while(nodesToVisit.size() > 0)
+            {
+                const GraphTraits::vertex_descriptor current = nodesToVisit.front();
+                nodesToVisit.pop_front();
+                const GraphTraits::vertex_descriptor parent = getParent(current);
+                f(current, parent);
+                for(GraphTraits::vertex_descriptor child : tree[current].children)
+                {
+                    nodesToVisit.push_back(child);
+                }
+            }
         }
         
         /**Add a cross edge to the view.
          * Emits crossEdgeAdded event */
-        void addCrossEdge(const GraphTraits::edge_descriptor edge);
+        void addCrossEdge(const GraphTraits::vertex_descriptor origin,
+                          const GraphTraits::vertex_descriptor target,
+                          const GraphTraits::edge_descriptor edge);
         
         /**Add an edge to the view.
          * Emits edgeAdded*/
@@ -95,17 +132,35 @@ namespace envire { namespace core
         /**Adds the initial root node to the TreeView */
         void addRoot(GraphTraits::vertex_descriptor root);
         
+        /**Removes an edge from the view.
+         * Also removes the sub-tree below the edge that should be removed.
+         * Emits edgeRemoved for each edge that is removed. The events will be 
+         * emitted starting from the deeps edge in the tree, i.e. you can be sure
+         * that the parent still exists in the tree when handling the event.
+         *
+         * If cross-edges exist that point into the sub-tree that is beeing removed,
+         * the method will return*/
+        void removeEdge(GraphTraits::vertex_descriptor origin, GraphTraits::vertex_descriptor target);
         //FIXME comment exception?!
         GraphTraits::vertex_descriptor getParent(GraphTraits::vertex_descriptor node) const;
+        
+        /** @return true if @p parent is the parent of @p child in this TreeView
+         * @throw std::out_of_range if child is not part of the TreeView*/
+        bool isParent(const GraphTraits::vertex_descriptor parent, const GraphTraits::vertex_descriptor child) const;
         
         /**The signals are invoked whenever the tree is updated by the TransformGraph
         * @note This is only the case if you requested an updating TreeView. 
         *       Otherwise they'll never be invoked.
         */
-        boost::signals2::signal<void (GraphTraits::edge_descriptor)> crossEdgeAdded;
+        boost::signals2::signal<void (const CrossEdge&)> crossEdgeAdded;
         boost::signals2::signal<void (GraphTraits::vertex_descriptor origin,
                                       GraphTraits::vertex_descriptor target)> edgeAdded;
         
+                                      /**Is emitted when a an edge is removed.
+         * When the signal is emitted, @p target is no longer part of the tree.
+         * @p origin is still part of the tree.*/
+        boost::signals2::signal<void (GraphTraits::vertex_descriptor origin,
+                                      GraphTraits::vertex_descriptor target)> edgeRemoved;
 
         /* The edges, that had to be removed to create the tree.
          * I.e. All edges that lead to a vertex that has already been discovered.
@@ -114,7 +169,7 @@ namespace envire { namespace core
          * @note The TransformGraph always contains two edges between connected nodes (the edge and the inverse edge)
          *       However only one of them will be in the crossEdges. The other one automatically becomes a back-edge 
          *       and is ignored. */
-        std::vector<GraphTraits::edge_descriptor> crossEdges;
+        std::vector<CrossEdge> crossEdges;
         
         /**The root node of this TreeView */
         GraphTraits::vertex_descriptor root;

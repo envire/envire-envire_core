@@ -459,5 +459,69 @@ BOOST_AUTO_TEST_CASE(remove_transform_test)
 
 }
 
+BOOST_AUTO_TEST_CASE(get_path_transform_test)
+{
+  /*Graph:       A
+   *           /   \
+   *           |    B
+   *           |    |
+   *           D -- C
+   *           |    |
+   *           E    G
+   *           |    |
+   *           F -- H
+   *           |
+   *           I
+   */
+  
+      
+    Tfg graph;
+    
+    Transform tf;
+    tf.transform.translation << 1,2,3;
+    tf.transform.orientation = Eigen::Quaterniond(1,2,3,4);
+    graph.addTransform("A", "B", tf);
+    tf.transform.translation << 0,-1,42;
+    tf.transform.orientation = Eigen::Quaterniond(1,0,0,13);
+    graph.addTransform("A", "D", tf);
+    tf.transform.translation << 0,-1,13;
+    tf.transform.orientation = Eigen::Quaterniond(1,0,0,13);
+    graph.addTransform("D", "E", tf);
+    tf.transform.translation << 0,-1,0;
+    tf.transform.orientation = Eigen::Quaterniond(1,0,0,13);
+    graph.addTransform("E", "F", tf);
+    tf.transform.translation << 12,-1,42;
+    tf.transform.orientation = Eigen::Quaterniond(1,0,0,13);
+    graph.addTransform("F", "I", tf);
+    tf.transform.translation << 17,12,14;
+    tf.transform.orientation = Eigen::Quaterniond(1,2,0,13);
+    graph.addTransform("B", "C", tf);
+    tf.transform.translation << 0,-1,42;
+    tf.transform.orientation = Eigen::Quaterniond(0.3,0,0,0.5);
+    graph.addTransform("C", "G", tf);
+    tf.transform.translation << 0,-1,42;
+    tf.transform.orientation = Eigen::Quaterniond(0.5,0.4,0.10,0.2);
+    graph.addTransform("G", "H", tf);
+    
+    Transform tfAb = graph.getTransform("A", "B");
+    Transform tfAi = graph.getTransform("A", "I");
+    Transform tfDh = graph.getTransform("D", "H");
+    Transform tfIb = graph.getTransform("I", "B");
+    
+    Path ab = graph.getPath("A", "B");
+    Path ai = graph.getPath("A", "I");
+    Path dh = graph.getPath("D", "H");
+    Path ib = graph.getPath("I", "B");   
+    
+    Transform tfPathAb = graph.getTransform(ab);
+    Transform tfPathAi = graph.getTransform(ai);
+    Transform tfPathDh = graph.getTransform(dh);
+    Transform tfPathIb = graph.getTransform(ib);
+    
+    compareTransform(tfAb, tfPathAb);
+    compareTransform(tfAi, tfPathAi);
+    compareTransform(tfDh, tfPathDh);
+    compareTransform(tfIb, tfPathIb);
+    
 
-
+}

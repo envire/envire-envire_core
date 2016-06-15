@@ -363,6 +363,34 @@ BOOST_AUTO_TEST_CASE(check_item_existence_example)
 
 }
 
+BOOST_AUTO_TEST_CASE(check_item_existence_example_typeId)
+{
+    struct Joint
+    {
+      Joint(int a) : a(a) {}
+      int a;
+    };
+    struct Sensor {};
+    
+    EnvireGraph g;
+    FrameId frame = "frame";
+    g.addFrame(frame);
+    
+    Item<Joint>::Ptr item(new Item<Joint>(42));
+    g.addItemToFrame(frame, item);
+    Item<Sensor>::Ptr item2(new Item<Sensor>());
+    g.addItemToFrame(frame, item2);
+    
+    const std::type_index stringType(typeid(Item<string>));
+    bool contains = g.containsItems(frame, stringType);
+    BOOST_CHECK(!contains);
+    
+    const std::type_index jointType(typeid(Item<Joint>));
+    using Iterator = EnvireGraph::ItemIterator<Item<Joint>>;
+    Iterator begin, end;
+    BOOST_CHECK(g.getItems(frame, jointType).size() > 0);
+}
+
 
 BOOST_AUTO_TEST_CASE(get_item_empty_graph_test)
 {
@@ -660,3 +688,36 @@ BOOST_AUTO_TEST_CASE(envire_graph_publish_current_state_test)
 
     BOOST_CHECK(d.itemRemovedEvents.size() == 2);
 }
+
+BOOST_AUTO_TEST_CASE(envire_graph_save_load_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    EnvireGraph graph;
+    Transform ab;
+//     ItemBase::Ptr item1(new Item<string>("bla"));
+//     ItemBase::Ptr item2(new Item<int>(42));
+
+    graph.addTransform(a, b, ab);
+    
+    //note: there is no easy way to test with items because we need to load
+    //      them as plugins to get the class name for serialization.
+    //      Thus we only test with a simple transform.
+    
+//     graph.addItemToFrame(a, item1);
+//     graph.addItemToFrame(b, item2);
+    BOOST_CHECK_NO_THROW(graph.saveToFile("save_envire_graph_test"));
+    
+    EnvireGraph loadGraph;
+    BOOST_CHECK_NO_THROW(loadGraph.loadFromFile("save_envire_graph_test"));
+    
+    BOOST_CHECK(loadGraph.containsFrame(a));
+    BOOST_CHECK(loadGraph.containsFrame(b));
+    BOOST_CHECK_NO_THROW(loadGraph.getTransform(a, b));
+    BOOST_CHECK_NO_THROW(loadGraph.getTransform(b, a));
+//     BOOST_CHECK(loadGraph.getItemCount<Item<string>>(a) == 1);
+//     BOOST_CHECK(loadGraph.getItemCount<Item<int>>(b) == 1);
+    
+    
+}
+

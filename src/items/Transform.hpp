@@ -85,6 +85,12 @@ namespace envire { namespace core
             << ",shape=ellipse,color=red,style=filled,fillcolor=lightcoral]";
             return out.str();
         }
+        
+        void setIdentity()
+        {
+          transform.translation.setIdentity();
+          transform.orientation.setIdentity();
+        }
 
     private:
         /**Grants access to boost serialization */

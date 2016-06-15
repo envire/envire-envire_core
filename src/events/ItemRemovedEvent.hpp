@@ -16,7 +16,10 @@ namespace envire { namespace core
         }
 
       FrameId frame;/**<frame that the no longer contains the item.*/
-      ItemBase::Ptr item; /**<The item that has been removed*/
+      /**The item that has been removed.
+       * @note Since the item has already been removed, item->getFrame() will
+       *       not return a valid value.*/
+      ItemBase::Ptr item; 
     };
     
     //a type safe version of the above event

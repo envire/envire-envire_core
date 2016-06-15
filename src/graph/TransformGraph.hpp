@@ -55,6 +55,12 @@ namespace envire { namespace core
         /** @return the transform between source(edge) and target(edge) */
         const Transform getTransform(const edge_descriptor edge) const;
         
+        /** @return the transform between path.front() and path.back().
+         *          Returns Identity if path.size() <= 1.
+         *  @throw UnknownTransformException if the edge between path[i] and path[i+1]
+         *                                   does not exist.*/
+        const Transform getTransform(const Path& path) const;
+        
         /**A convenience wrapper around Base::setEdgeProperty */
         void updateTransform(const vertex_descriptor origin, const vertex_descriptor target,
                              const Transform& tf);
@@ -178,6 +184,25 @@ namespace envire { namespace core
         }
 
         return origin_tf * target_tf.inverse();
+    }
+    
+    template <class F>
+    const Transform TransformGraph<F>::getTransform(const Path& path) const
+    {
+        if(path.size() <= 1)
+        {
+            return Transform(base::Position::Zero(), base::Orientation::Identity());
+        }
+        
+        Transform tf = getTransform(path[0], path[1]);
+        base::TransformWithCovariance &trans(tf.transform);
+        for(size_t i = 1; i < path.size() - 1; ++i)
+        {
+            //will throw if no path from path[i] to path[i + 1] exists
+            const Transform stepTf = getTransform(path[i], path[i + 1]);
+            trans = trans * stepTf.transform;
+        }
+        return tf; 
     }
 
     template <class F>

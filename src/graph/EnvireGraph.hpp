@@ -102,7 +102,13 @@ public:
     /** @throw UnknownFrameException if @p frame is not part of this graph*/                                                  
     const envire::core::Frame::ItemList& getItems(const FrameId& frame,
                                                   const std::type_index& type) const;
-                                                 
+                                                  
+    /**Visits all items in the given frame (ignoring the type).
+     * @param func should be a callable with operator(const ItemBase::Ptr)
+     * @throw UnknownFrameException if @p frame is not part of this graph */
+    template <class T>
+    void visitItems(const FrameId& frame, T func) const;                                                  
+                                                  
     /**Convenience method that returns an iterator to the @p i'th item of type @p T from @p frame.
       * @param T has to derive from ItemBase.
       * @throw UnknownFrameException if the @p frame id is invalid.
@@ -124,7 +130,7 @@ public:
     /** @return true if @p frame contains at least one item of @p type. 
       *  @param type The described type should derive from ItemBase*/
     bool containsItems(const vertex_descriptor frame, const std::type_index& type) const;
-
+    bool containsItems(const FrameId& frame, const std::type_index& type) const;
     /** @return the number of items of type @p T in @p frame.
       *  @param T should derive from ItemBase
       *  @throw UnknownFrameException if the @p frame id is invalid.*/
@@ -152,6 +158,20 @@ public:
     *                                      coming from or leading to this
     *                                      frame. */
     virtual void removeFrame(const FrameId& frame) override;
+    
+    /**Stores the graph in @p file.
+     * Boost serialization is used to store the graph.
+     * @throw boost::archive::archive_exception if the serialization failed
+     * @throw std::ios_base::failure if the file operation failed*/
+    void saveToFile(const std::string& file) const;
+    
+    /**Loads the graph from @p file.
+     * Boost serialization is used to load the graph.
+     * Only use this with files that have been created by saveToFile().
+     * @throw boost::archive::archive_exception if the serialization failed
+     * @throw std::ios_base::failure if the file operation failed
+     * FIXME I have no idea what happens when the graph already contains data*/
+    void loadFromFile(const std::string& file);
     
 protected:
 
@@ -212,6 +232,14 @@ EnvireGraph::getItems(const FrameId& frame) const
     }
 
     return getItemsInternal<T>(desc, frame);
+}
+
+template <class T>
+void EnvireGraph::visitItems(const FrameId& frameId, T func) const
+{
+  checkFrameValid(frameId);
+  const Frame& frame = (*this)[frameId];
+  frame.visitItems(func);
 }
 
 template<class T>

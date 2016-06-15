@@ -241,15 +241,10 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_test)
     BOOST_CHECK(tree[graph.vertex(c)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(e)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(a)].parent == Gra::null_vertex()); //check parent
-    BOOST_CHECK(tree[graph.vertex(a)].parentRelation == nullptr); //check parent
     BOOST_CHECK(tree[graph.vertex(b)].parent == graph.vertex(a));
-    BOOST_CHECK(tree[graph.vertex(b)].parentRelation == &tree[graph.vertex(a)]);
     BOOST_CHECK(tree[graph.vertex(d)].parent == graph.vertex(c));
-    BOOST_CHECK(tree[graph.vertex(d)].parentRelation == &tree[graph.vertex(c)]);
     BOOST_CHECK(tree[graph.vertex(f)].parent == graph.vertex(e));
-    BOOST_CHECK(tree[graph.vertex(f)].parentRelation == &tree[graph.vertex(e)]);
     BOOST_CHECK(tree[graph.vertex(g)].parent == graph.vertex(e));
-    BOOST_CHECK(tree[graph.vertex(g)].parentRelation == &tree[graph.vertex(e)]);
     std::unordered_set<GraphTraits::vertex_descriptor>& aChildren = tree[graph.vertex(a)].children;
     BOOST_CHECK(aChildren.find(graph.vertex(b)) != aChildren.end());
     BOOST_CHECK(aChildren.find(graph.vertex(c)) != aChildren.end());
@@ -336,9 +331,7 @@ BOOST_AUTO_TEST_CASE(simple_get_tree_with_frameId_test)
     BOOST_CHECK(tree[graph.vertex(a)].children.size() == 2);
     BOOST_CHECK(tree[graph.vertex(b)].parent == graph.vertex(a));
     BOOST_CHECK(tree[graph.vertex(c)].parent == graph.vertex(a));
-    BOOST_CHECK(tree[graph.vertex(c)].parentRelation == &tree[graph.vertex(a)]);
     BOOST_CHECK(tree[graph.vertex(a)].parent == Gra::null_vertex());
-    BOOST_CHECK(tree[graph.vertex(a)].parentRelation == nullptr);
 }
 
 BOOST_AUTO_TEST_CASE(simple_get_tree_with_invalid_frameId_test)
@@ -381,9 +374,9 @@ BOOST_AUTO_TEST_CASE(non_tree_edges_test)
     BOOST_CHECK(view.root == graph.getVertex(a));
     BOOST_CHECK(view.crossEdges.size() == 1);
     
-    GraphTraits::edge_descriptor edge = view.crossEdges[0];
-    GraphTraits::vertex_descriptor source = graph.source(edge);
-    GraphTraits::vertex_descriptor target = graph.target(edge);
+    TreeView::CrossEdge edge = view.crossEdges[0];
+    GraphTraits::vertex_descriptor source = edge.origin;
+    GraphTraits::vertex_descriptor target = edge.target;
     BOOST_CHECK(graph.vertex(c) == source);
     BOOST_CHECK(graph.vertex(e) == target);
 }
@@ -426,7 +419,7 @@ BOOST_AUTO_TEST_CASE(tree_view_automatic_update_simple_test)
     //vC has no children and her parent is vA
     BOOST_CHECK(view.tree[vC].children.size() == 0);
     BOOST_CHECK(view.tree[vC].parent == vA);
-    BOOST_CHECK(view.tree[vC].parentRelation == &view.tree[vA]);
+
     
     BOOST_CHECK(bView.tree[vA].children.size() == 1);
     BOOST_CHECK(bView.tree[vA].children.find(vC) != view.tree[vA].children.end());
@@ -445,7 +438,6 @@ BOOST_AUTO_TEST_CASE(tree_view_automatic_update_simple_test)
     BOOST_CHECK(bView.tree[vC].children.size() == 1);
     BOOST_CHECK(bView.tree.find(vD) != bView.tree.end());
     BOOST_CHECK(bView.tree[vD].parent == vC);
-    BOOST_CHECK(bView.tree[vD].parentRelation == &bView.tree[vC]);
     BOOST_CHECK(bView.tree[vD].children.size() == 0);
 }
 
@@ -492,12 +484,11 @@ BOOST_AUTO_TEST_CASE(tree_view_cross_edge_test)
     BOOST_CHECK(view.tree.find(vC) != view.tree.end());
     BOOST_CHECK(view.tree[vC].children.size() == 0);
     BOOST_CHECK(view.tree[vD].parent == vB);
-    BOOST_CHECK(view.tree[vD].parentRelation == &view.tree[vB]);
     BOOST_CHECK(view.tree[vD].children.size() == 0);
     //C -> D or D -> C should be part of the cross edges
     BOOST_CHECK(view.crossEdges.size() == 1);
-    const GraphTraits::vertex_descriptor src = graph.source(view.crossEdges[0]);
-    const GraphTraits::vertex_descriptor tar = graph.target(view.crossEdges[0]);
+    const GraphTraits::vertex_descriptor src = view.crossEdges[0].origin;
+    const GraphTraits::vertex_descriptor tar = view.crossEdges[0].target;
     //note: it is not specified whether src->tar or tar->src ends up in the cross
     //      edges. The current implementation adds src->tar but that can change.
     BOOST_CHECK(tar == vD);
@@ -595,19 +586,15 @@ BOOST_AUTO_TEST_CASE(tree_view_add_sub_tree_test)
     BOOST_CHECK(view.tree[vD].children.size() == 1);
     BOOST_CHECK(view.tree[vD].children.find(vG) != view.tree[vD].children.end());
     BOOST_CHECK(view.tree[vG].parent == vD);
-    BOOST_CHECK(view.tree[vG].parentRelation == &view.tree[vD]);
     
     BOOST_CHECK(view.tree[vG].children.size() == 2);
     BOOST_CHECK(view.tree[vG].children.find(vH) != view.tree[vG].children.end());
     BOOST_CHECK(view.tree[vG].children.find(vF) != view.tree[vG].children.end());
     
     BOOST_CHECK(view.tree[vF].parent == vG);
-    BOOST_CHECK(view.tree[vF].parentRelation == &view.tree[vG]);
     BOOST_CHECK(view.tree[vH].parent == vG);
-    BOOST_CHECK(view.tree[vH].parentRelation == &view.tree[vG]);
     
     BOOST_CHECK(view.tree[vE].parent == vF);
-    BOOST_CHECK(view.tree[vE].parentRelation == &view.tree[vF]);
     BOOST_CHECK(view.tree[vE].children.size() == 0);
     
     BOOST_CHECK(view.tree[vA].children.size() == 2);
@@ -615,7 +602,6 @@ BOOST_AUTO_TEST_CASE(tree_view_add_sub_tree_test)
     BOOST_CHECK(view.tree[vA].children.find(vC) != view.tree[vA].children.end());
     
     BOOST_CHECK(view.tree[vC].parent == vA);
-    BOOST_CHECK(view.tree[vC].parentRelation == &view.tree[vA]);
     BOOST_CHECK(view.crossEdges.size() == 0);
     
 }
@@ -645,12 +631,12 @@ BOOST_AUTO_TEST_CASE(tree_view_automatic_update_remove_test)
     graph.add_edge(B, C, ep);
 
     TreeView view;
-    bool edgeAddedCalled = false;
+    bool edgeRemovedCalled = false;
     graph.getTree(A, true, &view);
-    view.edgeAdded.connect([&edgeAddedCalled] (GraphTraits::vertex_descriptor,
-                                               GraphTraits::vertex_descriptor) 
+    view.edgeRemoved.connect([&edgeRemovedCalled] (GraphTraits::vertex_descriptor,
+                                                   GraphTraits::vertex_descriptor) 
     {
-        edgeAddedCalled = true;
+        edgeRemovedCalled = true;
     });
     
     graph.remove_edge(B, C);
@@ -666,8 +652,7 @@ BOOST_AUTO_TEST_CASE(tree_view_automatic_update_remove_test)
     BOOST_CHECK(view.tree.find(vC) == view.tree.end());
     BOOST_CHECK(view.tree[vA].children.size() == 1);
     BOOST_CHECK(view.tree[vA].parent == graph.null_vertex());
-    BOOST_CHECK(view.tree[vA].parentRelation == nullptr);
-    BOOST_CHECK(edgeAddedCalled);
+    BOOST_CHECK(edgeRemovedCalled);
 }
 
 BOOST_AUTO_TEST_CASE(tree_edge_exists_test)
@@ -1134,12 +1119,50 @@ BOOST_AUTO_TEST_CASE(treeview_dfsVisit_test)
     graph.add_edge(f, g, ep);
     
     TreeView tv = graph.getTree(a);
-    
-    FrameId expectedOrder[] = {"a", "f", "g", "e", "b", "d", "c"};
-    FrameId expectedParent[] = {"", "a", "f", "a", "a", "b", "b"};
+    //this order is memory layout dependent, thus we test multiple orders
+    FrameId expectedOrder[] = {"a", "e", "f", "g", "b", "d", "c"};
+    FrameId expectedOrder2[] = {"a", "f", "g", "e", "b", "d", "c"};
     
     int i = 0;
     tv.visitDfs(graph.getVertex(a), [&](GraphTraits::vertex_descriptor vd, 
+                                        GraphTraits::vertex_descriptor parent)
+      { 
+        const FrameId id = graph.getFrameId(vd);
+        if(id != expectedOrder[i] && id != expectedOrder2[i])
+          BOOST_CHECK(false);
+        ++i;
+      });
+}
+
+
+BOOST_AUTO_TEST_CASE(treeview_bfsVisit_test)
+{
+    FrameId a = "a";
+    FrameId b = "b";
+    FrameId c = "c";
+    FrameId d = "d";
+    FrameId e = "e";
+    FrameId f = "f";
+    FrameId g = "g";
+    
+    Gra graph;
+    EdgeProp ep;
+    graph.add_edge(a, b, ep);
+    graph.add_edge(a, c, ep);
+    graph.add_edge(b, d, ep);
+    graph.add_edge(b, e, ep);
+    graph.add_edge(e, f, ep);
+    graph.add_edge(c, g, ep);
+
+    TreeView tv = graph.getTree(a);
+    
+    //the order could just as well be a b c d e g f, this is just how it is
+    //implemented right now. 
+    FrameId expectedOrder[] = {"a", "c", "b", "g", "e", "d", "f"};
+    FrameId expectedParent[] = {"", "a", "a", "c", "b", "b", "e"};
+    
+    int i = 0;
+    tv.visitBfs(graph.getVertex(a), [&](GraphTraits::vertex_descriptor vd, 
                                         GraphTraits::vertex_descriptor parent)
       { 
         const FrameId id = graph.getFrameId(vd);
@@ -1154,6 +1177,8 @@ BOOST_AUTO_TEST_CASE(treeview_dfsVisit_test)
         ++i;
       });
 }
+
+
 
 BOOST_AUTO_TEST_CASE(ctor_copy_test)
 {
@@ -1207,8 +1232,8 @@ BOOST_AUTO_TEST_CASE(test_tree_view_events_test)
             targets.push_back(target);
         });
     
-    std::vector<edge_descriptor> crossEdges;
-    tv.crossEdgeAdded.connect([&](edge_descriptor edge)
+    std::vector<TreeView::CrossEdge> crossEdges;
+    tv.crossEdgeAdded.connect([&](const TreeView::CrossEdge& edge)
         {
             crossEdges.push_back(edge);
         });
@@ -1244,9 +1269,147 @@ BOOST_AUTO_TEST_CASE(test_tree_view_events_test)
     BOOST_CHECK(origins.size() == 4);
     BOOST_CHECK(targets.size() == 4);
     //check that a cross edge has been added instead
-    BOOST_CHECK(crossEdges[0] == graph.getEdge(e, b));
+    BOOST_CHECK(crossEdges[0].edge == graph.getEdge(b, e) || crossEdges[0].edge == graph.getEdge(e, b));
 
 }
+
+BOOST_AUTO_TEST_CASE(tree_view_consistency_test)
+{
+    using vertex_descriptor = GraphTraits::vertex_descriptor;
+    using edge_descriptor = GraphTraits::edge_descriptor;
+    Gra graph;
+    EdgeProp ep;
+    TreeView tv;
+  
+    graph.add_edge("a", "b", ep);
+    graph.add_edge("a", "d", ep);
+    graph.add_edge("b", "c", ep);
+    
+    vertex_descriptor a = graph.getVertex("a");
+    vertex_descriptor b = graph.getVertex("b");
+    vertex_descriptor c = graph.getVertex("c");
+    vertex_descriptor d = graph.getVertex("d");
+    
+    tv = graph.getTree("a");
+    
+    BOOST_CHECK(tv.tree[a].children.size() == 2);
+    BOOST_CHECK(tv.tree[b].children.size() == 1);
+    BOOST_CHECK(tv.tree[c].children.size() == 0);
+    BOOST_CHECK(tv.tree[d].children.size() == 0);
+    
+    BOOST_CHECK(tv.tree[a].parent == GraphTraits::null_vertex());
+    BOOST_CHECK(tv.tree[b].parent == a);
+    BOOST_CHECK(tv.tree[c].parent = b);
+    BOOST_CHECK(tv.tree[d].parent = a);
+    
+
+
+}
+
+BOOST_AUTO_TEST_CASE(tree_view_remove_edge_simple_test)
+{
+
+    using vertex_descriptor = GraphTraits::vertex_descriptor;
+    using edge_descriptor = GraphTraits::edge_descriptor;
+    Gra graph;
+    EdgeProp ep;
+    TreeView tv;
+  
+    graph.add_edge("a", "b", ep);
+    graph.add_edge("a", "d", ep);
+    graph.add_edge("b", "c", ep);
+    
+    tv = graph.getTree("a");
+    std::vector<vertex_descriptor> origins;
+    std::vector<vertex_descriptor> targets;
+    tv.edgeRemoved.connect([&](vertex_descriptor origin, vertex_descriptor target) 
+        {
+            origins.push_back(origin);
+            targets.push_back(target);
+        });
+    
+    const vertex_descriptor a = graph.getVertex("a");
+    const vertex_descriptor b = graph.getVertex("b");
+    const vertex_descriptor c = graph.getVertex("c");
+    const vertex_descriptor d = graph.getVertex("d");
+    
+    tv.removeEdge(a, b);
+    
+    BOOST_CHECK(!tv.edgeExists(a, b));
+    BOOST_CHECK(!tv.edgeExists(b, a));
+    BOOST_CHECK(!tv.edgeExists(b, c));
+    BOOST_CHECK(!tv.edgeExists(c, b));
+    BOOST_CHECK(tv.edgeExists(a, d));
+    
+    BOOST_CHECK(origins.size() == 2);
+    BOOST_CHECK(targets.size() == 2);
+    
+    //check if removed in correct order
+    BOOST_CHECK(origins[0] == b);
+    BOOST_CHECK(origins[1] == a);
+    BOOST_CHECK(targets[0] == c);
+    BOOST_CHECK(targets[1] == b);
+}
+
+BOOST_AUTO_TEST_CASE(tree_view_remove_edge_cross_edge_test)
+{
+
+    using vertex_descriptor = GraphTraits::vertex_descriptor;
+    using edge_descriptor = GraphTraits::edge_descriptor;
+    Gra graph;
+    EdgeProp ep;
+    TreeView tv;
+  
+    graph.add_edge("a", "b", ep);
+    graph.add_edge("a", "e", ep);
+    graph.add_edge("b", "c", ep);
+    graph.add_edge("b", "d", ep);
+    graph.add_edge("c", "d", ep);
+    
+    tv = graph.getTree("a");
+    std::vector<vertex_descriptor> origins;
+    std::vector<vertex_descriptor> targets;
+    tv.edgeRemoved.connect([&](vertex_descriptor origin, vertex_descriptor target) 
+        {
+            origins.push_back(origin);
+            targets.push_back(target);
+        });
+    
+    const vertex_descriptor a = graph.getVertex("a");
+    const vertex_descriptor b = graph.getVertex("b");
+    const vertex_descriptor c = graph.getVertex("c");
+    const vertex_descriptor d = graph.getVertex("d");
+    
+    BOOST_CHECK(tv.crossEdges.size() == 1);
+    
+    tv.removeEdge(a, b);
+    
+    BOOST_CHECK(!tv.edgeExists(a, b));
+    BOOST_CHECK(!tv.edgeExists(b, a));
+    BOOST_CHECK(!tv.edgeExists(b, c));
+    BOOST_CHECK(!tv.edgeExists(c, b));
+    BOOST_CHECK(!tv.edgeExists(b, d));
+    BOOST_CHECK(!tv.edgeExists(d, b));
+    BOOST_CHECK(!tv.edgeExists(c, d));
+    BOOST_CHECK(!tv.edgeExists(d, c));
+    BOOST_CHECK(tv.crossEdges.size() == 0);
+    
+    BOOST_CHECK(origins.size() == 3);
+    BOOST_CHECK(targets.size() == 3);
+    
+    //check if removed in correct order
+    BOOST_CHECK(origins[0] == b);
+    BOOST_CHECK(targets[0] == c);
+    BOOST_CHECK(origins[1] == b);
+    BOOST_CHECK(targets[1] == d);
+    BOOST_CHECK(origins[2] == a);
+    BOOST_CHECK(targets[2] == b);
+    
+    
+}
+
+
+
 
 BOOST_AUTO_TEST_CASE(publish_current_state_test)
 {
@@ -1307,4 +1470,6 @@ BOOST_AUTO_TEST_CASE(event_queue_test)
     BOOST_CHECK(queue.dispatcher.edgeModifiedEvents.size() == 1);
     BOOST_CHECK(queue.dispatcher.edgeRemovedEvents.size() == 0);
 }
+
+
 

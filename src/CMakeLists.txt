@@ -10,6 +10,7 @@ set(headers items/ItemBase.hpp
             items/RandomGenerator.hpp
             items/SpatialItem.hpp
             items/BoundingVolume.hpp
+            items/ItemMetadata.hpp
             graph/GraphExceptions.hpp
             graph/GraphVisitors.hpp
             graph/GraphViz.hpp
@@ -41,6 +42,7 @@ set(headers items/ItemBase.hpp
             
 set(sources items/ItemBase.cpp
             items/AlignedBoundingBox.cpp
+            items/ItemMetadata.cpp
             events/GraphEvent.cpp
             events/GraphEventPublisher.cpp
             events/GraphEventDispatcher.cpp
@@ -51,7 +53,7 @@ set(sources items/ItemBase.cpp
             serialization/Serialization.cpp
             util/Demangle.cpp)
             
-set(deps_pkg_config base-types)
+set(deps_pkg_config base-types base-lib)
 
 if(ENABLE_PLUGINS)
 

@@ -10,6 +10,7 @@
 #include "items/RandomGenerator.hpp"
 #include "items/SpatialItem.hpp"
 #include "items/BoundingVolume.hpp"
+#include "items/ItemMetadata.hpp"
 #include "graph/TransformGraph.hpp"
 #include "graph/EnvireGraph.hpp"
 #include "graph/Graph.hpp"
