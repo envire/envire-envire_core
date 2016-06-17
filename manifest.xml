@@ -13,4 +13,6 @@
   <depend package="glog" />
   <depend package="tools/class_loader" optional="1"/>
   <depend package="tools/plugin_manager" optional="1"/>
+  <!-- Required for performance tests  -->
+  <depend package="slam/envire" optional="1"/>
 </package>
