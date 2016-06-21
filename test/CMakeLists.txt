@@ -43,7 +43,7 @@ if(OLD_ENVIRE_FOUND)
     rock_executable(performance_comapare compare_old_new_performance.cpp
         DEPS_CMAKE Boost
         DEPS envire_core
-        DEPS_PKGCONFIG envire base-lib)
+        DEPS_PKGCONFIG envire)
 else()
     message(STATUS "old envire not found ... NOT building the performance comparision test")
 endif()
