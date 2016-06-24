@@ -36,7 +36,6 @@ namespace envire { namespace core
         base::Time time; /** Timestamp */
         boost::uuids::uuid uuid; /** Unique Identifier */
         FrameId frame_name; /** Frame name in which the Item is located */
-        void* user_data_ptr; /** Pointer to the user data */
 
     public:
 
@@ -115,7 +114,7 @@ namespace envire { namespace core
          * storing and using pointers to std::type_info is safe*/
         virtual const std::type_info* getTypeInfo() const = 0;
         
-        void* getRawData() const { return user_data_ptr; }
+        virtual void* getRawData() { return NULL; }
         
         /**Returns the data type of the embedded data*/
         virtual const std::type_info* getEmbeddedTypeInfo() const = 0;

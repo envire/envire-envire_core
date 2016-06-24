@@ -31,23 +31,19 @@ namespace envire { namespace core
 
         Item() : ItemBase()
         {
-            user_data_ptr = &user_data;
         }
 
         Item(const Item<_ItemData>& item) :  ItemBase(item), user_data(item.user_data)
         {
-            user_data_ptr = &this->user_data;
         }
 
         Item(Item<_ItemData>&& item) :  ItemBase(std::move(item)), user_data(std::move(item.user_data))
         {
-            user_data_ptr = &this->user_data;
         }
 
         template <typename... Ts>
         Item(Ts&&... args) : ItemBase(), user_data(std::forward<Ts>(args)...)
         {
-            user_data_ptr = &user_data;
         }
 
         virtual ~Item() {}
@@ -91,6 +87,8 @@ namespace envire { namespace core
         {
           return &typeid(_ItemData);
         }
+
+        virtual void* getRawData() { return &user_data; }
 
     private:
         /**Grants access to boost serialization */

@@ -4,7 +4,7 @@
 
 using namespace envire::core;
 
-ItemBase::ItemBase() : time(base::Time::now()), uuid(RandomGenerator::getRandomGenerator()()), user_data_ptr(NULL)
+ItemBase::ItemBase() : time(base::Time::now()), uuid(RandomGenerator::getRandomGenerator()())
 {
 }
 
