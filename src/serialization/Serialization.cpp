@@ -29,40 +29,50 @@ bool loadPluginLibrary(const std::string& class_name)
 
 bool Serialization::save(ArchiveOutType& ar, const ItemBase::Ptr& item)
 {
-    try
+    std::string class_name;
+    if (item->getClassName(class_name))
     {
-        // try to get handle
-        if(!hasHandle(item->getClassName()))
+        try
         {
-            // load plugin lib
-            if(loadPluginLibrary(item->getClassName()))
+            // try to get handle
+            if(!hasHandle(class_name))
             {
-                // try to get handle
-                LOG(INFO) << "Successfully loaded plugin library for item " << item->getClassName();
-                if(!hasHandle(item->getClassName()))
+                // load plugin lib
+                if(loadPluginLibrary(class_name))
                 {
-                    LOG(ERROR) << "Library has been loaded but can't find a serialization handle for " << item->getClassName();
+                    // try to get handle
+                    LOG(INFO) << "Successfully loaded plugin library for item " << class_name;
+                    if(!hasHandle(class_name))
+                    {
+                        LOG(ERROR) << "Library has been loaded but can't find a serialization handle for " << class_name << "."
+                                   << "Did you forget to register the Item with the ENVIRE_REGISTER_PLUGIN macro?";
+                        return false;
+                    }
+                }
+                else
+                {
+                    LOG(ERROR) << "Failed to load plugin library for item " << class_name;
                     return false;
                 }
             }
-            else
+            HandlePtr handle;
+            if(getHandle(class_name, handle) && handle)
             {
-                LOG(ERROR) << "Failed to load plugin library for item " << item->getClassName();
-                return false;
+                ItemHeader header(class_name);
+                ar << BOOST_SERIALIZATION_NVP(header);
+                return handle->save(ar, item);
             }
+            return false;
         }
-        HandlePtr handle;
-        if(getHandle(item->getClassName(), handle) && handle)
+        catch(const std::runtime_error& e)
         {
-            ItemHeader header(item);
-            ar << BOOST_SERIALIZATION_NVP(header);
-            return handle->save(ar, item);
+            LOG(ERROR) << "Caught exception while trying to save item of type " << class_name;
         }
-        return false;
     }
-    catch(const std::runtime_error& e)
+    else
     {
-        LOG(ERROR) << "Caught exception while trying to save item of type " << item->getClassName();
+        LOG(ERROR) << "Failed to save item " << item->getEmbeddedTypeInfo()->name() << ", it provides not class name. "
+                    << "Did you forget to register the Item with the ENVIRE_REGISTER_PLUGIN macro?";
     }
     return false;
 }
@@ -83,7 +93,8 @@ bool Serialization::load(ArchiveInType& ar, ItemBase::Ptr& item)
                 LOG(INFO) << "Successfully loaded plugin library for item " << header.class_name;
                 if(!hasHandle(header.class_name))
                 {
-                    LOG(ERROR) << "Library has been loaded but can't find a serialization handle for " << header.class_name;
+                    LOG(ERROR) << "Library has been loaded but can't find a serialization handle for " << header.class_name << "."
+                               << "Did you forget to register the Item with the ENVIRE_REGISTER_PLUGIN macro?";
                     return false;
                 }
             }

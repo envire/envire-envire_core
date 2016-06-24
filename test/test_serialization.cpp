@@ -20,16 +20,22 @@ using namespace envire::core;
 
 BOOST_AUTO_TEST_CASE(item_serialization_expected_failures)
 {
-    envire::core::Item<std::string>::Ptr string_item(new envire::core::Item<std::string>);
-    envire::core::ItemBase::Ptr base_item = boost::dynamic_pointer_cast< envire::core::ItemBase >(string_item);
-    BOOST_CHECK(base_item->getClassName() == "UnknownItem");
+    class DummyObject
+    {
+        std::string s;
+    };
+
+    envire::core::Item<DummyObject>::Ptr dummy_item(new envire::core::Item<DummyObject>);
+    envire::core::ItemBase::Ptr base_item = boost::dynamic_pointer_cast< envire::core::ItemBase >(dummy_item);
+    std::string class_name;
+    BOOST_CHECK(base_item->getClassName(class_name) == false);
 
 
     std::stringstream stream;
     boost::archive::polymorphic_binary_oarchive oa(stream);
     BOOST_CHECK(Serialization::save(oa, base_item) == false);
 
-    ItemHeader header(base_item);
+    ItemHeader header("dummy_item");
     oa << BOOST_SERIALIZATION_NVP(header);
 
     boost::archive::polymorphic_binary_iarchive ia(stream);

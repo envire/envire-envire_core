@@ -15,7 +15,6 @@ class ItemHeader
 public:
     ItemHeader() {}
     ItemHeader(const std::string& class_name) {this->class_name = class_name;}
-    ItemHeader(const ItemBase::Ptr& item) {this->class_name = item->getClassName();}
 
     std::string class_name;
 

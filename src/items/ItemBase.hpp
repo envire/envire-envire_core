@@ -95,7 +95,7 @@ namespace envire { namespace core
         * Returns the class name of the item
         *
         */
-        virtual std::string getClassName() const { return "UnknownItem"; }
+        virtual bool getClassName(std::string& class_name) const { return false; }
 
         std::type_index getTypeIndex() const
         {

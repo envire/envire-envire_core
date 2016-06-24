@@ -13,10 +13,7 @@ using namespace std;
 
 BOOST_AUTO_TEST_CASE(test_copy_operators)
 {
-    class StringItem : public envire::core::Item<std::string>
-    {
-        virtual std::string getClassName() const { return "StringItem"; }
-    };
+    typedef envire::core::Item<std::string> StringItem;
 
     StringItem string_item;
     string_item.setData("In-A-Gadda-Da-Vida");
@@ -72,7 +69,9 @@ BOOST_AUTO_TEST_CASE(vector_plugin_test)
 
     // create instance
     boost::shared_ptr<ItemBase> vector_plugin = loader.createInstance<ItemBase>("VectorPlugin");
-    BOOST_CHECK(vector_plugin->getClassName() == "VectorPlugin");
+    std::string class_name;
+    BOOST_CHECK(vector_plugin->getClassName(class_name));
+    BOOST_CHECK(class_name == "VectorPlugin");
 
     // create another instance
     boost::shared_ptr<ItemBase> vector_plugin_2 = loader.createInstance<ItemBase>("VectorPlugin");
@@ -103,7 +102,9 @@ BOOST_AUTO_TEST_CASE(class_loader_test)
     BOOST_CHECK(envire::core::ClassLoader::getInstance()->hasEnvireItem("VectorPlugin"));
     ItemBase::Ptr vector_plugin;
     BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItem("VectorPlugin", vector_plugin));
-    BOOST_CHECK(vector_plugin->getClassName() == "VectorPlugin");
+    std::string class_name;
+    BOOST_CHECK(vector_plugin->getClassName(class_name));
+    BOOST_CHECK(class_name == "VectorPlugin");
     BOOST_CHECK(vector_plugin.use_count() == 1);
     ItemBase::Ptr vector_plugin_2 = vector_plugin;
     BOOST_CHECK(vector_plugin.use_count() == 2);
@@ -112,13 +113,15 @@ BOOST_AUTO_TEST_CASE(class_loader_test)
     // load and cast element
     Item<Eigen::Vector3d>::Ptr vector_plugin_3;
     BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItem< Item<Eigen::Vector3d> >("VectorPlugin", vector_plugin_3));
-    BOOST_CHECK(vector_plugin_3->getClassName() == "VectorPlugin");
+    BOOST_CHECK(vector_plugin_3->getClassName(class_name));
+    BOOST_CHECK(class_name == "VectorPlugin");
     BOOST_CHECK(vector_plugin_2->getID() != vector_plugin_3->getID());
 
     // create envire item by embedded type
     ItemBase::Ptr vector_plugin_4;
     BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItemFor("Eigen::Vector3d", vector_plugin_4));
-    BOOST_CHECK(vector_plugin_4->getClassName() == "VectorPlugin");
+    BOOST_CHECK(vector_plugin_4->getClassName(class_name));
+    BOOST_CHECK(class_name == "VectorPlugin");
 
     // create a singleton plugin
     void* item_ptr = NULL;

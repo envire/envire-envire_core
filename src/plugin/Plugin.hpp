@@ -23,7 +23,6 @@
 */
 #define ENVIRE_PLUGIN_HEADER( _classname ) \
     public: \
-    virtual std::string getClassName() const { return #_classname; } \
     typedef boost::shared_ptr<_classname> Ptr; \
     private: \
     ENVIRE_SERIALIZATION_HEADER(TemplateType)
@@ -36,7 +35,7 @@
 * unique lookup name.
 *
 * Example usage in *.cpp:
-*      ENVIRE_REGISTER_PLUGIN(Namespace::ClassName)
+*      ENVIRE_REGISTER_PLUGIN(Namespace::ClassName, DataType)
 */
 #define ENVIRE_REGISTER_PLUGIN1( _classname ) \
 CLASS_LOADER_REGISTER_CLASS(_classname, envire::core::ItemBase); \
@@ -45,7 +44,7 @@ ENVIRE_REGISTER_SERIALIZATION(_classname, _classname::TemplateType)
 #define ENVIRE_REGISTER_PLUGIN2(_classname, _datatype) \
 CLASS_LOADER_REGISTER_CLASS(_classname, envire::core::ItemBase); \
 ENVIRE_REGISTER_SERIALIZATION(_classname, _classname::TemplateType) \
-static envire::core::MetadataInitializer _metadataInit(typeid(_classname), #_datatype);
+static envire::core::MetadataInitializer _metadataInit(typeid(envire::core::Item<_datatype>), #_datatype, #_classname);
 
 /** Overload selector for ENVIRE_REGISTER_PLUGIN. 
  *  FIXME should be removed as soon as the transition to the new macro is done */

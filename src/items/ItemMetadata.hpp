@@ -11,9 +11,13 @@ namespace envire { namespace core
     
 struct ItemMetadata
 {
-  /**Name of the embedded typed. e.g. for Item<int> the name would be
-   * "int".*/
-  std::string embeddedTypename; 
+    /** Name of the plugin class. e.g. "envire::core::Item<int>"
+     */
+    std::string className;
+
+    /**Name of the embedded typed. e.g. for Item<int> the name would be
+    * "int".*/
+    std::string embeddedTypename;
 };
 
 /**Provides a mapping between std::type_info and the metadata of the item.*/
@@ -45,10 +49,11 @@ private:
 /**Used to add meta data at program startup */
 struct MetadataInitializer
 {
-  MetadataInitializer(const std::type_info& type, const std::string& embeddedTypename)
+  MetadataInitializer(const std::type_info& type, const std::string& embeddedTypename, const std::string& className)
   {
     ItemMetadata data;
     data.embeddedTypename = embeddedTypename;
+    data.className = className;
     ItemMetadataMapping::addMapping(type, data);
   }
 };

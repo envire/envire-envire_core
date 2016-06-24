@@ -78,6 +78,26 @@ namespace envire { namespace core
         _ItemData& getData() { return this->user_data; }
         const _ItemData& getData() const { return this->user_data; }
 
+        virtual bool getClassName(std::string& class_name) const
+        {
+            if (ItemMetadataMapping::containsMetadata(*getTypeInfo()))
+            {
+                class_name = ItemMetadataMapping::getMetadata(*getTypeInfo()).className;
+                return true;
+            }
+            return false;
+        }
+
+        bool getEmbeddedTypeName(std::string& embedded_type_name) const
+        {
+            if (ItemMetadataMapping::containsMetadata(*getTypeInfo()))
+            {
+                embedded_type_name = ItemMetadataMapping::getMetadata(*getTypeInfo()).embeddedTypename;
+                return true;
+            }
+            return false;
+        }
+
         virtual const std::type_info* getTypeInfo() const 
         {
           return &typeid(envire::core::Item<_ItemData>);

@@ -123,7 +123,10 @@ bool ClassLoader::createCollisionObjectFor(const std::string& class_name, boost:
 template<class BaseClass>
 bool ClassLoader::createCollisionObjectFor(const envire::core::ItemBase& item, boost::shared_ptr<BaseClass>& collision_object)
 {
-    return createCollisionObjectFor<BaseClass>(item.getClassName(), collision_object);
+    std::string class_name;
+    if (item.getClassName(class_name))
+        return createCollisionObjectFor<BaseClass>(class_name, collision_object);
+    return false;
 }
 
 }}
