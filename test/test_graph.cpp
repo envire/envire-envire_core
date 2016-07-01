@@ -2,10 +2,10 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/serialization/shared_ptr.hpp>
-#include <boost/archive/polymorphic_text_iarchive.hpp>
-#include <boost/archive/polymorphic_text_oarchive.hpp>
-#include <boost/archive/polymorphic_binary_iarchive.hpp>
-#include <boost/archive/polymorphic_binary_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 #include <envire_core/graph/Graph.hpp>
 #include <envire_core/events/GraphEventDispatcher.hpp>
 #include <envire_core/graph/GraphViz.hpp>
@@ -1045,9 +1045,9 @@ BOOST_AUTO_TEST_CASE(serialization_test)
     graph.add_edge(a, c, ac);
     
     std::stringstream stream;
-    boost::archive::polymorphic_binary_oarchive oa(stream);
+    boost::archive::binary_oarchive oa(stream);
     oa << graph;
-    boost::archive::polymorphic_binary_iarchive ia(stream);
+    boost::archive::binary_iarchive ia(stream);
     Gra graph2;
     ia >> graph2;   
     

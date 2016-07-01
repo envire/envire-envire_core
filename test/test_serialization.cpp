@@ -3,10 +3,10 @@
 #define protected public
 #include <Eigen/Geometry>
 #include <boost/serialization/shared_ptr.hpp>
-#include <boost/archive/polymorphic_text_iarchive.hpp>
-#include <boost/archive/polymorphic_text_oarchive.hpp>
-#include <boost/archive/polymorphic_binary_iarchive.hpp>
-#include <boost/archive/polymorphic_binary_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 #include <boost/filesystem.hpp>
 
 #include <envire_core/serialization/Serialization.hpp>
@@ -32,13 +32,13 @@ BOOST_AUTO_TEST_CASE(item_serialization_expected_failures)
 
 
     std::stringstream stream;
-    boost::archive::polymorphic_binary_oarchive oa(stream);
+    boost::archive::binary_oarchive oa(stream);
     BOOST_CHECK(Serialization::save(oa, base_item) == false);
 
     ItemHeader header("dummy_item");
     oa << BOOST_SERIALIZATION_NVP(header);
 
-    boost::archive::polymorphic_binary_iarchive ia(stream);
+    boost::archive::binary_iarchive ia(stream);
     BOOST_CHECK(Serialization::load(ia, base_item) == false);
 }
 
@@ -62,11 +62,11 @@ BOOST_AUTO_TEST_CASE(vector_plugin_serialization_text)
 
     // serialize to string stream
     std::stringstream stream;
-    boost::archive::polymorphic_text_oarchive oa(stream);
+    boost::archive::text_oarchive oa(stream);
     BOOST_CHECK(Serialization::save(oa, base_plugin));
 
     // deserialize from string stream
-    boost::archive::polymorphic_text_iarchive ia(stream);
+    boost::archive::text_iarchive ia(stream);
     envire::core::ItemBase::Ptr base_plugin_2 = NULL;
     BOOST_CHECK(Serialization::load(ia, base_plugin_2));
 
@@ -97,11 +97,11 @@ BOOST_AUTO_TEST_CASE(vector_plugin_serialization_binary)
 
     // serialize to string stream
     std::stringstream stream;
-    boost::archive::polymorphic_binary_oarchive oa(stream);
+    boost::archive::binary_oarchive oa(stream);
     BOOST_CHECK(Serialization::save(oa, base_plugin));
 
     // deserialize from string stream
-    boost::archive::polymorphic_binary_iarchive ia(stream);
+    boost::archive::binary_iarchive ia(stream);
     envire::core::ItemBase::Ptr base_plugin_2 = NULL;
     BOOST_CHECK(Serialization::load(ia, base_plugin_2));
 
@@ -115,9 +115,9 @@ BOOST_AUTO_TEST_CASE(vector_plugin_serialization_binary)
     // serialize to binary blob
     std::vector<uint8_t> bin;
     stream.clear();
-    BOOST_CHECK(Serialization::save(bin, base_plugin));
+    BOOST_CHECK(Serialization::saveToBinary(bin, base_plugin));
     envire::core::ItemBase::Ptr base_plugin_3 = NULL;
-    BOOST_CHECK(Serialization::load(bin, base_plugin_3));
+    BOOST_CHECK(Serialization::loadFromBinary(bin, base_plugin_3));
     Item<Eigen::Vector3d>::Ptr vector_plugin_3 = boost::dynamic_pointer_cast< Item<Eigen::Vector3d> >(base_plugin_3);
     BOOST_CHECK(vector_plugin_3->getFrame() == vector_plugin->getFrame());
     BOOST_CHECK(vector_plugin_3->getData() == vector_plugin->getData());
@@ -141,11 +141,11 @@ BOOST_AUTO_TEST_CASE(test_unkown_plugin_binary_deserialization)
     std::cerr << "Time: " << plugin->getTime().microseconds << std::endl;
 
     std::ofstream ostream("vector_plugin.bin");
-    boost::archive::polymorphic_binary_oarchive oa(ostream);
+    boost::archive::binary_oarchive oa(ostream);
     BOOST_CHECK(Serialization::save(oa, plugin));
 
     std::ofstream ostream_2("vector_plugin.asc");
-    boost::archive::polymorphic_text_oarchive oa_s(ostream_2);
+    boost::archive::text_oarchive oa_s(ostream_2);
     BOOST_CHECK(Serialization::save(oa_s, plugin));
     */
 
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(test_unkown_plugin_binary_deserialization)
 
     // deserialization plugin
     std::ifstream istream(serialized_file.c_str());
-    boost::archive::polymorphic_binary_iarchive ia(istream);
+    boost::archive::binary_iarchive ia(istream);
     envire::core::ItemBase::Ptr base_plugin;
     BOOST_CHECK(Serialization::load(ia, base_plugin));
 
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(test_unkown_plugin_text_deserialization)
 
     // deserialization plugin
     std::ifstream istream(serialized_file.c_str());
-    boost::archive::polymorphic_text_iarchive ia(istream);
+    boost::archive::text_iarchive ia(istream);
     envire::core::ItemBase::Ptr base_plugin;
     BOOST_CHECK(Serialization::load(ia, base_plugin));
 
@@ -245,11 +245,11 @@ BOOST_AUTO_TEST_CASE(envire_graph_serialization_binary)
 
     // serialize graph to string stream
     std::stringstream stream;
-    boost::archive::polymorphic_binary_oarchive oa(stream);
+    boost::archive::binary_oarchive oa(stream);
     oa << graph;
 
     // deserialize graph from string stream
-    boost::archive::polymorphic_binary_iarchive ia(stream);
+    boost::archive::binary_iarchive ia(stream);
     EnvireGraph graph_2;
     ia >> graph_2;
 

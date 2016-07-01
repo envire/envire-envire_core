@@ -3,133 +3,25 @@
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/nvp.hpp>
 #include <envire_core/serialization/BinaryBufferHelper.hpp>
-#include <boost/archive/polymorphic_binary_iarchive.hpp>
-#include <boost/archive/polymorphic_binary_oarchive.hpp>
-#include <glog/logging.h>
-
-#ifdef CMAKE_ENABLE_PLUGINS
-    #include <envire_core/plugin/ClassLoader.hpp>
-#endif
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 
 using namespace envire::core;
 
-bool loadPluginLibrary(const std::string& class_name)
-{
-    #ifdef CMAKE_ENABLE_PLUGINS
-        LOG(INFO) << "Trying to load plugin library for item " << class_name;
-        ClassLoader* loader = ClassLoader::getInstance();
-        ItemBase::Ptr item;
-        return loader->createEnvireItem(class_name, item);
-    #else
-        LOG(INFO) << "Unable to load plugin library from item " << class_name
-                  << " because plugin support is disabled (code has been compiled with ENABLE_PLUGINS=OFF).";
-        return false;
-    #endif
-}
-
-bool Serialization::save(ArchiveOutType& ar, const ItemBase::Ptr& item)
-{
-    std::string class_name;
-    if (item->getClassName(class_name))
-    {
-        try
-        {
-            // try to get handle
-            if(!hasHandle(class_name))
-            {
-                // load plugin lib
-                if(loadPluginLibrary(class_name))
-                {
-                    // try to get handle
-                    LOG(INFO) << "Successfully loaded plugin library for item " << class_name;
-                    if(!hasHandle(class_name))
-                    {
-                        LOG(ERROR) << "Library has been loaded but can't find a serialization handle for " << class_name << "."
-                                   << "Did you forget to register the Item with the ENVIRE_REGISTER_PLUGIN macro?";
-                        return false;
-                    }
-                }
-                else
-                {
-                    LOG(ERROR) << "Failed to load plugin library for item " << class_name;
-                    return false;
-                }
-            }
-            HandlePtr handle;
-            if(getHandle(class_name, handle) && handle)
-            {
-                ItemHeader header(class_name);
-                ar << BOOST_SERIALIZATION_NVP(header);
-                return handle->save(ar, item);
-            }
-            return false;
-        }
-        catch(const std::runtime_error& e)
-        {
-            LOG(ERROR) << "Caught exception while trying to save item of type " << class_name;
-        }
-    }
-    else
-    {
-        LOG(ERROR) << "Failed to save item " << item->getEmbeddedTypeInfo()->name() << ", it provides not class name. "
-                    << "Did you forget to register the Item with the ENVIRE_REGISTER_PLUGIN macro?";
-    }
-    return false;
-}
-
-bool Serialization::load(ArchiveInType& ar, ItemBase::Ptr& item)
-{
-    try
-    {
-        ItemHeader header;
-        ar >> BOOST_SERIALIZATION_NVP(header);
-        // try to get handle
-        if(!hasHandle(header.class_name))
-        {
-            // load plugin lib
-            if(loadPluginLibrary(header.class_name))
-            {
-                // try to get handle
-                LOG(INFO) << "Successfully loaded plugin library for item " << header.class_name;
-                if(!hasHandle(header.class_name))
-                {
-                    LOG(ERROR) << "Library has been loaded but can't find a serialization handle for " << header.class_name << "."
-                               << "Did you forget to register the Item with the ENVIRE_REGISTER_PLUGIN macro?";
-                    return false;
-                }
-            }
-            else
-            {
-                LOG(ERROR) << "Failed to load plugin library for item " << header.class_name;
-                return false;
-            }
-        }
-        HandlePtr handle;
-        if(getHandle(header.class_name, handle) && handle)
-            return handle->load(ar, item);
-        return false;
-    }
-    catch(const std::runtime_error& e)
-    {
-        LOG(ERROR) << "Caught exception while trying to load item";
-    }
-    return false;
-}
-
-bool Serialization::save(std::vector< uint8_t >& binary, const ItemBase::Ptr& item)
+bool Serialization::saveToBinary(std::vector< uint8_t >& binary, const ItemBase::Ptr& item)
 {
     binary.reserve(1000000);
     BinaryOutputBuffer buffer(&binary);
     std::ostream ostream(&buffer);
-    boost::archive::polymorphic_binary_oarchive oa(ostream);
+    boost::archive::binary_oarchive oa(ostream);
     return save(oa, item);
 }
 
-bool Serialization::load(const std::vector< uint8_t >& binary, ItemBase::Ptr& item)
+bool Serialization::loadFromBinary(const std::vector< uint8_t >& binary, ItemBase::Ptr& item)
 {
     BinaryInputBuffer buffer(binary);
     std::istream istream(&buffer);
-    boost::archive::polymorphic_binary_iarchive ia(istream);
+    boost::archive::binary_iarchive ia(istream);
     return load(ia, item);
 }
 

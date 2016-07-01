@@ -1,7 +1,7 @@
 #pragma once
 #include <sstream>
-#include <boost/archive/polymorphic_binary_oarchive.hpp>
-#include <boost/archive/polymorphic_binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
 
 
 namespace envire { namespace core {
@@ -14,8 +14,8 @@ struct SerializableConcept
     {
         std::stringstream ss("");
 
-        boost::archive::polymorphic_binary_oarchive oa(ss);
-        boost::archive::polymorphic_binary_iarchive ia(ss);
+        boost::archive::binary_oarchive oa(ss);
+        boost::archive::binary_iarchive ia(ss);
 
         T* t = NULL;
 

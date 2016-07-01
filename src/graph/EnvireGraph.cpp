@@ -1,8 +1,8 @@
 
 #include <envire_core/graph/EnvireGraph.hpp>
 #include <fstream>
-#include <boost/archive/polymorphic_binary_oarchive.hpp>
-#include <boost/archive/polymorphic_binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
 
 namespace envire { namespace core {
 
@@ -166,7 +166,7 @@ void EnvireGraph::saveToFile(const std::string& file) const
     //set exception bits to ensure that myfile throws in case of error
     myfile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     myfile.open(file); //may throw
-    boost::archive::polymorphic_binary_oarchive oa(myfile);
+    boost::archive::binary_oarchive oa(myfile);
     oa << *this; //may throw archive_exception
 }
 
@@ -175,7 +175,7 @@ void EnvireGraph::loadFromFile(const std::string& file)
   std::ifstream myfile;
   myfile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
   myfile.open(file); //may throw  
-  boost::archive::polymorphic_binary_iarchive ia(myfile);
+  boost::archive::binary_iarchive ia(myfile);
   ia >> *this;
 }
 

@@ -2,14 +2,13 @@
 
 #include <envire_core/items/ItemBase.hpp>
 
-#include <boost/archive/polymorphic_iarchive.hpp>
-#include <boost/archive/polymorphic_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 
 namespace envire { namespace core
 {
-
-typedef boost::archive::polymorphic_iarchive ArchiveInType;
-typedef boost::archive::polymorphic_oarchive ArchiveOutType;
 
 /**
  * @brief Interface class of the item serialization handle.
@@ -21,9 +20,11 @@ class SerializationHandle
 public:
     virtual ~SerializationHandle() {}
 
-    virtual bool save(ArchiveOutType& ar, const ItemBase::Ptr& item) = 0;
+    virtual bool save(boost::archive::binary_oarchive& ar, const ItemBase::Ptr& item) = 0;
+    virtual bool load(boost::archive::binary_iarchive& ar, ItemBase::Ptr& item) = 0;
 
-    virtual bool load(ArchiveInType& ar, ItemBase::Ptr& item) = 0;
+    virtual bool save(boost::archive::text_oarchive& ar, const ItemBase::Ptr& item) = 0;
+    virtual bool load(boost::archive::text_iarchive& ar, ItemBase::Ptr& item) = 0;
 };
 
 }}

@@ -38,12 +38,22 @@ BOOST_CLASS_EXPORT(_classname) \
 class SerializationHandle ## _unique_id : public envire::core::SerializationHandle \
 { \
 public: \
-    virtual bool save(envire::core::ArchiveOutType& ar, const envire::core::ItemBase::Ptr& item) \
+    virtual bool save(boost::archive::binary_oarchive& ar, const envire::core::ItemBase::Ptr& item) \
     { \
         ar << BOOST_SERIALIZATION_NVP(item); \
         return true; \
     }; \
-    virtual bool load(envire::core::ArchiveInType& ar, envire::core::ItemBase::Ptr& item) \
+    virtual bool load(boost::archive::binary_iarchive& ar, envire::core::ItemBase::Ptr& item) \
+    { \
+        ar >> BOOST_SERIALIZATION_NVP(item); \
+        return true; \
+    }; \
+    virtual bool save(boost::archive::text_oarchive& ar, const envire::core::ItemBase::Ptr& item) \
+    { \
+        ar << BOOST_SERIALIZATION_NVP(item); \
+        return true; \
+    }; \
+    virtual bool load(boost::archive::text_iarchive& ar, envire::core::ItemBase::Ptr& item) \
     { \
         ar >> BOOST_SERIALIZATION_NVP(item); \
         return true; \

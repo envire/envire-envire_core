@@ -409,9 +409,9 @@ BOOST_AUTO_TEST_CASE(transform_graph_serialization_test)
     graph.addTransform(b,c, bc);
     
     std::stringstream stream;
-    boost::archive::polymorphic_binary_oarchive oa(stream);
+    boost::archive::binary_oarchive oa(stream);
     oa << graph;
-    boost::archive::polymorphic_binary_iarchive ia(stream);
+    boost::archive::binary_iarchive ia(stream);
     Tfg graph2;
     ia >> graph2;   
     
