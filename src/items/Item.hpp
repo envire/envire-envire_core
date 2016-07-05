@@ -1,20 +1,21 @@
 #pragma once
 
 #include "ItemBase.hpp"
+#include "ItemMetadata.hpp"
+#include "SpatioTemporal.hpp"
 
 #include <utility>
-#include <envire_core/serialization/SerializationRegistration.hpp>
-
-#ifdef CMAKE_ENABLE_PLUGINS
-  #include <envire_core/plugin/Plugin.hpp>
-#endif
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/nvp.hpp>
+#include <boost_serialization/BoostTypes.hpp>
 
 namespace envire { namespace core
 {
 
     /**@class Item
     *
-    * Item class
+    * @Note: The _ItemData type must have a default constructor and
+    *        copy operator.
     */
     template<class _ItemData>
     class Item : public ItemBase
@@ -24,26 +25,44 @@ namespace envire { namespace core
         typedef _ItemData TemplateType;
 
     protected:
-
-        _ItemData user_data;
+        base::SpatioTemporal<_ItemData> spatio_temporal_data;
 
     public:
 
         Item() : ItemBase()
         {
+            spatio_temporal_data.time = base::Time::now();
+            spatio_temporal_data.uuid = base::SpatioTemporal<_ItemData>::generateNewUUID();
         }
 
-        Item(const Item<_ItemData>& item) :  ItemBase(item), user_data(item.user_data)
+        Item(const _ItemData& data) : ItemBase()
         {
+            spatio_temporal_data.time = base::Time::now();
+            spatio_temporal_data.uuid = base::SpatioTemporal<_ItemData>::generateNewUUID();
+            spatio_temporal_data.data = data;
         }
 
-        Item(Item<_ItemData>&& item) :  ItemBase(std::move(item)), user_data(std::move(item.user_data))
+        Item(_ItemData&& data) : ItemBase()
         {
+            spatio_temporal_data.time = base::Time::now();
+            spatio_temporal_data.uuid = base::SpatioTemporal<_ItemData>::generateNewUUID();
+            spatio_temporal_data.data = std::move(data);
         }
 
-        template <typename... Ts>
-        Item(Ts&&... args) : ItemBase(), user_data(std::forward<Ts>(args)...)
+        Item(const Item<_ItemData>& item) : ItemBase(item)
         {
+            spatio_temporal_data.time = item.spatio_temporal_data.time;
+            spatio_temporal_data.uuid = item.spatio_temporal_data.uuid;
+            spatio_temporal_data.frame_id = item.spatio_temporal_data.frame_id;
+            spatio_temporal_data.data = item.spatio_temporal_data.data;
+        }
+
+        Item(Item<_ItemData>&& item) : ItemBase(std::move(item))
+        {
+            spatio_temporal_data.time = std::move(item.spatio_temporal_data.time);
+            spatio_temporal_data.uuid = std::move(item.spatio_temporal_data.uuid);
+            spatio_temporal_data.frame_id = std::move(item.spatio_temporal_data.frame_id);
+            spatio_temporal_data.data = std::move(item.spatio_temporal_data.data);
         }
 
         virtual ~Item() {}
@@ -51,32 +70,84 @@ namespace envire { namespace core
         Item<_ItemData>& operator=(const Item<_ItemData>& item)
         {
             ItemBase::operator=(item);
-            user_data = item.user_data;
+            spatio_temporal_data.time = item.spatio_temporal_data.time;
+            spatio_temporal_data.uuid = item.spatio_temporal_data.uuid;
+            spatio_temporal_data.frame_id = item.spatio_temporal_data.frame_id;
+            spatio_temporal_data.data = item.spatio_temporal_data.data;
             return *this;
         }
 
         Item<_ItemData>& operator=(Item<_ItemData>&& item)
         {
             ItemBase::operator=(std::move(item));
-            user_data = std::move(item.user_data);
+            spatio_temporal_data.time = std::move(item.spatio_temporal_data.time);
+            spatio_temporal_data.uuid = std::move(item.spatio_temporal_data.uuid);
+            spatio_temporal_data.frame_id = std::move(item.spatio_temporal_data.frame_id);
+            spatio_temporal_data.data = std::move(item.spatio_temporal_data.data);
             return *this;
         }
+
+        /**@brief setTime
+        *
+        * Sets the timestamp of the item
+        *
+        */
+        virtual void setTime(const base::Time& time) { this->spatio_temporal_data.time = time; }
+
+        /**@brief getTime
+        *
+        * Returns the timestamp of the item
+        *
+        */
+        virtual const base::Time& getTime() const { return this->spatio_temporal_data.time; }
+
+        /**@brief setID
+        *
+        * Sets the unique identifier of the item
+        *
+        */
+        virtual void setID(const boost::uuids::uuid& id) { this->spatio_temporal_data.uuid = id; }
+
+        /**@brief getID
+        *TARGET
+        * Returns the unique identifier of the item
+        *
+        */
+        virtual const boost::uuids::uuid& getID() const { return this->spatio_temporal_data.uuid; }
+
+        /**@brief setFrame
+        *
+        * Sets the frame name of the item
+        *
+        */
+        virtual void setFrame(const std::string& frame_name) { this->spatio_temporal_data.frame_id = frame_name; }
+
+        /**@brief getFrame
+        *
+        * Returns the frame name of the item
+        *
+        */
+        virtual const std::string& getFrame() const { return this->spatio_temporal_data.frame_id; }
 
         /**@brief setData
         *
         * Sets the user data
         *
         */
-        void setData(const _ItemData& data) { this->user_data = data; }
-        void setData(_ItemData&& data) { this->user_data = std::move(data); }
+        void setData(const _ItemData& data) { this->spatio_temporal_data.data = data; }
+        void setData(_ItemData&& data) { this->spatio_temporal_data.data = std::move(data); }
 
         /**@brief getData
         *
         * Returns the user data
         *
         */
-        _ItemData& getData() { return this->user_data; }
-        const _ItemData& getData() const { return this->user_data; }
+        _ItemData& getData() { return this->spatio_temporal_data.data; }
+        const _ItemData& getData() const { return this->spatio_temporal_data.data; }
+
+
+        base::SpatioTemporal<_ItemData>& asSpatioTemporal() {return spatio_temporal_data;}
+
 
         virtual bool getClassName(std::string& class_name) const
         {
@@ -108,7 +179,7 @@ namespace envire { namespace core
           return &typeid(_ItemData);
         }
 
-        virtual void* getRawData() { return &user_data; }
+        virtual void* getRawData() { return &spatio_temporal_data.data; }
 
     private:
         /**Grants access to boost serialization */
@@ -119,7 +190,10 @@ namespace envire { namespace core
         void serialize(Archive &ar, const unsigned int version)
         {
             ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(envire::core::ItemBase);
-            ar & BOOST_SERIALIZATION_NVP(user_data);
+            ar & boost::serialization::make_nvp("time", spatio_temporal_data.time.microseconds);
+            ar & boost::serialization::make_nvp("uuid", spatio_temporal_data.uuid);
+            ar & boost::serialization::make_nvp("frame_name", spatio_temporal_data.frame_id);
+            ar & boost::serialization::make_nvp("user_data", spatio_temporal_data.data);
         }
 
     };

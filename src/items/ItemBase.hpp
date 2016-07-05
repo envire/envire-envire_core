@@ -5,15 +5,11 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/serialization/access.hpp>
-#include <boost/serialization/string.hpp>
 #include <boost/serialization/export.hpp>
-#include <boost/serialization/nvp.hpp>
 #include <base/Time.hpp>
 #include <string>
 #include <type_traits>
 #include <typeindex>
-#include <boost_serialization/BoostTypes.hpp>
-#include "ItemMetadata.hpp"
 
 namespace envire { namespace core
 {
@@ -21,7 +17,8 @@ namespace envire { namespace core
 
     /**@class ItemBase
     *
-    * ItemBase class
+    * The ItemBase class is a abstract interface class of all
+    * Item<T> classes in EvniRe.
     */
     class ItemBase
     {
@@ -30,14 +27,6 @@ namespace envire { namespace core
         using PtrType = boost::shared_ptr<T>;
         
         typedef PtrType<ItemBase> Ptr;
-
-    protected:
-
-        base::Time time; /** Timestamp */
-        boost::uuids::uuid uuid; /** Unique Identifier */
-        FrameId frame_name; /** Frame name in which the Item is located */
-
-    public:
 
         ItemBase();
         ItemBase(const ItemBase& item);
@@ -52,43 +41,43 @@ namespace envire { namespace core
         * Sets the timestamp of the item
         *
         */
-        void setTime(const base::Time& time) { this->time = time; }
+        virtual void setTime(const base::Time& time) = 0;
 
         /**@brief getTime
         *
         * Returns the timestamp of the item
         *
         */
-        const base::Time& getTime() const { return this->time; }
+        virtual const base::Time& getTime() const = 0;
 
         /**@brief setID
         *
         * Sets the unique identifier of the item
         *
         */
-        void setID(const boost::uuids::uuid& id) { this->uuid = id; }
+        virtual void setID(const boost::uuids::uuid& id) = 0;
 
         /**@brief getID
         *TARGET
         * Returns the unique identifier of the item
         *
         */
-        const boost::uuids::uuid& getID() const { return this->uuid; }
-        const std::string getIDString() const { return boost::uuids::to_string(this->uuid); }
+        virtual const boost::uuids::uuid& getID() const = 0;
+        const std::string getIDString() const { return boost::uuids::to_string(this->getID()); }
 
         /**@brief setFrame
         *
         * Sets the frame name of the item
         *
         */
-        void setFrame(const std::string& frame_name) { this->frame_name = frame_name; }
+        virtual void setFrame(const std::string& frame_name) = 0;
 
         /**@brief getFrame
         *
         * Returns the frame name of the item
         *
         */
-        const std::string& getFrame() const { return this->frame_name; }
+        virtual const std::string& getFrame() const = 0;
 
         /**@brief getClassName
         *
@@ -114,10 +103,11 @@ namespace envire { namespace core
          * storing and using pointers to std::type_info is safe*/
         virtual const std::type_info* getTypeInfo() const = 0;
         
-        virtual void* getRawData() { return NULL; }
-        
         /**Returns the data type of the embedded data*/
         virtual const std::type_info* getEmbeddedTypeInfo() const = 0;
+
+        /** Returns a raw pointer to the data of an Item */
+        virtual void* getRawData() { return NULL; }
         
 
     private:
@@ -128,9 +118,6 @@ namespace envire { namespace core
         template <typename Archive>
         void serialize(Archive &ar, const unsigned int version)
         {
-            ar & boost::serialization::make_nvp("time", time.microseconds);
-            ar & BOOST_SERIALIZATION_NVP(uuid);
-            ar & BOOST_SERIALIZATION_NVP(frame_name);
         }
     };
 

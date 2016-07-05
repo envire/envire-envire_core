@@ -135,11 +135,12 @@ BOOST_AUTO_TEST_CASE(add_multiple_items_test)
     FrameId a = "frame_a";
     struct DataA 
     {
-        DataA(const string& value) : value(value){}
+        DataA(const string& value = "") : value(value){}
         string value;
     };
     struct DataB
     {
+        DataB() {}
         DataB(const int value) : value(value){}
         int value;
     };
@@ -148,13 +149,13 @@ BOOST_AUTO_TEST_CASE(add_multiple_items_test)
     g.addFrame(a);
 
 
-    Item<DataA>::Ptr a1(new Item<DataA>("Grandpa, why don't you tell a story?"));
-    Item<DataA>::Ptr a2(new Item<DataA>("Yeah Grandpa, you lived a long and interesting life."));
-    Item<DataA>::Ptr a3(new Item<DataA>("That's a lie and you know it"));
+    Item<DataA>::Ptr a1(new Item<DataA>(DataA("Grandpa, why don't you tell a story?")));
+    Item<DataA>::Ptr a2(new Item<DataA>(DataA("Yeah Grandpa, you lived a long and interesting life.")));
+    Item<DataA>::Ptr a3(new Item<DataA>(DataA("That's a lie and you know it")));
     
-    Item<DataB>::Ptr b1(new Item<DataB>(42));
-    Item<DataB>::Ptr b2(new Item<DataB>(21));
-    Item<DataB>::Ptr b3(new Item<DataB>(84));
+    Item<DataB>::Ptr b1(new Item<DataB>(DataB(42)));
+    Item<DataB>::Ptr b2(new Item<DataB>(DataB(21)));
+    Item<DataB>::Ptr b3(new Item<DataB>(DataB(84)));
     
     g.addItemToFrame(a, a1);
     g.addItemToFrame(a, a2);
@@ -337,6 +338,7 @@ BOOST_AUTO_TEST_CASE(check_item_existence_example)
 {
     struct Joint
     {
+      Joint() {}
       Joint(int a) : a(a) {}
       int a;
     };
@@ -346,7 +348,7 @@ BOOST_AUTO_TEST_CASE(check_item_existence_example)
     FrameId frame = "frame";
     g.addFrame(frame);
     
-    Item<Joint>::Ptr item(new Item<Joint>(42));
+    Item<Joint>::Ptr item(new Item<Joint>(Joint(42)));
     g.addItemToFrame(frame, item);
     Item<Sensor>::Ptr item2(new Item<Sensor>());
     g.addItemToFrame(frame, item2);
@@ -367,6 +369,7 @@ BOOST_AUTO_TEST_CASE(check_item_existence_example_typeId)
 {
     struct Joint
     {
+      Joint() {}
       Joint(int a) : a(a) {}
       int a;
     };
@@ -376,7 +379,7 @@ BOOST_AUTO_TEST_CASE(check_item_existence_example_typeId)
     FrameId frame = "frame";
     g.addFrame(frame);
     
-    Item<Joint>::Ptr item(new Item<Joint>(42));
+    Item<Joint>::Ptr item(new Item<Joint>(Joint(42)));
     g.addItemToFrame(frame, item);
     Item<Sensor>::Ptr item2(new Item<Sensor>());
     g.addItemToFrame(frame, item2);

@@ -296,7 +296,7 @@ const double newGetTransform10000()
 class MyMap : public envire::CartesianMap
 {
 public:
-  MyMap(const std::string& id) : CartesianMap(id) {}
+  MyMap(const std::string& id = "") : CartesianMap(id) {}
   virtual int getDimension() const override {return 42;}
 };
 
@@ -313,7 +313,7 @@ const double newAddItemCartesianMap10000()
     vector<Item::Ptr> items;
     for(int i = 0; i < 10000; ++i)
     {
-      items.emplace_back(new Item("bla")); //id is not used, therefore just use "bla"
+      items.emplace_back(new Item(MyMap("bla"))); //id is not used, therefore just use "bla"
     }
     
     auto start = chrono::steady_clock::now();
@@ -376,7 +376,7 @@ const double newGetItemCartesianMap10000()
     EnvireGraph graph;
     const FrameId root("4");
     graph.addFrame(root);
-    Item::Ptr item(new Item("bla"));
+    Item::Ptr item(new Item(MyMap("bla")));
     graph.addItemToFrame(root, item);
     const envire::core::GraphTraits::vertex_descriptor rootV = graph.vertex(root);
 
