@@ -26,4 +26,12 @@ ItemBase& ItemBase::operator=(ItemBase&& item)
     return *this;
 }
 
+std::string ItemBase::getClassName() const
+{
+    std::string class_name;
+    if(getClassName(class_name))
+        return class_name;
+    return "UnknownItem";
+}
+
 BOOST_CLASS_EXPORT(envire::core::ItemBase)

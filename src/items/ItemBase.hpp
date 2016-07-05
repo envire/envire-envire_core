@@ -83,7 +83,10 @@ namespace envire { namespace core
         *
         * Returns the class name of the item
         *
+        * @deprecated use getClassName(std::string& class_name) instead
         */
+        std::string getClassName() const;
+
         virtual bool getClassName(std::string& class_name) const { return false; }
 
         std::type_index getTypeIndex() const
@@ -96,8 +99,7 @@ namespace envire { namespace core
         {
           return std::type_index(*getEmbeddedTypeInfo());
         }
-        
-        
+
         /** Returns the typeinfo of the item. 
          * @note The lifetime of std::type_info is till the end of the program. Thus
          * storing and using pointers to std::type_info is safe*/
