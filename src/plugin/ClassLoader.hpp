@@ -3,7 +3,7 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
-#include <base/Singleton.hpp>
+#include <base-logging/Singleton.hpp>
 #include <plugin_manager/PluginLoader.hpp>
 
 #include <envire_core/items/ItemBase.hpp>

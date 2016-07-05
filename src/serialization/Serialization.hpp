@@ -8,6 +8,7 @@
     #include <envire_core/plugin/ClassLoader.hpp>
 #endif
 
+#include <boost/serialization/nvp.hpp>
 #include <glog/logging.h>
 #include <map>
 
