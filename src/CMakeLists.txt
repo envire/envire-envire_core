@@ -11,6 +11,7 @@ set(headers items/ItemBase.hpp
             items/SpatialItem.hpp
             items/BoundingVolume.hpp
             items/ItemMetadata.hpp
+            items/SpatioTemporal.hpp
             graph/GraphExceptions.hpp
             graph/GraphVisitors.hpp
             graph/GraphViz.hpp
