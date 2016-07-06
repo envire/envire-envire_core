@@ -2,10 +2,13 @@
 
 #include <envire_core/items/ItemBase.hpp>
 
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
+namespace boost { namespace archive
+{
+    class binary_oarchive;
+    class binary_iarchive;
+    class text_oarchive;
+    class text_iarchive;
+}}
 
 namespace envire { namespace core
 {
