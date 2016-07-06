@@ -141,7 +141,9 @@ namespace envire { namespace core
          * If cross-edges exist that point into the sub-tree that is beeing removed,
          * the method will return*/
         void removeEdge(GraphTraits::vertex_descriptor origin, GraphTraits::vertex_descriptor target);
-        //FIXME comment exception?!
+        
+        /** Returns the parent of @p node. Returns null_vertex if there is no parent
+         * @throw std::exception if @p node is not in the tree*/
         GraphTraits::vertex_descriptor getParent(GraphTraits::vertex_descriptor node) const;
         
         /** @return true if @p parent is the parent of @p child in this TreeView
