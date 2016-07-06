@@ -1,7 +1,5 @@
-#include <envire_core/items/Item.hpp>
+#include <envire_core/plugin/Plugin.hpp>
 #include <Eigen/Geometry>
 #include <boost_serialization/EigenTypes.hpp>
 
-using namespace envire;
-
-ENVIRE_PLUGIN( VectorPlugin, Eigen::Vector3d )
+ENVIRE_REGISTER_ITEM( Eigen::Vector3d )

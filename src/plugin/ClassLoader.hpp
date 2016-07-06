@@ -20,6 +20,7 @@ class ClassLoader : public plugin_manager::PluginLoader
 {
     friend class base::Singleton<ClassLoader>;
     static constexpr char envire_item_base_class[] = "envire::core::ItemBase";
+    static constexpr char envire_item_class[] = "envire::core::Item";
     static constexpr char envire_collision_base_class[] = "envire::collision::ODECollisionBase";
 
 public:

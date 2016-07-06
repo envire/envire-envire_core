@@ -3,6 +3,7 @@
 using namespace envire::core;
 
 constexpr char ClassLoader::envire_item_base_class[];
+constexpr char ClassLoader::envire_item_class[];
 constexpr char ClassLoader::envire_collision_base_class[];
 
 ClassLoader::ClassLoader() : PluginLoader()
@@ -37,6 +38,10 @@ bool ClassLoader::createEnvireItem(const std::string& item_name, envire::core::I
 
 bool ClassLoader::createEnvireItemFor(const std::string& embedded_type, envire::core::ItemBase::Ptr& base_item)
 {
+    if(createEnvireItem(std::string(envire_item_class) + "<" + embedded_type + ">", base_item))
+        return true;
+
+    // try to get the envire item name using the associated classes
     std::string associated_class;
     if(getAssociatedClassOfType(embedded_type, envire_item_base_class, associated_class))
     {

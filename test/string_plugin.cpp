@@ -1,5 +1,4 @@
-#include <envire_core/items/Item.hpp>
+#include <envire_core/plugin/Plugin.hpp>
+#include <string>
 
-using namespace envire;
-
-ENVIRE_PLUGIN( StringPlugin, std::string )
+ENVIRE_REGISTER_ITEM( std::string )

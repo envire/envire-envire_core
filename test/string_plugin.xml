@@ -1,5 +1,5 @@
 <library path="envire_string_plugin">
-  <class class_name="envire::StringPlugin" base_class_name="envire::core::ItemBase">
+    <class class_name="envire::core::Item<std::string>" base_class_name="envire::core::ItemBase">
     <description>String plugin which is used in the unit tests of the envire core.</description>
     <associations>
         <class class_name="std::string"></class>

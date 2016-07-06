@@ -65,16 +65,16 @@ BOOST_AUTO_TEST_CASE(vector_plugin_test)
     vector<string> classes = loader.getAvailableClasses<ItemBase>();
     BOOST_CHECK(classes.size() == 1);
     for(auto &class_name : classes)
-        BOOST_CHECK(class_name == "VectorPlugin");
+        BOOST_CHECK(class_name == "envire::core::Item<Eigen::Vector3d>");
 
     // create instance
-    boost::shared_ptr<ItemBase> vector_plugin = loader.createInstance<ItemBase>("VectorPlugin");
+    boost::shared_ptr<ItemBase> vector_plugin = loader.createInstance<ItemBase>("envire::core::Item<Eigen::Vector3d>");
     std::string class_name;
     BOOST_CHECK(vector_plugin->getClassName(class_name));
-    BOOST_CHECK(class_name == "VectorPlugin");
+    BOOST_CHECK(class_name == "envire::core::Item<Eigen::Vector3d>");
 
     // create another instance
-    boost::shared_ptr<ItemBase> vector_plugin_2 = loader.createInstance<ItemBase>("VectorPlugin");
+    boost::shared_ptr<ItemBase> vector_plugin_2 = loader.createInstance<ItemBase>("envire::core::Item<Eigen::Vector3d>");
     BOOST_CHECK(vector_plugin->getID() != vector_plugin_2->getID());
 
     Item<Eigen::Vector3d>* vector_plugin_item = dynamic_cast< Item<Eigen::Vector3d>* >(vector_plugin.get());
@@ -99,12 +99,12 @@ BOOST_AUTO_TEST_CASE(class_loader_test)
     loader->reloadXMLPluginFiles();
 
     // load single element
-    BOOST_CHECK(envire::core::ClassLoader::getInstance()->hasEnvireItem("VectorPlugin"));
+    BOOST_CHECK(envire::core::ClassLoader::getInstance()->hasEnvireItem("envire::core::Item<Eigen::Vector3d>"));
     ItemBase::Ptr vector_plugin;
-    BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItem("VectorPlugin", vector_plugin));
+    BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItem("envire::core::Item<Eigen::Vector3d>", vector_plugin));
     std::string class_name;
     BOOST_CHECK(vector_plugin->getClassName(class_name));
-    BOOST_CHECK(class_name == "VectorPlugin");
+    BOOST_CHECK(class_name == "envire::core::Item<Eigen::Vector3d>");
     BOOST_CHECK(vector_plugin.use_count() == 1);
     ItemBase::Ptr vector_plugin_2 = vector_plugin;
     BOOST_CHECK(vector_plugin.use_count() == 2);
@@ -112,29 +112,29 @@ BOOST_AUTO_TEST_CASE(class_loader_test)
 
     // load and cast element
     Item<Eigen::Vector3d>::Ptr vector_plugin_3;
-    BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItem< Item<Eigen::Vector3d> >("VectorPlugin", vector_plugin_3));
+    BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItem< Item<Eigen::Vector3d> >("envire::core::Item<Eigen::Vector3d>", vector_plugin_3));
     BOOST_CHECK(vector_plugin_3->getClassName(class_name));
-    BOOST_CHECK(class_name == "VectorPlugin");
+    BOOST_CHECK(class_name == "envire::core::Item<Eigen::Vector3d>");
     BOOST_CHECK(vector_plugin_2->getID() != vector_plugin_3->getID());
 
     // create envire item by embedded type
     ItemBase::Ptr vector_plugin_4;
     BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItemFor("Eigen::Vector3d", vector_plugin_4));
     BOOST_CHECK(vector_plugin_4->getClassName(class_name));
-    BOOST_CHECK(class_name == "VectorPlugin");
+    BOOST_CHECK(class_name == "envire::core::Item<Eigen::Vector3d>");
 
     // create a singleton plugin
     void* item_ptr = NULL;
     std::string test_string = "In-A-Gadda-Da-Vida";
-    BOOST_CHECK(envire::core::ClassLoader::getInstance()->hasEnvireItem("StringPlugin"));
+    BOOST_CHECK(envire::core::ClassLoader::getInstance()->hasEnvireItem("envire::core::Item<std::string>"));
     {
         Item<std::string>::Ptr string_plugin;
-        BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItem< Item<std::string> >("StringPlugin", string_plugin));
+        BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItem< Item<std::string> >("envire::core::Item<std::string>", string_plugin));
         string_plugin->setData(test_string);
         item_ptr = string_plugin.get();
     }
     Item<std::string>::Ptr string_plugin;
-    BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItem< Item<std::string> >("StringPlugin", string_plugin));
+    BOOST_CHECK(envire::core::ClassLoader::getInstance()->createEnvireItem< Item<std::string> >("envire::core::Item<std::string>", string_plugin));
     BOOST_CHECK(string_plugin->getData() == test_string);
     BOOST_CHECK(string_plugin.get() == item_ptr);
 }
