@@ -9,7 +9,7 @@
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/nil_generator.hpp>
 
-namespace base
+namespace envire { namespace core
 {
 
 /**
@@ -66,6 +66,6 @@ public:
     }
 };
 
-}
+}}
 
 #endif

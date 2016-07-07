@@ -25,27 +25,27 @@ namespace envire { namespace core
         typedef _ItemData TemplateType;
 
     protected:
-        base::SpatioTemporal<_ItemData> spatio_temporal_data;
+        SpatioTemporal<_ItemData> spatio_temporal_data;
 
     public:
 
         Item() : ItemBase()
         {
             spatio_temporal_data.time = base::Time::now();
-            spatio_temporal_data.uuid = base::SpatioTemporal<_ItemData>::generateNewUUID();
+            spatio_temporal_data.uuid = SpatioTemporal<_ItemData>::generateNewUUID();
         }
 
         Item(const _ItemData& data) : ItemBase()
         {
             spatio_temporal_data.time = base::Time::now();
-            spatio_temporal_data.uuid = base::SpatioTemporal<_ItemData>::generateNewUUID();
+            spatio_temporal_data.uuid = SpatioTemporal<_ItemData>::generateNewUUID();
             spatio_temporal_data.data = data;
         }
 
         Item(_ItemData&& data) : ItemBase()
         {
             spatio_temporal_data.time = base::Time::now();
-            spatio_temporal_data.uuid = base::SpatioTemporal<_ItemData>::generateNewUUID();
+            spatio_temporal_data.uuid = SpatioTemporal<_ItemData>::generateNewUUID();
             spatio_temporal_data.data = std::move(data);
         }
 
@@ -146,7 +146,7 @@ namespace envire { namespace core
         const _ItemData& getData() const { return this->spatio_temporal_data.data; }
 
 
-        base::SpatioTemporal<_ItemData>& asSpatioTemporal() {return spatio_temporal_data;}
+        envire::core::SpatioTemporal<_ItemData>& asSpatioTemporal() {return spatio_temporal_data;}
 
 
         virtual bool getClassName(std::string& class_name) const
