@@ -35,18 +35,10 @@ namespace envire { namespace core
             spatio_temporal_data.uuid = SpatioTemporal<_ItemData>::generateNewUUID();
         }
 
-        Item(const _ItemData& data) : ItemBase()
+        Item(const _ItemData& data) : ItemBase(), spatio_temporal_data(data)
         {
             spatio_temporal_data.time = base::Time::now();
             spatio_temporal_data.uuid = SpatioTemporal<_ItemData>::generateNewUUID();
-            spatio_temporal_data.data = data;
-        }
-
-        Item(_ItemData&& data) : ItemBase()
-        {
-            spatio_temporal_data.time = base::Time::now();
-            spatio_temporal_data.uuid = SpatioTemporal<_ItemData>::generateNewUUID();
-            spatio_temporal_data.data = std::move(data);
         }
 
         Item(const Item<_ItemData>& item) : ItemBase(item)

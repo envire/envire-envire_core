@@ -44,6 +44,8 @@ public:
 public:
     SpatioTemporal() : uuid(boost::uuids::nil_uuid()) {}
 
+    SpatioTemporal(const T& data) : uuid(boost::uuids::nil_uuid()), data(data) {}
+
     void setTime(const base::Time& time) { this->time = time; }
     const base::Time& getTime() const { return time; }
 
