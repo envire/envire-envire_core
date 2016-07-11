@@ -1,10 +1,19 @@
 #ifndef envire_core_EnvireGraphStructureVisualization_H
 #define envire_core_EnvireGraphStructureVisualization_H
 
+
 #include <boost/noncopyable.hpp>
+
+#ifndef Q_MOC_RUN
+//workaround for qt bug ( 4.7.3, 4.7.4, 4.8.0, 4.8.1 ) with boost 1.48
+//https://bugreports.qt.io/browse/QTBUG-22829
+#include <envire_core/graph/EnvireGraph.hpp>
+#endif
+
+
 #include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <osg/Geode>
-#include <envire_core/graph/EnvireGraph.hpp>
+
 #include <memory>
 
 namespace envire { namespace core 
