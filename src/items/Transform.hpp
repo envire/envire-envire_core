@@ -7,6 +7,7 @@
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
 #include <boost_serialization/BaseTypes.hpp>
+#include <boost/format.hpp>
 
 #include <base/Time.hpp>
 #include <base/TransformWithCovariance.hpp>
