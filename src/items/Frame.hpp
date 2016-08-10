@@ -2,15 +2,18 @@
 #define __ENVIRE_CORE_FRAME__
 
 #include <boost/serialization/string.hpp>
+#include <boost/serialization/version.hpp>
 #include <vector>
 #include <string>
 #include <sstream>
 #include <unordered_map>
 #include <typeindex>
+#include <glog/logging.h>
     
 #include "ItemBase.hpp"
 #include "RandomGenerator.hpp"
 #include <boost_serialization/BoostTypes.hpp>
+#include <boost_serialization/DynamicSizeSerialization.hpp>
 #include <envire_core/serialization/Serialization.hpp>
 #include <envire_core/util/Demangle.hpp>
 
@@ -107,6 +110,8 @@ namespace envire { namespace core
     };
 }}
 
+BOOST_CLASS_VERSION(envire::core::Frame::ItemMap, 1)
+
 namespace boost { namespace serialization
 {
 
@@ -119,18 +124,50 @@ namespace boost { namespace serialization
                     const unsigned int version)
     {
         // Store map size
-        std::size_t map_size = item_map.size();
-        ar << boost::serialization::make_nvp("map_size", map_size);
+        std::uint64_t map_size = item_map.size();
+        std::vector<bool> serializable(map_size, false);
+        std::uint64_t serializable_types = 0;
         for(envire::core::Frame::ItemMap::const_iterator it = item_map.begin(); it != item_map.end(); it++)
         {
-            // Store list size
-            const envire::core::Frame::ItemList& item_list = it->second;
-            std::size_t list_size = item_list.size();
-            ar << boost::serialization::make_nvp("list_size", list_size);
-            for(envire::core::Frame::ItemList::const_iterator it = item_list.begin(); it != item_list.end(); it++)
+            if(!it->second.empty() && envire::core::Serialization::isSerializable(it->second.front()))
             {
-                // Serialize item
-                envire::core::Serialization::save(ar, *it);
+                serializable[std::distance(item_map.begin(), it)] = true;
+                serializable_types++;
+            }
+        }
+
+        if(version == 0)
+        {
+            std::size_t serializable_types_st = serializable_types;
+            ar << boost::serialization::make_nvp("map_size", serializable_types_st);
+        }
+        else
+            saveSizeValue(ar, serializable_types);
+        for(envire::core::Frame::ItemMap::const_iterator it = item_map.begin(); it != item_map.end(); it++)
+        {
+            if(serializable[std::distance(item_map.begin(), it)])
+            {
+                // Store list size
+                const envire::core::Frame::ItemList& item_list = it->second;
+                std::size_t list_size = item_list.size();
+                if(version == 0)
+                    ar << boost::serialization::make_nvp("list_size", list_size);
+                else
+                    saveSizeValue(ar, list_size);
+                for(envire::core::Frame::ItemList::const_iterator it = item_list.begin(); it != item_list.end(); it++)
+                {
+                    // Serialize item
+                    if(!envire::core::Serialization::save(ar, *it))
+                    {
+                        std::string error_msg = "Failed to serialize an item of type ";
+                        std::string class_name;
+                        if((*it)->getClassName(class_name))
+                            error_msg += class_name;
+                        else
+                            class_name += (*it)->getEmbeddedTypeInfo()->name();
+                        throw std::runtime_error(error_msg);
+                    }
+                }
             }
         }
     }
@@ -143,24 +180,39 @@ namespace boost { namespace serialization
                      envire::core::Frame::ItemMap& item_map,
                      const unsigned int version)
     {
+        item_map.clear();
         // Recover map size
-        std::size_t map_size;
-        ar >> boost::serialization::make_nvp("map_size", map_size);
+        uint64_t map_size;
+        if(version == 0)
+        {
+            std::size_t map_size_st;
+            ar >> boost::serialization::make_nvp("map_size", map_size_st);
+            map_size = map_size_st;
+        }
+        else
+            loadSizeValue(ar, map_size);
         for(std::size_t i = 0; i < map_size; i++)
         {
             // Recover list size
             envire::core::Frame::ItemList item_list;
-            std::size_t list_size;
-            ar >> boost::serialization::make_nvp("list_size", list_size);
+            uint64_t list_size;
+            if(version == 0)
+            {
+                std::size_t list_size_st;
+                ar >> boost::serialization::make_nvp("list_size", list_size);
+                list_size = list_size_st;
+            }
+            else
+                loadSizeValue(ar, list_size);
             if(list_size > 0)
             {
-                item_list.resize(list_size);
+                item_list.reserve(list_size);
                 for(std::size_t j = 0; j < list_size; j++)
                 {
                     // Unserializes item
                     envire::core::ItemBase::Ptr item;
-                    envire::core::Serialization::load(ar, item);
-                    item_list[j] = item;
+                    if(envire::core::Serialization::load(ar, item))
+                        item_list.push_back(item);
                 }
             }
 
@@ -171,6 +223,9 @@ namespace boost { namespace serialization
                 item_map.insert(std::move(new_entry));
             }
         }
+
+        if(item_map.size() < map_size)
+            LOG(ERROR) << "Failed to deserialize all items. All items of " << (map_size-item_map.size()) << " types have been dropped.";
     }
 
     /**Splits serialization of envire::core::Frame::ItemMap
