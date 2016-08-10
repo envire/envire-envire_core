@@ -11,7 +11,7 @@ mutex ItemMetadataMapping::mappingMutex;
 
 void ItemMetadataMapping::addMapping(const std::type_info& id, const ItemMetadata& data)
 {
-  LOG(INFO) << "Adding meta-data for " << id.name() << ". Content: className=" << data.className
+  DLOG(INFO) << "Adding meta-data for " << id.name() << ". Content: className=" << data.className
             <<  ", embeddedTypename=" << data.embeddedTypename;
   
   lock_guard<mutex> guard(mappingMutex);

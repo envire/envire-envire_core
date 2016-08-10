@@ -20,7 +20,7 @@ namespace envire { namespace core
  * serialization of inherited classes from the abstract class ItemBase.
  * For this to work it is mandatory to call the ENVIRE_REGISTER_SERIALIZATION( classname )
  * macro in the source file of the inherited class.
- * ENVIRE_REGISTER_PLUGIN( classname ) will also call ENVIRE_REGISTER_SERIALIZATION( classname ).
+ * ENVIRE_REGISTER_ITEM( classname ) will also call ENVIRE_REGISTER_SERIALIZATION( classname ).
  */
 class Serialization
 {
@@ -112,7 +112,7 @@ public:
                     if(!hasHandle(header.class_name))
                     {
                         LOG(ERROR) << "Library has been loaded but can't find a serialization handle for " << header.class_name << "."
-                                << "Did you forget to register the Item with the ENVIRE_REGISTER_PLUGIN macro?";
+                                << "Did you forget to register the Item with the ENVIRE_REGISTER_ITEM macro?";
                         return false;
                     }
                 }
