@@ -1,4 +1,5 @@
 #include <envire_core/plugin/ClassLoader.hpp>
+#include <glog/logging.h>
 
 using namespace envire::core;
 
@@ -48,4 +49,26 @@ bool ClassLoader::createEnvireItemFor(const std::string& embedded_type, envire::
         return createEnvireItem(associated_class, base_item);
     }
     return false;
+}
+
+bool ClassLoader::loadEnvireItemLibrary(const std::string& item_name)
+{
+    if(hasEnvireItem(item_name))
+        return loadLibrary(item_name);
+    return false;
+}
+
+bool ClassLoader::loadAllEnvireItemLibraries()
+{
+    std::vector<std::string> item_classes = getAvailableClasses(envire_item_base_class);
+    bool load_fails = false;
+    for (std::string item_name : item_classes)
+    {
+        if(!loadLibrary(item_name))
+        {
+            load_fails = true;
+            LOG(ERROR) << "Failed to load plugin library of EnviRe item " << item_name;
+        }
+    }
+    return load_fails;
 }

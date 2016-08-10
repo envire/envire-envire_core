@@ -11,6 +11,8 @@
 namespace envire { namespace core
 {
 
+class Serialization;
+
 /**
  * @class ClassLoader
  * @brief A singleton class used to load class loader based plugins
@@ -19,6 +21,7 @@ namespace envire { namespace core
 class ClassLoader : public plugin_manager::PluginLoader
 {
     friend class base::Singleton<ClassLoader>;
+    friend class envire::core::Serialization;
     static constexpr char envire_item_base_class[] = "envire::core::ItemBase";
     static constexpr char envire_item_class[] = "envire::core::Item";
     static constexpr char envire_collision_base_class[] = "envire::collision::ODECollisionBase";
@@ -91,6 +94,23 @@ public:
     bool createCollisionObjectFor(const envire::core::ItemBase& item, boost::shared_ptr<BaseClass>& collision_object);
 
 protected:
+    /**
+     * @brief This method allows to load the shared library of the given plugin class name.
+     *
+     * @param item_name the name of the plugin class
+     * @returns true if successfully loaded or when already loaded
+     */
+    bool loadEnvireItemLibrary(const std::string& item_name);
+
+    /**
+     * @brief Loads all available shared libraries providing plugins
+     * of the base class envire::core::ItemBase.
+     *
+     * @returns true if all libraries have been loaded successfully
+     */
+    bool loadAllEnvireItemLibraries();
+
+private:
     /**
      * @brief Constructor for ClassLoader
      * It is protected because this class is a singleton class.
