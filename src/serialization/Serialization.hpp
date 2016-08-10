@@ -4,10 +4,6 @@
 #include <envire_core/serialization/ItemHeader.hpp>
 #include <envire_core/items/ItemBase.hpp>
 
-#ifdef CMAKE_ENABLE_PLUGINS
-    #include <envire_core/plugin/ClassLoader.hpp>
-#endif
-
 #include <boost/serialization/nvp.hpp>
 #include <glog/logging.h>
 #include <map>
@@ -39,51 +35,28 @@ public:
     template <typename Archive>
     static bool save(Archive& ar, const ItemBase::Ptr& item)
     {
-        std::string class_name;
-        if (item->getClassName(class_name))
+        if(isSerializable(item))
         {
+            std::string class_name;
+            HandlePtr handle;
             try
             {
-                // try to get handle
-                if(!hasHandle(class_name))
-                {
-                    // load plugin lib
-                    if(loadPluginLibrary(class_name))
-                    {
-                        // try to get handle
-                        LOG(INFO) << "Successfully loaded plugin library for item " << class_name;
-                        if(!hasHandle(class_name))
-                        {
-                            LOG(ERROR) << "Library has been loaded but can't find a serialization handle for " << class_name << "."
-                                    << "Did you forget to register the Item with the ENVIRE_REGISTER_PLUGIN macro?";
-                            return false;
-                        }
-                    }
-                    else
-                    {
-                        LOG(ERROR) << "Failed to load plugin library for item " << class_name;
-                        return false;
-                    }
-                }
-                HandlePtr handle;
-                if(getHandle(class_name, handle) && handle)
+                if (item->getClassName(class_name) && getHandle(class_name, handle) && handle)
                 {
                     ItemHeader header(class_name);
                     ar << BOOST_SERIALIZATION_NVP(header);
                     return handle->save(ar, item);
                 }
-                return false;
             }
             catch(const std::runtime_error& e)
             {
-                LOG(ERROR) << "Caught exception while trying to save item of type " << class_name;
+                LOG(ERROR) << "Caught exception while trying to save an item of type " << class_name;
             }
         }
-        else
-        {
-            LOG(ERROR) << "Failed to save item " << item->getEmbeddedTypeInfo()->name() << ", it provides not class name. "
-                        << "Did you forget to register the Item with the ENVIRE_REGISTER_PLUGIN macro?";
-        }
+
+        LOG(ERROR) << "Failed to serialize an item with embedded type " << item->getEmbeddedTypeInfo()->name() << "."
+                   << "Make sure that the item is registered using the ENVIRE_REGISTER_ITEM macro and a xml file "
+                   << "with the plugin meta information is exported.";
         return false;
     }
 
@@ -169,6 +142,14 @@ public:
     static bool loadFromBinary(const std::vector< uint8_t >& binary, ItemBase::Ptr& item);
 
     /**
+     * @brief Returns true if a serialization handle is registered for the given item.
+     *
+     * @param item pointer to the ItemBase class
+     * @return true if a serialization handle is registered
+     */
+    static bool isSerializable(const ItemBase::Ptr& item);
+
+    /**
      * @brief Returns a reference to the static HandleMap object.
      *
      * @return envire::core::Serialization::HandleMap&
@@ -204,19 +185,9 @@ public:
     static bool getHandle(const std::string& plugin_name, HandlePtr& handle);
 
 private:
-    static bool loadPluginLibrary(const std::string& class_name)
-    {
-        #ifdef CMAKE_ENABLE_PLUGINS
-            LOG(INFO) << "Trying to load plugin library for item " << class_name;
-            ClassLoader* loader = ClassLoader::getInstance();
-            ItemBase::Ptr item;
-            return loader->createEnvireItem(class_name, item);
-        #else
-            LOG(INFO) << "Unable to load plugin library from item " << class_name
-                    << " because plugin support is disabled (code has been compiled with ENABLE_PLUGINS=OFF).";
-            return false;
-        #endif
-    }
+    static bool loadPluginLibrary(const std::string& class_name);
+
+    static bool loadAllPluginLibraries();
 };
 
 }}

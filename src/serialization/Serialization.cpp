@@ -6,6 +6,10 @@
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 
+#ifdef CMAKE_ENABLE_PLUGINS
+    #include <envire_core/plugin/ClassLoader.hpp>
+#endif
+
 using namespace envire::core;
 
 bool Serialization::saveToBinary(std::vector< uint8_t >& binary, const ItemBase::Ptr& item)
@@ -25,6 +29,45 @@ bool Serialization::loadFromBinary(const std::vector< uint8_t >& binary, ItemBas
     return load(ia, item);
 }
 
+bool Serialization::isSerializable(const ItemBase::Ptr& item)
+{
+    std::string class_name;
+    if (!item->getClassName(class_name))
+    {
+        /* Load all available plugins of type ItemBase.
+         * Note: The shared library of the Item has to be dynamicly loaded or linked
+         * in order to get a valid class name. Since this is here not jet the case all
+         * plugin libraries have to be loaded. */
+        loadAllPluginLibraries();
+
+        if (!item->getClassName(class_name))
+        {
+            LOG(INFO) << "Can't serialize item with embedded type " << item->getEmbeddedTypeInfo()->name() << ", it provides not class name. "
+                      << "Did you forget to register the Item with the ENVIRE_REGISTER_ITEM macro?";
+            return false;
+        }
+    }
+
+    // try to get handle
+    if (hasHandle(class_name))
+        return true;
+
+    // load plugin lib
+    if (!loadPluginLibrary(class_name))
+    {
+        LOG(INFO) << "Failed to load plugin library for item " << class_name;
+        return false;
+    }
+
+    // try to get handle
+    if (hasHandle(class_name))
+        return true;
+    else
+        LOG(INFO) << "Library has been loaded but can't find a serialization handle for " << class_name << "."
+                << "Did you forget to register the Item with the ENVIRE_REGISTER_ITEM macro?";
+
+    return false;
+}
 
 Serialization::HandleMap& Serialization::getHandleMap()
 {
@@ -54,4 +97,29 @@ bool Serialization::getHandle(const std::string& plugin_name, Serialization::Han
         return true;
     }
     return false;
+}
+
+bool Serialization::loadPluginLibrary(const std::string& class_name)
+{
+    #ifdef CMAKE_ENABLE_PLUGINS
+        LOG(INFO) << "Trying to load plugin library for item " << class_name;
+        ClassLoader* loader = ClassLoader::getInstance();
+        return loader->loadEnvireItemLibrary(class_name);
+    #else
+        LOG(ERROR) << "Unable to load plugin library from item " << class_name
+                   << " because plugin support is disabled (code has been compiled with ENABLE_PLUGINS=OFF).";
+        return false;
+    #endif
+}
+
+bool Serialization::loadAllPluginLibraries()
+{
+    #ifdef CMAKE_ENABLE_PLUGINS
+        ClassLoader* loader = ClassLoader::getInstance();
+        return loader->loadAllEnvireItemLibraries();
+    #else
+        LOG(ERROR) << "Unable to load plugin library from item " << class_name
+                << " because plugin support is disabled (code has been compiled with ENABLE_PLUGINS=OFF).";
+        return false;
+    #endif
 }
