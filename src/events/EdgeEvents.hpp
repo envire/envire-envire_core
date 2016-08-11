@@ -84,6 +84,8 @@ namespace envire { namespace core
     class EdgeRemovedEvent : public EdgeEvent
     {
     public:
+      //EdgeRemovedEvent does not contain an edge_descriptor because it has already been
+      //removed from the graph when the event is raised and thus doesnt exist anymore.
         EdgeRemovedEvent(const FrameId& origin, const FrameId& target) :
             EdgeEvent(GraphEvent::EDGE_REMOVED, origin, target) {}
 
