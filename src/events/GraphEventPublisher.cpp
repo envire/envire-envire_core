@@ -48,3 +48,13 @@ void GraphEventPublisher::notifySubscriber(GraphEventSubscriber* pSubscriber, co
 {
     pSubscriber->notifyGraphEvent(e);
 }
+
+
+GraphEventPublisher::~GraphEventPublisher()
+{
+    //use while loop because unsubscribe() modifies the list
+    while(subscribers.size() > 0)
+    {
+        subscribers.front()->unsubscribe();
+    }
+}

@@ -17,6 +17,7 @@ namespace envire { namespace core
     /**
      * Base class for frame-event publishers.
      * Handles the subscription and notification of subscribers.
+     * If the publisher is destroyed. All remaining subscribers will be unsubscribed.
      */
     class GraphEventPublisher
     {
@@ -49,7 +50,8 @@ namespace envire { namespace core
         //there is no use in creating an instance of the publisher
         //on its own.
         GraphEventPublisher() {}
-        virtual ~GraphEventPublisher() {}
+        
+        virtual ~GraphEventPublisher();
 
     };
 }}
