@@ -20,6 +20,7 @@ set(headers items/ItemBase.hpp
             graph/Graph.hpp
             graph/TransformGraph.hpp
             graph/EnvireGraph.hpp
+            graph/Path.hpp
             events/GraphEvent.hpp
             events/GraphEventSubscriber.hpp
             events/GraphEventDispatcher.hpp
@@ -51,6 +52,7 @@ set(sources items/ItemBase.cpp
             events/GraphEventQueue.cpp
             graph/EnvireGraph.cpp
             graph/TreeView.cpp
+            graph/Path.cpp
             serialization/Serialization.cpp
             util/Demangle.cpp)
             

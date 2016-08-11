@@ -59,7 +59,7 @@ namespace envire { namespace core
          *          Returns Identity if path.size() <= 1.
          *  @throw UnknownTransformException if the edge between path[i] and path[i+1]
          *                                   does not exist.*/
-        const Transform getTransform(const Path& path) const;
+        const Transform getTransform(const std::shared_ptr<Path> path) const;
         
         /**A convenience wrapper around Base::setEdgeProperty */
         void updateTransform(const vertex_descriptor origin, const vertex_descriptor target,
@@ -187,19 +187,19 @@ namespace envire { namespace core
     }
     
     template <class F>
-    const Transform TransformGraph<F>::getTransform(const Path& path) const
+    const Transform TransformGraph<F>::getTransform(const std::shared_ptr<Path> path) const
     {
-        if(path.size() <= 1)
+        if(path->getSize() <= 1)
         {
             return Transform(base::Position::Zero(), base::Orientation::Identity());
         }
         
-        Transform tf = getTransform(path[0], path[1]);
+        Transform tf = getTransform((*path)[0], (*path)[1]);
         base::TransformWithCovariance &trans(tf.transform);
-        for(size_t i = 1; i < path.size() - 1; ++i)
+        for(size_t i = 1; i < path->getSize() - 1; ++i)
         {
             //will throw if no path from path[i] to path[i + 1] exists
-            const Transform stepTf = getTransform(path[i], path[i + 1]);
+            const Transform stepTf = getTransform((*path)[i], (*path)[i + 1]);
             trans = trans * stepTf.transform;
         }
         return tf; 

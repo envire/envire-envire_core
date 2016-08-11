@@ -842,12 +842,12 @@ BOOST_AUTO_TEST_CASE(get_path_test)
     graph.add_edge(D, G, ep);
     graph.add_edge(C, F, ep);
     
-    const vector<FrameId> path = graph.getPath(A, D);
+    const shared_ptr<Path> path = graph.getPath(A, D, false);
     
-    BOOST_CHECK(path[0] == A);
-    BOOST_CHECK(path[1] == B);
-    BOOST_CHECK(path[2] == C);
-    BOOST_CHECK(path[3] == D);
+    BOOST_CHECK((*path)[0] == A);
+    BOOST_CHECK((*path)[1] == B);
+    BOOST_CHECK((*path)[2] == C);
+    BOOST_CHECK((*path)[3] == D);
 }
 
 BOOST_AUTO_TEST_CASE(get_path_invalid_frame_test)
@@ -857,8 +857,8 @@ BOOST_AUTO_TEST_CASE(get_path_invalid_frame_test)
     FrameId B("B");
     
     graph.addFrame(A);
-    BOOST_CHECK_THROW(graph.getPath(A, B), UnknownFrameException);
-    BOOST_CHECK_THROW(graph.getPath(B, A), UnknownFrameException);
+    BOOST_CHECK_THROW(graph.getPath(A, B, false), UnknownFrameException);
+    BOOST_CHECK_THROW(graph.getPath(B, A, false), UnknownFrameException);
 }
 
 BOOST_AUTO_TEST_CASE(get_empty_path_test)
@@ -871,8 +871,8 @@ BOOST_AUTO_TEST_CASE(get_empty_path_test)
     
     graph.add_edge(A, B, ep);
     graph.addFrame(C);
-    const vector<FrameId> path = graph.getPath(A, C);
-    BOOST_CHECK(path.size() == 0);
+    std::shared_ptr<Path> path = graph.getPath(A, C, false);
+    BOOST_CHECK(path->getSize() == 0);
 }
 
 BOOST_AUTO_TEST_CASE(remove_unknown_frame_test)

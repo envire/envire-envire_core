@@ -508,10 +508,10 @@ BOOST_AUTO_TEST_CASE(get_path_transform_test)
     Transform tfDh = graph.getTransform("D", "H");
     Transform tfIb = graph.getTransform("I", "B");
     
-    Path ab = graph.getPath("A", "B");
-    Path ai = graph.getPath("A", "I");
-    Path dh = graph.getPath("D", "H");
-    Path ib = graph.getPath("I", "B");   
+    std::shared_ptr<Path> ab = graph.getPath("A", "B", false);
+    std::shared_ptr<Path> ai = graph.getPath("A", "I", false);
+    std::shared_ptr<Path> dh = graph.getPath("D", "H", false);
+    std::shared_ptr<Path> ib = graph.getPath("I", "B", false);   
     
     Transform tfPathAb = graph.getTransform(ab);
     Transform tfPathAi = graph.getTransform(ai);

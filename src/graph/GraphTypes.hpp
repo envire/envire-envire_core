@@ -141,9 +141,6 @@ namespace envire { namespace core
     using GraphBase = boost::labeled_graph<boost::directed_graph<FRAME_PROP, EDGE_PROP, envire::core::Environment>, FrameId>;
     
     
-    /**A Path between two frames. Index 0 is the origin, index n the target of the path. */
-    typedef std::vector<FrameId> Path;
-    
     /**A hash function for the edge_descriptor.
      * @see http://stackoverflow.com/questions/15902134/removing-edges-temporarily-from-a-boost-graph*/
     template <class GRAPH>
@@ -152,7 +149,7 @@ namespace envire { namespace core
         EdgeHash(const std::shared_ptr<GRAPH> graph) : graph(graph){}
 
         std::size_t operator()(typename GRAPH::edge_descriptor const& e) const {
-        std::size_t hash = 1338;
+        std::size_t hash = 1337; //just some random number :)
         //Each edge is uniquely defined by it's source and target.
         //Thus we can use those vertex_descriptors to create the hash
         //value of the edge
@@ -173,3 +170,26 @@ namespace envire { namespace core
     };
 
 }}
+
+namespace std {
+
+  template <>
+  struct hash<std::pair<envire::core::FrameId, envire::core::FrameId>>
+  {
+    std::size_t operator()(const std::pair<envire::core::FrameId, envire::core::FrameId>& k) const
+    {
+      using std::size_t;
+      using std::hash;
+      using std::string;
+
+      // Compute individual hash values for first,
+      // second and third and combine them using XOR
+      // and bit shifting:
+      std::size_t hashVal = 0;
+      boost::hash_combine(hashVal, std::hash<std::string>()(k.first));
+      boost::hash_combine(hashVal, std::hash<std::string>()(k.second));
+      return hashVal;
+    }
+  };
+
+}

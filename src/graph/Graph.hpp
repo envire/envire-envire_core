@@ -14,6 +14,7 @@
 #include <envire_core/graph/TreeView.hpp>
 #include <envire_core/graph/GraphExceptions.hpp>
 #include <envire_core/graph/GraphVisitors.hpp>
+#include <envire_core/graph/Path.hpp>
 
 
 namespace envire { namespace core
@@ -229,10 +230,21 @@ public:
       *       subscribing*/
     virtual void subscribeTreeView(TreeView* view);
     
-    /**Returns the shortest path from @p origin to @p target.
-    * Returns an empty vector if the path doesn't exist.
-    * @throw UnknownFrameException if @p orign or @p target don't exist */
-    Path getPath(FrameId origin, FrameId target) const;
+    /**Returns all frames on the shortest path from @p origin to @p target.
+     * Returns an empty vector if no path exists.
+     * @throw UnknownFrameException if @p orign or @p target don't exist */
+    std::vector<FrameId> getFrames(FrameId origin, FrameId target) const;
+    
+    /**Returns the shortes path from @p origin to @p target.
+     * Returns an empty path if no path exists.
+     * 
+     * @throw UnknownFrameException if @p orign or @p target don't exist.
+     * @param autoUpdating If true, an auto updating path will be returned.
+     *                     I.e. a path that is subscribed to graph and
+     *                     notices when an edge on the path is removed*/
+    std::shared_ptr<Path> getPath(const FrameId& origin, const FrameId& target,
+                                  const bool autoUpdating);
+       
     
     /** @return number of frames in this graph*/
     vertices_size_type num_vertices() const;
@@ -523,12 +535,12 @@ void Graph<F,E>::subscribeTreeView(TreeView* view)
 }
 
 template <class F, class E>
-Path Graph<F,E>::getPath(FrameId origin, FrameId target) const
+std::vector<FrameId> Graph<F,E>::getFrames(FrameId origin, FrameId target) const
 {
     vertex_descriptor fromDesc = getVertex(origin); //may throw
     vertex_descriptor toDesc = getVertex(target); //may throw
   
-    Path path;
+    std::vector<FrameId> path;
     envire::core::GraphBFSVisitor <vertex_descriptor>visit(toDesc, this->graph());
     try
     {
@@ -989,6 +1001,19 @@ bool Graph<F,E>::containsEdge(const vertex_descriptor origin, const vertex_descr
     return e.second;   
 }
   
+template<class F, class E>
+std::shared_ptr<Path> Graph<F,E>::getPath(const FrameId& origin, const FrameId& target,
+                                          const bool autoUpdating)
+{
+    if(autoUpdating)
+    {
+        return std::shared_ptr<Path>(new Path(getFrames(origin, target), this));
+    }
+    else
+    {
+        return std::shared_ptr<Path>(new Path(getFrames(origin, target)));
+    }
+}
 
 }}
 
