@@ -522,6 +522,63 @@ BOOST_AUTO_TEST_CASE(get_path_transform_test)
     compareTransform(tfAi, tfPathAi);
     compareTransform(tfDh, tfPathDh);
     compareTransform(tfIb, tfPathIb);
+}
+
+
+BOOST_AUTO_TEST_CASE(get_path_transform_dirty_test)
+{
+ /** Initial grap:
+  *   A -> B -> C
+  *    \
+  *     D -> E
+  * Graph after change:
+  *   A -> D -> E -> C -> B
+ */
+      
+    Tfg graph;
     
+    Transform tf;
+    tf.transform.translation << 0,3,0;
+    tf.transform.orientation = Eigen::Quaterniond(1,2,3,4);
+    graph.addTransform("A", "B", tf);
+    tf.transform.translation << 0,-1,42;
+    tf.transform.orientation = Eigen::Quaterniond(1,0,0,13);
+    graph.addTransform("B", "C", tf);
+    tf.transform.translation << -5,1,13;
+    tf.transform.orientation = Eigen::Quaterniond(1,2,0,13);
+    graph.addTransform("A", "D", tf);
+    tf.transform.translation << -5,12,10;
+    tf.transform.orientation = Eigen::Quaterniond(1,-1,0,13);
+    graph.addTransform("D", "E", tf);
+
+    
+    std::shared_ptr<Path> path = graph.getPath("A", "B", true);
+    
+    graph.remove_edge("A", "B");
+    BOOST_CHECK(path->isDirty());
+    graph.addTransform("E", "C", tf);
+    compareTransform(graph.getTransform(path), graph.getTransform("A", "B"));
 
 }
+
+BOOST_AUTO_TEST_CASE(get_path_transform_dirty_exception_test)
+{
+    Tfg graph;
+    
+    Transform tf;
+    tf.transform.translation << 0,3,0;
+    tf.transform.orientation = Eigen::Quaterniond(1,2,3,4);
+    graph.addTransform("A", "B", tf);
+    tf.transform.translation << 0,-1,42;
+    tf.transform.orientation = Eigen::Quaterniond(1,0,0,13);
+    graph.addTransform("B", "C", tf);
+    tf.transform.translation << -5,1,13;
+    tf.transform.orientation = Eigen::Quaterniond(1,2,0,13);
+
+    
+    std::shared_ptr<Path> path = graph.getPath("A", "C", true);
+    
+    graph.remove_edge("A", "B");
+    BOOST_CHECK_THROW(graph.getTransform(path), InvalidPathException);
+}
+

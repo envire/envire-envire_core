@@ -18,11 +18,27 @@ namespace envire { namespace core
   };
   
   
+  /** Represents a path inside a Graph. I.e. a series of frames that are 
+   *  connected by edges.
+   *  
+   *  Paths can only be instanziated by the Graph. They are always connected to
+   *  the graph that created them. Do not use paths on any other graph than the
+   *  one that created the path.
+   * 
+   *  Paths may be auto updating (depending on what you specify on creation).
+   *  If a path is auto updating, it will notice when an edge on the path is 
+   *  removed from the graph and mark itself as dirty. The next time a dirty path
+   *  is used, it will try to update itself and find a new valid path from origin
+   *  to target.
+   */
   class Path : public GraphEventDispatcher
   {
     //every template specilization of Graph is a friend
     template <class FRAME_PROP, class EDGE_PROP>
     friend class Graph;
+    
+    template <class FRAME_PROP>
+    friend class TransformGraph;
     
   public:
     
@@ -36,7 +52,7 @@ namespace envire { namespace core
     
     /**Returns all frames on this path from origin to target.
      * Returns an empty vector if the path is empty.
-     * If the path is dirty this method will return an outdated path*/
+     * @warning If the path is dirty this method will return an outdated path*/
     const std::vector<FrameId>& getFrames() const;
     
     /**Returns true if the path is dirty. I.e. if an edge on the path has been removed.

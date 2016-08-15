@@ -8,6 +8,17 @@
 namespace envire { namespace core
 {
     
+  
+  
+    class InvalidPathException : public std::exception
+    {
+    public:
+        explicit InvalidPathException() :
+          msg("Invalid Path") {}
+        virtual char const * what() const throw() { return msg.c_str(); }
+        const std::string msg;
+    };
+    
     class EdgeAlreadyExistsException : public std::exception
     {
     public:

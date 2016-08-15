@@ -875,6 +875,46 @@ BOOST_AUTO_TEST_CASE(get_empty_path_test)
     BOOST_CHECK(path->getSize() == 0);
 }
 
+BOOST_AUTO_TEST_CASE(get_updating_path_test)
+{
+    Gra graph;
+    FrameId A("A");
+    FrameId B("B");
+    FrameId C("C");
+    EdgeProp ep;
+    
+    graph.add_edge(A, B, ep);  
+    graph.add_edge(B, C, ep);  
+    
+    std::shared_ptr<Path> path = graph.getPath(A, C, true);
+    BOOST_CHECK(path->isAutoUpdating());
+    BOOST_CHECK(!path->isDirty());
+    graph.remove_edge(A, B);
+    BOOST_CHECK(path->isDirty());
+}
+
+BOOST_AUTO_TEST_CASE(get_updating_path2_test)
+{
+    Gra graph;
+    FrameId A("A");
+    FrameId B("B");
+    FrameId C("C");
+    FrameId D("D");
+    EdgeProp ep;
+    
+    graph.add_edge(A, B, ep);  
+    graph.add_edge(B, C, ep);  
+    graph.add_edge(C, A, ep);  
+    graph.add_edge(C, D, ep);  
+    
+    
+    std::shared_ptr<Path> path = graph.getPath(A, B, true);
+    graph.remove_edge(C, D);
+    BOOST_CHECK(!path->isDirty());
+}
+
+
+
 BOOST_AUTO_TEST_CASE(remove_unknown_frame_test)
 {
     FrameId a = "frame_a";

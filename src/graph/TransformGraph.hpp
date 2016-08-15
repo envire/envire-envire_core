@@ -194,6 +194,17 @@ namespace envire { namespace core
             return Transform(base::Position::Zero(), base::Orientation::Identity());
         }
         
+        if(path->isDirty())
+        {
+          //NOTE this could be done in the Path but then the Path would need to know
+          //     about the graph and its template parameters...
+          path->setFrames(this->getFrames(path->getOrigin(), path->getTarget()));
+          path->setDirty(false);
+          if(path->isEmpty())
+            throw InvalidPathException();
+        }
+        
+        
         Transform tf = getTransform((*path)[0], (*path)[1]);
         base::TransformWithCovariance &trans(tf.transform);
         for(size_t i = 1; i < path->getSize() - 1; ++i)
