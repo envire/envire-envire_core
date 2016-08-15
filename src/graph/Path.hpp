@@ -68,8 +68,13 @@ namespace envire { namespace core
     /** Returns the number of frames in this path*/
     std::size_t getSize() const;
     
-    /**returns the i'th frame in the path */
+    /**returns the i'th frame in the path.
+     * @warning crashes if @p i is out of range*/
     const FrameId& operator[](const int i) const;
+    
+    /**returns the i'th frame in the path.
+     * @throw std::out_of_range if @p i is out of range*/
+    const FrameId& at(const int i) const;
     
   protected:
     //only the graph may create paths.

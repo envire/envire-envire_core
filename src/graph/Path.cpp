@@ -105,6 +105,12 @@ const FrameId& Path::operator[](const int i) const
   return frames[i];
 }
 
+const FrameId& Path::at(const int i) const
+{
+  return frames.at(i);
+}
+
+
 
   
 }}
