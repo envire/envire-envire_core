@@ -124,9 +124,8 @@ namespace boost { namespace serialization
                     const unsigned int version)
     {
         // Store map size
-        std::uint64_t map_size = item_map.size();
-        std::vector<bool> serializable(map_size, false);
-        std::uint64_t serializable_types = 0;
+        std::vector<bool> serializable(item_map.size(), false);
+        uint64_t serializable_types = 0;
         for(envire::core::Frame::ItemMap::const_iterator it = item_map.begin(); it != item_map.end(); it++)
         {
             if(!it->second.empty() && envire::core::Serialization::isSerializable(it->second.front()))
@@ -149,9 +148,12 @@ namespace boost { namespace serialization
             {
                 // Store list size
                 const envire::core::Frame::ItemList& item_list = it->second;
-                std::size_t list_size = item_list.size();
+                uint64_t list_size = item_list.size();
                 if(version == 0)
-                    ar << boost::serialization::make_nvp("list_size", list_size);
+                {
+                    std::size_t list_size_st = list_size;
+                    ar << boost::serialization::make_nvp("list_size", list_size_st);
+                }
                 else
                     saveSizeValue(ar, list_size);
                 for(envire::core::Frame::ItemList::const_iterator it = item_list.begin(); it != item_list.end(); it++)
@@ -199,7 +201,7 @@ namespace boost { namespace serialization
             if(version == 0)
             {
                 std::size_t list_size_st;
-                ar >> boost::serialization::make_nvp("list_size", list_size);
+                ar >> boost::serialization::make_nvp("list_size", list_size_st);
                 list_size = list_size_st;
             }
             else
