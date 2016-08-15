@@ -173,6 +173,11 @@ public:
      * FIXME I have no idea what happens when the graph already contains data*/
     void loadFromFile(const std::string& file);
     
+    /** Copies all frames and edges from this graph to @p target.
+     *  Excludes all items. 
+     */
+    void createStructuralCopy(EnvireGraph& target) const;
+    
 protected:
 
     /** @return A range that contains all items of type @p T in frame @p frame

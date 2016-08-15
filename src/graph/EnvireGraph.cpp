@@ -172,12 +172,44 @@ void EnvireGraph::saveToFile(const std::string& file) const
 
 void EnvireGraph::loadFromFile(const std::string& file)
 {
-  std::ifstream myfile;
-  myfile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-  myfile.open(file); //may throw  
-  boost::archive::binary_iarchive ia(myfile);
-  ia >> *this;
+    std::ifstream myfile;
+    myfile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    myfile.open(file); //may throw  
+    boost::archive::binary_iarchive ia(myfile);
+    ia >> *this;
 }
 
+void EnvireGraph::createStructuralCopy(EnvireGraph& destination) const
+{
+    //note: this is not very efficient but until someone complains there is 
+    //      no need to do some fancy stuff just to make it fast :-)
+    vertex_iterator it, end;
+    std::tie(it, end) = getVertices();
+    for(; it != end; ++ it)
+    {
+        const FrameId id = getFrameId(*it);
+        destination.addFrame(id);
+    }
+    
+    edge_iterator edgeIt, edgeEnd;
+    std::tie(edgeIt, edgeEnd) = getEdges();
+    for(; edgeIt != edgeEnd; ++ edgeIt)
+    {
+        const vertex_descriptor src = source(*edgeIt);
+        const vertex_descriptor tar = target(*edgeIt);
+        const FrameId sourceId = getFrameId(src);
+        const FrameId targetId = getFrameId(tar);
+        const Transform tf(getTransform(src, tar));
+        try 
+        {
+            destination.addTransform(sourceId, targetId, tf);
+        }
+        catch(EdgeAlreadyExistsException&)
+        {
+            //happens because addTransform internally already adds the 
+            //edge in the opposite direction. Can be ignored.
+        }
+    }
+}
 
 }}

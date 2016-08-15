@@ -724,3 +724,36 @@ BOOST_AUTO_TEST_CASE(envire_graph_save_load_test)
     
 }
 
+BOOST_AUTO_TEST_CASE(envire_graph_structural_copy_test)
+{
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    EnvireGraph graph;
+    Transform tf;
+    ItemBase::Ptr item1(new Item<string>("bla"));
+    ItemBase::Ptr item2(new Item<int>(42));
+
+    graph.addTransform(a, b, tf);
+    graph.addItemToFrame(a, item1);
+    graph.addItemToFrame(b, item2);
+    graph.addTransform(a, c, tf);
+    graph.addTransform(c, b, tf);
+    graph.addItemToFrame(c, item2);
+    graph.addItemToFrame(c, item1);
+    
+    EnvireGraph copy;
+    graph.createStructuralCopy(copy);
+    
+    BOOST_CHECK(copy.num_edges() == graph.num_edges());
+    BOOST_CHECK(copy.num_vertices() == graph.num_vertices());
+    BOOST_CHECK_NO_THROW(copy.getTransform(a, b));
+    BOOST_CHECK_NO_THROW(copy.getTransform(c, b));
+    BOOST_CHECK_NO_THROW(copy.getTransform(a, c));
+    
+    BOOST_CHECK(copy.getTotalItemCount(a) == 0);
+    BOOST_CHECK(copy.getTotalItemCount(b) == 0);
+    BOOST_CHECK(copy.getTotalItemCount(c) == 0);
+}
+
+
