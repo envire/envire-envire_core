@@ -12,6 +12,12 @@
 using namespace envire::core;
 using namespace std;
 
+
+GraphEventPublisher::GraphEventPublisher()
+{
+    subscribers.reserve(10000);
+}
+
 void GraphEventPublisher::subscribe(GraphEventSubscriber* pSubscriber, bool publish_current_state)
 {
     assert(nullptr != pSubscriber);
