@@ -23,6 +23,14 @@ namespace envire { namespace core
     {
     private:
       std::vector<GraphEventSubscriber*> subscribers;
+      
+      /**Is true while notify() is called. Is used to detect if the subscriber
+       * list is modified while inside a notify() call.*/
+      bool insideNotify;
+      /**Temporarly stores subscribers that subscribe while inside notify().
+       * They will be moved to the subcribers list once notify() has finished*/
+      std::vector<GraphEventSubscriber*> toBeSubscribed;
+      std::vector<GraphEventSubscriber*> toBeUnsubscribed;
 
     public:
         /**Subscribes the @param handler to all events by this event source */
@@ -46,6 +54,8 @@ namespace envire { namespace core
          *        Basically the reverse process of publishCurrentState
          */
         virtual void unpublishCurrentState(GraphEventSubscriber* pSubscriber) = 0;
+        
+        void unsubscribeInternal(GraphEventSubscriber* pSubscriber);
 
         //there is no use in creating an instance of the publisher
         //on its own.
