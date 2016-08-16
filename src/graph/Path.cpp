@@ -89,7 +89,7 @@ void Path::createEdges(const std::vector< FrameId >& frames)
   if(frames.size() == 0) //loop below breakes for size == 0
     return;
   
-  for(int i = 0; i < frames.size() - 1; ++i)
+  for(int i = 0; i < ((int)frames.size()) - 1; ++i)
   {
     edges.emplace(frames[i], frames[i+1]);
   }
