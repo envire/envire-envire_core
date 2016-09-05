@@ -74,8 +74,13 @@ endif()
 rock_library(envire_core
     HEADERS ${headers}
     SOURCES ${sources}
-    DEPS_CMAKE Boost Glog
-    DEPS_PKGCONFIG ${deps_pkg_config})
+    DEPS_CMAKE Glog
+    DEPS_PKGCONFIG ${deps_pkg_config}
+    DEPS_PLAIN
+        Boost_FILESYSTEM
+        Boost_SERIALIZATION
+        Boost_SYSTEM
+)
 
 
 install(FILES
