@@ -42,6 +42,8 @@ namespace envire { namespace core
     
   public:
     
+    using Ptr = std::shared_ptr<Path>;
+      
     /**Returns the origin of this path.
      * @throw EmptyPathException if the path is empty*/
     const FrameId& getOrigin() const;

@@ -242,7 +242,7 @@ public:
      * @param autoUpdating If true, an auto updating path will be returned.
      *                     I.e. a path that is subscribed to graph and
      *                     notices when an edge on the path is removed*/
-    std::shared_ptr<Path> getPath(const FrameId& origin, const FrameId& target,
+    Path::Ptr getPath(const FrameId& origin, const FrameId& target,
                                   const bool autoUpdating);
        
     
@@ -1002,16 +1002,16 @@ bool Graph<F,E>::containsEdge(const vertex_descriptor origin, const vertex_descr
 }
   
 template<class F, class E>
-std::shared_ptr<Path> Graph<F,E>::getPath(const FrameId& origin, const FrameId& target,
+Path::Ptr Graph<F,E>::getPath(const FrameId& origin, const FrameId& target,
                                           const bool autoUpdating)
 {
     if(autoUpdating)
     {
-        return std::shared_ptr<Path>(new Path(getFrames(origin, target), this));
+        return Path::Ptr(new Path(getFrames(origin, target), this));
     }
     else
     {
-        return std::shared_ptr<Path>(new Path(getFrames(origin, target)));
+        return Path::Ptr(new Path(getFrames(origin, target)));
     }
 }
 
