@@ -168,6 +168,7 @@ void EnvireGraph::saveToFile(const std::string& file) const
     myfile.open(file); //may throw
     boost::archive::binary_oarchive oa(myfile);
     oa << *this; //may throw archive_exception
+    myfile.close();
 }
 
 void EnvireGraph::loadFromFile(const std::string& file)
@@ -177,6 +178,7 @@ void EnvireGraph::loadFromFile(const std::string& file)
     myfile.open(file); //may throw  
     boost::archive::binary_iarchive ia(myfile);
     ia >> *this;
+    myfile.close();
 }
 
 void EnvireGraph::createStructuralCopy(EnvireGraph& destination) const
