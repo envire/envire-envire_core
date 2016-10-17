@@ -61,6 +61,7 @@ void TreeView::clear()
 {
     tree.clear();
     crossEdges.clear();
+    root = GraphTraits::null_vertex();
 }
 
 void TreeView::unsubscribe()
