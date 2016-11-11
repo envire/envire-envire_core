@@ -5,6 +5,18 @@ using namespace envire::core;
 
 
 
+BOOST_AUTO_TEST_CASE(transform_set_identity)
+{
+    Transform tf;
+    tf.transform.translation << 1, 2, 3;
+    tf.transform.orientation = Eigen::AngleAxisd(1.0, Eigen::Vector3d::UnitX());
+    
+    tf.setIdentity();
+    BOOST_CHECK(tf.transform.translation.x() == 0);
+    BOOST_CHECK(tf.transform.translation.y() == 0);
+    BOOST_CHECK(tf.transform.translation.z() == 0);
+}
+
 BOOST_AUTO_TEST_CASE(operations_with_transform)
 {
     Transform tf1, tf2;

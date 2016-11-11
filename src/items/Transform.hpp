@@ -89,7 +89,7 @@ namespace envire { namespace core
         
         void setIdentity()
         {
-          transform.translation.setIdentity();
+          transform.translation.setZero();
           transform.orientation.setIdentity();
         }
 
