@@ -13,6 +13,7 @@
 #define BOOST_RESULT_OF_USE_DECLTYPE //this is important for the transform_iterator
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost_serialization/BoostTypes.hpp>
+#include <boost/lexical_cast.hpp>
 
 
 namespace envire { namespace core {
@@ -292,6 +293,11 @@ template <class T>
 const EnvireGraph::ItemIterator<T> EnvireGraph::getItem(const vertex_descriptor frame, const int i) const
 {
     assertDerivesFromItemBase<T>();
+    
+    if(i < 0)
+    {
+       throw std::out_of_range("Out of range: " + boost::lexical_cast<std::string>(i)); 
+    }
     const Frame::ItemMap& items = graph()[frame].items;
     const std::type_index key(typeid(T));
     if(items.find(key) == items.end())
@@ -300,7 +306,7 @@ const EnvireGraph::ItemIterator<T> EnvireGraph::getItem(const vertex_descriptor 
     }
     const Frame::ItemList& list = items.at(key);
     assert(list.size() > 0); //if everything is implemented correctly empty lists can never exist in the map
-    if(i >= list.size())
+    if((size_t)i >= list.size()) //i is always >= 0 thus cast to size_t is always safe
     {
       throw std::out_of_range("Out of range");
     }
