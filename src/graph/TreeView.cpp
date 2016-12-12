@@ -1,5 +1,7 @@
 #include <envire_core/graph/TreeView.hpp>
 
+#include <glog/logging.h>
+
 namespace envire { namespace core
 {
     using vertex_descriptor = GraphTraits::vertex_descriptor;
@@ -225,7 +227,7 @@ vertex_descriptor TreeView::getParent(vertex_descriptor node) const
 {
     if(tree.find(node) == tree.end())
     {
-      std::cerr << "ERROR: get parent of node not in tree" << std::endl;
+      LOG(ERROR) << "ERROR: get parent of node not in tree";
     }
     return tree.at(node).parent;
 }
