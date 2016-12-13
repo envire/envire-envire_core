@@ -2,6 +2,8 @@
 
 #include <envire_core/graph/GraphTypes.hpp>
 
+#include <glog/logging.h>
+
 namespace envire { namespace core
 {
     
@@ -65,6 +67,8 @@ namespace envire { namespace core
         TreeView(TreeView&& other) noexcept;
         
         virtual ~TreeView();
+
+        bool hasRoot();
         
         /**If a publisher is set the TreeView will automatically unsubscribe 
         * from the publisher on destruction. */
@@ -108,13 +112,18 @@ namespace envire { namespace core
             nodesToVisit.push_back(node);
             while(nodesToVisit.size() > 0)
             {
-                const GraphTraits::vertex_descriptor current = nodesToVisit.front();
-                nodesToVisit.pop_front();
-                const GraphTraits::vertex_descriptor parent = getParent(current);
-                f(current, parent);
-                for(GraphTraits::vertex_descriptor child : tree[current].children)
+                try {
+                    const GraphTraits::vertex_descriptor current = nodesToVisit.front();
+                    nodesToVisit.pop_front();
+                    const GraphTraits::vertex_descriptor parent = getParent(current);
+                    f(current, parent);
+                    for(GraphTraits::vertex_descriptor child : tree[current].children)
+                    {
+                        nodesToVisit.push_back(child);
+                    }
+                } catch (const std::runtime_error& e)
                 {
-                    nodesToVisit.push_back(child);
+                    throw std::runtime_error("envire_core:TreeView::visitBfs: node is not in the tree or is null vertex.");
                 }
             }
         }

@@ -1,7 +1,5 @@
 #include <envire_core/graph/TreeView.hpp>
 
-#include <glog/logging.h>
-
 namespace envire { namespace core
 {
     using vertex_descriptor = GraphTraits::vertex_descriptor;
@@ -46,6 +44,14 @@ TreeView::~TreeView()
         publisher->unsubscribeTreeView(this);
         publisher = nullptr;
     }
+}
+
+bool TreeView::hasRoot()
+{
+    if (root == GraphTraits::null_vertex)
+        return true;
+    else
+        return false;
 }
 
 void TreeView::setPublisher(TreeUpdatePublisher* pub)
@@ -225,9 +231,13 @@ void TreeView::addRoot(vertex_descriptor root)
 
 vertex_descriptor TreeView::getParent(vertex_descriptor node) const
 {
+    if (node == GraphTraits::null_vertex())
+    {
+      throw std::runtime_error("envire_core:TreeView::getParent: Node is null vertex.");
+    }
     if(tree.find(node) == tree.end())
     {
-      LOG(ERROR) << "ERROR: get parent of node not in tree";
+      throw std::runtime_error("envire_core:TreeView::getParent:Node is not in the tree.");
     }
     return tree.at(node).parent;
 }
