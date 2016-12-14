@@ -123,7 +123,7 @@ namespace envire { namespace core
                     }
                 } catch (const std::runtime_error& e)
                 {
-                    throw std::runtime_error("envire_core:TreeView::visitBfs: node is not in the tree or is null vertex.");
+                    throw std::runtime_error("envire_core:TreeView::visitBfs: node is not in the tree or is null vertex. %s");
                 }
             }
         }

@@ -48,10 +48,13 @@ TreeView::~TreeView()
 
 bool TreeView::hasRoot()
 {
-    if (root == GraphTraits::null_vertex)
-        return true;
-    else
+    if (root == GraphTraits::null_vertex())
+    {
         return false;
+    }
+    else {
+        return true;
+    }
 }
 
 void TreeView::setPublisher(TreeUpdatePublisher* pub)
@@ -237,7 +240,7 @@ vertex_descriptor TreeView::getParent(vertex_descriptor node) const
     }
     if(tree.find(node) == tree.end())
     {
-      throw std::runtime_error("envire_core:TreeView::getParent:Node is not in the tree.");
+      throw std::runtime_error("envire_core:TreeView::getParent: Node is not in the tree.");
     }
     return tree.at(node).parent;
 }
