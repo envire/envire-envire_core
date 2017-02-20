@@ -10,10 +10,6 @@ provide techniques to store, operate and interchange information within a
 robotic system. The application of EnviRe mainly focus to support navigation,
 simulation and operations and simplify the interchange of algorithms among software components.
 
-License
--------
-GPL-v2 or later
-
 Installation
 ------------
 The easiest way to build and install this package is to use Rock's build system.
