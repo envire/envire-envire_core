@@ -1,4 +1,4 @@
-envire-core
+EnviRe Core
 =============
 Core part for the Environment Representation library
 
@@ -55,3 +55,10 @@ STRUCTURE
 	easily embedded include the external software directly here
 -- doc/
 	should contain the existing doxygen file: doxygen.conf
+
+Maintenance and development
+--------------------
+DFKI GmbH - Robotics Innovation Center
+
+![alt tag](https://github.com/envire/envire.github.io/raw/master/images/dfki_logo.jpg)
+
