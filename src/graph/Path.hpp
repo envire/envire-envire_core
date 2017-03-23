@@ -47,7 +47,7 @@ namespace envire { namespace core
   /** Represents a path inside a Graph. I.e. a series of frames that are 
    *  connected by edges.
    *  
-   *  Paths can only be instanziated by the Graph. They are always connected to
+   *  Paths can only be instantiated by the Graph. They are always connected to
    *  the graph that created them. Do not use paths on any other graph than the
    *  one that created the path.
    * 
@@ -59,7 +59,7 @@ namespace envire { namespace core
    */
   class Path : public GraphEventDispatcher
   {
-    //every template specilization of Graph is a friend
+    //every template specialization of Graph is a friend
     template <class FRAME_PROP, class EDGE_PROP>
     friend class Graph;
     
@@ -114,7 +114,7 @@ namespace envire { namespace core
      * The path is subscribed to @p graph and auto updates if the graph changes.*/
     Path(const std::vector<FrameId>& frames, GraphEventPublisher* graph);
     
-    /**overriden to reset pGraph when unsubscribed. Otherwise we might end up
+    /**overridden to reset pGraph when unsubscribed. Otherwise we might end up
      * trying to update the path using a deleted graph.*/
     virtual void unsubscribe() override;
     
@@ -135,8 +135,8 @@ namespace envire { namespace core
     
     //all edges on the path. Used to quickly check if the path is affected when edges change.
     //is empty when not subscribed to a graph.
-    //NOTE we cant use edge_descriptor here because it becomes invalid when the edge is removed
-    //     std::pair<FrameId, FrameId> is muc slower to hash but is the only choice
+    //NOTE we can't use edge_descriptor here because it becomes invalid when the edge is removed
+    //     std::pair<FrameId, FrameId> is much slower to hash but is the only choice
     std::unordered_set<std::pair<FrameId, FrameId>> edges;
     bool dirty; //If true, some edge on the path was removed and the path needs to be re-calculated
     bool autoUpdating;

@@ -258,13 +258,13 @@ public:
     
     /**Returns all frames on the shortest path from @p origin to @p target.
      * Returns an empty vector if no path exists.
-     * @throw UnknownFrameException if @p orign or @p target don't exist */
+     * @throw UnknownFrameException if @p origin or @p target don't exist */
     std::vector<FrameId> getFrames(FrameId origin, FrameId target) const;
     
-    /**Returns the shortes path from @p origin to @p target.
+    /**Returns the shortest path from @p origin to @p target.
      * Returns an empty path if no path exists.
      * 
-     * @throw UnknownFrameException if @p orign or @p target don't exist.
+     * @throw UnknownFrameException if @p origin or @p target don't exist.
      * @param autoUpdating If true, an auto updating path will be returned.
      *                     I.e. a path that is subscribed to graph and
      *                     notices when an edge on the path is removed*/
