@@ -110,7 +110,8 @@ GraphEventPublisher::~GraphEventPublisher()
     //use while loop because unsubscribe() modifies the list
     while(subscribers.size() > 0)
     {
-        subscribers.front()->unsubscribe();
+        subscribers.back()->unsubscribe();
+        subscribers.pop_back();
     }
 }
 
