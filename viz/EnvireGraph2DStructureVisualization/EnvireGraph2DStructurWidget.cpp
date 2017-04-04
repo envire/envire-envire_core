@@ -38,7 +38,7 @@ using namespace envire::core;
 namespace envire { namespace viz {
 
 EnvireGraph2DStructurWidget::EnvireGraph2DStructurWidget(QWidget *parent)
-    : QWidget(parent) 
+    : QWidget(parent), renderer(nullptr), item(nullptr)
 {
     resize(300,120);
     
@@ -55,17 +55,28 @@ EnvireGraph2DStructurWidget::EnvireGraph2DStructurWidget(QWidget *parent)
 void EnvireGraph2DStructurWidget::displayGraph(const QString& svgString)
 {   
     const QByteArray data = svgString.toAscii();
-    QSvgRenderer* renderer = new QSvgRenderer(data);
-    QGraphicsSvgItem *item = new QGraphicsSvgItem();
+    
+    while(scene->items().size() > 0)
+    {
+        scene->removeItem(scene->items().front());
+    }
+    
+    if(item)
+    {
+        delete item;
+        item = nullptr;
+    }
+    
+    if(renderer)
+    {
+        delete renderer;
+        renderer = nullptr;
+    }
+    
+    renderer = new QSvgRenderer(data);
+    item = new QGraphicsSvgItem();
     item->setSharedRenderer(renderer);
-    scene->clear();
     scene->addItem(item);
 }
 
-void EnvireGraph2DStructurWidget::displayGraph(const envire::core::EnvireGraph& graph)
-{
-    std::stringstream stream;
-    GraphDrawing::writeSVG(graph, stream);
-    displayGraph(QString::fromStdString(stream.str()));
-}
 }}

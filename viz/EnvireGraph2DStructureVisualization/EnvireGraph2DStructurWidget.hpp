@@ -34,6 +34,9 @@
 #include <envire_core/graph/EnvireGraph.hpp>
 #endif
 
+class QSvgRenderer;
+class QGraphicsSvgItem;
+
 namespace envire { namespace viz {
 
 class EnvireGraph2DStructurWidget : public QWidget
@@ -43,11 +46,12 @@ public:
     EnvireGraph2DStructurWidget(QWidget *parent = 0);
     
 public slots:
-    void displayGraph(const envire::core::EnvireGraph& graph);
-    /** @param dotGraph The graph in dot format */
-    void displayGraph(const QString& dotGrap);
+    /** @param svgString The graph in svg format */
+    void displayGraph(const QString& svgString);
     
 private:
     QGraphicsScene* scene; /**The scene displaying the current graph */
+    QSvgRenderer* renderer;
+    QGraphicsSvgItem* item;
 };
 }}
