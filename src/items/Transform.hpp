@@ -102,14 +102,13 @@ namespace envire { namespace core
             return Transform(time, transform.inverse());
         }
         
-        const std::string toGraphviz() const 
+        const std::string toString() const 
         {
             std::stringstream out;
-            out << "[label=\"" << time.toString(::base::Time::Seconds) <<
-            boost::format("\\nt: (%.2f %.2f %.2f)\\nr: (%.2f %.2f %.2f %.2f)") % transform.translation.x() % transform.translation.y() % transform.translation.z()
-            % transform.orientation.w() % transform.orientation.x() % transform.orientation.y() % transform.orientation.z()
-            << "\""
-            << ",shape=ellipse,color=red,style=filled,fillcolor=lightcoral]";
+            out << time.toString(::base::Time::Seconds) << "\n" <<
+            boost::format("t: (%.2f %.2f %.2f)\nr: (%.2f %.2f %.2f %.2f)") % transform.translation.x() % transform.translation.y() % transform.translation.z()
+            % transform.orientation.w() % transform.orientation.x() % transform.orientation.y() % transform.orientation.z();
+            
             return out.str();
         }
         

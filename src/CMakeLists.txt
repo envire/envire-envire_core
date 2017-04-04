@@ -14,7 +14,6 @@ set(headers items/ItemBase.hpp
             items/SpatioTemporal.hpp
             graph/GraphExceptions.hpp
             graph/GraphVisitors.hpp
-            graph/GraphViz.hpp
             graph/TreeView.hpp
             graph/GraphTypes.hpp
             graph/Graph.hpp

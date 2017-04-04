@@ -90,19 +90,20 @@ namespace envire { namespace core
             return count;
         }
         
-        const std::string toGraphviz() const 
+        const std::string toString() const 
         {
             std::stringstream out;
-            out << "[shape=record, label=\"{{" << id <<
-                   "|" << calculateTotalItemCount() << "}";
-                
+            out << id <<
+                   " | " << calculateTotalItemCount();
+                   //FIXME improve output
+/*                
             for(const auto& itemPair : items)
             {
                 std::string typeName = demangleTypeName(itemPair.first);
                 typeName = escapeAngleBraces(typeName);
                 out << "| {" << typeName  << "|" << itemPair.second.size() << "}";
             }
-            out << "}\"" << ",style=filled,fillcolor=lightblue]";
+            out << "}\"" << ",style=filled,fillcolor=lightblue]";*/
             return out.str();
         }
         

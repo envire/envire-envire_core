@@ -60,12 +60,8 @@ namespace envire { namespace core
      * 
      *  * provide a setId(const FrameId&) method.
      * 
-     *  * provide a toGraphviz() const method that returns a const reference to a
-     *    graphviz representation of this property. It should output a pair of
-     *    brackets with a series of assigments "name=value" inside.
-     *    Each assignment should be separated either with space, with comma,
-     *    or with semicolon.
-     *    Example: "[label=\"" + id + "\"]"
+     *  * provide a toString() const method that returns a const reference to a
+     *    string representation of this frame. 
      * 
      *  * be default constructible
      */
@@ -81,7 +77,7 @@ namespace envire { namespace core
           static_assert(std::is_same<decltype(t.getId()), const FrameId&>::value, "getId() must return a const FrameId&");
           const FrameId& id = t.getId();
           prop.setId(id);
-          const std::string graphviz_text = t.toGraphviz(); //check for toGraphviz() method
+          const std::string graphviz_text = t.toString(); //check for toString() method
         }
       
     private:
@@ -93,12 +89,8 @@ namespace envire { namespace core
      * An EdgeProperty should:
      *  * provide an inverse() method that creates an inverted copy.
      * 
-     *  * provide a toGraphviz() const method that returns a const reference to a
-     *    graphviz representation of this property. It should output a pair of
-     *    brackets with a series of assigments "name=value" inside.
-     *    Each assignment should be separated either with space, with comma,
-     *    or with semicolon.
-     *    Example: "[label=\"" + id + "\"]"
+     *  * provide a toString() const method that returns a const reference to a
+     *    string representation of this edge. 
      */
     template <class T>
     class EdgePropertyConcept
@@ -109,7 +101,7 @@ namespace envire { namespace core
         {
             T u = t.inverse();//check for inverse() method that returns a T
             u.inverse();//suppress "u not used" warning
-            const std::string graphviz_text = t.toGraphviz(); //check for toGraphviz() method
+            const std::string graphviz_text = t.toString(); //check for toString() method
         }
     private:
       const T t; //inverse() has to be const
