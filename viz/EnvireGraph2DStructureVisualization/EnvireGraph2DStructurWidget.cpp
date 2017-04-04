@@ -43,40 +43,22 @@ EnvireGraph2DStructurWidget::EnvireGraph2DStructurWidget(QWidget *parent)
     resize(300,120);
     
     scene = new QGraphicsScene();
-    QZoomableGraphicsView* view = new QZoomableGraphicsView(scene);    
+    view = new QZoomableGraphicsView(scene);    
     view->setDragMode(QGraphicsView::ScrollHandDrag);
     QVBoxLayout* vbox = new QVBoxLayout();
     vbox->addWidget(view);
     setLayout(vbox);
-      
+    renderer = new QSvgRenderer();
+    item = new QGraphicsSvgItem();
+
+    scene->addItem(item);
     show();
 }
 
 void EnvireGraph2DStructurWidget::displayGraph(const QString& svgString)
 {   
     const QByteArray data = svgString.toAscii();
-    
-    while(scene->items().size() > 0)
-    {
-        scene->removeItem(scene->items().front());
-    }
-    
-    if(item)
-    {
-        delete item;
-        item = nullptr;
-    }
-    
-    if(renderer)
-    {
-        delete renderer;
-        renderer = nullptr;
-    }
-    
-    renderer = new QSvgRenderer(data);
-    item = new QGraphicsSvgItem();
+    renderer->load(data);
     item->setSharedRenderer(renderer);
-    scene->addItem(item);
 }
-
 }}

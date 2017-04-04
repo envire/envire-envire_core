@@ -36,6 +36,7 @@
 
 class QSvgRenderer;
 class QGraphicsSvgItem;
+class QZoomableGraphicsView;
 
 namespace envire { namespace viz {
 
@@ -53,5 +54,6 @@ private:
     QGraphicsScene* scene; /**The scene displaying the current graph */
     QSvgRenderer* renderer;
     QGraphicsSvgItem* item;
+    QZoomableGraphicsView* view;
 };
 }}
