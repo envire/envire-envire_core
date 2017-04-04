@@ -20,6 +20,7 @@ set(headers items/ItemBase.hpp
             graph/TransformGraph.hpp
             graph/EnvireGraph.hpp
             graph/Path.hpp
+            graph/GraphDrawing.hpp
             events/GraphEvent.hpp
             events/GraphEventSubscriber.hpp
             events/GraphEventDispatcher.hpp
@@ -55,7 +56,7 @@ set(sources items/ItemBase.cpp
             serialization/Serialization.cpp
             util/Demangle.cpp)
             
-set(deps_pkg_config base-types)
+set(deps_pkg_config base-types ogdf)
 
 if(ENABLE_PLUGINS)
 

@@ -31,7 +31,7 @@
 #include <envire_core/events/GraphEventDispatcher.hpp>
 #include <envire_core/events/GraphItemEventDispatcher.hpp>
 #include <envire_core/items/Item.hpp>
-#include <envire_core/graph/GraphViz.hpp>
+#include <envire_core/graph/GraphDrawing.hpp>
 #include <vector>
 
 
@@ -583,12 +583,11 @@ BOOST_AUTO_TEST_CASE(graphviz_test)
         Transform tf;
         graph.addTransform(origin, target, tf);
     }
-    //FIXME
-//     GraphViz viz;
-//     viz.write(graph, "envireGraph_graphviz_test.dot");
+    
+    GraphDrawing::writeSVG(graph, "simple_svg_test.svg");
 }
 
-BOOST_AUTO_TEST_CASE(complex_graphviz_test)
+BOOST_AUTO_TEST_CASE(complex_draw_test)
 {
     EnvireGraph graph;
     
@@ -611,10 +610,7 @@ BOOST_AUTO_TEST_CASE(complex_graphviz_test)
     graph.addItemToFrame(a, item2);
     graph.addItemToFrame(a, item3);
     
-    //FIXME
-    
-//     GraphViz viz;
-//     viz.write(graph, "envireGraph_complex_graphviz_test.dot");
+    GraphDrawing::writeSVG(graph, "complex_svg_test.svg");
 }
 
 BOOST_AUTO_TEST_CASE(remove_frame_item_events_test)

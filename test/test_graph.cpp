@@ -34,7 +34,7 @@
 #include <boost/archive/binary_oarchive.hpp>
 #include <envire_core/graph/Graph.hpp>
 #include <envire_core/events/GraphEventDispatcher.hpp>
-#include <envire_core/graph/GraphViz.hpp>
+#include <envire_core/graph/GraphDrawing.hpp>
 #include <envire_core/events/GraphEventQueue.hpp>
 #include <vector>
 #include <string>
@@ -1042,9 +1042,7 @@ BOOST_AUTO_TEST_CASE(graph_graphviz_test)
     graph.add_edge(d,e, ep);
     graph.add_edge(e,a, ep);
     
-  //FIXME reimplement
-//     GraphViz viz;
-//     viz.write(graph, "graph_graphviz_test.dot");
+    GraphDrawing::writeSVG(graph, "graph_test.svg");
 }
 
 

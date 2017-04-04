@@ -29,7 +29,7 @@
 #include "QZoomableGraphicsView.hpp"
 #include <QtSvg/QGraphicsSvgItem>
 #include <QtSvg/QSvgRenderer>
-#include <envire_core/graph/GraphViz.hpp>
+#include <envire_core/graph/GraphDrawing.hpp>
 #include <sstream>
 #include <boost/graph/graphviz.hpp>
 
@@ -52,15 +52,20 @@ EnvireGraph2DStructurWidget::EnvireGraph2DStructurWidget(QWidget *parent)
     show();
 }
 
-void EnvireGraph2DStructurWidget::displayGraph(const QString& dotGraph)
-{
-
+void EnvireGraph2DStructurWidget::displayGraph(const QString& svgString)
+{   
+    const QByteArray data = svgString.toAscii();
+    QSvgRenderer* renderer = new QSvgRenderer(data);
+    QGraphicsSvgItem *item = new QGraphicsSvgItem();
+    item->setSharedRenderer(renderer);
+    scene->clear();
+    scene->addItem(item);
 }
 
 void EnvireGraph2DStructurWidget::displayGraph(const envire::core::EnvireGraph& graph)
 {
-//     std::stringstream stream;
-//     GraphViz::write(graph, stream);
-//     displayGraph(QString::fromStdString(stream.str()));
+    std::stringstream stream;
+    GraphDrawing::writeSVG(graph, stream);
+    displayGraph(QString::fromStdString(stream.str()));
 }
 }}
