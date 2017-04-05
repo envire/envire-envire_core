@@ -27,10 +27,10 @@
 #include <boost/test/unit_test.hpp>
 #define protected public
 #include <envire_core/graph/TransformGraph.hpp>
-#include <envire_core/graph/GraphViz.hpp>
 #include <boost/lexical_cast.hpp>
 #include <vector>
 #include <string>
+#include <envire_core/graph/GraphDrawing.hpp>
 
 using namespace envire::core;
 using namespace std;
@@ -411,10 +411,9 @@ BOOST_AUTO_TEST_CASE(transform_graph_graphviz_test)
     graph.addTransform(d, e, de);
     graph.addTransform(c, e, ce);
     graph.addTransform(e, f, ef);
-    
-    //FIXME
-//     GraphViz viz;
-//     viz.write(graph, "transformgraph_graphviz_test.dot");
+
+    GraphDrawing::writeSVG(graph, "transformgraph_graphviz_test.svg");
+
 }
 
 BOOST_AUTO_TEST_CASE(transform_graph_serialization_test)
