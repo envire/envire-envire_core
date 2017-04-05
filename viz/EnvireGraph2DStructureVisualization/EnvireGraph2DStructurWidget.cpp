@@ -42,7 +42,7 @@ EnvireGraph2DStructurWidget::EnvireGraph2DStructurWidget(QWidget *parent)
 {
     resize(300,120);
     
-    scene = new QGraphicsScene();
+    scene = new QGraphicsScene(this);
     view = new QZoomableGraphicsView(scene);    
     view->setDragMode(QGraphicsView::ScrollHandDrag);
     QVBoxLayout* vbox = new QVBoxLayout();
