@@ -34,12 +34,12 @@
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/filesystem.hpp>
+#include <fstream>
 
 #include <envire_core/serialization/Serialization.hpp>
 #include <envire_core/items/Item.hpp>
 #include <envire_core/plugin/ClassLoader.hpp>
 #include <envire_core/graph/TransformGraph.hpp>
-#include <envire_core/graph/GraphViz.hpp>
 #include <envire_core/graph/EnvireGraph.hpp>
 
 using namespace envire::core;
