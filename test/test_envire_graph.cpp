@@ -1,3 +1,29 @@
+//
+// Copyright (c) 2015, Deutsches Forschungszentrum für Künstliche Intelligenz GmbH.
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+
 #include <boost/test/unit_test.hpp>
 #include <boost/lexical_cast.hpp>
 #define protected public
@@ -5,7 +31,7 @@
 #include <envire_core/events/GraphEventDispatcher.hpp>
 #include <envire_core/events/GraphItemEventDispatcher.hpp>
 #include <envire_core/items/Item.hpp>
-#include <envire_core/graph/GraphViz.hpp>
+#include <envire_core/graph/GraphDrawing.hpp>
 #include <vector>
 
 
@@ -557,11 +583,11 @@ BOOST_AUTO_TEST_CASE(graphviz_test)
         Transform tf;
         graph.addTransform(origin, target, tf);
     }
-    GraphViz viz;
-    viz.write(graph, "envireGraph_graphviz_test.dot");
+    
+    GraphDrawing::writeSVG(graph, "simple_svg_test.svg");
 }
 
-BOOST_AUTO_TEST_CASE(complex_graphviz_test)
+BOOST_AUTO_TEST_CASE(complex_draw_test)
 {
     EnvireGraph graph;
     
@@ -584,8 +610,7 @@ BOOST_AUTO_TEST_CASE(complex_graphviz_test)
     graph.addItemToFrame(a, item2);
     graph.addItemToFrame(a, item3);
     
-    GraphViz viz;
-    viz.write(graph, "envireGraph_complex_graphviz_test.dot");
+    GraphDrawing::writeSVG(graph, "complex_svg_test.svg");
 }
 
 BOOST_AUTO_TEST_CASE(remove_frame_item_events_test)

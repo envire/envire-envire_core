@@ -1,3 +1,29 @@
+//
+// Copyright (c) 2015, Deutsches Forschungszentrum für Künstliche Intelligenz GmbH.
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+
 #pragma once
 
 #include <boost/graph/adjacency_list.hpp>
@@ -34,12 +60,8 @@ namespace envire { namespace core
      * 
      *  * provide a setId(const FrameId&) method.
      * 
-     *  * provide a toGraphviz() const method that returns a const reference to a
-     *    graphviz representation of this property. It should output a pair of
-     *    brackets with a series of assigments "name=value" inside.
-     *    Each assignment should be separated either with space, with comma,
-     *    or with semicolon.
-     *    Example: "[label=\"" + id + "\"]"
+     *  * provide a toString() const method that returns a const reference to a
+     *    string representation of this frame. 
      * 
      *  * be default constructible
      */
@@ -55,7 +77,7 @@ namespace envire { namespace core
           static_assert(std::is_same<decltype(t.getId()), const FrameId&>::value, "getId() must return a const FrameId&");
           const FrameId& id = t.getId();
           prop.setId(id);
-          const std::string graphviz_text = t.toGraphviz(); //check for toGraphviz() method
+          const std::string graphviz_text = t.toString(); //check for toString() method
         }
       
     private:
@@ -67,12 +89,8 @@ namespace envire { namespace core
      * An EdgeProperty should:
      *  * provide an inverse() method that creates an inverted copy.
      * 
-     *  * provide a toGraphviz() const method that returns a const reference to a
-     *    graphviz representation of this property. It should output a pair of
-     *    brackets with a series of assigments "name=value" inside.
-     *    Each assignment should be separated either with space, with comma,
-     *    or with semicolon.
-     *    Example: "[label=\"" + id + "\"]"
+     *  * provide a toString() const method that returns a const reference to a
+     *    string representation of this edge. 
      */
     template <class T>
     class EdgePropertyConcept
@@ -83,7 +101,7 @@ namespace envire { namespace core
         {
             T u = t.inverse();//check for inverse() method that returns a T
             u.inverse();//suppress "u not used" warning
-            const std::string graphviz_text = t.toGraphviz(); //check for toGraphviz() method
+            const std::string graphviz_text = t.toString(); //check for toString() method
         }
     private:
       const T t; //inverse() has to be const

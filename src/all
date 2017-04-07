@@ -17,7 +17,6 @@
 #include "graph/GraphTypes.hpp"
 #include "graph/GraphExceptions.hpp"
 #include "graph/GraphVisitors.hpp"
-#include "graph/GraphViz.hpp"
 #include "events/GraphEvent.hpp"
 #include "events/GraphEventSubscriber.hpp"
 #include "events/GraphEventDispatcher.hpp"

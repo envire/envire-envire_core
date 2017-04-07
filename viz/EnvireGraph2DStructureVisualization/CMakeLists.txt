@@ -5,7 +5,7 @@ rock_library(envire_2D_structure_widget
                      QZoomableGraphicsView.hpp
              SOURCES EnvireGraph2DStructurWidget.cpp
                      QZoomableGraphicsView.cpp
-             DEPS_PKGCONFIG QtCore QtGui QtSvg libgvc
+             DEPS_PKGCONFIG QtCore QtGui QtSvg ogdf
              DEPS envire_core)    
 
 

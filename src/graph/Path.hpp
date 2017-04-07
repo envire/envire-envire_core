@@ -1,3 +1,29 @@
+//
+// Copyright (c) 2015, Deutsches Forschungszentrum für Künstliche Intelligenz GmbH.
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+
 #pragma once
 #include "GraphTypes.hpp"
 #include <envire_core/items/Transform.hpp>
@@ -21,7 +47,7 @@ namespace envire { namespace core
   /** Represents a path inside a Graph. I.e. a series of frames that are 
    *  connected by edges.
    *  
-   *  Paths can only be instanziated by the Graph. They are always connected to
+   *  Paths can only be instantiated by the Graph. They are always connected to
    *  the graph that created them. Do not use paths on any other graph than the
    *  one that created the path.
    * 
@@ -33,7 +59,7 @@ namespace envire { namespace core
    */
   class Path : public GraphEventDispatcher
   {
-    //every template specilization of Graph is a friend
+    //every template specialization of Graph is a friend
     template <class FRAME_PROP, class EDGE_PROP>
     friend class Graph;
     
@@ -88,7 +114,7 @@ namespace envire { namespace core
      * The path is subscribed to @p graph and auto updates if the graph changes.*/
     Path(const std::vector<FrameId>& frames, GraphEventPublisher* graph);
     
-    /**overriden to reset pGraph when unsubscribed. Otherwise we might end up
+    /**overridden to reset pGraph when unsubscribed. Otherwise we might end up
      * trying to update the path using a deleted graph.*/
     virtual void unsubscribe() override;
     
@@ -109,8 +135,8 @@ namespace envire { namespace core
     
     //all edges on the path. Used to quickly check if the path is affected when edges change.
     //is empty when not subscribed to a graph.
-    //NOTE we cant use edge_descriptor here because it becomes invalid when the edge is removed
-    //     std::pair<FrameId, FrameId> is muc slower to hash but is the only choice
+    //NOTE we can't use edge_descriptor here because it becomes invalid when the edge is removed
+    //     std::pair<FrameId, FrameId> is much slower to hash but is the only choice
     std::unordered_set<std::pair<FrameId, FrameId>> edges;
     bool dirty; //If true, some edge on the path was removed and the path needs to be re-calculated
     bool autoUpdating;

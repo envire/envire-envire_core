@@ -1,3 +1,29 @@
+//
+// Copyright (c) 2015, Deutsches Forschungszentrum für Künstliche Intelligenz GmbH.
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+
 #define protected public
 #include <boost/test/unit_test.hpp>
 #include <boost/lexical_cast.hpp>
@@ -8,7 +34,7 @@
 #include <boost/archive/binary_oarchive.hpp>
 #include <envire_core/graph/Graph.hpp>
 #include <envire_core/events/GraphEventDispatcher.hpp>
-#include <envire_core/graph/GraphViz.hpp>
+#include <envire_core/graph/GraphDrawing.hpp>
 #include <envire_core/events/GraphEventQueue.hpp>
 #include <vector>
 #include <string>
@@ -30,9 +56,9 @@ public:
       id = _id;
   }
   
-  const string toGraphviz() const
+  const string toString() const
   {
-      return "[label=\"" + id + "\"]";
+      return id;
   }
   
   template<class Archive>
@@ -55,10 +81,10 @@ struct EdgeProp
     return other;
   }
   
-  const string toGraphviz() const
+  const string toString() const
   {
-      return "[label=\" inverted: " + boost::lexical_cast<string>(inverted) +
-             ", value: " + boost::lexical_cast<string>(value) + "\"]";
+      return "inverted: " + boost::lexical_cast<string>(inverted) +
+             ", value: " + boost::lexical_cast<string>(value);
   }
   
   template<class Archive>
@@ -1016,9 +1042,7 @@ BOOST_AUTO_TEST_CASE(graph_graphviz_test)
     graph.add_edge(d,e, ep);
     graph.add_edge(e,a, ep);
     
-  
-    GraphViz viz;
-    viz.write(graph, "graph_graphviz_test.dot");
+    GraphDrawing::writeSVG(graph, "graph_test.svg");
 }
 
 
@@ -1030,7 +1054,7 @@ struct StringProperty
     StringProperty(string value) : value(value) {}
     const FrameId& getId() const { return id;}
     void setId(const FrameId& _id){id = _id;}
-    const string toGraphviz() const{return "[label=\"bla\"]";}
+    const string toString() const{return "bla";}
     template<class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
