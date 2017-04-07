@@ -66,6 +66,8 @@ namespace envire { namespace core
                              const Transform& tf);
         void updateTransform(const FrameId& origin, const FrameId& target, 
                              const Transform& tf);
+
+        void updateTranform(const edge_descriptor edge, const Transform &tf);
         
         /**A convenience wrapper around Base::add_edge */
         void addTransform(const vertex_descriptor origin, const vertex_descriptor target,
@@ -243,6 +245,15 @@ namespace envire { namespace core
                                             const Transform& tf)
     {
         setEdgeProperty(origin, target, tf);
+    }
+
+    template <class F>
+    void TransformGraph<F>::updateTranform(const edge_descriptor edge, const Transform &tf)
+    {
+        vertex_descriptor source_vertex = this->getSourceVertex(edge);
+        vertex_descriptor target_vertex = this->getTargetVertex(edge);
+
+        updateTranform(source_vertex, target_vertex, tf);
     }
     
     template <class F>
