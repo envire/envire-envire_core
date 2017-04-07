@@ -88,8 +88,8 @@ namespace envire { namespace core
             std::tie(it, end) = graph.getEdges();
             for(; it != end; ++it)
             {
-                const GraphTraits::vertex_descriptor src = graph.source(*it);
-                const GraphTraits::vertex_descriptor tar = graph.target(*it);
+                const GraphTraits::vertex_descriptor src = graph.getSourceVertex(*it);
+                const GraphTraits::vertex_descriptor tar = graph.getTargetVertex(*it);
                 
                 if(nodes.find(src) == nodes.end())
                 {

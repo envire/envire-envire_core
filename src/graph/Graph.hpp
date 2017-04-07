@@ -208,10 +208,10 @@ public:
     
     
     /** @return the source vertex of the @p edge*/
-    const vertex_descriptor source(const edge_descriptor edge) const;
+    const vertex_descriptor getSourceVertex(const edge_descriptor edge) const;
     
     /** @return the target vertex of the @p edge*/
-    const vertex_descriptor target(const edge_descriptor edge) const;
+    const vertex_descriptor getTargetVertex(const edge_descriptor edge) const;
     
     /**Gets the vertex with id @p frameId.
     * @throw UnknownFrameException if the frame does not exist */
@@ -589,13 +589,13 @@ std::vector<FrameId> Graph<F,E>::getFrames(FrameId origin, FrameId target) const
 }
 
 template <class F, class E>
-const typename Graph<F,E>::vertex_descriptor Graph<F,E>::source(const edge_descriptor edge) const
+const typename Graph<F,E>::vertex_descriptor Graph<F,E>::getSourceVertex(const edge_descriptor edge) const
 {
     return boost::source(edge, graph());
 }
 
 template <class F, class E>
-const typename Graph<F,E>::vertex_descriptor Graph<F,E>::target(const edge_descriptor edge) const
+const typename Graph<F,E>::vertex_descriptor Graph<F,E>::getTargetVertex(const edge_descriptor edge) const
 {
     return boost::target(edge, graph());
 }
@@ -714,8 +714,8 @@ void Graph<F,E>::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) cons
     //We only need to add the edge to the tree, if one of the two vertices is already part
     //of the tree
     
-    const vertex_descriptor src = source(newEdge);
-    const vertex_descriptor tar = target(newEdge);
+    const vertex_descriptor src = getSourceVertex(newEdge);
+    const vertex_descriptor tar = getTargetVertex(newEdge);
     const bool srcInView = view->vertexExists(src);
     const bool tarInView = view->vertexExists(tar);
     
@@ -920,8 +920,8 @@ void Graph<F,E>::publishCurrentState(GraphEventSubscriber* pSubscriber)
         std::vector<edge_descriptor>::const_iterator it = std::find(published_edges.begin(), published_edges.end(), *edge_it);
         if(it == published_edges.end())
         {
-            const vertex_descriptor src = source(*edge_it);
-            const vertex_descriptor tar = target(*edge_it);
+            const vertex_descriptor src = getSourceVertex(*edge_it);
+            const vertex_descriptor tar = getTargetVertex(*edge_it);
             notifySubscriber(pSubscriber, EdgeAddedEvent(getFrameId(src), getFrameId(tar), *edge_it));
 
             // save inverse edge in order to not send it twice
@@ -941,8 +941,8 @@ void Graph<F,E>::unpublishCurrentState(GraphEventSubscriber* pSubscriber)
         std::vector<edge_descriptor>::const_iterator it = std::find(unpublished_edges.begin(), unpublished_edges.end(), *edge_it);
         if(it == unpublished_edges.end())
         {
-            const vertex_descriptor src = source(*edge_it);
-            const vertex_descriptor tar = target(*edge_it);
+            const vertex_descriptor src = getSourceVertex(*edge_it);
+            const vertex_descriptor tar = getTargetVertex(*edge_it);
             notifySubscriber(pSubscriber, EdgeRemovedEvent(getFrameId(src), getFrameId(tar)));
 
             // save inverse edge in order to not send it twice

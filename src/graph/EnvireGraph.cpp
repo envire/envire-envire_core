@@ -284,8 +284,8 @@ void EnvireGraph::createStructuralCopy(EnvireGraph& destination) const
     std::tie(edgeIt, edgeEnd) = getEdges();
     for(; edgeIt != edgeEnd; ++ edgeIt)
     {
-        const vertex_descriptor src = source(*edgeIt);
-        const vertex_descriptor tar = target(*edgeIt);
+        const vertex_descriptor src = getSourceVertex(*edgeIt);
+        const vertex_descriptor tar = getTargetVertex(*edgeIt);
         const FrameId sourceId = getFrameId(src);
         const FrameId targetId = getFrameId(tar);
         const Transform tf(getTransform(src, tar));
