@@ -6,6 +6,67 @@
 
 namespace envire { namespace core {
 
+EnvireGraph::EnvireGraph()
+    : TransformGraph<Frame>()
+{}
+
+EnvireGraph::EnvireGraph(const EnvireGraph &other, std::vector<std::type_index> *filter_list, bool inclusive)
+    : TransformGraph<Frame>()
+{
+    std::cout << "EnvireGraph copy" << std::endl;
+  //NOTE: we are explicitly avoiding calling any copy constructor because boost
+  //      graphs are not deep copied by default. To achieve deep copies
+  //      we should use boost::copy_graph but copy_graph does not work for
+  //      boost_labeled graph because labeled_graph does not define an
+  //      add_vertex(G) method.
+  //
+  //      Therefore, we use copy_graph to copy the graph structure and add the
+  //      labels manually
+  
+    //copy structure from other into the base directed_graph
+    boost::copy_graph(other, graph());
+    //copy the labels
+    regernateLabelMap();    
+
+    if (filter_list != NULL) {
+        // parse through all vertexes (frames) in graph
+        vertex_iterator vertex_it, vertex_end;
+        std::tie(vertex_it, vertex_end) = getVertices();
+        for(; vertex_it != vertex_end; ++ vertex_it)
+        {   
+            // vertex_iterator->vertex_descriptor
+            Frame::ItemMap& items = graph()[*vertex_it].items;
+
+            // parse through all items in vertex (frame)
+            // We erase the elements of the map inside of loop
+            Frame::ItemMap::const_iterator item_it, item_end;
+            for(item_it = items.begin(); item_it != items.end();)
+            {
+                // white list, presurve the object of types from filter list
+                // delete that are not find
+                if (inclusive == true) {
+                    if (std::find(filter_list->begin(), filter_list->end(), item_it->first) == filter_list->end())
+                    {
+                        items.erase(item_it++);
+                    } else {
+                        item_it++;
+                    }
+                } 
+                // black list, delete all objects of the types in the filter list
+                else {
+                    if (std::find(filter_list->begin(), filter_list->end(), item_it->first) != filter_list->end())
+                    {
+                        items.erase(item_it++);
+                    } else
+                    {
+                        item_it++;
+                    }
+                }
+            }
+        }
+    }
+}   
+
   
 void EnvireGraph::addItem(ItemBase::Ptr item)
 {

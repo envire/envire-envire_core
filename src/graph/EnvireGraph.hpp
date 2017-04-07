@@ -41,6 +41,17 @@ public:
     template <class T>
     using ItemIteratorPair =  std::pair<ItemIterator<T>, ItemIterator<T>>;
 
+    EnvireGraph();
+
+    /**
+    * @param includive defines if the types set in filter_list should be presurve in the resulted graph,
+    * if true, the filter_list is white list, if false, the filter_list is black list, and the items of types will
+    * be excluded from the resulted graph
+    *
+    */
+    EnvireGraph(const EnvireGraph &other, 
+                std::vector<std::type_index> *filter_list = NULL, bool inclusive = true);
+
 
     /** Adds @p item to the item list in the frame of item
     *  Causes ItemAddedEvent.
