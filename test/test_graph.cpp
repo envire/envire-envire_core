@@ -1042,7 +1042,8 @@ BOOST_AUTO_TEST_CASE(graph_graphviz_test)
     graph.add_edge(d,e, ep);
     graph.add_edge(e,a, ep);
     
-    GraphDrawing::writeSVG(graph, "graph_test.svg");
+
+    GraphDrawing::write(graph, "graph_test.dot");
 }
 
 

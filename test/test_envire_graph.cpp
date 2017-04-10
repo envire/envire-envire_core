@@ -584,7 +584,7 @@ BOOST_AUTO_TEST_CASE(graphviz_test)
         graph.addTransform(origin, target, tf);
     }
     
-    GraphDrawing::writeSVG(graph, "simple_svg_test.svg");
+    GraphDrawing::write(graph, "simple_svg_test.dot");
 }
 
 BOOST_AUTO_TEST_CASE(complex_draw_test)
@@ -610,7 +610,7 @@ BOOST_AUTO_TEST_CASE(complex_draw_test)
     graph.addItemToFrame(a, item2);
     graph.addItemToFrame(a, item3);
     
-    GraphDrawing::writeSVG(graph, "complex_svg_test.svg");
+    GraphDrawing::write(graph, "complex_svg_test.dot");
 }
 
 BOOST_AUTO_TEST_CASE(remove_frame_item_events_test)
