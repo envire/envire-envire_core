@@ -34,6 +34,8 @@
 #include <envire_core/graph/EnvireGraph.hpp>
 #endif
 
+#include <gvc.h>
+
 class QSvgRenderer;
 class QGraphicsSvgItem;
 class QZoomableGraphicsView;
@@ -45,6 +47,7 @@ class EnvireGraph2DStructurWidget : public QWidget
     Q_OBJECT
 public:
     EnvireGraph2DStructurWidget(QWidget *parent = 0);
+    ~EnvireGraph2DStructurWidget();
     
 public slots:
     /** @param svgString The graph in svg format */
@@ -55,5 +58,6 @@ private:
     QSvgRenderer* renderer;
     QGraphicsSvgItem* item;
     QZoomableGraphicsView* view;
+    GVC_t* gvc;
 };
 }}

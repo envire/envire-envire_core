@@ -30,9 +30,8 @@
 #include <QtSvg/QGraphicsSvgItem>
 #include <QtSvg/QSvgRenderer>
 #include <envire_core/graph/GraphDrawing.hpp>
-#include <sstream>
 #include <boost/graph/graphviz.hpp>
-#include <gvc.h>
+
 
 using namespace envire::core;
 
@@ -53,15 +52,22 @@ EnvireGraph2DStructurWidget::EnvireGraph2DStructurWidget(QWidget *parent)
     item = new QGraphicsSvgItem();
 
     scene->addItem(item);
+    
+    gvc = gvContext();
+    
     show();
 }
 
+EnvireGraph2DStructurWidget::~EnvireGraph2DStructurWidget()
+{
+    gvFreeContext(gvc);
+}
+
+
 void EnvireGraph2DStructurWidget::displayGraph(const QString& dotStr)
 {   
-    
-    const QByteArray data = dotStr.toAscii();
-    Agraph_t* graph = agmemread(data.constData());
-    GVC_t* gvc = gvContext();
+
+    Agraph_t* graph = agmemread(dotStr.toStdString().c_str());
     gvLayout(gvc, graph, "dot");
     char* svg;
     unsigned int svgSize = 0;
@@ -74,9 +80,5 @@ void EnvireGraph2DStructurWidget::displayGraph(const QString& dotStr)
     gvFreeRenderData(svg);
     gvFreeLayout(gvc, graph);
     agclose(graph);
-    gvFreeContext(gvc);
-    
-    
-
 }
 }}
