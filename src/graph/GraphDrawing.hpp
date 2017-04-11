@@ -23,107 +23,196 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#pragma once
-#include <ogdf/basic/Graph.h>
-#include <ogdf/basic/GraphAttributes.h>
-#include <ogdf/layered/SugiyamaLayout.h>
-#include <ogdf/layered/OptimalRanking.h>
-#include <ogdf/layered/MedianHeuristic.h>
-#include <ogdf/layered/OptimalHierarchyLayout.h>
-#include <ogdf/fileformats/GraphIO.h>
 
-#include "Graph.hpp"
-#include <unordered_map>
-#include <algorithm>
+#pragma once
+
+#include <fstream> // std::ofstream
+
+#include <envire_core/graph/EnvireGraph.hpp>
+#include <boost/graph/graphviz.hpp>
+#include <boost/algorithm/string.hpp>
+#include <envire_core/util/Demangle.hpp>
 
 namespace envire { namespace core
 {
- 
-    /**Provides methods to draw envire graphs*/
-    class GraphDrawing
+
+    template <class PROP_MAP>
+    class EnvireGraphVertexWriter
     {
     public:
+        EnvireGraphVertexWriter(PROP_MAP propMap) : propMap(propMap){}
         
-        template <class FRAME_PROP, class EDGE_PROP>
-        static void writeSVG(const Graph<FRAME_PROP, EDGE_PROP> &graph, const std::string& filename)
+        template <class VERTEX>
+        void operator()(std::ostream &out, const VERTEX& v) const
         {
-            if(filename.empty())
+            const Frame& frame = propMap[v];
+            
+            out << "[shape=record, label=\"{{"
+                << frame.getId()
+                <<   "|" << frame.calculateTotalItemCount() << "}";
+                
+            for(const auto& itemPair : frame.items)
             {
-                throw std::runtime_error("No filename specified for graph output");
+                std::string typeName = demangleTypeName(itemPair.first);
+                typeName = escapeAngleBraces(typeName);
+                out << "| {" << typeName  << "|" << itemPair.second.size() << "}";
             }
-            std::ofstream of;
-            of.open(filename.c_str());
-            writeSVG(graph, of);
+            out << "}\"" << ",style=filled,fillcolor=lightblue]";           
         }
-        
-        template <class FRAME_PROP, class EDGE_PROP>
-        static void writeSVG(const Graph<FRAME_PROP, EDGE_PROP> &graph, std::ostream& out)
-        {
-            ogdf::Graph ogdfGraph;
-            ogdf::GraphAttributes attrs(ogdfGraph, ogdf::GraphAttributes::edgeLabel |
-                                                   ogdf::GraphAttributes::edgeGraphics |
-                                                   ogdf::GraphAttributes::nodeLabel |
-                                                   ogdf::GraphAttributes::nodeGraphics |
-                                                   ogdf::GraphAttributes::nodeStyle);
-            
-            toOgdf(graph, ogdfGraph, attrs);
-            
-            ogdf::SugiyamaLayout SL;
-            SL.call(attrs);
-       
-            ogdf::GraphIO::SVGSettings svgSettings;
-            svgSettings.margin(400); //icrease size of viewbox to see big labels
-            ogdf::GraphIO::drawSVG(attrs, out, svgSettings);
-        }
-        
-        template <class FRAME_PROP, class EDGE_PROP>
-        static void toOgdf(const Graph<FRAME_PROP, EDGE_PROP> &graph, ogdf::Graph& outGraph,
-                           ogdf::GraphAttributes& outAttributes)
-        {
-            outGraph.clear();
-            
-            std::unordered_map<GraphTraits::vertex_descriptor, ogdf::node> nodes;
-            
-            typename Graph<FRAME_PROP, EDGE_PROP>::edge_iterator it, end;
-            std::tie(it, end) = graph.getEdges();
-            for(; it != end; ++it)
-            {
-                const GraphTraits::vertex_descriptor src = graph.getSourceVertex(*it);
-                const GraphTraits::vertex_descriptor tar = graph.getTargetVertex(*it);
-                
-                if(nodes.find(src) == nodes.end())
-                {
-                    ogdf::node n = outGraph.newNode();
-                    nodes[src] = n;
-                    const std::string label = graph.getFrameProperty(graph.getFrameId(src)).toString();; 
-                    outAttributes.label(n) = label;
-                    size_t numLines = std::count(label.begin(), label.end(), '\n');
-                    ++numLines; //at least one line
-                    //FIXME shouldnt be constant
-                    outAttributes.width(n) = 200;
-                    outAttributes.height(n) = 20;
-                    outAttributes.fillPattern(n) = ogdf::FillPattern::None;
-                }
-                
-                if(nodes.find(tar) == nodes.end())
-                {
-                    ogdf::node n = outGraph.newNode();
-                    nodes[tar] = n;
-                    const std::string label = graph.getFrameProperty(graph.getFrameId(tar)).toString();; 
-                    outAttributes.label(n) = label;
-                    size_t numLines = std::count(label.begin(), label.end(), '\n');
-                    ++numLines; //at least one line
-                    outAttributes.width(n) = 200;
-                    outAttributes.height(n) = 20;
-                    outAttributes.fillPattern(n) = ogdf::FillPattern::None;
-                }
-                
-                ogdf::edge edge = outGraph.newEdge(nodes[src], nodes[tar]);
-                
-                const std::string edgeLabel = graph.getEdgeProperty(*it).toString();
-                outAttributes.label(edge) = edgeLabel;
-            }
-        }
+    private:
+        PROP_MAP propMap;
     };
     
-}}//end namespace
+    template <class PROP_MAP>
+    class GenericVertexWriter
+    {
+    public:
+        GenericVertexWriter(PROP_MAP propMap) : propMap(propMap){}
+        
+        template <class VERTEX>
+        void operator()(std::ostream &out, const VERTEX& v) const
+        {
+            const auto& vertex = propMap[v];
+            
+            out << "[shape=record, label=\"{{"
+                << vertex.toString() << "}"
+                << "}\"" << ",style=filled,fillcolor=lightblue]";           
+        }
+    private:
+        PROP_MAP propMap;
+    };
+    
+    template <class PROP_MAP>
+    class EnvireGraphEdgeWriter
+    {
+    public:
+        EnvireGraphEdgeWriter(PROP_MAP propMap) : propMap(propMap){}
+        
+        template <class EDGE>
+        void operator()(std::ostream &out, const EDGE& e) const
+        {
+            const Transform& tf = propMap[e];
+            out << "[label=\"" << tf.time.toString(::base::Time::Seconds) <<
+            boost::format("\\nt: (%.2f %.2f %.2f)\\nr: (%.2f %.2f %.2f %.2f)") % tf.transform.translation.x() % tf.transform.translation.y() % tf.transform.translation.z()
+            % tf.transform.orientation.w() % tf.transform.orientation.x() % tf.transform.orientation.y() % tf.transform.orientation.z()
+            << "\""
+            << ",shape=ellipse,color=red,style=filled,fillcolor=lightcoral]";
+        }
+    private:
+        PROP_MAP propMap;
+    };
+    
+    template <class PROP_MAP>
+    class GenericEdgeWriter
+    {
+    public:
+        GenericEdgeWriter(PROP_MAP propMap) : propMap(propMap){}
+        
+        template <class EDGE>
+        void operator()(std::ostream &out, const EDGE& e) const
+        {
+            const auto& edge = propMap[e];
+            out << "[label=\"" << edge.toString() << "\"" 
+                << ",shape=ellipse,color=red,style=filled,fillcolor=lightcoral]";
+        }
+    private:
+        PROP_MAP propMap;
+    };
+
+
+    class GraphPropWriter
+    {
+    public:
+        GraphPropWriter(){}
+        void operator()(std::ostream &out) const
+        {
+            //out<< "graph[rankdir=LR,splines=ortho];\n";
+            out<< "graph[size=\"88,136\", ranksep=3.0, nodesep=2.0, fontname=\"Helvetica\", fontsize=8];\n";
+        }
+    };
+
+
+    /**@class GraphViz
+     * Creates .dot graphs for all Graphs that follow the concepts specified in 
+     * graph/GraphTypes.hpp
+     * */
+    class GraphDrawing
+    {
+
+    protected:
+        
+        template <class PROP_MAP>
+        static EnvireGraphVertexWriter<PROP_MAP> makeEnvireGraphVertexWriter(PROP_MAP propMap)
+        {
+            return EnvireGraphVertexWriter<PROP_MAP>(propMap);
+        }
+        
+        template <class PROP_MAP>
+        static GenericVertexWriter<PROP_MAP> makeGenericVertexWriter(PROP_MAP propMap)
+        {
+            return GenericVertexWriter<PROP_MAP>(propMap);
+        }
+        
+        template <class PROP_MAP>
+        static EnvireGraphEdgeWriter<PROP_MAP> makeEnvireGraphEdgeWriter(PROP_MAP propMap)
+        {
+            return EnvireGraphEdgeWriter<PROP_MAP>(propMap);
+        }
+        
+        template <class PROP_MAP>
+        static GenericEdgeWriter<PROP_MAP> makeGenericEdgeWriter(PROP_MAP propMap)
+        {
+            return GenericEdgeWriter<PROP_MAP>(propMap);
+        }
+        
+    public:
+      
+        static void write(const EnvireGraph& graph, std::ostream& out)
+        {
+            boost::write_graphviz(out, graph,
+                    makeEnvireGraphVertexWriter(boost::get(boost::vertex_bundle, graph)),
+                    makeEnvireGraphEdgeWriter(boost::get(boost::edge_bundle, graph)),
+                    GraphPropWriter());       
+        }
+        
+        template <class FRAME_PROP>
+        static void write(const TransformGraph<FRAME_PROP>& graph, std::ostream& out)
+        {
+            boost::write_graphviz(out, graph,
+                    makeGenericVertexWriter(boost::get(boost::vertex_bundle, graph)),
+                    makeEnvireGraphEdgeWriter(boost::get(boost::edge_bundle, graph)),
+                    GraphPropWriter());       
+        }
+        
+            template <class EDGE_PROP, class FRAME_PROP>
+        static void write(const Graph<EDGE_PROP, FRAME_PROP>& graph, std::ostream& out)
+        {
+            boost::write_graphviz(out, graph,
+                    makeGenericVertexWriter(boost::get(boost::vertex_bundle, graph)),
+                    makeGenericEdgeWriter(boost::get(boost::edge_bundle, graph)),
+                    GraphPropWriter());       
+        }
+        
+        
+        template <class T>
+        static void write(const T& graph, const std::string& filename = "")
+        {
+            std::streambuf * buf;
+            std::ofstream of;
+
+            if(!filename.empty())
+            {
+                of.open(filename.c_str());
+                buf = of.rdbuf();
+            }
+            else
+            {
+                buf = std::cout.rdbuf();
+            }
+
+            /** Print graph **/
+            std::ostream out(buf);
+            write(graph, out);
+        }
+    };
+}}

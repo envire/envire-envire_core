@@ -411,8 +411,8 @@ BOOST_AUTO_TEST_CASE(transform_graph_graphviz_test)
     graph.addTransform(d, e, de);
     graph.addTransform(c, e, ce);
     graph.addTransform(e, f, ef);
-
-    GraphDrawing::writeSVG(graph, "transformgraph_graphviz_test.svg");
+    
+    GraphDrawing::write(graph, "transformgraph_graphviz_test.dot");
 
 }
 

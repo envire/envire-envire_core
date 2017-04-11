@@ -48,7 +48,7 @@ public:
     
 public slots:
     /** @param svgString The graph in svg format */
-    void displayGraph(const QString& svgString);
+    void displayGraph(const QString& dotStr);
     
 private:
     QGraphicsScene* scene; /**The scene displaying the current graph */
