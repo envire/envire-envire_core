@@ -41,7 +41,7 @@ namespace envire { namespace viz {
 EnvireGraph2DStructurWidget::EnvireGraph2DStructurWidget(int updateIntervalMs, 
                                                          QWidget *parent)
     : QWidget(parent), renderer(nullptr), item(nullptr), needRedraw(false),
-      updateInterval(updateIntervalMs), runLayoutThread(true), 
+      pauseRedraw(false), updateInterval(updateIntervalMs), runLayoutThread(true), 
       layoutThread(&EnvireGraph2DStructurWidget::layoutGraph, this)
     
 {
@@ -53,6 +53,8 @@ EnvireGraph2DStructurWidget::EnvireGraph2DStructurWidget(int updateIntervalMs,
     view = new QZoomableGraphicsView(scene);    
     view->setDragMode(QGraphicsView::ScrollHandDrag);
     QVBoxLayout* vbox = new QVBoxLayout();
+    QCheckBox* pauseUpdate = new QCheckBox("Pause 2D Update", this);
+    vbox->addWidget(pauseUpdate);
     vbox->addWidget(view);
     setLayout(vbox);
     renderer = new QSvgRenderer();
@@ -60,7 +62,8 @@ EnvireGraph2DStructurWidget::EnvireGraph2DStructurWidget(int updateIntervalMs,
 
     scene->addItem(item);
     
-
+    connect(pauseUpdate, SIGNAL(toggled(bool)), this, SLOT(pauseToggled(bool)));
+    
 
     show();
 }
@@ -83,7 +86,7 @@ void EnvireGraph2DStructurWidget::layoutGraph()
         if(!runLayoutThread)
             break;
         
-        if(!needRedraw)
+        if(!needRedraw || pauseRedraw)
             continue;
         
         
@@ -115,6 +118,11 @@ void EnvireGraph2DStructurWidget::layoutGraph()
     gvFreeContext(gvc);
 }
 
+
+void EnvireGraph2DStructurWidget::pauseToggled(bool toggled)
+{
+    pauseRedraw = !pauseRedraw;
+}
 
 void EnvireGraph2DStructurWidget::displaySvg(QSvgRenderer* r)
 {
