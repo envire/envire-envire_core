@@ -32,6 +32,7 @@
 #include <envire_core/graph/GraphDrawing.hpp>
 #include <sstream>
 #include <boost/graph/graphviz.hpp>
+#include <gvc.h>
 
 using namespace envire::core;
 
@@ -55,10 +56,27 @@ EnvireGraph2DStructurWidget::EnvireGraph2DStructurWidget(QWidget *parent)
     show();
 }
 
-void EnvireGraph2DStructurWidget::displayGraph(const QString& svgString)
+void EnvireGraph2DStructurWidget::displayGraph(const QString& dotStr)
 {   
-    const QByteArray data = svgString.toAscii();
-    renderer->load(data);
+    
+    const QByteArray data = dotStr.toAscii();
+    Agraph_t* graph = agmemread(data.constData());
+    GVC_t* gvc = gvContext();
+    gvLayout(gvc, graph, "dot");
+    char* svg;
+    unsigned int svgSize = 0;
+    gvRenderData (gvc, graph, "svg", &svg, &svgSize);
+    
+    QByteArray qSvg(svg, svgSize);
+    renderer->load(qSvg);
     item->setSharedRenderer(renderer);
+    
+    gvFreeRenderData(svg);
+    gvFreeLayout(gvc, graph);
+    agclose(graph);
+    gvFreeContext(gvc);
+    
+    
+
 }
 }}
