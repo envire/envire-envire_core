@@ -34,7 +34,9 @@
 #include <envire_core/graph/EnvireGraph.hpp>
 #endif
 
-#include <gvc.h>
+
+#include <mutex>
+#include <thread>
 
 class QSvgRenderer;
 class QGraphicsSvgItem;
@@ -42,22 +44,43 @@ class QZoomableGraphicsView;
 
 namespace envire { namespace viz {
 
+/**An auto-updating 2d visualizer. */
 class EnvireGraph2DStructurWidget : public QWidget
 {
     Q_OBJECT
 public:
-    EnvireGraph2DStructurWidget(QWidget *parent = 0);
+    /**be carefull with @p updateIntervalMs. For large graphs the graph layout
+     * takes a long time.*/
+    EnvireGraph2DStructurWidget(int updateIntervalMs, QWidget *parent = 0);
     ~EnvireGraph2DStructurWidget();
     
 public slots:
-    /** @param svgString The graph in svg format */
+    /** @param dotStr graph in dot format. The graph will not be displayed until
+     *                redraw() is called.*/
+    
     void displayGraph(const QString& dotStr);
     
+private slots:
+    void displaySvg(QSvgRenderer* r);
+    
 private:
+    /**runs async to layout the graph without locking the ui thread */
+    void layoutGraph();
+    
+    
     QGraphicsScene* scene; /**The scene displaying the current graph */
     QSvgRenderer* renderer;
     QGraphicsSvgItem* item;
     QZoomableGraphicsView* view;
-    GVC_t* gvc;
+
+    
+    std::thread graphLayoutThread;
+    
+    QString currentGraph;
+    bool needRedraw;
+    std::mutex currentGraphMutex;
+    int updateInterval;
+    bool runLayoutThread;
+    std::thread layoutThread;
 };
 }}

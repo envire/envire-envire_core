@@ -31,15 +31,22 @@
 #include <QtSvg/QSvgRenderer>
 #include <envire_core/graph/GraphDrawing.hpp>
 #include <boost/graph/graphviz.hpp>
+#include <gvc.h>
 
 
 using namespace envire::core;
 
 namespace envire { namespace viz {
 
-EnvireGraph2DStructurWidget::EnvireGraph2DStructurWidget(QWidget *parent)
-    : QWidget(parent), renderer(nullptr), item(nullptr)
+EnvireGraph2DStructurWidget::EnvireGraph2DStructurWidget(int updateIntervalMs, 
+                                                         QWidget *parent)
+    : QWidget(parent), renderer(nullptr), item(nullptr), needRedraw(false),
+      updateInterval(updateIntervalMs), runLayoutThread(true), 
+      layoutThread(&EnvireGraph2DStructurWidget::layoutGraph, this)
+    
 {
+    qRegisterMetaType<QSvgRenderer*>("QSvgRenderer*");
+    
     resize(300,120);
     
     scene = new QGraphicsScene(this);
@@ -53,32 +60,75 @@ EnvireGraph2DStructurWidget::EnvireGraph2DStructurWidget(QWidget *parent)
 
     scene->addItem(item);
     
-    gvc = gvContext();
-    
+
+
     show();
 }
 
 EnvireGraph2DStructurWidget::~EnvireGraph2DStructurWidget()
 {
+    runLayoutThread = false;
+    layoutThread.join();
+}
+
+void EnvireGraph2DStructurWidget::layoutGraph()
+{
+    //layouting is done in a different thread to reduce gui lag for large graphs
+    GVC_t* gvc = gvContext();
+    
+    while(runLayoutThread)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(updateInterval));
+        
+        if(!runLayoutThread)
+            break;
+        
+        if(!needRedraw)
+            continue;
+        
+        
+        QString dotStr;
+        {
+            std::lock_guard<std::mutex> lock(currentGraphMutex);
+            dotStr = currentGraph;
+            needRedraw = false;
+        }
+        
+        Agraph_t* graph = agmemread(dotStr.toStdString().c_str());
+        gvLayout(gvc, graph, "dot");
+        char* svg;
+        unsigned int svgSize = 0;
+        gvRenderData (gvc, graph, "svg", &svg, &svgSize);
+        
+        QByteArray qSvg(svg, svgSize);
+        QSvgRenderer* r = new QSvgRenderer();
+        r->load(qSvg);
+        r->moveToThread(this->thread());
+        QMetaObject::invokeMethod(this, "displaySvg", Qt::QueuedConnection,
+                            Q_ARG(QSvgRenderer*, r));  
+        
+        gvFreeRenderData(svg);
+        gvFreeLayout(gvc, graph);
+        agclose(graph);
+    }
+    
     gvFreeContext(gvc);
 }
 
 
+void EnvireGraph2DStructurWidget::displaySvg(QSvgRenderer* r)
+{
+    item->setSharedRenderer(r);
+}
+
+
+
 void EnvireGraph2DStructurWidget::displayGraph(const QString& dotStr)
 {   
-
-    Agraph_t* graph = agmemread(dotStr.toStdString().c_str());
-    gvLayout(gvc, graph, "dot");
-    char* svg;
-    unsigned int svgSize = 0;
-    gvRenderData (gvc, graph, "svg", &svg, &svgSize);
     
-    QByteArray qSvg(svg, svgSize);
-    renderer->load(qSvg);
-    item->setSharedRenderer(renderer);
-    
-    gvFreeRenderData(svg);
-    gvFreeLayout(gvc, graph);
-    agclose(graph);
+    std::lock_guard<std::mutex> lock(currentGraphMutex);
+    currentGraph = dotStr;
+    needRedraw = true;
 }
+    
 }}

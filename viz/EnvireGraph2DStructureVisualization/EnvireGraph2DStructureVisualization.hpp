@@ -38,7 +38,7 @@ class EnvireGraph2DStructureVisualization : public envire::viz::EnvireGraph2DStr
     Q_OBJECT
 public:
     EnvireGraph2DStructureVisualization(QWidget *parent = 0) : 
-        EnvireGraph2DStructurWidget(parent) {}
+        EnvireGraph2DStructurWidget(200, parent) {}
 };
 
 #endif /* ENVIREGRAPH2DSTRUCTUREVISUALIZATION_HPP */
