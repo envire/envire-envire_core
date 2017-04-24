@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(test_copy)
     AIterator cBegin, cEnd;     
 
     // frame_a
-    boost::tie(aBegin, aEnd) = g_copy.getItems<Item<std::string>>(aFrame);
+    std::tie(aBegin, aEnd) = g_copy.getItems<Item<std::string>>(aFrame);
     BOOST_CHECK(aBegin != aEnd);
     BOOST_CHECK(aBegin->getData().compare(item_a_0->getData()) == 0);
     ++aBegin;
@@ -47,14 +47,14 @@ BOOST_AUTO_TEST_CASE(test_copy)
     BOOST_CHECK(aBegin == aEnd);
 
     // frame_b
-    boost::tie(bBegin, bEnd) = g_copy.getItems<Item<std::string>>(bFrame);
+    std::tie(bBegin, bEnd) = g_copy.getItems<Item<std::string>>(bFrame);
     BOOST_CHECK(bBegin != bEnd);
     BOOST_CHECK(bBegin->getData().compare(item_b_0->getData()) == 0);
     ++bBegin;
     BOOST_CHECK(bBegin == bEnd);
 
     // frame_c
-    boost::tie(cBegin, cEnd) = g_copy.getItems<Item<std::string>>(cFrame);
+    std::tie(cBegin, cEnd) = g_copy.getItems<Item<std::string>>(cFrame);
     BOOST_CHECK(cBegin == cEnd);    
 }
 
@@ -95,22 +95,26 @@ BOOST_AUTO_TEST_CASE(test_copy_with_filter)
     Item<B>::Ptr item_b_in_c(new Item<B>(B("item_b_in_c")));
 
     
-    EnvireGraph *g = new EnvireGraph();
-    g->addFrame(aFrame);
-    g->addFrame(bFrame);
-    g->addFrame(cFrame);
-    g->addFrame(dFrame);
+    EnvireGraph g;
+    g.addFrame(aFrame);
+    g.addFrame(bFrame);
+    g.addFrame(cFrame);
+    g.addFrame(dFrame);
     
-    g->addItemToFrame(aFrame, item_a_in_a);
-    g->addItemToFrame(aFrame, item_a_in_a_1);
+    g.addItemToFrame(aFrame, item_a_in_a);
+    g.addItemToFrame(aFrame, item_a_in_a_1);
 
-    g->addItemToFrame(bFrame, item_a_in_b);     
-    g->addItemToFrame(bFrame, item_b_in_b); 
+    g.addItemToFrame(bFrame, item_a_in_b);     
+    g.addItemToFrame(bFrame, item_b_in_b); 
 
-    g->addItemToFrame(cFrame, item_b_in_c); 
+    g.addItemToFrame(cFrame, item_b_in_c); 
 
 
-
+    BOOST_CHECK(g.getTotalItemCount(aFrame) == 2);
+    BOOST_CHECK(g.getTotalItemCount(bFrame) == 2);
+    BOOST_CHECK(g.getTotalItemCount(cFrame) == 1);
+    BOOST_CHECK(g.getTotalItemCount(dFrame) == 0);
+    
 
     // copy graph, presurve only object of the class A
     std::vector<std::type_index> filter_list;
@@ -120,9 +124,13 @@ BOOST_AUTO_TEST_CASE(test_copy_with_filter)
     // two object of a class in frame a
     // one object of a class in frame b
     // frame c and d are empty
-    EnvireGraph g_copy(*g, &filter_list, true);
-
-    delete g;
+    EnvireGraph g_copy(g, &filter_list, true);
+    
+    BOOST_CHECK(g_copy.getTotalItemCount(aFrame) == 2);
+    BOOST_CHECK(g_copy.getTotalItemCount(bFrame) == 2);
+    BOOST_CHECK(g_copy.getTotalItemCount(cFrame) == 1);
+    BOOST_CHECK(g_copy.getTotalItemCount(dFrame) == 0);
+    
 
     using AIterator = EnvireGraph::ItemIterator<Item<A>>;
     using BIterator = EnvireGraph::ItemIterator<Item<B>>;
@@ -131,7 +139,7 @@ BOOST_AUTO_TEST_CASE(test_copy_with_filter)
     BIterator bBegin, bEnd;  
 
     // frame_a
-    boost::tie(aBegin, aEnd) = g_copy.getItems<Item<A>>(aFrame);
+    std::tie(aBegin, aEnd) = g_copy.getItems<Item<A>>(aFrame);
     BOOST_CHECK(aBegin != aEnd);
     BOOST_CHECK(aBegin->getData().name.compare(item_a_in_a->getData().name) == 0);
     ++aBegin;
@@ -139,30 +147,33 @@ BOOST_AUTO_TEST_CASE(test_copy_with_filter)
     ++aBegin;    
     BOOST_CHECK(aBegin == aEnd);
 
-    boost::tie(bBegin, bEnd) = g_copy.getItems<Item<B>>(aFrame);
+    std::tie(bBegin, bEnd) = g_copy.getItems<Item<B>>(aFrame);
     BOOST_CHECK(bBegin == bEnd);
 
     // frame_b
-    boost::tie(aBegin, aEnd) = g_copy.getItems<Item<A>>(bFrame);
+    std::tie(aBegin, aEnd) = g_copy.getItems<Item<A>>(bFrame);
     BOOST_CHECK(aBegin != aEnd);
     BOOST_CHECK(aBegin->getData().name.compare(item_a_in_b->getData().name) == 0);
-    ++bBegin;
+    ++aBegin;
     BOOST_CHECK(aBegin == aEnd);
 
-    boost::tie(bBegin, bEnd) = g_copy.getItems<Item<B>>(bFrame);
+    std::tie(bBegin, bEnd) = g_copy.getItems<Item<B>>(bFrame);
+    BOOST_CHECK(bBegin != bEnd);
+    BOOST_CHECK(bBegin->getData().name.compare(item_b_in_b->getData().name) == 0);
+    ++bBegin;
     BOOST_CHECK(bBegin == bEnd);
 
     // frame_c
-    boost::tie(aBegin, aEnd) = g_copy.getItems<Item<A>>(cFrame);
+    std::tie(aBegin, aEnd) = g_copy.getItems<Item<A>>(cFrame);
     BOOST_CHECK(aBegin == aEnd);   
 
-    boost::tie(bBegin, bEnd) = g_copy.getItems<Item<B>>(cFrame);
-    BOOST_CHECK(bBegin == bEnd);
+    std::tie(bBegin, bEnd) = g_copy.getItems<Item<B>>(cFrame);
+    BOOST_CHECK(bBegin != bEnd);
 
     // frame_d
-    boost::tie(aBegin, aEnd) = g_copy.getItems<Item<A>>(dFrame);
+    std::tie(aBegin, aEnd) = g_copy.getItems<Item<A>>(dFrame);
     BOOST_CHECK(aBegin == aEnd);        
 
-    boost::tie(bBegin, bEnd) = g_copy.getItems<Item<B>>(dFrame);
+    std::tie(bBegin, bEnd) = g_copy.getItems<Item<B>>(dFrame);
     BOOST_CHECK(bBegin == bEnd);    
 }
