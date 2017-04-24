@@ -115,6 +115,21 @@ BOOST_AUTO_TEST_CASE(create_envire_graph_test)
     EnvireGraph g;
 }
 
+BOOST_AUTO_TEST_CASE(copy_with_items_test)
+{
+    EnvireGraph g;
+    const FrameId frame("awesome frame");
+    g.addFrame(frame);
+    Item<string>::Ptr item(new Item<string>("lalala"));
+    Item<string>::Ptr item2(new Item<string>("lululu"));
+    
+    g.addItemToFrame(frame, item);
+    g.addItemToFrame(frame, item2);
+        
+    EnvireGraph g2(g);
+    BOOST_CHECK(g2.getTotalItemCount(frame) == 2);
+}
+
 BOOST_AUTO_TEST_CASE(simple_add_item_test)
 {
     FrameId aFrame = "frame_a";
