@@ -70,10 +70,9 @@ public:
 class B
 {
 public:
-	B(double x, double y)
-	: x(x), y(y) {}
-	double x;
-	double y;
+    B(std::string name)
+    : name(name) {}
+    std::string name;
 };
 
 BOOST_AUTO_TEST_CASE(test_copy_with_filter)
@@ -90,10 +89,10 @@ BOOST_AUTO_TEST_CASE(test_copy_with_filter)
     // one object of a class in frame b
     // one object of b class in frame b
     Item<A>::Ptr item_a_in_b(new Item<A>(A("item_a_in_b")));
-    Item<A>::Ptr item_b_in_b(new Item<A>(A("item_b_in_b")));
+    Item<B>::Ptr item_b_in_b(new Item<B>(B("item_b_in_b")));
 
     // one object of c class in frame c
-    Item<A>::Ptr item_b_in_c(new Item<A>(A("item_b_in_c")));
+    Item<B>::Ptr item_b_in_c(new Item<B>(B("item_b_in_c")));
 
     
     EnvireGraph *g = new EnvireGraph();
@@ -111,9 +110,11 @@ BOOST_AUTO_TEST_CASE(test_copy_with_filter)
     g->addItemToFrame(cFrame, item_b_in_c); 
 
 
+
+
     // copy graph, presurve only object of the class A
     std::vector<std::type_index> filter_list;
-    filter_list.push_back(std::type_index(typeid(A)));
+    filter_list.push_back(std::type_index(typeid(envire::core::Item<A>)));
 
     // RESULT:
     // two object of a class in frame a

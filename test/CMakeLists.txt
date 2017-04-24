@@ -29,6 +29,7 @@ rock_testsuite(test_suite suite.cpp
     test_graph.cpp
     test_transform.cpp
     test_envire_graph.cpp
+    test_filter.cpp
     DEPS envire_core
 	DEPS_PLAIN
 	   Boost_THREAD

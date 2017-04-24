@@ -58,35 +58,41 @@ EnvireGraph::EnvireGraph(const EnvireGraph &other, std::vector<std::type_index> 
         // parse through all vertexes (frames) in graph
         vertex_iterator vertex_it, vertex_end;
         std::tie(vertex_it, vertex_end) = getVertices();
-        for(; vertex_it != vertex_end; ++ vertex_it)
+        for(; vertex_it != vertex_end; ++vertex_it)
         {   
+            std::cout << "vertex---" << std::endl;
             // vertex_iterator->vertex_descriptor
             Frame::ItemMap& items = graph()[*vertex_it].items;
 
             // parse through all items in vertex (frame)
             // We erase the elements of the map inside of loop
             Frame::ItemMap::const_iterator item_it, item_end;
-            for(item_it = items.begin(); item_it != items.end();)
+            for(item_it = items.begin(); item_it != items.end(); item_it++)
             {
+                std::cout << "item ---" << std::endl;
                 // white list, presurve the object of types from filter list
                 // delete that are not find
                 if (inclusive == true) {
-                    if (std::find(filter_list->begin(), filter_list->end(), item_it->first) == filter_list->end())
-                    {
-                        items.erase(item_it++);
-                    } else {
-                        item_it++;
-                    }
+                    std::cout << "inclusive " << item_it->first.name() << std::endl;
+                    //if (std::find(filter_list->begin(), filter_list->end(), item_it->first) == filter_list->end())
+                    //{
+                    //    std::cout << "erase " << item_it->first.name() << std::endl;
+                    //    items.erase(item_it++);
+                    //} else {
+                    //    std::cout << "!!!! " << item_it->first.name() << std::endl;
+                    //    ++item_it;
+
+                    //}
                 } 
                 // black list, delete all objects of the types in the filter list
                 else {
-                    if (std::find(filter_list->begin(), filter_list->end(), item_it->first) != filter_list->end())
-                    {
-                        items.erase(item_it++);
-                    } else
-                    {
-                        item_it++;
-                    }
+                    //if (std::find(filter_list->begin(), filter_list->end(), item_it->first) != filter_list->end())
+                    //{
+                    //    items.erase(item_it++);
+                    //} else
+                    //{
+                    //    ++item_it;
+                    //}
                 }
             }
         }
