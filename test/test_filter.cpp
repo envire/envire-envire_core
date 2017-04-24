@@ -117,8 +117,8 @@ BOOST_AUTO_TEST_CASE(test_copy_with_filter)
     
 
     // copy graph, presurve only object of the class A
-    std::vector<std::type_index> filter_list;
-    filter_list.push_back(std::type_index(typeid(envire::core::Item<A>)));
+    std::unordered_set<std::type_index> filter_list;
+    filter_list.emplace(typeid(envire::core::Item<A>));
 
     // RESULT:
     // two object of a class in frame a
@@ -127,8 +127,8 @@ BOOST_AUTO_TEST_CASE(test_copy_with_filter)
     EnvireGraph g_copy(g, &filter_list, true);
     
     BOOST_CHECK(g_copy.getTotalItemCount(aFrame) == 2);
-    BOOST_CHECK(g_copy.getTotalItemCount(bFrame) == 2);
-    BOOST_CHECK(g_copy.getTotalItemCount(cFrame) == 1);
+    BOOST_CHECK(g_copy.getTotalItemCount(bFrame) == 1);
+    BOOST_CHECK(g_copy.getTotalItemCount(cFrame) == 0);
     BOOST_CHECK(g_copy.getTotalItemCount(dFrame) == 0);
     
 
@@ -157,23 +157,5 @@ BOOST_AUTO_TEST_CASE(test_copy_with_filter)
     ++aBegin;
     BOOST_CHECK(aBegin == aEnd);
 
-    std::tie(bBegin, bEnd) = g_copy.getItems<Item<B>>(bFrame);
-    BOOST_CHECK(bBegin != bEnd);
-    BOOST_CHECK(bBegin->getData().name.compare(item_b_in_b->getData().name) == 0);
-    ++bBegin;
-    BOOST_CHECK(bBegin == bEnd);
-
-    // frame_c
-    std::tie(aBegin, aEnd) = g_copy.getItems<Item<A>>(cFrame);
-    BOOST_CHECK(aBegin == aEnd);   
-
-    std::tie(bBegin, bEnd) = g_copy.getItems<Item<B>>(cFrame);
-    BOOST_CHECK(bBegin != bEnd);
-
-    // frame_d
-    std::tie(aBegin, aEnd) = g_copy.getItems<Item<A>>(dFrame);
-    BOOST_CHECK(aBegin == aEnd);        
-
-    std::tie(bBegin, bEnd) = g_copy.getItems<Item<B>>(dFrame);
-    BOOST_CHECK(bBegin == bEnd);    
+ 
 }

@@ -325,7 +325,7 @@ protected:
     
     /**Re-generates the content of _map based on the FrameIds.
      * This method is used when de-serializing or copying the graph.*/
-    void regernateLabelMap();
+    void regenerateLabelMap();
     
     
     /**TreeViews that need to be updated when the graph is modified */
@@ -388,7 +388,7 @@ Graph<F,E>::Graph(const Graph<F, E>& other) : Base()
   //copy structure from other into the base directed_graph
   boost::copy_graph(other, graph());
   //copy the labels
-  regernateLabelMap();
+  regenerateLabelMap();
 }
 
 template <class F, class E>
@@ -965,7 +965,7 @@ void Graph<F,E>::load(Archive &ar, const unsigned int version)
     ar >> boost::serialization::make_nvp("directed_graph",  graph());
 
     // regenerate mapping of the labeled graph
-    regernateLabelMap();
+    regenerateLabelMap();
 }
 
 template<class F, class E>
@@ -997,7 +997,7 @@ bool Graph<F,E>::containsFrame(const FrameId& frameId) const
 }
 
 template<class F, class E>
-void Graph<F,E>::regernateLabelMap()
+void Graph<F,E>::regenerateLabelMap()
 {
     typename boost::graph_traits<Graph<F,E>>::vertex_iterator it, end;
     for (boost::tie( it, end ) = boost::vertices( graph()); it != end; ++it)

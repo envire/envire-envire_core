@@ -35,6 +35,7 @@
 #include <typeindex>
 #include <typeinfo>
 #include <type_traits>
+#include <unordered_set>
 
 #define BOOST_RESULT_OF_USE_DECLTYPE //this is important for the transform_iterator
 #include <boost/iterator/transform_iterator.hpp>
@@ -70,14 +71,16 @@ public:
     EnvireGraph();
 
     /**
-    * @param includive defines if the types set in filter_list should be presurve in the resulted graph,
+    * @param inclusive defines if the types set in filter_list should be preserved in the resulted graph,
     * if true, the filter_list is white list, if false, the filter_list is black list, and the items of types will
     * be excluded from the resulted graph
     *
     */
     EnvireGraph(const EnvireGraph &other, 
-                std::vector<std::type_index> *filter_list = NULL, bool inclusive = true);
+                std::unordered_set<std::type_index> *filter_list, bool inclusive);
 
+    EnvireGraph(const EnvireGraph &other);
+    
 
     /** Adds @p item to the item list in the frame of item
     *  Causes ItemAddedEvent.
