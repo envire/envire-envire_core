@@ -63,6 +63,8 @@ public slots:
 private slots:
     void displaySvg(QSvgRenderer* r);
     
+    void pauseToggled(bool toggled);
+    
 private:
     /**runs async to layout the graph without locking the ui thread */
     void layoutGraph();
@@ -78,6 +80,7 @@ private:
     
     QString currentGraph;
     bool needRedraw;
+    bool pauseRedraw;
     std::mutex currentGraphMutex;
     int updateInterval;
     bool runLayoutThread;
