@@ -228,6 +228,45 @@ BOOST_AUTO_TEST_CASE(get_vertex_unknown_frame_test)
     BOOST_CHECK_THROW(g.getVertex(a), UnknownFrameException);
 }
 
+BOOST_AUTO_TEST_CASE(simple_get_vertices)
+{
+    Gra graph;
+    EdgeProp ep;
+    
+    /*       a
+     *      / \
+     *     c   b
+     *   /  \
+     *  d   e
+     *    /  \
+     *   f   g
+     */
+
+    FrameId a = "frame_a";
+    FrameId b = "frame_b";
+    FrameId c = "frame_c";
+    FrameId d = "frame_d";
+    FrameId e = "frame_e";
+    FrameId f = "frame_f";
+    FrameId g = "frame_g";
+
+    graph.add_edge(a, b, ep);
+    graph.add_edge(a, c, ep);
+    graph.add_edge(c, d, ep);
+    graph.add_edge(c, e, ep);
+    graph.add_edge(e, f, ep);
+    graph.add_edge(e, g, ep);
+
+    int num_frames = 7;
+    int counter = 0;
+    Gra::vertex_iterator it, end;
+    std::tie(it, end) = graph.getVertices();
+    for(; it != end; ++ it)
+    {
+        counter ++;   
+    }
+    BOOST_CHECK(counter == num_frames);
+}
 
 BOOST_AUTO_TEST_CASE(simple_get_tree_test)
 {
