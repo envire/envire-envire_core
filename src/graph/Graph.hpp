@@ -570,7 +570,16 @@ std::vector<FrameId> Graph<F,E>::getFrames(FrameId origin, FrameId target) const
     envire::core::GraphBFSVisitor <vertex_descriptor>visit(toDesc, this->graph());
     try
     {
-        boost::breadth_first_search(this->graph(), fromDesc, visitor(visit));
+        // breadth first search uses a std::vector of default_color_type as default,
+        // which is fine for graphs using boost::vecS. Since we are using listS,
+        // we need to provide a colormap:
+        std::map<vertex_descriptor, boost::default_color_type> colors;
+        auto colorMap = boost::make_assoc_property_map(colors);
+        // the alternative would be to provide a custom vertex_index_map which maps
+        // each vertex to an integer in [0, num_vertices(g))
+
+        boost::breadth_first_search(this->graph(), fromDesc,
+            visitor(visit).color_map(colorMap));
 
     }catch(const FoundFrameException &e)
     {
