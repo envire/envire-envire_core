@@ -110,8 +110,8 @@ namespace envire { namespace core
             GraphBFSVisitor <vertex_descriptor>visit(targetVertex, this->graph());
 
             try
-            {
-                boost::breadth_first_search(this->graph(), originVertex, visitor(visit));
+            {   
+                Base::breathFirstSearch(originVertex, boost::visitor(visit));
 
             }catch(const FoundFrameException &e)
             {

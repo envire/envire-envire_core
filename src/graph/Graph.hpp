@@ -283,6 +283,18 @@ public:
      * "A nullptr for vertices" */
     static vertex_descriptor null_vertex();
     
+    /** Visit Graph in bfs order.
+     * This is a wrapper around boost::breath_first_search that correctly
+     * parameterizes boost::breath_first_search to work with this graph. */
+    template <class VISITOR>
+    void breathFirstSearch(const vertex_descriptor root, VISITOR visitor) const;
+    
+    /** Visit Graph in bfs order.
+     * This is a wrapper around boost::breath_first_search that correctly
+     * parameterizes boost::breath_first_search to work with this graph. */
+    template <class GRAPH, class VISITOR>
+    void breathFirstSearch(GRAPH& graph, const vertex_descriptor root, VISITOR visitor) const;
+    
 protected:
     using map_type = typename GraphBase<FRAME_PROP, EDGE_PROP>::map_type;
     using GraphBase<FRAME_PROP, EDGE_PROP>::graph;
@@ -541,7 +553,7 @@ void Graph<F,E>::getTree(const vertex_descriptor root, TreeView* outView) const
 {
     outView->addRoot(root);
     TreeBuilderVisitor<Graph<F,E>> visitor(*outView, *this);
-    boost::breadth_first_search(*this, root, boost::visitor(visitor));
+    breathFirstSearch(root, boost::visitor(visitor));
 }
 
 template <class F, class E>
@@ -570,16 +582,7 @@ std::vector<FrameId> Graph<F,E>::getFrames(FrameId origin, FrameId target) const
     envire::core::GraphBFSVisitor <vertex_descriptor>visit(toDesc, this->graph());
     try
     {
-        // breadth first search uses a std::vector of default_color_type as default,
-        // which is fine for graphs using boost::vecS. Since we are using listS,
-        // we need to provide a colormap:
-        std::map<vertex_descriptor, boost::default_color_type> colors;
-        auto colorMap = boost::make_assoc_property_map(colors);
-        // the alternative would be to provide a custom vertex_index_map which maps
-        // each vertex to an integer in [0, num_vertices(g))
-
-        boost::breadth_first_search(this->graph(), fromDesc,
-            visitor(visit).color_map(colorMap));
+        breathFirstSearch(fromDesc, boost::visitor(visit));
 
     }catch(const FoundFrameException &e)
     {
@@ -802,7 +805,7 @@ void Graph<F,E>::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) cons
         //and thus the bfs will not follow those edges.
         //the visitor will add those edges directly to the view
         TreeBuilderVisitor<Graph<F,E>> visitor(*view, *this);
-        boost::breadth_first_search(fg, notInView, boost::visitor(visitor));
+        breathFirstSearch(fg, notInView, boost::visitor(visitor));
     }
 }
 
@@ -1049,6 +1052,29 @@ Path::Ptr Graph<F,E>::getPath(const FrameId& origin, const FrameId& target,
         return Path::Ptr(new Path(getFrames(origin, target)));
     }
 }
+
+template<class F, class E>
+template<class VISITOR>
+void Graph<F,E>::breathFirstSearch(vertex_descriptor root, VISITOR visitor) const
+{
+    breathFirstSearch(graph(), root, visitor);
+}
+
+template<class F, class E>
+template <class GRAPH, class VISITOR>
+void Graph<F,E>::breathFirstSearch(GRAPH& graph, const vertex_descriptor root, VISITOR visitor) const
+{
+    // breadth first search uses a std::vector of default_color_type as default,
+    // which is fine for graphs using boost::vecS. Since we are using listS,
+    // we need to provide a colormap:
+    std::unordered_map<vertex_descriptor, boost::default_color_type> colors;
+    auto colorMap = boost::make_assoc_property_map(colors);
+    // the alternative would be to provide a custom vertex_index_map which maps
+    // each vertex to an integer in [0, num_vertices(g))
+
+    boost::breadth_first_search(graph, root, visitor.color_map(colorMap));    
+}
+
 
 }}
 

@@ -797,9 +797,9 @@ BOOST_AUTO_TEST_CASE(envire_graph_structural_copy_test)
 }
 
 
-BOOST_AUTO_TEST_CASE(getPath_test)
+BOOST_AUTO_TEST_CASE(bfs_visitor_test)
 {
-    //a special case that seems to crash on some boost versions?!
+    /**If the bfs visitor is not parameterized correctly, this will segfault */
     EnvireGraph graph;
 
     const FrameId a = "a";
@@ -807,32 +807,9 @@ BOOST_AUTO_TEST_CASE(getPath_test)
 
     graph.addFrame(b);
     graph.addFrame(a);
-
-    const Path::Ptr p = graph.getPath(a, a, false); // this is okay
-    BOOST_CHECK(p->getSize() == 0);
-    graph.removeFrame(b);
-    const Path::Ptr p2 = graph.getPath(a, a, false); // now it crashes
-    BOOST_CHECK(p2->getSize() == 0);    
     
-}
-
-BOOST_AUTO_TEST_CASE(getPath_test_2)
-{
-    //a special case that seems to crash on some boost versions?!
-    EnvireGraph graph;
-
-    const FrameId a = "a";
-    const FrameId b = "b";
-
-    graph.addFrame(a);
-    graph.addFrame(b);
-
-    const Path::Ptr p = graph.getPath(a, a, false); // this is okay
-    BOOST_CHECK(p->getSize() == 0);
+    BOOST_CHECK_NO_THROW(graph.getFrames(a, a));
     graph.removeFrame(b);
-    const Path::Ptr p2 = graph.getPath(a, a, false); // now it crashes
-    BOOST_CHECK(p2->getSize() == 0);    
-    
+    BOOST_CHECK_NO_THROW(graph.getFrames(a, a));
 }
-
 
