@@ -14,4 +14,6 @@ rock_vizkit_widget(EnvireGraph2DStructureVisualization
     HEADERS EnvireGraph2DStructureVisualization.hpp
     MOC     EnvireGraph2DStructureVisualization.hpp
             EnvireGraph2DStructureVisualizationPlugin.hpp
-    DEPS    envire_2D_structure_widget)
+    DEPS_PKGCONFIG QtCore QtGui
+    DEPS    envire_2D_structure_widget
+)

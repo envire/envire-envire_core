@@ -8,5 +8,5 @@ Description: envire 2D structure widget
 Requires: QtCore QtGui envire_core libgvc @PKGCONFIG_DEPS@
 Version: @PROJECT_VERSION@
 Libs: -L${libdir} -lenvire_2D_structure_widget
-Cflags: -I${includedir} @QT_QTGUI_INCLUDE_DIR@
+Cflags: -I${includedir}
 
