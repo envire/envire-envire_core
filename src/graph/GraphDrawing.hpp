@@ -132,7 +132,7 @@ namespace envire { namespace core
     };
 
 
-    /**@class GraphViz
+    /**@class GraphDrawing
      * Creates .dot graphs for all Graphs that follow the concepts specified in 
      * graph/GraphTypes.hpp
      * */
