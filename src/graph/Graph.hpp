@@ -284,16 +284,24 @@ public:
     static vertex_descriptor null_vertex();
     
     /** Visit Graph in bfs order.
-     * This is a wrapper around boost::breath_first_search that correctly
-     * parameterizes boost::breath_first_search to work with this graph. */
+     * This is a wrapper around boost::breadth_first_search that correctly
+     * parameterizes boost::breadth_first_search to work with this graph. */
     template <class VISITOR>
-    void breathFirstSearch(const vertex_descriptor root, VISITOR visitor) const;
+    void breadthFirstSearch(const vertex_descriptor root, VISITOR visitor) const;
     
     /** Visit Graph in bfs order.
-     * This is a wrapper around boost::breath_first_search that correctly
-     * parameterizes boost::breath_first_search to work with this graph. */
+     * This is a wrapper around boost::breadth_first_search that correctly
+     * parameterizes boost::breadth_first_search to work with this graph. */
     template <class GRAPH, class VISITOR>
-    void breathFirstSearch(GRAPH& graph, const vertex_descriptor root, VISITOR visitor) const;
+    void breadthFirstSearch(GRAPH& graph, const vertex_descriptor root, VISITOR visitor) const;
+
+    template <class VISITOR>
+    EIGEN_DEPRECATED
+    void breathFirstSearch(const vertex_descriptor root, VISITOR visitor) const { breadthFirstSearch(root, visitor); }
+
+    template <class GRAPH, class VISITOR>
+    EIGEN_DEPRECATED
+    void breathFirstSearch(GRAPH& graph, const vertex_descriptor root, VISITOR visitor) const { breadthFirstSearch(graph, root, visitor); }
     
 protected:
     using map_type = typename GraphBase<FRAME_PROP, EDGE_PROP>::map_type;
@@ -553,7 +561,7 @@ void Graph<F,E>::getTree(const vertex_descriptor root, TreeView* outView) const
 {
     outView->addRoot(root);
     TreeBuilderVisitor<Graph<F,E>> visitor(*outView, *this);
-    breathFirstSearch(root, boost::visitor(visitor));
+    breadthFirstSearch(root, boost::visitor(visitor));
 }
 
 template <class F, class E>
@@ -582,7 +590,7 @@ std::vector<FrameId> Graph<F,E>::getFrames(FrameId origin, FrameId target) const
     envire::core::GraphBFSVisitor <vertex_descriptor>visit(toDesc, this->graph());
     try
     {
-        breathFirstSearch(fromDesc, boost::visitor(visit));
+        breadthFirstSearch(fromDesc, boost::visitor(visit));
 
     }catch(const FoundFrameException &e)
     {
@@ -805,7 +813,7 @@ void Graph<F,E>::addEdgeToTreeView(edge_descriptor newEdge, TreeView* view) cons
         //and thus the bfs will not follow those edges.
         //the visitor will add those edges directly to the view
         TreeBuilderVisitor<Graph<F,E>> visitor(*view, *this);
-        breathFirstSearch(fg, notInView, boost::visitor(visitor));
+        breadthFirstSearch(fg, notInView, boost::visitor(visitor));
     }
 }
 
@@ -1053,16 +1061,17 @@ Path::Ptr Graph<F,E>::getPath(const FrameId& origin, const FrameId& target,
     }
 }
 
+
 template<class F, class E>
 template<class VISITOR>
-void Graph<F,E>::breathFirstSearch(vertex_descriptor root, VISITOR visitor) const
+void Graph<F,E>::breadthFirstSearch(vertex_descriptor root, VISITOR visitor) const
 {
-    breathFirstSearch(graph(), root, visitor);
+    breadthFirstSearch(graph(), root, visitor);
 }
 
 template<class F, class E>
 template <class GRAPH, class VISITOR>
-void Graph<F,E>::breathFirstSearch(GRAPH& graph, const vertex_descriptor root, VISITOR visitor) const
+void Graph<F,E>::breadthFirstSearch(GRAPH& graph, const vertex_descriptor root, VISITOR visitor) const
 {
     // breadth first search uses a std::vector of default_color_type as default,
     // which is fine for graphs using boost::vecS. Since we are using listS,

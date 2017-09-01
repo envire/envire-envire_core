@@ -111,7 +111,7 @@ namespace envire { namespace core
 
             try
             {   
-                Base::breathFirstSearch(originVertex, boost::visitor(visit));
+                Base::breadthFirstSearch(originVertex, boost::visitor(visit));
 
             }catch(const FoundFrameException &e)
             {
