@@ -41,4 +41,11 @@
   <!-- Required for performance tests  -->
   <depend package="slam/envire" optional="1"/>
   <depend package="external/ogdf" />
+
+  <keywords>
+    <keyword>Representation</keyword>
+    <keyword>Geophaphic</keyword>
+  </keywords>
+    
+    <stage>0</stage>
 </package>
