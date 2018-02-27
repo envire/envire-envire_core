@@ -185,6 +185,11 @@ public:
     size_t getTotalItemCount(const FrameId& frame) const;
     size_t getTotalItemCount(const vertex_descriptor vd) const;
     
+    /** @return a list containing the types of all items inside @p frame
+      * @throw UnknownFrameException if the @p frame id is invalid.*/
+    std::vector<std::type_index> getItemTypes(const FrameId& frame) const;
+    std::vector<std::type_index> getItemTypes(const vertex_descriptor vd) const;
+    
     
     /**Removes @p frame from the Graph.
     *  A frame can only be removed if there are no edges connected to

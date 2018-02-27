@@ -175,6 +175,18 @@ size_t EnvireGraph::getTotalItemCount(const vertex_descriptor vd) const
     return frame.calculateTotalItemCount();
 }
 
+std::vector<std::type_index> EnvireGraph::getItemTypes(const FrameId& frame) const
+{
+    return getItemTypes(getVertex(frame));
+
+}
+
+std::vector<std::type_index> EnvireGraph::getItemTypes(const vertex_descriptor vd) const
+{
+    const Frame& frame = graph()[vd];
+    return frame.getItemTypes();
+}
+
 const Frame::ItemList& EnvireGraph::getItems(const vertex_descriptor frame,
                                              const std::type_index& type) const
 {

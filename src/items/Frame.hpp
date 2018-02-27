@@ -107,6 +107,17 @@ namespace envire { namespace core
             return out.str();
         }
         
+        /** @return A list of all item types used in this frame */
+        std::vector<std::type_index> getItemTypes() const
+        {
+            std::vector<std::type_index> result;
+            for(const auto& itemPair : items)
+            {
+              result.push_back(itemPair.first);
+            }
+            return result;
+        }
+        
         /**Visits all items in this frame.
          * @param func should have an operator(const ItemBase::Ptr)*/
         template <class T>
