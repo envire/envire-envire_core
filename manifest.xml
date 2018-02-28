@@ -26,11 +26,12 @@
 
 <package>
   <description brief="Core part for the Environment Representation library">
-  Core library for the Environment Representation. The goal of this core part is to deal with the representation commonalities among plugins
+      Core library for the Environment Representation. The goal of this core part is to deal with the representation commonalities among plugins
   </description>
-  <author> Envire Team/ric-team8@dfki.de</author>
-  <maintainer> Javier Hidalgo Carrio/javier.hidalgo_carrio@dfki.de</maintainer>
-  <url>http://rock-robotics.org/</url>
+  <author>Envire Team/ric-team8@dfki.de</author>
+  <maintainer>Javier Hidalgo Carrio/javier.hidalgo_carrio@dfki.de</maintainer>
+  <logo>EnviRe - https://raw.githubusercontent.com/envire/envire.github.io/master/images/envire_logo_graph.png</logo>
+  <url>http://envire.github.io</url>
 
   <depend package="base/cmake" />
   <depend package="base/types" />
@@ -40,10 +41,16 @@
   <depend package="tools/plugin_manager" optional="1"/>
   <depend package="external/ogdf" />
 
+  <activity>active</activity>
+
+   <classifiers>
+       <classifier>c++</classifier>
+   </classifiers>
+
   <keywords>
     <keyword>Representation</keyword>
     <keyword>Geographic</keyword>
   </keywords>
-    
+
     <stage>0</stage>
 </package>
