@@ -60,4 +60,8 @@ std::string ItemBase::getClassName() const
     return "UnknownItem";
 }
 
+void ItemBase::contentsChanged(){
+    itemContentsChanged(*this);
+}
+
 BOOST_CLASS_EXPORT(envire::core::ItemBase)
