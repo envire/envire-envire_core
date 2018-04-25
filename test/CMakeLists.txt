@@ -30,6 +30,7 @@ rock_testsuite(test_suite suite.cpp
     test_transform.cpp
     test_envire_graph.cpp
     test_filter.cpp
+    test_item_changed_callback.cpp
     DEPS 
       envire_core
     DEPS_PLAIN

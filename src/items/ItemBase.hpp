@@ -32,6 +32,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/export.hpp>
+#include <boost/signals2.hpp>
 #include <base/Time.hpp>
 #include <string>
 #include <type_traits>
@@ -137,6 +138,32 @@ namespace envire { namespace core
         /** Returns a raw pointer to the data of an Item */
         virtual void* getRawData() { return NULL; }
         
+        /** Emits the itemContentsChanged event */
+        void contentsChanged();
+        
+        /**
+         * registeres a changed callback function ponter
+         * @warning to receive callbacks, the contentsChanged() method must be called manually to emit the signal
+         * 
+         * @param callback the function to call on change compatible with boost signal (using lambda functions or boost::bind)
+         * The signature of the callback function is (const ItemBase& item)
+         * e.g.  connectContentsChangedCallback([&reactor](const ItemBase& item){reactor.frame=item.getFrame();reactor.called=true;});
+         * connectContentsChangedCallback(boost::bind(&ItemContentReactor::cb, &reactor,  _1));
+         * @warning Lambda functions cannot be disconnected.
+         * 
+         */
+        template<class CALLBACK> void connectContentsChangedCallback(const CALLBACK &callback){
+            itemContentsChanged.connect(callback);
+        }
+        
+        /**
+         * disconnects a connected callback
+         * 
+         * @param callback the function to call on change compatible with boost signale (using functor objects or boost::bind)
+         */
+        template<class CALLBACK> void disconnectContentsChangedCallback(const CALLBACK &callback){
+            itemContentsChanged.disconnect(callback);
+        }
 
     private:
         /**Grands access to boost serialization */
@@ -147,6 +174,10 @@ namespace envire { namespace core
         void serialize(Archive &ar, const unsigned int version)
         {
         }
+        
+        /** This signal can be manually emitted to notify about the change */
+        boost::signals2::signal<void (ItemBase& item)> itemContentsChanged;
+        
     };
 
     /**Mark this class as abstract class */
