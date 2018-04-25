@@ -26,7 +26,6 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/lexical_cast.hpp>
-#define protected public
 #include <envire_core/graph/EnvireGraph.hpp>
 #include <envire_core/events/GraphEventDispatcher.hpp>
 #include <envire_core/events/GraphItemEventDispatcher.hpp>
