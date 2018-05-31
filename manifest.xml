@@ -40,6 +40,7 @@
   <depend package="tools/class_loader" optional="1"/>
   <depend package="tools/plugin_manager" optional="1"/>
   <depend package="external/ogdf" />
+  <depend package="graphviz" />
 
   <activity>active</activity>
 
