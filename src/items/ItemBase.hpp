@@ -59,6 +59,7 @@ namespace envire { namespace core
         ItemBase(const ItemBase& item);
         ItemBase(ItemBase&& item);
         virtual ~ItemBase() {}
+        virtual ItemBase::Ptr clone(bool keep_id = false, bool keep_frame = false) const = 0;
 
         ItemBase& operator=(const ItemBase& item);
         ItemBase& operator=(ItemBase&& item);
