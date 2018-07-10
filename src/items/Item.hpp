@@ -83,6 +83,16 @@ namespace envire { namespace core
             spatio_temporal_data.data = std::move(item.spatio_temporal_data.data);
         }
 
+        //https://stackoverflow.com/questions/12255546/c-deep-copying-a-base-class-pointer
+        virtual ItemBase::Ptr clone() const {
+            //has to use this constructor, derived items need default constructor otherwise
+            ItemBase::Ptr ptr = ItemBase::Ptr(new Item<_ItemData>(this->getData()));
+            ptr->setTime(this->getTime());
+            ptr->setID(this->getID());
+            ptr->setFrame(this->getFrame());
+            return ptr;
+        }
+
         virtual ~Item() {}
 
         Item<_ItemData>& operator=(const Item<_ItemData>& item)
