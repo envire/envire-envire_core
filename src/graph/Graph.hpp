@@ -303,6 +303,12 @@ public:
     EIGEN_DEPRECATED
     void breathFirstSearch(GRAPH& graph, const vertex_descriptor root, VISITOR visitor) const { breadthFirstSearch(graph, root, visitor); }
     
+    /** Visits all vertices in no particular order. The visitation order is 
+     * @p visitor can be anything that is callable and takes a vertex_descriptor as parameter. I.e. that fulfills visitor(GraphTraits::vertex_descriptor)*/
+    template <class VISITOR>
+    void visitVertices(VISITOR visitor);
+    
+    
 protected:
     using map_type = typename GraphBase<FRAME_PROP, EDGE_PROP>::map_type;
     using GraphBase<FRAME_PROP, EDGE_PROP>::graph;
@@ -1083,6 +1089,17 @@ void Graph<F,E>::breadthFirstSearch(GRAPH& graph, const vertex_descriptor root, 
 
     boost::breadth_first_search(graph, root, visitor.color_map(colorMap));    
 }
+
+template<class F, class E>
+template <class VISITOR>
+void Graph<F,E>::visitVertices(VISITOR visitor)
+{
+    auto vertices =  getVertices();
+    for (auto vert = vertices.first; vert != vertices.second; ++vert){
+        visitor(*vert);
+    }
+}
+
 
 
 }}

@@ -1203,6 +1203,54 @@ BOOST_AUTO_TEST_CASE(copy_ctor_test)
     BOOST_CHECK(graph2.getFrameProperty(c).value == "meeeh");
 }
 
+
+
+BOOST_AUTO_TEST_CASE(visit_vertices_empty_grapg)
+{
+    Gra graph;
+    std::vector<FrameId> visited;
+    graph.visitVertices([&](GraphTraits::vertex_descriptor vd) 
+    {
+        visited.push_back(graph.getFrameId(vd));
+    });
+    
+    BOOST_CHECK(visited.size() == 0);
+}
+
+BOOST_AUTO_TEST_CASE(visit_vertices_lambda_test)
+{
+    Gra graph;
+
+    const FrameId a = "frame_a";
+    const FrameId b = "frame_b";
+    const FrameId c = "frame_c";
+    const FrameId d = "frame_d";
+    
+    graph.addFrame(a);
+    graph.addFrame(b);
+    graph.addFrame(c);
+    graph.addFrame(d);
+   
+    const GraphTraits::vertex_descriptor aDesc = graph.getVertex(a);
+    const GraphTraits::vertex_descriptor bDesc = graph.getVertex(b);
+    const GraphTraits::vertex_descriptor cDesc = graph.getVertex(c);
+    const GraphTraits::vertex_descriptor dDesc = graph.getVertex(d);
+
+    std::vector<FrameId> visited;
+    graph.visitVertices([&](GraphTraits::vertex_descriptor vd) 
+    {
+        visited.push_back(graph.getFrameId(vd));
+    });
+    
+    BOOST_CHECK(visited.size() == 4);
+    BOOST_CHECK(std::find(visited.begin(), visited.end(), a) != visited.end());
+    BOOST_CHECK(std::find(visited.begin(), visited.end(), b) != visited.end());
+    BOOST_CHECK(std::find(visited.begin(), visited.end(), c) != visited.end());
+    BOOST_CHECK(std::find(visited.begin(), visited.end(), d) != visited.end());
+    
+}
+
+
 BOOST_AUTO_TEST_CASE(treeview_dfsVisit_test)
 {
     FrameId a = "a";
