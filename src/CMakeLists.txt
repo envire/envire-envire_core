@@ -1,4 +1,5 @@
 find_package(Boost COMPONENTS serialization filesystem system)
+find_package(console_bridge)
 
 
 set(headers items/ItemBase.hpp
@@ -65,7 +66,7 @@ if(ENABLE_PLUGINS)
               plugin/Plugin.hpp)
   set(sources ${sources}
               plugin/ClassLoader.cpp)
-  set(deps_pkg_config ${deps_pkg_config} class_loader plugin_manager)
+  set(deps_pkg_config ${deps_pkg_config} class_loader plugin_manager console_bridge)
   
 endif()
 
