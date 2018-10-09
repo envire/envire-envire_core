@@ -1,3 +1,6 @@
+Build and test status: [![CircleCI](https://circleci.com/gh/envire/envire-envire_core.svg?style=svg)](https://circleci.com/gh/envire/envire-envire_core)
+
+
 EnviRe Core
 =============
 Core library for Environment Representation. The goal of this core part is
@@ -34,16 +37,16 @@ the Rock CMake macros automatically handle the project's build process and
 install setup properly.
 
 STRUCTURE
--- src/ 
+-- src/
 	Contains all header (*.h/*.hpp) and source files
 -- build/
 	The target directory for the build process, temporary content
 -- bindings/
 	Language bindings for this package, e.g. put into subfolders such as
-   |-- ruby/ 
+   |-- ruby/
         Ruby language bindings
 -- viz/
-        Source files for a vizkit plugin / widget related to this library 
+        Source files for a vizkit plugin / widget related to this library
 -- resources/
 	General resources such as images that are needed by the program
 -- configuration/
@@ -53,9 +56,9 @@ STRUCTURE
 	easily embedded include the external software directly here
 -- doc/
 	should contain the existing doxygen file: doxygen.conf
-	
+
 Graph Usage Examples
---------------------	
+--------------------
 This section contains a few simple usage examples that showcase some of the graph's features.
 
 #### Adding Frames
@@ -221,4 +224,3 @@ Maintenance and development
 DFKI GmbH - Robotics Innovation Center
 
 ![alt tag](https://github.com/envire/envire.github.io/raw/master/images/dfki_logo.jpg)
-
