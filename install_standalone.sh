@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e #abort with error if any command returns with something other than zero
 
 ############
 # Install script for envire
