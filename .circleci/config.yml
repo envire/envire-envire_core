@@ -16,3 +16,34 @@ jobs:
       - run:
           name: run install script
           command: ./install_standalone.sh
+
+  test:
+    docker:
+      - image: ubuntu:16.04
+    steps:
+      - run:
+          name: apt-get
+          command: apt update && apt -y install build-essential gcc g++ cmake git wget libgoogle-glog-dev libboost-test-dev libboost-filesystem-dev libboost-serialization-dev libboost-system-dev pkg-config libeigen3-dev libclass-loader-dev libtinyxml-dev
+      - run:
+          name: download install script
+          command: wget https://raw.githubusercontent.com/envire/envire-envire_core/master/install_standalone.sh
+      - run:
+          name: chmod install script
+          command: chmod +x install_standalone.sh
+      - run:
+          name: run install script
+          command: ./install_standalone.sh
+          - run:
+              name: test_suit
+              command: envire-envire_core/build/test/test_suite
+          - run:
+              name: test_plugins
+              command: envire-envire_core/build/test/test_suite
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
