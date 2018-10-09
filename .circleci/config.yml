@@ -6,7 +6,7 @@ jobs:
     steps:
       - run:
           name: apt-get
-          command: apt update && apt -y install build-essential gcc g++ cmake git wget
+          command: apt update && apt -y install build-essential gcc g++ cmake git wget libgoogle-glog-dev
       - run:
           name: download install script
           command: wget https://raw.githubusercontent.com/envire/envire-envire_core/master/install_standalone.sh
