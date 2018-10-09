@@ -39,11 +39,3 @@ jobs:
           - run:
               name: test_plugins
               command: envire-envire_core/build/test/test_suite
-workflows:
-  version: 2
-  build-and-test:
-    jobs:
-      - build
-      - test:
-          requires:
-            - build
