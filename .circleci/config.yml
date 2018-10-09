@@ -6,7 +6,7 @@ jobs:
     steps:
       - run:
           name: apt-get
-          command: apt update && apt -y install build-essential gcc g++ cmake git wget libgoogle-glog-dev libboost-filesystem-dev libboost-serialization-dev libboost-system-dev pkg-config libeigen3-dev libclass-loader-dev 
+          command: apt update && apt -y install build-essential gcc g++ cmake git wget libgoogle-glog-dev libboost-filesystem-dev libboost-serialization-dev libboost-system-dev pkg-config libeigen3-dev libclass-loader-dev libtinyxml-dev
       - run:
           name: download install script
           command: wget https://raw.githubusercontent.com/envire/envire-envire_core/master/install_standalone.sh

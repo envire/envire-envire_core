@@ -42,7 +42,7 @@ build https://github.com/envire/tools-plugin_manager.git master tools-plugin_man
 
 #envire
 #build https://github.com/envire/envire-envire_core.git envire-envire_core "-DENABLE_PLUGINS=OFF -DROCK_TEST_ENABLED=OFF"
-build https://github.com/envire/envire-envire_core.git master envire-envire_core
+build https://github.com/envire/envire-envire_core.git master envire-envire_core "-DROCK_TEST_ENABLED=ON"
 
 
 
