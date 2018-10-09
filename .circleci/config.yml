@@ -2,12 +2,17 @@ version: 2
 jobs:
   build:
     docker:
-      - image: debian:stretch
+      - image: ubuntu:16.04
     steps:
-      - checkout
       - run:
-          name: Greeting
-          command: echo Hello, world.
+          name: apt-get
+          command: apt-get update && apt-get -y build-essential gcc g++ cmake git
       - run:
-          name: Print the Current Time
-          command: date
+          name: download install script
+          command: wget https://raw.githubusercontent.com/envire/envire-envire_core/master/install_standalone.sh
+      - run:
+          name: chmod install script
+          command: chmod +x install_standalone.sh
+      - run:
+          name: run install script
+          command: ./install_standalone.sh
