@@ -33,9 +33,16 @@ jobs:
       - run:
           name: run install script
           command: ./install_standalone.sh
-          - run:
-              name: test_suit
-              command: envire-envire_core/build/test/test_suite
-          - run:
-              name: test_plugins
-              command: envire-envire_core/build/test/test_suite
+      - run:
+          name: test_suit
+          command: envire-envire_core/build/test/test_suite
+      - run:
+          name: test_plugins
+          command: envire-envire_core/build/test/test_suite
+workflows:
+  build-and-test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
