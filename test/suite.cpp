@@ -27,8 +27,25 @@
 // Do NOT add anything to this file
 // This header from boost takes ages to compile, so we make sure it is compiled
 // only once (here)
+
 #ifndef BOOST_TEST_DYN_LINK
 #define BOOST_TEST_DYN_LINK
 #endif
-#define BOOST_TEST_MAIN
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_MODULE test module name
 #include <boost/test/unit_test.hpp>
+#include <boost/filesystem.hpp>
+#include <iostream>
+#include "PathSingleton.hpp"
+
+// entry point:
+int main(int argc, char* argv[], char* envp[])
+{
+  PathSingleton::binaryFolderPath = boost::filesystem::system_complete(argv[0]);
+  PathSingleton::binaryFolderPath = PathSingleton::binaryFolderPath.parent_path();
+  return boost::unit_test::unit_test_main( &init_unit_test, argc, argv );
+}
+
+
+
+

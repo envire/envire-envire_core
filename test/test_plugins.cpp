@@ -32,6 +32,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <vector>
+#include "PathSingleton.hpp"
 
 using namespace envire::core;
 using namespace envire;
@@ -77,12 +78,7 @@ BOOST_AUTO_TEST_CASE(test_copy_operators)
 
 BOOST_AUTO_TEST_CASE(vector_plugin_test)
 {
-    const char* root_path = std::getenv("AUTOPROJ_CURRENT_ROOT");
-    string path_plugin;
-    if(root_path != NULL)
-    {
-        path_plugin = string(root_path) + "/envire/envire_core/build/test/libenvire_vector_plugin.so";
-    }
+    const string path_plugin = PathSingleton::binaryFolderPath.string() +  "/libenvire_vector_plugin.so";
 
     BOOST_CHECK(path_plugin.length() > 0);
     class_loader::ClassLoader loader(path_plugin, false);
@@ -115,14 +111,17 @@ BOOST_AUTO_TEST_CASE(class_loader_test)
 {
     ClassLoader* loader = ClassLoader::getInstance();
     std::vector<std::string> xml_paths;
-    const char* root_folder = std::getenv("AUTOPROJ_CURRENT_ROOT");
-    BOOST_CHECK(root_folder != NULL);
-    std::string root_folder_str(root_folder);
-    root_folder_str += "/envire/envire_core/test";
-    xml_paths.push_back(root_folder_str);
+
+    xml_paths.push_back(PathSingleton::binaryFolderPath.string() +  "/");
     loader->clear();
     loader->overridePluginXmlPaths(xml_paths);
     loader->reloadXMLPluginFiles();
+    
+    for(std::string s : loader->getPluginXmlPaths())
+    {
+      std::cout << s << std::endl;
+    }
+
 
     // load single element
     BOOST_CHECK(envire::core::ClassLoader::getInstance()->hasEnvireItem("envire::core::Item<Eigen::Vector3d>"));
@@ -149,6 +148,7 @@ BOOST_AUTO_TEST_CASE(class_loader_test)
     BOOST_CHECK(vector_plugin_4->getClassName(class_name));
     BOOST_CHECK(class_name == "envire::core::Item<Eigen::Vector3d>");
 
+    
     // create a singleton plugin
     void* item_ptr = NULL;
     std::string test_string = "In-A-Gadda-Da-Vida";
