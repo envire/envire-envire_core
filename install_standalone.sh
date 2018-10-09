@@ -12,7 +12,7 @@ function build {
   mkdir $3/build
   cd $3/build
   cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../../install $4
-  make -j install
+  make -j4 install
   cd ../../
 }
 
