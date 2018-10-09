@@ -11,16 +11,26 @@ provide techniques to store, operate and interchange information within a
 robotic system. The application of EnviRe mainly focus to support navigation,
 simulation and operations and simplify the interchange of algorithms among software components.
 
-Installation
+Installation using Rock's build system
 ------------
 The easiest way to build and install this package is to use Rock's build system.
 See [this page](http://rock-robotics.org/documentation/installation.html)
 on how to install Rock.
 
-However, if you feel that it's too heavy for your needs, Rock aims at having
-most of its "library" packages (such as this one) to follow best practices. See
-[this page](http://rock-robotics.org/documentation/packages/outside_of_rock.html)
-for installation instructions outside of Rock.
+Standalone Installation
+------------
+First make sure that all dependencies are installed:
+```
+ apt -y install build-essential gcc g++ cmake git wget libboost-test-dev libgoogle-glog-dev libboost-filesystem-dev libboost-serialization-dev libboost-system-dev pkg-config libeigen3-dev libclass-loader-dev libtinyxml-dev
+```
+
+Afterwards download and execute the standalone install script:
+```
+wget https://raw.githubusercontent.com/envire/envire-envire_core/master/install_standalone.sh
+chmod +x install_standalone.sh
+./install_standalone.sh
+```
+
 
 Rock CMake Macros
 -----------------
