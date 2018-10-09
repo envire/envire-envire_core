@@ -35,8 +35,6 @@ build https://github.com/envire/base-numeric.git master base-numeric
 build https://github.com/envire/base-boost_serialization.git master base-boost_serialization
 
 #plugins
-build https://github.com/rock-core/base-console_bridge.git master base-console_bridge
-build https://github.com/ros/class_loader.git indigo-devel class_loader "-DBUILD_SHARED_LIBS=ON -DCATKIN_DISABLED=ON -DCMAKE_BUILD_TYPE=Release"
 build https://github.com/envire/tools-plugin_manager.git master tools-plugin_manager
 
 

@@ -42,16 +42,16 @@
 #include <envire_core/graph/TransformGraph.hpp>
 #include <envire_core/graph/EnvireGraph.hpp>
 
+#include "PathSingleton.hpp"
+
 using namespace envire::core;
 
 struct LoadLocalPlugins {
     LoadLocalPlugins()
     {
-        ClassLoader* loader = ClassLoader::getInstance();
+         ClassLoader* loader = ClassLoader::getInstance();
         std::vector<std::string> xml_paths;
-        const char* root_folder = std::getenv("AUTOPROJ_CURRENT_ROOT");
-        std::string root_folder_str(root_folder);
-        root_folder_str += "/envire/envire_core/test";
+        std::string root_folder_str(PathSingleton::binaryFolderPath.string() +  "/");
         xml_paths.push_back(root_folder_str);
         loader->clear();
         loader->overridePluginXmlPaths(xml_paths);

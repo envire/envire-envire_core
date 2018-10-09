@@ -22,10 +22,13 @@ if(ENABLE_PLUGINS)
         Boost_UNIT_TEST_FRAMEWORK
 )
 
-file(GLOB xml_test_files "${CMAKE_CURRENT_SOURCE_DIR}/*.xml")
+#copy test files to build/test directory
+file(GLOB xml_files "${CMAKE_CURRENT_SOURCE_DIR}/*.xml")
+file(GLOB bin_files "${CMAKE_CURRENT_SOURCE_DIR}/*.bin")
+set(test_files "${xml_files};${bin_files}")
 add_custom_command(TARGET test_plugins PRE_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy
-                       ${xml_test_files} $<TARGET_FILE_DIR:test_plugins>)
+                       ${test_files} $<TARGET_FILE_DIR:test_plugins>)
 
 # install(FILES vector_plugin.xml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     
