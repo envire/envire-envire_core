@@ -13,16 +13,16 @@ jobs:
       - checkout
       - run:
           name: chmod install script
-          command: chmod +x envire-envire_core/install_dependencies.sh
+          command: chmod +x install_dependencies.sh
       - run:
           name: run install script
-          command: ~/envire-envire_core/install_dependencies.sh
+          command: ./install_dependencies.sh
       - run:
           name: compile
-          command: cd ~/envire-envire_core && mkdir build && cd build && cmake -DROCK_TEST_ENABLED=ON ..
+          command: mkdir build && cd build && cmake -DROCK_TEST_ENABLED=ON ..
       - run:
           name: test_suit
-          command: ~/envire-envire_core/build/test/test_suite
+          command: ~/build/test/test_suite
       - run:
           name: test_plugins
-          command: ~/envire-envire_core/build/test/test_plugins
+          command: ~/build/test/test_plugins
