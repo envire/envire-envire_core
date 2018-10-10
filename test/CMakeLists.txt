@@ -43,6 +43,7 @@ rock_testsuite(test_suite suite.cpp
     test_filter.cpp
     test_item_changed_callback.cpp
     PathSingleton.cpp
+    DEPS_PKGCONFIG class_loader
     DEPS 
       envire_core
     DEPS_PLAIN
