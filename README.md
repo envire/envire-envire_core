@@ -19,17 +19,18 @@ on how to install Rock.
 
 Standalone Installation
 ------------
-First make sure that all dependencies are installed:
+First make sure that all dependencies are installed.
+Most of the dependencies can be installed using apt:
 ```
- apt -y install build-essential gcc g++ cmake git wget libboost-test-dev libgoogle-glog-dev libboost-filesystem-dev libboost-serialization-dev libboost-system-dev pkg-config libeigen3-dev libclass-loader-dev libtinyxml-dev
+apt install build-essential gcc g++ cmake git wget libgoogle-glog-dev libboost-test-dev libboost-filesystem-dev libboost-serialization-dev libboost-system-dev pkg-config libeigen3-dev libclass-loader-dev libtinyxml-dev librosconsole-bridge-dev libeigen3-dev libclass-loader-dev libtinyxml-dev
 ```
 
-Afterwards download and execute the standalone install script:
+Some dependencies need to be build from source. A script is provided to install those:
 ```
-wget https://raw.githubusercontent.com/envire/envire-envire_core/master/install_standalone.sh
-chmod +x install_standalone.sh
-./install_standalone.sh
+chmod +x install_dependencies.sh
+sudo ./install_dependencies.sh [path_to_prefix]
 ```
+If no prefix is provided, the dependencies will be installed system-wide.
 
 
 Rock CMake Macros
