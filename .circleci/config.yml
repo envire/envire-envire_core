@@ -22,7 +22,7 @@ jobs:
           command: mkdir build && cd build && cmake -DROCK_TEST_ENABLED=ON ..
       - run:
           name: test_suit
-          command: ~/build/test/test_suite
+          command: ~/project/build/test/test_suite
       - run:
           name: test_plugins
-          command: ~/build/test/test_plugins
+          command: ~/project/build/test/test_plugins
