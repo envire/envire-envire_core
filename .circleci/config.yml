@@ -10,18 +10,19 @@ jobs:
       - run:
           name: fix-class-loader-pkg-config
           command: "sed -i '/Libs:/c\Libs:  -lclass_loader -lboost_filesystem -lboost_thread -lboost_system -lpthread -lPocoFoundation -ldl -lconsole_bridge' /usr/lib/x86_64-linux-gnu/pkgconfig/class_loader.pc"
-      - run:
-          name: download install script
-          command: wget https://raw.githubusercontent.com/envire/envire-envire_core/master/install_standalone.sh
+      - checkout
       - run:
           name: chmod install script
-          command: chmod +x install_standalone.sh
+          command: chmod +x envire-envire_core/install_dependencies.sh
       - run:
           name: run install script
-          command: ./install_standalone.sh
+          command: ~/envire-envire_core/install_dependencies.sh
+      - run:
+          name: compile
+          command: cd ~/envire-envire_core && mkdir build && cd build && cmake -DROCK_TEST_ENABLED=ON ..
       - run:
           name: test_suit
-          command: envire-envire_core/build/test/test_suite
+          command: ~/envire-envire_core/build/test/test_suite
       - run:
           name: test_plugins
-          command: envire-envire_core/build/test/test_plugins
+          command: ~/envire-envire_core/build/test/test_plugins
