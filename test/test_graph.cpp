@@ -1204,6 +1204,11 @@ BOOST_AUTO_TEST_CASE(copy_ctor_test)
 }
 
 
+BOOST_AUTO_TEST_CASE(get_null_vertex_frame_id)
+{
+    Gra graph;
+    BOOST_CHECK_THROW(graph.getFrameId(GraphTraits::null_vertex()), NullVertexException);
+}
 
 BOOST_AUTO_TEST_CASE(visit_vertices_empty_grapg)
 {
@@ -1231,11 +1236,6 @@ BOOST_AUTO_TEST_CASE(visit_vertices_lambda_test)
     graph.addFrame(c);
     graph.addFrame(d);
    
-    const GraphTraits::vertex_descriptor aDesc = graph.getVertex(a);
-    const GraphTraits::vertex_descriptor bDesc = graph.getVertex(b);
-    const GraphTraits::vertex_descriptor cDesc = graph.getVertex(c);
-    const GraphTraits::vertex_descriptor dDesc = graph.getVertex(d);
-
     std::vector<FrameId> visited;
     graph.visitVertices([&](GraphTraits::vertex_descriptor vd) 
     {
