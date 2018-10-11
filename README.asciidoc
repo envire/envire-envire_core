@@ -1,11 +1,13 @@
-= Envire Core Documentation
+= EnviRe Core Documentation
+
 Build and test
+
 [link=https://circleci.com/gh/envire/envire-envire_core]
 image::https://circleci.com/gh/envire/envire-envire_core.svg?style=svg[Build Status]
 
-EnviRe Core
-=============
-Core library for Environment Representation. The goal of this core part is
+== About EnviRe Core
+
+This is the core library for Environment Representation. The goal of this core part is
 to deal with the representation commonalities among plugins.
 
 Environment Representation (EnviRe) technologies are meant to close the gap and
@@ -13,14 +15,14 @@ provide techniques to store, operate and interchange information within a
 robotic system. The application of EnviRe mainly focus to support navigation,
 simulation and operations and simplify the interchange of algorithms among software components.
 
-Installation using Rock's build system
-------------
+== Installation
+=== Using Rock's build system
 The easiest way to build and install this package is to use Rock's build system.
 See [this page](http://rock-robotics.org/documentation/installation.html)
 on how to install Rock.
 
-Standalone Installation
-------------
+=== Standalone Installation
+
 First make sure that all dependencies are installed.
 Most of the dependencies can be installed using apt:
 ```
@@ -35,14 +37,12 @@ sudo ./install_dependencies.sh [path_to_prefix]
 If no prefix is provided, the dependencies will be installed system-wide.
 
 
-Rock CMake Macros
------------------
+== Rock CMake Macros
 
 This package uses a set of CMake helper shipped as the Rock CMake macros.
 Documentations is available on [this page](http://rock-robotics.org/documentation/packages/cmake_macros.html).
 
-Rock Standard Layout
---------------------
+== Rock Standard Layout
 
 This directory structure follows some simple rules, to allow for generic build
 processes and simplify reuse of this project. Following these rules ensures that
