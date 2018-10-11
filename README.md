@@ -68,6 +68,7 @@ STRUCTURE
 -- doc/
 	should contain the existing doxygen file: doxygen.conf
 
+
 Graph Usage Examples
 --------------------
 This section contains a few simple usage examples that showcase some of the graph's features.
@@ -235,6 +236,103 @@ All items can be removed at once using ``clearFrame()``.
 ```
 g.clearFrame(frame);
 ```
+
+#### Adding Transformations
+```
+EnvireGraph g;
+const FrameId a = "frame_a";
+const FrameId b = "frame_b";
+Transform ab;
+/** initialize Transform */
+g.addTransform(a, b, ab);
+```
+If a transformation is added, the inverse will be added automatically.
+If one or both of the frames are not part of the graph, they will be added.
+
+#### Removing Transformations
+```
+g.removeTransform(a, b);
+```
+The inverse will be removed as well.
+
+#### Modifying Transformations
+Transformations can be replaced using ``updateTransform``.
+The inverse will be updated automatically.
+```
+Transform tf;
+tf.transform.translation << 84, 21, 42;
+g.updateTransform(a, b, tf);
+```
+
+
+#### Calculating Transformations
+``getTransform()`` can be used to calculate the transformation between two
+frames if a path connecting the two exists in the graph. Breadth first search is
+used to find the path connecting the two frames.
+```
+const Transform tf2 = g.getTransform(a, b);
+```
+
+Calculating the transformation between two frames might be expensive depending
+on the complexity of the graph structure. A ``TreeView`` can be used to speed
+up the calculation:
+```
+TreeView view = g.getTree(g.getVertex(a));
+const Transform tf3 = g.getTransform(a, b, view);
+```
+
+Since creating the ``TreeView`` walks the whole graph once, using this methods
+only makes sense when multiple transformations need to be calculated.
+
+If you need to calculate the same transformation multiple times, you can
+use ``getPath()`` to retrieve a list of all frames that need to be traversed
+to calculate the transformation. The path can be used to speed up the calculation
+of the transform even further.
+```
+envire::core::Path::Ptr path = g.getPath(a, b, false);
+const Transform tf4 = g.getTransform(path);
+```
+
+
+#### Disconnecting a Frame from the Graph
+``disconnectFrame()`` can be used to remove all transformations coming from
+or leading to a certain frame.
+
+#### TreeViews
+
+``TreeViews`` provide a tree view of the graph structure. I.e. when viewed
+through a ``TreeView`` the graph turns into a tree with a specific root node.
+
+TreeViews use vertex_descriptors instead of FrameIds to reference frames because
+vertex_descriptors can be hashed in constant time (they are just pointers).
+
+#### Creating Tree Views
+TreeViews can be created by calling ``getTree()`` and providing a root node.
+```
+EnvireGraph g;
+const FrameId root("root");
+TreeView view = g.getTree(root);
+```
+
+Note that the view will most likely be copied on return. If the tree is large
+you might want to avoid that copy and pass an empty view as out-parameter instead:
+```
+TreeView view2;
+g.getTree(root, &view2);
+```
+
+#### Updating Tree Views
+
+By default, a tree view shows a snapshot of the graph. I.e. if the graph changes,
+the changes will not be visible in the view. The view or parts of it might
+become invalid when vertices or edges are removed from the graph.
+To avoid this, you can request a self-updating tree view:
+```
+g.getTree(root, true, &view);
+```
+
+The view has three signals ``crossEdgeAdded``, ``edgeAdded`` and ``edgeRemoved``
+that will be emitted whenever the tree view changes.
 
 
 Maintenance and development
