@@ -1,5 +1,7 @@
-Build and test status: [![CircleCI](https://circleci.com/gh/envire/envire-envire_core.svg?style=svg)](https://circleci.com/gh/envire/envire-envire_core)
-
+= Envire Core Documentation
+Build and test
+[link=https://circleci.com/gh/envire/envire-envire_core]
+image::https://circleci.com/gh/envire/envire-envire_core.svg?style=svg[Build Status]
 
 EnviRe Core
 =============
@@ -192,7 +194,7 @@ The ``ItemIterator`` can be used to iterate over all items of a specific type
 in a frame. The iterator internally takes care of the necessary type casting
 and type checks.
 ```
-using OcTreeItem = envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>;  
+using OcTreeItem = envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>;
 using OcTreeItemIt = EnvireGraph::ItemIterator<envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>>;
 OcTreeItemIt it, end;
 std::tie(it, end) = g.getItems<envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>>(frame);
