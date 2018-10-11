@@ -1,6 +1,8 @@
 = EnviRe Core Documentation
 
-Build and test
+:toc:
+
+== Build and Test Status
 
 [link=https://circleci.com/gh/envire/envire-envire_core]
 image::https://circleci.com/gh/envire/envire-envire_core.svg?style=svg[Build Status]
