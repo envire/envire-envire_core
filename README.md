@@ -113,6 +113,13 @@ possible to remove frames while they are still connected. The intention of this
 restriction is, to make the user aware of the consequences that removing a frame
 might have for the graph structure as a whole.
 
+
+#### Loading Envire Plugins
+Envire Plugins provide ...
+TODO
+TODO
+TODO
+TODO
 #### Creating Items
 Before an item can be added to a frame, it has to be loaded using the ``ClassLoader``.
 ```
@@ -120,15 +127,13 @@ Before an item can be added to a frame, it has to be loaded using the ``ClassLoa
 #include <envire_core/items/Item.hpp>
 #include <octomap/AbstractOcTree.h>
 ```
-```
-TODO THIS CODE IS BROKEN!!! FIX IT
-//   envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>> octree;
-//   ClassLoader* loader = ClassLoader::getInstance();
-//   if(!loader->createEnvireItem("envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>", octree))
-//   {
-//     std::cerr << "Unabled to load envire::octomap::OcTree" << std::endl;
-//     return -1;
-//   }
+envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>::Ptr octree;
+ClassLoader* loader = ClassLoader::getInstance();
+if(!loader->createEnvireItem("envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>", octree))
+{
+	std::cerr << "Unabled to load envire::octomap::OcTree" << std::endl;
+	return -1;
+}
 ```
 
 It is also possible to instantiate items directly, however this is only
@@ -139,20 +144,23 @@ the ``ClassLoader`` was used to load the item.
 Once the item is loaded, there are two ways to add it to the graph.
 The common way is to add it using ``addItemToFrame()``:
 ```
-TODO BROKEN!!
-//   g.addItemToFrame(frame, octree);
+g.addItemToFrame(frame, octree);
 ```
 The item will remember the frame that it was added to. I.e. an item cannot be part of two frames at the same time.
 
 It is also possible to set the frame id beforehand and add the item using
 ``addItem()``.
 ```
-TODO BROKEN!!!!
-//   octree->setFrame(frame);
-//   g.addItem(octree);
+octree->setFrame(frame);
+g.addItem(octree);
 ```
 
-The item type can be a pointer to any subclass of ``ItemBase``.
+The item type can be a ``boost::shared_ptr`` to any subclass of ``ItemBase``.
+Item contains a typedef ``Ptr`` to make working with the pointer more convenient.
+```
+envire::core::Item<...>::Ptr p;
+```
+
 
 #### Accessing Items
 When working with items, the user needs to know the item type. The type can
@@ -163,15 +171,15 @@ either be provided at compile time using template parameters or at runtime using
 ``containsItems()`` is used to check for the existence of items of a given type
 in a given frame.
 ```
-TODO BROKEN!!!
-//   const bool contains = g.containsItems<envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>>(frame);
+const bool contains = g.containsItems<envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>>(frame);
 ```
+
 If the type is not known at compile time, there is also an overload that
-accepts ``std::type_index``:
+accepts ``std::type_index``. You can get the type index by calling
+``getTypeIndex()`` on any ``Item``.
 ```
-TODO BROKEN!!!
-//   const std::type_index index(octree->getTypeIndex());
-//   const bool contains2 = g.containsItems(frame, index);
+const std::type_index index(octree->getTypeIndex());
+const bool contains2 = g.containsItems(frame, index);
 ```
 
 
