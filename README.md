@@ -127,6 +127,7 @@ Before an item can be added to a frame, it has to be loaded using the ``ClassLoa
 #include <envire_core/items/Item.hpp>
 #include <octomap/AbstractOcTree.h>
 ```
+```
 envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>::Ptr octree;
 ClassLoader* loader = ClassLoader::getInstance();
 if(!loader->createEnvireItem("envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>", octree))
@@ -177,6 +178,7 @@ const bool contains = g.containsItems<envire::core::Item<boost::shared_ptr<octom
 If the type is not known at compile time, there is also an overload that
 accepts ``std::type_index``. You can get the type index by calling
 ``getTypeIndex()`` on any ``Item``.
+
 ```
 const std::type_index index(octree->getTypeIndex());
 const bool contains2 = g.containsItems(frame, index);
@@ -189,32 +191,31 @@ The ``ItemIterator`` can be used to iterate over all items of a specific type
 in a frame. The iterator internally takes care of the necessary type casting
 and type checks.
 ```
-TODO BROKEN!!!
-//   using Iterator = EnvireGraph::ItemIterator<envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>>;
-//   Iterator it, end;
-//   std::tie(it, end) = g.getItems<envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>>(frame);
-//   for(; it != end; ++it)
-//   {
-//     std::cout << "Item uuid: " << it->getIDString() << std::endl;
-//   }
+using OcTreeItem = envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>;  
+using OcTreeItemIt = EnvireGraph::ItemIterator<envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>>;
+OcTreeItemIt it, end;
+std::tie(it, end) = g.getItems<envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>>(frame);
+for(; it != end; ++it)
+{
+	std::cout << "Item uuid: " << it->getIDString() << std::endl;
+}
 ```
 
 A convenience method exist to get an ``ItemIterator`` of the i'th item:
 ```
-TODO BROKEN!!!
-//   Iterator itemIt = g.getItem<envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>>(frame, 42);
+OcTreeItemIt itemIt = g.getItem<OcTreeItem>(frame, 42);
 ```
 
 #### Accessing Items without Iterators
 If type information is not available at compile time, ``getItems()`` can also
 be used with ``std::type_index``:
+```const std::type_index index2(octree->getTypeIndex());
+const Frame::ItemList& items = g.getItems(frame, index2);
 ```
-TODO BROKEN!!!
-//   const std::type_index index2(octree->getTypeIndex());
-//   const Frame::ItemList& items = g.getItems(frame, index2);
-```
+However without compile time type information automatic type casting is not
+available, thus in this case ``getItems`` returns a list of ``ItemBase::Ptr``.
+The list is returned as reference and points to graph internal memory.
 
-The returned reference points directly to graph internal memory.
 
 #### Removing Items
 
@@ -222,19 +223,17 @@ Items can be removed by calling ``removeItemFromFrame()``. Removing items invali
 all iterators of the same type. To be able to iteratively remove items, the
 method returns a new pair of iterators.
 ```
-TODO BROKEN!!!
-//   Iterator i, endI;
-//   std::tie(i, endI) = g.getItems<envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>>(frame);
-//   for(; i != endI;)
-//   {
-//       std::tie(i, endI) = g.removeItemFromFrame(frame, i);
-//   }
+OcTreeItemIt i, endI;
+std::tie(i, endI) = g.getItems<OcTreeItem>(frame);
+for(; i != endI;)
+{
+		std::tie(i, endI) = g.removeItemFromFrame(frame, i);
+}
 ```
 
 All items can be removed at once using ``clearFrame()``.
 ```
-TODO BROKEN!!!
-//   g.clearFrame(frame);
+g.clearFrame(frame);
 ```
 
 
