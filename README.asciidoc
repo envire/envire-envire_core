@@ -22,7 +22,7 @@ simulation and operations and simplify the interchange of algorithms among softw
 == Installation
 === Using Rock's build system
 The easiest way to build and install this package is to use Rock's build system.
-See [this page](http://rock-robotics.org/documentation/installation.html)
+See http://rock-robotics.org/documentation/installation.html[this page]
 on how to install Rock.
 
 === Standalone Installation
@@ -43,7 +43,7 @@ If no prefix is provided, the dependencies will be installed system-wide.
 
 == Rock CMake Macros
 This package uses a set of CMake helper shipped as the Rock CMake macros.
-Documentations is available on [this page](http://rock-robotics.org/documentation/packages/cmake_macros.html).
+Documentations is available on http://rock-robotics.org/documentation/packages/cmake_macros.html[this page].
 
 == Rock Standard Layout
 This directory structure follows some simple rules, to allow for generic build
