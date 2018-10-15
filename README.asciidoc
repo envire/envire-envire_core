@@ -1,5 +1,6 @@
 = EnviRe Core Documentation
 :toc: macro
+:toclevels: 5
 
 toc::[]
 
