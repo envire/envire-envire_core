@@ -40,14 +40,11 @@ sudo ./install_dependencies.sh [path_to_prefix]
 ----
 If no prefix is provided, the dependencies will be installed system-wide.
 
-
 == Rock CMake Macros
-
 This package uses a set of CMake helper shipped as the Rock CMake macros.
 Documentations is available on [this page](http://rock-robotics.org/documentation/packages/cmake_macros.html).
 
 == Rock Standard Layout
-
 This directory structure follows some simple rules, to allow for generic build
 processes and simplify reuse of this project. Following these rules ensures that
 the Rock CMake macros automatically handle the project's build process and
@@ -75,8 +72,325 @@ STRUCTURE
 	should contain the existing doxygen file: doxygen.conf
 
 
-== Graph Usage Examples
-This section contains a few usage examples that showcase most of the graph's features.
+== Documentation
+Envire Core is the main component of the envire library. It consists of:
+
+* A graph structure to represent the environment and utilities that help in
+  manipulating and analyzing the structure.
+* An event system to notify users about changes in the environment.
+* A plugin system that allows the user to store arbitrary Objects in the
+  envire graph.
+* Serialization.
+
+=== The Graph
+The envire graph is the backbone of the whole library. It stores arbitrary data
+and time & space transformations between the data.
+
+==== Structure
+The graph itself is implemented as inheritance chain. Each class in the chain
+adds some of the functionality.
+
+image::https://raw.githubusercontent.com/envire/envire.github.io/master/images/docs/graph/envire_core_graph_inherit.png[graph uml]
+
+
+``envire::core::Graph<E,V>`` is the root class of the graph structure. It extends
+a ``boost::labeled_graph``. The template parameters ``E`` and ``V`` are edge and
+vertex properties, i.e. they define the type of the data that can be stored
+in the edges and vertices of the graph. Edge properties need to implement the
+``envire::core::EdgePropertyConcept`` while vertex properties need to implement
+``envire::core::FramePropertyConcept``.
+
+The following features are provided by the ``Graph``:
+
+* Frames (vertices) are indexed by a unique string-based frame id and can be
+retrieved in O(1).
+* A double-linked graph structure is enforced. I.e. if an edge is added, the
+  inverse edge is calculated and added automatically. If an edge is updated,
+  the inverse is updated as well.
+* Users are informed about changes in the graph structure via a publisher
+  subscriber based event system.
+* TreeViews and Paths are provided to navigate the graph structure.
+
+
+The ``TransformGraph<V>`` extends ``Graph<Transformation, V>``. It adds functionality
+to calculate and set transformations (including covariance) between frames.
+Transformation chains are calculated automatically.
+
+The ``EnvireGraph`` extends ``TransformGraph<Frame>``. It adds functionality to
+add, remove and manipulate items. Items can be used to store arbitrary data in
+the graph.
+
+==== Edge & Vertex Property Concepts
+Edge and vertex properties (`E` and `V`) need to follow special concepts to be compatible with
+the ``Graph``. All edge properties need to implement ``envire::core::EdgePropertyConcept``
+while all vertex properties have to implement ``envire::core::FramePropertyConcept``.
+
+Both concepts ensure, that the property is serializable using boost serialization
+(``boost::SerializableConcept``) and that a string representation of the
+vertex/edge can be generated. The string representation is used when
+visualizing the graph.
+
+Furthermore edge properties need to implement an ``inverse()`` method, that
+inverts the *meaning* of the edge.
+
+Vertex properties need to implement ``const FrameId& getId()`` and
+``void setId(const FrameId&)``. Those methods are used to store a unique
+vertex identifier inside each vertex. This identifier is used as index when
+storing a frame inside the graph.
+
+==== Frames
+Frames are vertices in the structure of the ``EnvireGraph`` and implement the
+``FramePropertyConcept``. Each ``Frame`` stores a set of items indexed by type.
+
+==== Transformations
+Transformations (``envire::core::Transformation``) are edges in the ``EnvireGraph``.
+They implement the ``EdgePropertyConcept`` and describe the spatial and temporal
+displacement between frames.
+
+==== Items
+The data elements that are stored in the Frames of the graph are called Items.
+Every item must inherit from `envire::core::ItemBase`. `getTypeInfo()`
+and `getEmbeddedTypeInfo()` need to be overridden to provide correct type information
+about the item. `getTypeInfo()` should return the `type_info` of the item itself
+while `getEmbeddedTypeInfo()` should return the type of the encapsulated data (i.e.
+the type of the data that is returned in `getRawData()`).
+
+A template (`envire::core::Item<T>`) that inherits from `ItemBase` and carries
+arbitrary data `T` is provided for convenience. Thus manually inheriting from `ItemBase`
+should not be necessary.
+
+==== Tree Views
+``TreeViews`` are lightweight structures that *view* a portion of the graph as tree.
+Views are generated by bfs-visiting the graph starting at a given frame.
+All frames that are reachable from that frame will be part of the view. The structure
+does not contain any loops (it is a tree, not a graph). Edges that would create
+loops in the tree are called cross-edges and are stored in a special list inside
+the ``TreeView``.
+
+A ``TreeView`` contains pointers to the actual data, thus if the underlying graph
+is destroyed or manipulated, the view becomes invalid.
+
+A ``TreeView`` can either be static or dynamic. A static view is a snapshot of the
+graph at the time it was taken. I.e. it will not update or change. If the graph changes,
+parts of the tree might become invalid. Accessing the graph trough a static view
+after the underlying graph has changed may result in memory corruption and should
+be used with care.
+
+A dynamic ``TreeView`` is updated automatically whenever the underlying graph changes.
+The view provides signals that will be emitted when that happens. Dynamic views
+significantly increase the computational cost of all manipulative graph operations.
+Especially the removal of edges is expensive.
+
+
+=== Graph Events
+The event-system is used by the ``Graph`` to inform the user about changes to the
+graph structure.
+
+image::https://raw.githubusercontent.com/envire/envire.github.io/master/images/docs/graph/envire_core_events.png[event uml]
+
+==== Publishing Events
+The ``GraphEventPublisher`` manages the subscribers and provides methods to
+notify subscribers about events. Every class that wants to publish events
+needs to extend ``GraphEventPublisher``. `Graph` and its subclasses extend
+this class.
+
+==== Receiving Events
+In order to receive events a class needs to extend ``GraphEventSubscriber``
+and override the ``notifyGraphEvent()`` method.
+Three convenience classes already exist, that do this and simplify
+the usage of the event-system. Thus there is usually no need to derive from
+``GraphEventSubscriber`` directly:
+
+* The ``GraphEventDispatcher`` handles all events and provides virtual methods
+  for each event. Thus a subscriber can simply extend the dispatcher and
+  override the methods that it cares about.
+
+* The ``GraphEventQueue`` buffers all events in a queue. If ``flush()`` is called,
+  all events are processed at once. The user needs to override the ``process()``
+  method to process the events. The queue detects contradicting events and
+  removes them from the queue. E.g. if a frame is added and removed before
+  ``flush()`` is called, neither the added- nor the removed-event is processed.
+
+* The ``GraphItemEventDispatcher<T>`` is a special dispatcher that is used to
+  receive typed item events. To receive only item events for a certain item
+  type, the user should derive from ``GraphItemEventDispatcher<T>`` where
+  ``T`` is the item type that he cares about.
+
+==== TreeView Events
+The ``TreeView`` does not use the event system. Instead it provides
+simple events using boost signals.
+
+
+=== Plugins
+
+EnviRe is designed on a modular plug-in mechanism in order to facilitate maintainability and
+integrability of 3rd party libraries as PCL and OctoMap.
+
+EnviRe provides tooling to easily define and load plug-in classes. As plugin-in back-end EnviRe
+relies on the http://wiki.ros.org/class_loader[class_loader] library. To gather and provide meta
+informations about all available plug-ins the plugin_manager library is used.
+
+For more details see the chapter on plugin design.
+
+==== Providing a user-data plug-in
+
+In order to handle user data types in EnviRe they have to be embedded into a ``envire::core::Item<T>`` class.
+The ``Item`` class augments the embedded type by a time-stamp, a reference frame and an unique ID.
+
+To register a new plug-in of the type ``envire::core::Item<namespace::UserType>`` for it's use with EnviRe, the macro
+``ENVIRE_REGISTER_ITEM ( namespace::UserType )`` has to be placed in a source file (*.cpp).
+It adds the class loader registration macro ``CLASS_LOADER_REGISTER_CLASS`` and also registers the
+class to the serialization (See the [serialization]({{site.baseurl}}/docs/core_serialization.html) section for further details).
+
+Note that the class ``UserType`` must be serializeable by
+http://www.boost.org/libs/serialization/doc/[boost serialization] at that point.
+
+In order to make the plug-in available to your system a XML file containing meta informations about the
+plug-in class needs to be exported.
+
+==== Example
+
+The following example shows how a new EnviRe item, with the embedded type
+``boost::shared_ptr<::octomap::AbstractOcTree>``, is defined in a *.cpp file:
+[source, c++]
+----
+#include <octomap/AbstractOcTree.h>
+#include <boost/shared_ptr.hpp>
+#include <envire_core/plugin/Plugin.hpp>
+
+ENVIRE_REGISTER_ITEM( boost::shared_ptr<octomap::AbstractOcTree> )
+----
+
+It is strongly recommended to use this macros when a new item is defined,
+since the plug-in mechanism and the serialization relay on it. Nonetheless it's
+possible to define item classes without using this macro, in this case the class won't
+be available as plug-in and it won't be possible to serialize the class.
+
+Since the embedded type must be serializeable by
+ http://www.boost.org/libs/serialization/doc/[boost serialization],
+it might be necessary to implement the necessary methods in a header file.
+
+
+To make the plug-in available to your system a XML file containing meta informations
+about the plug-in class needs to be exported.
+A minimal layout would look like this:
+[source, xml]
+----
+<library path="envire_octomap">
+  <class class_name="envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>" base_class_name="envire::core::ItemBase">
+  </class>
+</library>
+----
+This minimal layout can be extended by a class description, associations to other types
+and a singleton flag.
+If this optional fields are not defined, the description will be empty, there won't be
+any associations and the plug-in won't be
+a singleton instance.
+
+[source, xml]
+----
+<library path="envire_octomap">
+  <class class_name="envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>" base_class_name="envire::core::ItemBase">
+    <description>Octomap OcTree plugin</description>
+    <associations>
+      <class class_name="boost::shared_ptr<octomap::AbstractOcTree>"></class>
+      <class class_name="octomap::AbstractOcTree"></class>
+      <class class_name="octomap::OcTree"></class>
+    </associations>
+    <singleton>false</singleton>
+  </class>
+</library>
+----
+
+To install the XML file there is a cmake macro ``install_plugin_info`` available, which is
+exported by the plugin_manager library.
+
+[source, cmake]
+----
+rock_library(envire_octomap
+    SOURCES OcTree.cpp
+    HEADERS OcTree.hpp
+    DEPS_CMAKE Boost octomap
+    DEPS_PKGCONFIG class_loader envire_core)
+
+install_plugin_info(envire_octomap)
+----
+
+The macro ``install_plugin_info`` installs a file named ``envire_octomap.xml`` to the folder
+`lib/plugin_manager` relative to the currently defined CMAKE install path.
+
+
+==== Using a plug-in
+
+To create an instance of a plug-in the ``envire::core::ClassLoader`` singleton class can be used.
+
+Since EnviRe plug-ins are pure class_loader plug-ins it's also possible to load them by using
+only the class_loader library or the ``PluginLoader`` class of the plugin_manager library.
+For more details read the design section of this page.
+
+==== Example
+
+In the following example the OcTree plug-in class is loaded as abstract ItemBase class:
+[source, c++]
+----
+envire::core::ClassLoader* loader = envire::core::ClassLoader::getInstance();
+if(loader->hasEnvireItem("envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>"))
+{
+    ItemBase::Ptr item;
+    if (loader->createEnvireItem("envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>", item))
+    {
+        // A new item has been successfully created
+    }
+}
+----
+
+The plug-in class can be also directly casted:
+[source, c++]
+----
+envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>::Ptr item;
+envire::core::ClassLoader::getInstance()->createEnvireItem< envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>> >("envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>", item);
+----
+In this case at least the embedded type has to be known at compile time.
+
+It is also possible to get an Item for a given embedded type by calling
+the method ``createEnvireItemFor("boost::shared_ptr<octomap::AbstractOcTree>", item)``.
+
+
+==== Design
+image::https://github.com/envire/envire.github.io/raw/master/images/docs/plugins/plugin_manager_design.png[plugin_manager_design]
+
+The EnviRe ``envire_core::ClassLoader`` relies on the plugin_manager library which relies on the
+class_loader library.
+The class_loader library handles the export of classes, loading of shared libraries
+and the creation of new instances. More informations about the class_loader can be
+found http://wiki.ros.org/class_loader[here].
+The plugin_manager library handles XML files to provide a-priori meta informations
+about the available plug-ins. In contrast to the ROS http://wiki.ros.org/pluginlib[plugin_lib],
+the plugin_manager supports singleton instances, associations and is framework
+independent.
+
+Advantages of the plugin_manager library:
+
+- Gather meta informations of available plugins without loading them
+- Model associations between classes
+- Support of singleton instances
+- Framework independent
+
+
+The ``plugin_manager::PluginManager`` class parses all XML files and preprocesses the informations.
+It can be queried about available plug-in classes, relations, associations or properties of classes.
+An example of a XML file can be found in the previous section.
+
+The ``plugin_manager::PluginLoader`` is a singleton class which on demand creates a new
+``class_loader::ClassLoader`` instance for each new library that is required. It also holds and
+returns the same instance of a plug-in class if it is marked as singleton.
+
+The ``envire_core::ClassLoader`` extends the ``PluginLoader`` by knowledge about the EnviRe
+base classes.
+
+
+== Code Examples
+This section contains code examples showcasing most of the envire core features
 
 === Frames
 ==== Adding Frames
@@ -89,7 +403,6 @@ g.addFrame(frame);
 ----
 
 or implicitly by using a unknown frame id in ``addTransform()``.
-
 [source,c++]
 ----
 EnvireGraph g;
@@ -97,7 +410,6 @@ const FrameId frameA = "frame_a";
 const FrameId frameB = "frame_b";
 Transform tf;
 g.addTransform(frameA, frameB, tf);
-
 ----
 Frames cannot be added twice. If a frame with the given name already exists,
 an exception will be thrown.
@@ -117,7 +429,6 @@ g.addFrame(frame);
 g.disconnectFrame(frame);
 g.removeFrame(frame);
 ----
-
 ``disconnectFrame()`` removes all transforms that are connected to the given frame.
 Frames can only be removed, if they are not connected to the graph. I.e. if no
 edges are connected to the frame. An exception will be thrown, if the frame is
@@ -139,7 +450,6 @@ Before an item can be added to a frame, it has to be loaded using the ``ClassLoa
 #include <envire_core/items/Item.hpp>
 #include <octomap/AbstractOcTree.h>
 ----
-
 [source,c++]
 ----
 envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>::Ptr octree;
@@ -150,7 +460,6 @@ if(!loader->createEnvireItem("envire::core::Item<boost::shared_ptr<octomap::Abst
 	return -1;
 }
 ----
-
 It is also possible to instantiate items directly, however this is only
 recommended for testing because visualization and serialization only work if
 the ``ClassLoader`` was used to load the item.
@@ -159,26 +468,21 @@ the ``ClassLoader`` was used to load the item.
 Once the item is loaded, there are two ways to add it to the graph.
 The common way is to add it using ``addItemToFrame()``:
 [source,c++]
-
 ----
 g.addItemToFrame(frame, octree);
 ----
-
 The item will remember the frame that it was added to. I.e. an item cannot be part of two frames at the same time.
 
 It is also possible to set the frame id beforehand and add the item using
 ``addItem()``.
 [source,c++]
-
 ----
 octree->setFrame(frame);
 g.addItem(octree);
 ----
-
 The item type can be a ``boost::shared_ptr`` to any subclass of ``ItemBase``.
 Item contains a typedef ``Ptr`` to make working with the pointer more convenient.
 [source,c++]
-
 ----
 envire::core::Item<...>::Ptr p;
 ----
@@ -192,28 +496,23 @@ either be provided at compile time using template parameters or at runtime using
 ``containsItems()`` is used to check for the existence of items of a given type
 in a given frame.
 [source,c++]
-
 ----
 const bool contains = g.containsItems<envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>>(frame);
 ----
-
 If the type is not known at compile time, there is also an overload that
 accepts ``std::type_index``. You can get the type index by calling
 ``getTypeIndex()`` on any ``Item``.
-
 [source,c++]
 ----
 const std::type_index index(octree->getTypeIndex());
 const bool contains2 = g.containsItems(frame, index);
 ----
 
-
 ==== Accessing Items with Iterators
 
 The ``ItemIterator`` can be used to iterate over all items of a specific type
 in a frame. The iterator internally takes care of the necessary type casting
 and type checks.
-
 [source,c++]
 ----
 using OcTreeItem = envire::core::Item<boost::shared_ptr<octomap::AbstractOcTree>>;
@@ -225,7 +524,6 @@ for(; it != end; ++it)
 	std::cout << "Item uuid: " << it->getIDString() << std::endl;
 }
 ----
-
 A convenience method exist to get an ``ItemIterator`` of the i'th item:
 [source,c++]
 ----
