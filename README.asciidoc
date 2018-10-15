@@ -231,7 +231,7 @@ EnviRe provides tooling to easily define and load plug-in classes. As plugin-in 
 relies on the http://wiki.ros.org/class_loader[class_loader] library. To gather and provide meta
 informations about all available plug-ins the plugin_manager library is used.
 
-For more details see the chapter on plugin design.
+For more details see the chapter on plugin <<Design>>.
 
 ==== Providing a user-data plug-in
 
@@ -479,7 +479,7 @@ ENVIRE_REGISTER_ITEM( example::DummyType )
 ----
 
 How to create and install the plugin meta-informations on your system is
-described in the plugins section. TODO reference
+described in the <<Plugins>> section.
 
 ==== Framework connection
 
@@ -695,8 +695,6 @@ All items can be removed at once using ``clearFrame()``.
 g.clearFrame(frame);
 ----
 
-=== Transformations
-TODO text about what transforms are etc.
 
 ==== Adding Transformations
 [source,c++]
