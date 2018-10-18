@@ -41,6 +41,16 @@ sudo ./install_dependencies.sh [path_to_prefix]
 ----
 If no prefix is provided, the dependencies will be installed system-wide.
 
+
+=== Test Coverage and API Documentation
+Run `make doc` to generate the API documentation.
+
+Set the `COVERAGE` flag during configuration to generate a code coverage make target.
+Run `make test && make coverage` to generate the coverage report. You can find the
+generated report in `build/cov`. Please note that coverage reporting only works
+when code optimization is disabled. I.e. when `CMAKE_BUILD_TYPE=Debug`.
+
+
 == Rock CMake Macros
 This package uses a set of CMake helper shipped as the Rock CMake macros.
 Documentations is available on http://rock-robotics.org/documentation/packages/cmake_macros.html[this page].
@@ -71,6 +81,9 @@ STRUCTURE
 	easily embedded include the external software directly here
 -- doc/
 	should contain the existing doxygen file: doxygen.conf
+
+
+
 
 
 == Documentation

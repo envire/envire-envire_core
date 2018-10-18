@@ -25,8 +25,8 @@
 -->
 
 <package>
-  <description brief="Core part for the Environment Representation library">
-      Core library for the Environment Representation. The goal of this core part is to deal with the representation commonalities among plugins
+  <description brief="Core part of the Environment Representation library">
+      Core library of the Environment Representation. The goal of this core part is to deal with the representation commonalities among plugins
   </description>
   <author>Envire Team/ric-team8@dfki.de</author>
   <maintainer>Javier Hidalgo Carrio/javier.hidalgo_carrio@dfki.de</maintainer>
@@ -46,12 +46,19 @@
 
    <classifiers>
        <classifier>c++</classifier>
+       <classifier>rock</classifier>
+       <classifier>ubuntu</classifier>
    </classifiers>
 
   <keywords>
     <keyword>Representation</keyword>
     <keyword>Geographic</keyword>
+    <keyword>Environment</keyword>
+    <keyword>Graph</keyword>
   </keywords>
 
-    <stage>0</stage>
+  <stage>2</stage>
+  <use>multi project</use>
+
+
 </package>
