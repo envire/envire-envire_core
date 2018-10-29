@@ -94,7 +94,7 @@ namespace envire { namespace core
             {
                 last_time = tf.time;
             }
-            return Transform(this->time, this->transform*tf.transform);
+            return Transform(last_time, this->transform*tf.transform);
         }
         
         Transform inverse() const
