@@ -48,6 +48,11 @@ ClassLoader* ClassLoader::getInstance()
     return base::Singleton<ClassLoader>::getInstance();
 }
 
+void ClassLoader::destroyInstance()
+{
+    base::Singleton<ClassLoader>::destroyInstance();
+}
+
 bool ClassLoader::hasEnvireItem(const std::string& class_name) const
 {
     return hasClassOfType(class_name, envire_item_base_class);

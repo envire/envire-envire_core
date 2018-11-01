@@ -55,8 +55,15 @@ class ClassLoader : public plugin_manager::PluginLoader
 public:
     /**
      * @brief Returns the singleton instance of this class
+     * @note not thread-safe
      */
     static ClassLoader* getInstance();
+    
+    /** 
+     * @brief Destroys the intsance returned by getInstance().
+     * @note not thread-safe
+     */
+    static void destroyInstance();
 
     /**
      * @brief Returns true if the class is registerd and inherits from envire::core::ItemBase.
