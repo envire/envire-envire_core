@@ -196,12 +196,8 @@ BOOST_AUTO_TEST_CASE(test_unkown_plugin_binary_deserialization)
 //     BOOST_CHECK(Serialization::save(oa_s, plugin));
 //     ostream_2.close();
 
-    const char* root_path = std::getenv("AUTOPROJ_CURRENT_ROOT");
-    std::string serialized_file;
-    if(root_path != NULL)
-    {
-        serialized_file = std::string(root_path) + "/envire/envire_core/test/vector_plugin.bin";
-    }
+    std::string serialized_file = PathSingleton::binaryFolderPath.string() + "/vector_plugin.bin";
+
     boost::filesystem::path file(serialized_file);
     BOOST_CHECK(boost::filesystem::exists(file));
 
@@ -224,12 +220,8 @@ BOOST_AUTO_TEST_CASE(test_unkown_plugin_binary_deserialization)
 
 BOOST_AUTO_TEST_CASE(test_unkown_plugin_text_deserialization)
 {
-    const char* root_path = std::getenv("AUTOPROJ_CURRENT_ROOT");
-    std::string serialized_file;
-    if(root_path != NULL)
-    {
-        serialized_file = std::string(root_path) + "/envire/envire_core/test/vector_plugin.asc";
-    }
+    std::string serialized_file = PathSingleton::binaryFolderPath.string() + "/vector_plugin.asc";
+
     boost::filesystem::path file(serialized_file);
     BOOST_CHECK(boost::filesystem::exists(file));
 

@@ -25,7 +25,8 @@ if(ENABLE_PLUGINS)
 #copy test files to build/test directory
 file(GLOB xml_files "${CMAKE_CURRENT_SOURCE_DIR}/*.xml")
 file(GLOB bin_files "${CMAKE_CURRENT_SOURCE_DIR}/*.bin")
-set(test_files "${xml_files};${bin_files}")
+file(GLOB asc_files "${CMAKE_CURRENT_SOURCE_DIR}/*.asc")
+set(test_files "${xml_files};${bin_files};${asc_files}")
 add_custom_command(TARGET test_plugins PRE_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy
                        ${test_files} $<TARGET_FILE_DIR:test_plugins>)
