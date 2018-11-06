@@ -23,3 +23,7 @@ jobs:
       - run:
           name: test_suit
           command: ~/project/build/test/test_suite
+      - run:
+          name: test_plugins
+          command: ~/project/build/test/test_plugins
+
