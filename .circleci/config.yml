@@ -19,7 +19,7 @@ jobs:
           command: ./install_dependencies.sh
       - run:
           name: compile
-          command: mkdir build && cd build && cmake -DROCK_TEST_ENABLED=ON .. && make -j4
+          command: mkdir build && cd build && cmake -DROCK_TEST_ENABLED=ON .. && make -j4 install
       - run:
           name: test_suit
           command: ~/project/build/test/test_suite
