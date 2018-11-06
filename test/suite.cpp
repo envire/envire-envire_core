@@ -37,13 +37,17 @@
 #include <boost/filesystem.hpp>
 #include <iostream>
 #include "PathSingleton.hpp"
+#include <envire_core/plugin/ClassLoader.hpp>
 
 // entry point:
 int main(int argc, char* argv[], char* envp[])
 {
   PathSingleton::binaryFolderPath = boost::filesystem::system_complete(argv[0]);
   PathSingleton::binaryFolderPath = PathSingleton::binaryFolderPath.parent_path();
-  return boost::unit_test::unit_test_main( &init_unit_test, argc, argv );
+  int result = boost::unit_test::unit_test_main( &init_unit_test, argc, argv );
+  
+  envire::core::ClassLoader::destroyInstance();
+  return result;
 }
 
 
