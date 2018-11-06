@@ -24,6 +24,6 @@ jobs:
           name: test_suit
           command: ~/project/build/test/test_suite
       - run:
-          name: test_plugins
+          name: LD_LIBRARY_PATH=/usr/local/lib test_plugins
           command: ~/project/build/test/test_plugins
 
