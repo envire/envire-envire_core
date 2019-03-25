@@ -39,6 +39,8 @@ Some dependencies need to be build from source. A script is provided to install 
 chmod +x install_dependencies.sh
 sudo ./install_dependencies.sh [path_to_prefix]
 ----
+The [path_to_prefix] must be a full path.
+
 If no prefix is provided, the dependencies will be installed system-wide.
 
 
