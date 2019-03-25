@@ -44,6 +44,10 @@ struct EnvireGraphStructureVisualization::Data {
     osg::ref_ptr<osg::Group> rootGroup = nullptr;
     osg::ref_ptr<osg::Node> nextNode = nullptr;
     FrameId currentRoot;
+    
+      /**Convert envire transform to osg transform */
+    std::pair<osg::Quat, osg::Vec3d> convertTransform(const envire::core::transformType& tf) const;
+    
 };
 
 QStringList EnvireGraphStructureVisualization::getNodes()
@@ -152,12 +156,12 @@ osg::ref_ptr<osg::Node> EnvireGraphStructureVisualization::drawGraphStructure(co
   {
     tree.edgeAdded.connect([&] (GraphTraits::vertex_descriptor origin, GraphTraits::vertex_descriptor target)
     {
-      const Transform tf = graph.getTransform(origin, target);
+      const transformType tf = graph.getTransform(origin, target);
       const FrameId& originName = graph.getFrameId(origin);
       const FrameId& targetName = graph.getFrameId(target);
       osg::Quat orientation;
       osg::Vec3d translation;
-      std::tie(orientation, translation) = convertTransform(tf);
+      std::tie(orientation, translation) = p->convertTransform(tf);
       
       if(TransformerGraph::getFrame(*transformerGraph, originName) == nullptr)
         TransformerGraph::addFrame(*transformerGraph, originName);
@@ -194,7 +198,7 @@ osg::ref_ptr<osg::Node> EnvireGraphStructureVisualization::drawGraphStructure(co
 }
 
 
-std::pair<osg::Quat, osg::Vec3d> EnvireGraphStructureVisualization::convertTransform(const Transform& tf) const
+std::pair<osg::Quat, osg::Vec3d> EnvireGraphStructureVisualization::Data::convertTransform(const envire::core::transformType& tf) const
 {
   //normalizing is important, otherwise osg will break when switching the root.
   const base::Quaterniond& rot = tf.transform.orientation.normalized();

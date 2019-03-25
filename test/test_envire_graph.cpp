@@ -456,7 +456,7 @@ BOOST_AUTO_TEST_CASE(add_item_event_test)
     EnvireGraph graph;
     FrameId a("a");
     FrameId b("b");
-    Transform tf;
+    transformType tf;
     
     graph.addTransform(a, b, tf);
     
@@ -510,7 +510,7 @@ BOOST_AUTO_TEST_CASE(remove_item_event_test)
     EnvireGraph graph;
     FrameId a("a");
     FrameId b("b");
-    Transform tf;
+    transformType tf;
     
     graph.addTransform(a, b, tf);
     Item<string>::Ptr item1(new Item<string>("The ships hung in the sky in much the same way that bricks don't."));
@@ -595,7 +595,7 @@ BOOST_AUTO_TEST_CASE(graphviz_test)
     {
         FrameId origin = "frame_" + boost::lexical_cast<std::string>(i);
         FrameId target = "frame_" + boost::lexical_cast<std::string>(i + 1);
-        Transform tf;
+        transformType tf;
         graph.addTransform(origin, target, tf);
     }
     
@@ -609,9 +609,9 @@ BOOST_AUTO_TEST_CASE(complex_draw_test)
     const FrameId a = "frame_a";
     const FrameId b = "frame_b";
     const FrameId c = "frame_c";
-    Transform aToB;
+    transformType aToB;
     aToB.transform.translation << 1, 2, 3;
-    Transform bToC;
+    transformType bToC;
     bToC.transform.translation << 42, 44, -3;
     
     graph.addTransform(a, b, aToB);
@@ -687,8 +687,8 @@ BOOST_AUTO_TEST_CASE(envire_graph_serialization_test)
     FrameId b = "BBB";
     FrameId c = "CCCC";
     EnvireGraph graph;
-    Transform ab;
-    Transform bc;
+    transformType ab;
+    transformType bc;
     
     ab.transform.translation << 1, 2, 3;
     ab.transform.orientation.coeffs() << 0, 1, 2, 3; 
@@ -713,7 +713,7 @@ BOOST_AUTO_TEST_CASE(envire_graph_publish_current_state_test)
     FrameId a = "frame_a";
     FrameId b = "frame_b";
     EnvireGraph graph;
-    Transform ab;
+    transformType ab;
     ItemBase::Ptr item1(new Item<string>("bla"));
     ItemBase::Ptr item2(new Item<int>(42));
 
@@ -737,7 +737,7 @@ BOOST_AUTO_TEST_CASE(envire_graph_save_load_test)
     FrameId a = "frame_a";
     FrameId b = "frame_b";
     EnvireGraph graph;
-    Transform ab;
+    transformType ab;
 //     ItemBase::Ptr item1(new Item<string>("bla"));
 //     ItemBase::Ptr item2(new Item<int>(42));
 
@@ -770,7 +770,7 @@ BOOST_AUTO_TEST_CASE(envire_graph_structural_copy_test)
     FrameId b = "frame_b";
     FrameId c = "frame_c";
     EnvireGraph graph;
-    Transform tf;
+    transformType tf;
     ItemBase::Ptr item1(new Item<string>("bla"));
     ItemBase::Ptr item2(new Item<int>(42));
 

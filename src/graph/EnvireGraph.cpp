@@ -238,7 +238,7 @@ void EnvireGraph::removeItemFromFrame(const ItemBase::Ptr item)
 void EnvireGraph::publishCurrentState(GraphEventSubscriber* pSubscriber)
 {
     // publish vertices and edges
-    envire::core::Graph< envire::core::Frame, envire::core::Transform >::publishCurrentState(pSubscriber);
+    envire::core::Graph< envire::core::Frame, envire::core::transformType >::publishCurrentState(pSubscriber);
 
     // publish items
     typename EnvireGraph::vertex_iterator vertex_it, vertex_end;
@@ -272,7 +272,7 @@ void EnvireGraph::unpublishCurrentState(GraphEventSubscriber* pSubscriber)
     }
 
     // unpublish vertices and edges
-    envire::core::Graph< envire::core::Frame, envire::core::Transform >::unpublishCurrentState(pSubscriber);
+    envire::core::Graph< envire::core::Frame, envire::core::transformType >::unpublishCurrentState(pSubscriber);
 }
 
 void EnvireGraph::saveToFile(const std::string& file) const
@@ -316,7 +316,7 @@ void EnvireGraph::createStructuralCopy(EnvireGraph& destination) const
         const vertex_descriptor tar = getTargetVertex(*edgeIt);
         const FrameId sourceId = getFrameId(src);
         const FrameId targetId = getFrameId(tar);
-        const Transform tf(getTransform(src, tar));
+        const transformType tf(getTransform(src, tar));
         try 
         {
             destination.addTransform(sourceId, targetId, tf);

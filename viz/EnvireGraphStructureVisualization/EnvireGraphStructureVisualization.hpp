@@ -33,7 +33,7 @@
 #ifndef Q_MOC_RUN
 //workaround for qt bug ( 4.7.3, 4.7.4, 4.8.0, 4.8.1 ) with boost 1.48
 //https://bugreports.qt.io/browse/QTBUG-22829
-#include <envire_core/graph/EnvireGraph.hpp>
+#include <envire_core/graph/EnvireGraph.hpp> 
 #endif
 
 
@@ -42,10 +42,6 @@
 
 #include <memory>
 
-namespace envire { namespace core 
-{
-  class Transform;
-}}
 
 namespace vizkit3d
 {
@@ -79,8 +75,6 @@ namespace vizkit3d
     /** Check if two lists have the same content*/
     bool areSame(const QStringList& a, const QStringList& b) const;
     
-    /**Convert envire transform to osg transform */
-    std::pair<osg::Quat, osg::Vec3d> convertTransform(const envire::core::Transform& tf) const;
     osg::ref_ptr<osg::Node> drawGraphStructure(const envire::core::EnvireGraph& graph,
                                                 const envire::core::FrameId& root);
     

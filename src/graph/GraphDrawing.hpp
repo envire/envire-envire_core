@@ -91,7 +91,7 @@ namespace envire { namespace core
         template <class EDGE>
         void operator()(std::ostream &out, const EDGE& e) const
         {
-            const Transform& tf = propMap[e];
+            const transformType& tf = propMap[e];
             out << "[label=\"" << tf.time.toString(::base::Time::Seconds) <<
             boost::format("\\nt: (%.2f %.2f %.2f)\\nr: (%.2f %.2f %.2f %.2f)") % tf.transform.translation.x() % tf.transform.translation.y() % tf.transform.translation.z()
             % tf.transform.orientation.w() % tf.transform.orientation.x() % tf.transform.orientation.y() % tf.transform.orientation.z()

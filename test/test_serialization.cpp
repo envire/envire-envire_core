@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(envire_graph_serialization_binary)
     FrameId a = "frame_a";
     FrameId b = "frame_b";
     EnvireGraph graph;
-    Transform tf;
+    transformType tf;
     tf.transform.translation << 42, 21, -42;
     tf.transform.orientation = base::AngleAxisd(0.25, base::Vector3d::UnitX());
     tf.transform.cov = base::TransformWithCovariance::Covariance::Identity() * 2.0;
@@ -325,7 +325,7 @@ BOOST_AUTO_TEST_CASE(envire_graph_serialization_binary)
     BOOST_CHECK(begin->getTime() == vector_plugin_b->getTime());
 
     // check if transformation is the same
-    Transform tf_2 = graph_2.getTransform(a, b);
+    transformType tf_2 = graph_2.getTransform(a, b);
     BOOST_CHECK(tf.time == tf_2.time);
     BOOST_CHECK(tf.transform.cov == tf_2.transform.cov);
     BOOST_CHECK(tf.transform.translation == tf_2.transform.translation);

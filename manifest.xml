@@ -34,7 +34,6 @@
   <url>http://envire.github.io</url>
 
   <depend package="base/cmake" />
-  <depend package="base/types" />
   <depend package="base/boost_serialization" />
   <depend package="glog" />
   <depend package="tools/class_loader" optional="1"/>

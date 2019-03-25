@@ -34,56 +34,61 @@
 #include <boost/serialization/nvp.hpp>
 #include <boost_serialization/BaseTypes.hpp>
 #include <boost/format.hpp>
-
 #include <base/Time.hpp>
-#include <base/TransformWithCovariance.hpp>
 
 namespace envire { namespace core
 {
+  
+    /** @param TRANSFORM FIXME define constraints
+    /**                  Constraints:
+     *                   * TRANSFORM::TRANSFORM(translation, orientation)   
+     *                   * TRANSFORM TRANSFORM::inverse()
+     *                   * static TRANSFORM TRANSFORM::Identity()
+    /** @ */
+    template <class TRANSFORM>
     class Transform
     {
     public:
+        using innerTransformType = TRANSFORM;
         base::Time time; /** Timestamp */
-        base::TransformWithCovariance transform; /** the transformation */
+        TRANSFORM transform; /** the transformation */
 
     public:
         Transform() { this->transform.invalidateTransform(); };
+        
         Transform(const base::Time &_time):time(_time)
         { this->transform.invalidateTransform(); };
-        Transform(const base::TransformWithCovariance &_twc):transform(_twc){};
-        Transform(const base::Time &_time, const base::TransformWithCovariance &_twc):
+        
+        Transform(const innerTransformType &_twc):transform(_twc){};
+        
+        Transform(const base::Time &_time, const innerTransformType &_twc):
             time(_time), transform(_twc){};
-        Transform(const base::Position &_translation, const base::Orientation &_orient):
-            transform(_translation, _orient){};
-        Transform(const base::Time &_time, const base::Position &_translation, const base::Orientation &_orient, const base::Matrix6d &_cov):
-            time(_time), transform(_translation, _orient, _cov){};
+            
+        Transform(const Transform<innerTransformType> &tf) : time(tf.time), transform(tf.transform) {}
 
-
-        Transform(const Transform &tf) : time(tf.time), transform(tf.transform) {}
-
-        Transform(Transform&& tf) : time(std::move(tf.time)),
+        Transform(Transform<innerTransformType>&& tf) : time(std::move(tf.time)),
                                     transform(std::move(tf.transform)) {}
 
-        Transform& operator=(const Transform& other)
+        Transform<innerTransformType>& operator=(const  Transform<innerTransformType>& other)
         {
           time = other.time;
           transform = other.transform;
           return *this;
         }
 
-        Transform& operator=(Transform&& other)
+         Transform<innerTransformType>& operator=(Transform<innerTransformType>&& other)
         {
           time = std::move(other.time);
           transform = std::move(other.transform);
           return *this;
         }
 
-        void setTransform(const base::TransformWithCovariance& tf)
+        void setTransform(const innerTransformType& tf)
         {
             this->transform = tf;
         }
 
-        Transform operator*(const Transform &tf) const
+         Transform<innerTransformType> operator*(const  Transform<innerTransformType> &tf) const
         {
             base::Time last_time;
             if(this->time > tf.time)
@@ -94,28 +99,36 @@ namespace envire { namespace core
             {
                 last_time = tf.time;
             }
-            return Transform(last_time, this->transform*tf.transform);
+            return  Transform<innerTransformType>(last_time, this->transform*tf.transform);
         }
         
-        Transform inverse() const
+         Transform<innerTransformType> inverse() const
         {
-            return Transform(time, transform.inverse());
+            return  Transform<innerTransformType>(time, transform.inverse());
         }
         
         const std::string toString() const 
         {
+            //FIXME access to orientation etc.
             std::stringstream out;
-            out << time.toString(::base::Time::Seconds) << "\n" <<
-            boost::format("t: (%.2f %.2f %.2f)\nr: (%.2f %.2f %.2f %.2f)") % transform.translation.x() % transform.translation.y() % transform.translation.z()
-            % transform.orientation.w() % transform.orientation.x() % transform.orientation.y() % transform.orientation.z();
+//             out << time.toString(::base::Time::Seconds) << "\n" <<
+//             boost::format("t: (%.2f %.2f %.2f)\nr: (%.2f %.2f %.2f %.2f)") % transform.translation.x() % transform.translation.y() % transform.translation.z()
+//             % transform.orientation.w() % transform.orientation.x() % transform.orientation.y() % transform.orientation.z();
             
             return out.str();
         }
         
         void setIdentity()
         {
-          transform.translation.setZero();
-          transform.orientation.setIdentity();
+          //FIXME this changes semantics slightly (references to translation and orientation will break)
+          transform = TRANSFORM::Identity();
+//           transform.translation.setZero();
+//           transform.orientation.setIdentity();
+        }
+        
+        static Transform<innerTransformType> Identity() 
+        {
+            return Transform<innerTransformType>(innerTransformType::Identity());
         }
 
     private:

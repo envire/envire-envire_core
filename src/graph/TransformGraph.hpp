@@ -20,17 +20,20 @@
 
 namespace envire { namespace core
 {
+  
+    using transformType = Transform<base::TransformWithCovariance>;
+  
     /**
      * FIXME comment
     */
     template <class FRAME_PROP>
     class TransformGraph :
-        public Graph<FRAME_PROP, Transform>
+        public Graph<FRAME_PROP, transformType>
     {
     public:
       using vertex_descriptor = GraphTraits::vertex_descriptor;
       using edge_descriptor = GraphTraits::edge_descriptor;
-      using Base = Graph<FRAME_PROP, Transform>;
+      using Base = Graph<FRAME_PROP, transformType>;
       using Base::num_edges;
       using Base::getFrameId;
       using Base::null_vertex;
@@ -44,36 +47,36 @@ namespace envire { namespace core
         /** @return the transform between a and b. Calculating it if necessary.
          * @throw UnknownTransformException if the transformation doesn't exist
          * @throw UnknownFrameException if the @p origin or @p target does not exist*/
-        const Transform getTransform(const FrameId& origin, const FrameId& target) const;
-        const Transform getTransform(const vertex_descriptor origin, const vertex_descriptor target) const;
+        const transformType getTransform(const FrameId& origin, const FrameId& target) const;
+        const transformType getTransform(const vertex_descriptor origin, const vertex_descriptor target) const;
 
          /** @return the transform between a and b. Calculating it if necessary.
          * @throw UnknownTransformException if the transformation doesn't exist
          * @throw UnknownFrameException if the @p origin or @p target does not exist*/
-        const Transform getTransform(const FrameId& origin, const FrameId& target, const TreeView &view) const;
-        const Transform getTransform(const vertex_descriptor origin, const vertex_descriptor target, const TreeView &view) const;
+        const transformType getTransform(const FrameId& origin, const FrameId& target, const TreeView &view) const;
+        const transformType getTransform(const vertex_descriptor origin, const vertex_descriptor target, const TreeView &view) const;
         /** @return the transform between source(edge) and target(edge) */
-        const Transform getTransform(const edge_descriptor edge) const;
+        const transformType getTransform(const edge_descriptor edge) const;
         
         /** @return the transform between path.front() and path.back().
          *          Returns Identity if path.size() <= 1.
          *  @throw UnknownTransformException if the edge between path[i] and path[i+1]
          *                                   does not exist.*/
-        const Transform getTransform(const std::shared_ptr<Path> path) const;
+        const transformType getTransform(const std::shared_ptr<Path> path) const;
         
         /**A convenience wrapper around Base::setEdgeProperty */
         void updateTransform(const vertex_descriptor origin, const vertex_descriptor target,
-                             const Transform& tf);
+                             const transformType& tf);
         void updateTransform(const FrameId& origin, const FrameId& target, 
-                             const Transform& tf);
+                             const transformType& tf);
 
-        void updateTransform(const edge_descriptor edge, const Transform &tf);
+        void updateTransform(const edge_descriptor edge, const transformType &tf);
         
         /**A convenience wrapper around Base::add_edge */
         void addTransform(const vertex_descriptor origin, const vertex_descriptor target,
-                          const Transform& tf);
+                          const transformType& tf);
         void addTransform(const FrameId& origin, const FrameId& target,
-                          const Transform& tf);
+                          const transformType& tf);
         
         /**A convenience wrapper around Base::remove_edge */
         void removeTransform(const vertex_descriptor origin, const vertex_descriptor target);
@@ -92,7 +95,7 @@ namespace envire { namespace core
     };
     
     template <class F>
-    const Transform TransformGraph<F>::getTransform(const vertex_descriptor originVertex,
+    const transformType TransformGraph<F>::getTransform(const vertex_descriptor originVertex,
                                                     const vertex_descriptor targetVertex) const
     {
         if(num_edges() == 0)
@@ -106,7 +109,7 @@ namespace envire { namespace core
         if(!pair.second)
         {            
             /** It is not a direct edge transformation **/
-            Transform tf(base::Position::Zero(), base::Orientation::Identity()); //start with identity transform
+            transformType tf = transformType::Identity(); //start with identity transform
             GraphBFSVisitor <vertex_descriptor>visit(targetVertex, this->graph());
 
             try
@@ -115,7 +118,7 @@ namespace envire { namespace core
 
             }catch(const FoundFrameException &e)
             {
-                base::TransformWithCovariance &trans(tf.transform);
+                transformType::innerTransformType &trans(tf.transform);
 
                 /** Compute the transformation **/
                 std::deque<vertex_descriptor>::iterator it = visit.tree->begin();
@@ -135,7 +138,7 @@ namespace envire { namespace core
 
     
   template <class F>
-  const Transform TransformGraph<F>::getTransform(const FrameId& origin, const FrameId& target) const
+  const transformType TransformGraph<F>::getTransform(const FrameId& origin, const FrameId& target) const
   {
       const vertex_descriptor originVertex = getVertex(origin);
       const vertex_descriptor targetVertex = getVertex(target); 
@@ -146,17 +149,17 @@ namespace envire { namespace core
 
   
     template <class F>
-    const Transform TransformGraph<F>::getTransform(const vertex_descriptor originVertex,
+    const transformType TransformGraph<F>::getTransform(const vertex_descriptor originVertex,
                                                     const vertex_descriptor targetVertex,
                                                     const TreeView &view) const
     {
         if (originVertex == targetVertex)
         {
             /* An identity transformation **/
-            return Transform(Eigen::Vector3d::Zero(), Eigen::Quaterniond::Identity());
+            return transformType::Identity();
         }
-
-        base::TransformWithCovariance origin_tf = base::TransformWithCovariance::Identity(); // An identity transformation
+        
+        transformType::innerTransformType origin_tf = transformType::innerTransformType::Identity(); // An identity transformation
 
         /** Get transformation from origin to the root **/
         vertex_descriptor od = originVertex;
@@ -170,7 +173,7 @@ namespace envire { namespace core
             od = view.getParent(od);
         }
 
-        base::TransformWithCovariance target_tf = base::TransformWithCovariance::Identity(); // An identity transformation
+        transformType::innerTransformType target_tf = transformType::innerTransformType::Identity(); // An identity transformation
 
         /** Get transformation from target to the root **/
         vertex_descriptor td = targetVertex;
@@ -189,11 +192,11 @@ namespace envire { namespace core
     }
     
     template <class F>
-    const Transform TransformGraph<F>::getTransform(const std::shared_ptr<Path> path) const
+    const transformType TransformGraph<F>::getTransform(const std::shared_ptr<Path> path) const
     {
         if(path->getSize() <= 1)
         {
-            return Transform(base::Position::Zero(), base::Orientation::Identity());
+            return transformType::Identity();
         }
         
         if(path->isDirty())
@@ -207,19 +210,19 @@ namespace envire { namespace core
         }
         
         
-        Transform tf = getTransform((*path)[0], (*path)[1]);
-        base::TransformWithCovariance &trans(tf.transform);
+        transformType tf = getTransform((*path)[0], (*path)[1]);
+        transformType::innerTransformType &trans(tf.transform);
         for(size_t i = 1; i < path->getSize() - 1; ++i)
         {
             //will throw if no path from path[i] to path[i + 1] exists
-            const Transform stepTf = getTransform((*path)[i], (*path)[i + 1]);
+            const transformType stepTf = getTransform((*path)[i], (*path)[i + 1]);
             trans = trans * stepTf.transform;
         }
         return tf; 
     }
 
     template <class F>
-    const Transform TransformGraph<F>::getTransform(const FrameId& origin, const FrameId& target, const TreeView &view) const
+    const transformType TransformGraph<F>::getTransform(const FrameId& origin, const FrameId& target, const TreeView &view) const
     {
         const vertex_descriptor originVertex = getVertex(origin);//will throw
         const vertex_descriptor targetVertex = getVertex(target); //will throw
@@ -227,28 +230,26 @@ namespace envire { namespace core
     }
 
     template <class F>
-    const Transform TransformGraph<F>::getTransform(edge_descriptor edge) const
+    const transformType TransformGraph<F>::getTransform(edge_descriptor edge) const
     {
         return (*this)[edge].transform;
     }
 
     template <class F>
-    void TransformGraph<F>::updateTransform(const vertex_descriptor origin,
-                                            const vertex_descriptor target,
-                                            const Transform& tf)
+    void TransformGraph<F>::updateTransform(const vertex_descriptor origin, const vertex_descriptor target,
+                                            const transformType& tf)
     {
         setEdgeProperty(origin, target, tf);
     }
     
     template <class F>
-    void TransformGraph<F>::updateTransform(const FrameId& origin, const FrameId& target, 
-                                            const Transform& tf)
+    void TransformGraph<F>::updateTransform(const FrameId& origin, const FrameId& target, const transformType& tf)
     {
         setEdgeProperty(origin, target, tf);
     }
 
     template <class F>
-    void TransformGraph<F>::updateTransform(const edge_descriptor edge, const Transform &tf)
+    void TransformGraph<F>::updateTransform(const edge_descriptor edge, const transformType &tf)
     {
         vertex_descriptor source_vertex = this->getSourceVertex(edge);
         vertex_descriptor target_vertex = this->getTargetVertex(edge);
@@ -259,14 +260,14 @@ namespace envire { namespace core
     template <class F>
     void TransformGraph<F>::addTransform(const vertex_descriptor origin,
                                          const vertex_descriptor target,
-                                         const Transform& tf)
+                                         const transformType& tf)
     {
         add_edge(origin, target, tf);
     }
     template <class F>
     void TransformGraph<F>::addTransform(const FrameId& origin,
                                          const FrameId& target,
-                                         const Transform& tf)
+                                         const transformType& tf)
     {
         add_edge(origin, target, tf);
     }
