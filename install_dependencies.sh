@@ -16,16 +16,19 @@ function build {
   cd ../../
 }
 
-PREFIX=""
-if [ "$#" -eq 1 ]; then
-PREFIX="-DCMAKE_INSTALL_PREFIX=$1"
 
-cat <<'EOF' > env.sh
-export CMAKE_PREFIX_PATH=$1
-export PKG_CONFIG_PATH=$1/lib/pkgconfig:$1/share/pkgconfig:$1/lib64/pkgconfig:$PKG_CONFIG_PATH
-export LD_LIBRARY_PATH=$1/lib:$1/lib64:$LD_LIBRARY_PATH
-export PATH=$1/bin:$PATH
-EOF
+
+PREFIX=""
+ABS_PREFIX=`readlink -f $1`
+if [ "$#" -eq 1 ]; then
+PREFIX="-DCMAKE_INSTALL_PREFIX=$ABS_PREFIX"
+
+echo "" > env.sh #create empty env.sh
+echo "export CMAKE_PREFIX_PATH=$ABS_PREFIX" >> env.sh
+echo "export PKG_CONFIG_PATH=$ABS_PREFIX/lib/pkgconfig:$ABS_PREFIX/share/pkgconfig:$ABS_PREFIX/lib64/pkgconfig:$PKG_CONFIG_PATH" >> env.sh
+echo "export LD_LIBRARY_PATH=$ABS_PREFIX/lib:$ABS_PREFIX/lib64:$LD_LIBRARY_PATH" >> env.sh
+echo "export PATH=$ABS_PREFIX/bin:$PATH" >> env.sh
+
 source env.sh
   
 fi
