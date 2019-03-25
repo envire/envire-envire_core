@@ -19,8 +19,9 @@ function build {
 
 
 PREFIX=""
-ABS_PREFIX=`readlink -f $1`
+ABS_PREFIX=""
 if [ "$#" -eq 1 ]; then
+ABS_PREFIX=`readlink -f $1`
 PREFIX="-DCMAKE_INSTALL_PREFIX=$ABS_PREFIX"
 
 echo "" > env.sh #create empty env.sh
@@ -32,7 +33,6 @@ echo "export PATH=$ABS_PREFIX/bin:$PATH" >> env.sh
 source env.sh
   
 fi
-
 
 build https://github.com/rock-core/base-cmake.git master base-cmake "$PREFIX"
 #SISL should be optional for base-types but it isn't
