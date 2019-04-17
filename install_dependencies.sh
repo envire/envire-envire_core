@@ -12,7 +12,7 @@ function build {
   mkdir $3/build
   cd $3/build
   cmake .. $4
-  make -j4 install
+  make -j install
   cd ../../
 }
 
@@ -35,10 +35,8 @@ source env.sh
 fi
 
 build https://github.com/rock-core/base-cmake.git master base-cmake "$PREFIX"
-#SISL should be optional for base-types but it isn't
-build https://github.com/SINTEF-Geometry/SISL.git master sisl "-DBUILD_SHARED_LIBS=ON $PREFIX"
 build https://github.com/rock-core/base-logging.git master base-logging "$PREFIX"
-build https://github.com/rock-core/base-types.git master base-types "-DBINDINGS_RUBY=OFF -DROCK_VIZ_ENABLED=FALSE $PREFIX"
+build https://github.com/rock-core/base-types.git master base-types "-DBINDINGS_RUBY=OFF -DUSE_SISL=OFF -DROCK_VIZ_ENABLED=FALSE $PREFIX"
 build https://github.com/envire/base-numeric.git master base-numeric "$PREFIX"
 build https://github.com/envire/base-boost_serialization.git master base-boost_serialization "$PREFIX"
 
