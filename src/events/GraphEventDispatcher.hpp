@@ -59,6 +59,11 @@ namespace envire { namespace core
         virtual ~GraphEventDispatcher() {}
         virtual void notifyGraphEvent(const GraphEvent& event);
 
+        void enable(bool newstate = true){
+            enabled = newstate;
+        }
+
+
     protected:
         virtual void edgeAdded(const EdgeAddedEvent& e) {}
         virtual void edgeRemoved(const EdgeRemovedEvent& e) {}
@@ -67,5 +72,8 @@ namespace envire { namespace core
         virtual void frameRemoved(const FrameRemovedEvent& e) {}
         virtual void itemAdded(const ItemAddedEvent& e) {}
         virtual void itemRemoved(const ItemRemovedEvent& e) {}
+
+    private:
+        bool enabled;
     };
 }}
