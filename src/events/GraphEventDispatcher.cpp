@@ -38,12 +38,11 @@ using namespace envire::core;
 GraphEventDispatcher::GraphEventDispatcher(GraphEventPublisher* pPublisher): GraphEventSubscriber(pPublisher),enabled(true)
 {}
 
-GraphEventDispatcher::GraphEventDispatcher()
+GraphEventDispatcher::GraphEventDispatcher():enabled(true)
 {}
 
 void GraphEventDispatcher::notifyGraphEvent(const GraphEvent& event)
 {
-
     if (enabled) 
     {
         switch(event.getType())

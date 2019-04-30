@@ -66,12 +66,7 @@ class TestGraphEventDispatcher : public GraphEventDispatcher
         virtual void frameAdded(const FrameAddedEvent& e) {frameAddedEvents++;}
         virtual void frameRemoved(const FrameRemovedEvent& e) {frameRemovedEvents++;}
         virtual void itemAdded(const ItemAddedEvent& e) {itemAddedEvents++;}
-        virtual void itemRemoved(const ItemRemovedEvent& e) {itemRemovedEvents++;}
-
-    private:
-        bool enabled;
-
-        
+        virtual void itemRemoved(const ItemRemovedEvent& e) {itemRemovedEvents++;}        
 
     };
 
