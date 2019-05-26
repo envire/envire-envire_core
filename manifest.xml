@@ -41,6 +41,7 @@
   <depend package="tools/plugin_manager" optional="1"/>
   <depend package="external/ogdf" />
   <depend package="graphviz" />
+  <depend package="poco" />
 
   <activity>active</activity>
 
