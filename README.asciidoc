@@ -97,6 +97,9 @@ STRUCTURE
 
 
 
+== Developement and Contribution
+Contributions are very welcome. Please use the pull-request mechanism of github. The maintainers will give feedback and merge when they are satisfied. Please make sure that your contribution is covered by unit tests.
+
 
 
 == Documentation
