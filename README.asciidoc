@@ -26,7 +26,7 @@ See http://rock-robotics.org/documentation/installation.html[this page]
 on how to install Rock.
 
 The envire package set(https://github.com/envire/envire-package_set) is required to fulfil the 
-dependencies to `base/boost_serialisation` and `external/ogdf`.
+dependencies to `base/boost_serialisation` and `external/ogdf`. All other dependencies should be available in the default rock package sets.
 
 === Standalone Installation
 
