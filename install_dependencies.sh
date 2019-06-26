@@ -8,6 +8,19 @@ set -e #abort with error if any command returns with something other than zero
 ############
 
 function build {
+
+  if [ -d $3 ] 
+  then
+    echo "Directory $3 already exists. " 
+    read -r -p "Do you want to delete and re-download $3? [y/N] " response
+    if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]
+    then
+     rm -rf $3
+    else
+      echo "Aborting!"
+      exit -1
+    fi
+  fi
   git clone --branch $2 $1 $3
   mkdir $3/build
   cd $3/build
