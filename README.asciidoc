@@ -25,6 +25,9 @@ The easiest way to build and install this package is to use Rock's build system.
 See http://rock-robotics.org/documentation/installation.html[this page]
 on how to install Rock.
 
+The envire package set(https://github.com/envire/envire-package_set) is required to fulfil the 
+dependencies to `base/boost_serialisation` and `external/ogdf`.
+
 === Standalone Installation
 
 First make sure that all dependencies are installed.
