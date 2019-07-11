@@ -63,6 +63,9 @@ namespace envire { namespace core
             enabled = newstate;
         }
 
+        bool isEnabled(){
+            return enabled;
+        }
 
     protected:
         virtual void edgeAdded(const EdgeAddedEvent& e) {}
