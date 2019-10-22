@@ -29,9 +29,9 @@
       Core library of the Environment Representation. The goal of this core part is to deal with the representation commonalities among plugins
   </description>
   <author>Envire Team/ric-team8@dfki.de</author>
-  <maintainer>Javier Hidalgo Carrio/javier.hidalgo_carrio@dfki.de</maintainer>
+  <maintainer>Arne Böckmann / arne.boeckmann@dfki.de</maintainer>
   <logo>EnviRe - https://raw.githubusercontent.com/envire/envire.github.io/master/images/envire_logo_graph.png</logo>
-  <url>http://envire.github.io</url>
+  <url>https://github.com/envire/envire-envire_core</url>
 
   <depend package="base/cmake" />
   <depend package="base/types" />
