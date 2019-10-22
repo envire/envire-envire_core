@@ -33,7 +33,7 @@ dependencies to `base/boost_serialisation` and `external/ogdf`. All other depend
 First make sure that all dependencies are installed.
 Most of the dependencies can be installed using apt:
 ----
-apt install build-essential gcc g++ cmake git wget libgoogle-glog-dev libboost-test-dev libboost-filesystem-dev libboost-serialization-dev libboost-system-dev pkg-config libeigen3-dev libclass-loader-dev libtinyxml-dev librosconsole-bridge-dev libeigen3-dev libclass-loader-dev libtinyxml-dev
+apt install build-essential gcc g++ cmake git wget libgoogle-glog-dev libboost-test-dev libboost-filesystem-dev libboost-serialization-dev libboost-system-dev pkg-config libeigen3-dev libclass-loader-dev libtinyxml-dev librosconsole-bridge-dev libeigen3-dev libclass-loader-dev libtinyxml-dev doxygen
 ----
 
 Some dependencies need to be build from source. A script is provided to install those:
