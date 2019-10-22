@@ -1271,19 +1271,30 @@ BOOST_AUTO_TEST_CASE(treeview_dfsVisit_test)
     graph.add_edge(f, g, ep);
     
     TreeView tv = graph.getTree(a);
-    //this order is memory layout dependent, thus we test multiple orders
-    FrameId expectedOrder[] = {"a", "e", "f", "g", "b", "d", "c"};
-    FrameId expectedOrder2[] = {"a", "f", "g", "e", "b", "d", "c"};
+    std::vector<FrameId> visited;
     
     int i = 0;
     tv.visitDfs(graph.getVertex(a), [&](GraphTraits::vertex_descriptor vd, 
                                         GraphTraits::vertex_descriptor parent)
       { 
         const FrameId id = graph.getFrameId(vd);
-        if(id != expectedOrder[i] && id != expectedOrder2[i])
-          BOOST_CHECK(false);
-        ++i;
+        visited.push_back(id);
       });
+    
+    // the actual visit order depends on memory layout, boost versions etc.
+    // thus we can only check that sub trees are visited dfs
+    
+    for(int i = 0; i < visited.size(); ++i)
+    {
+        if(visited[i] == "a")
+            BOOST_CHECK(visited[i+1] == "f" || visited[i+1] == "b" || visited[i+1] == "e");
+        if(visited[i] == "f")
+            BOOST_CHECK(visited[i+1] == "g");
+        if(visited[i] == "b")
+            BOOST_CHECK(visited[i+1] == "c" || visited[i+1] == "d");
+            
+    }   
+    
 }
 
 
@@ -1308,26 +1319,57 @@ BOOST_AUTO_TEST_CASE(treeview_bfsVisit_test)
 
     TreeView tv = graph.getTree(a);
     
-    //the order could just as well be a b c d e g f, this is just how it is
-    //implemented right now. 
-    FrameId expectedOrder[] = {"a", "c", "b", "g", "e", "d", "f"};
-    FrameId expectedParent[] = {"", "a", "a", "c", "b", "b", "e"};
+    std::vector<FrameId> visited;
     
     int i = 0;
     tv.visitBfs(graph.getVertex(a), [&](GraphTraits::vertex_descriptor vd, 
                                         GraphTraits::vertex_descriptor parent)
       { 
         const FrameId id = graph.getFrameId(vd);
-        BOOST_CHECK(id == expectedOrder[i]);
-        if(expectedParent[i] == "") 
-          BOOST_CHECK(parent == GraphTraits::null_vertex());
-        else
-        {
-          const FrameId parentId = graph.getFrameId(parent);
-          BOOST_CHECK(expectedParent[i] == parentId);
-        }
-        ++i;
+        visited.push_back(id);
       });
+    
+    // the actual visit order depends on memory layout, boost versions etc.
+    // thus we can only check that sub trees are visited bfs
+    
+    std::unordered_map<FrameId, bool> seen;
+    
+    for(const FrameId& f : visited)
+    {
+        seen[f] = false;
+    }
+    
+    for(int i = 0; i < visited.size(); ++i)
+    {
+        const FrameId v = visited[i];
+        seen[visited[i]] = true;
+        //if we are at b or c, a should have been visited before
+        //and e,d,g,f should not have been visited before
+        if(v == "b" || v == "c")
+        {
+            BOOST_CHECK(seen["a"]);
+            BOOST_CHECK(!seen["e"]);
+            BOOST_CHECK(!seen["d"]);
+            BOOST_CHECK(!seen["g"]);
+            BOOST_CHECK(!seen["f"]);
+        }
+        if(v == "e" || v == "d" || v == "g")
+        {
+            BOOST_CHECK(seen["a"]);
+            BOOST_CHECK(seen["b"]);
+            BOOST_CHECK(seen["c"]);
+            BOOST_CHECK(!seen["f"]);
+        }
+        if(v == "f")
+        {
+            BOOST_CHECK(seen["a"]);
+            BOOST_CHECK(seen["b"]);
+            BOOST_CHECK(seen["c"]);
+            BOOST_CHECK(seen["e"]);
+            BOOST_CHECK(seen["d"]);
+            BOOST_CHECK(seen["g"]);
+        }
+    }    
 }
 
 

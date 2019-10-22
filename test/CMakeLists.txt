@@ -11,16 +11,27 @@ if(ENABLE_PLUGINS)
         DEPS envire_core
         DEPS_PKGCONFIG class_loader)
     
-    rock_testsuite(test_plugins suite.cpp
+    # The plugin test suit cannot use the rock test macros because it needs to set
+    # the library path before executing the test
+    
+    add_definitions(-DBOOST_TEST_DYN_LINK)
+    
+    add_executable(test_plugins suite.cpp
         test_plugins.cpp
         PathSingleton.cpp
-        test_serialization.cpp
-        DEPS envire_core
-        DEPS_PKGCONFIG class_loader boost_serialization
-        DEPS_PLAIN
-        Boost_THREAD
-        Boost_UNIT_TEST_FRAMEWORK
-)
+        test_serialization.cpp)
+        
+    pkg_check_modules(CLS_LOADER REQUIRED class_loader)
+        
+    target_link_libraries(test_plugins 
+                          envire_core
+                          ${Boost_LIBRARIES}
+                          ${CLS_LOADER_LIBRARIES})
+    
+    add_test(NAME test-plugins-cxx
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/test_plugins")
+    set_tests_properties(test-plugins-cxx PROPERTIES ENVIRONMENT LD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR}:$ENV{LD_LIBRARY_PATH})
+
 
 #copy test files to build/test directory
 file(GLOB xml_files "${CMAKE_CURRENT_SOURCE_DIR}/*.xml")
