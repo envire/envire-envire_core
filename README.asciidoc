@@ -45,6 +45,10 @@ sudo ./install_dependencies.sh [path_to_prefix]
 If no prefix is provided, the dependencies will be installed system-wide.
 The install script generates an `env.sh` file. Source this file before building. It exports all neccessary environment variables.
 
+----
+source env.sh
+----
+
 After all dependencies have been installed, build and install like any other cmake project.
 ----
 mkdir build
