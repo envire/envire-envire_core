@@ -75,6 +75,7 @@ private:
     QGraphicsSvgItem* item;
     QZoomableGraphicsView* view;
 
+    QSvgRenderer* shared_renderer;
     
     std::thread graphLayoutThread;
     

@@ -40,7 +40,7 @@ namespace envire { namespace viz {
 
 EnvireGraph2DStructurWidget::EnvireGraph2DStructurWidget(int updateIntervalMs, 
                                                          QWidget *parent)
-    : QWidget(parent), renderer(nullptr), item(nullptr), needRedraw(false),
+    : QWidget(parent), renderer(nullptr), item(nullptr), shared_renderer(nullptr), needRedraw(false),
       pauseRedraw(false), updateInterval(updateIntervalMs), runLayoutThread(true), 
       layoutThread(&EnvireGraph2DStructurWidget::layoutGraph, this)
     
@@ -127,6 +127,10 @@ void EnvireGraph2DStructurWidget::pauseToggled(bool toggled)
 void EnvireGraph2DStructurWidget::displaySvg(QSvgRenderer* r)
 {
     item->setSharedRenderer(r);
+    if (shared_renderer){
+        delete shared_renderer;
+    }
+    shared_renderer = r;
 }
 
 
