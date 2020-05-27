@@ -26,7 +26,7 @@ if(ENABLE_PLUGINS)
     target_link_libraries(test_plugins 
                           envire_core
                           ${Boost_LIBRARIES}
-                          ${CLS_LOADER_LIBRARIES})
+                          ${class_loader_PKGCONFIG_LIBRARIES})
     
     add_test(NAME test-plugins-cxx
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/test_plugins")
