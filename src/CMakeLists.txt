@@ -56,7 +56,7 @@ set(sources items/ItemBase.cpp
             serialization/Serialization.cpp
             util/Demangle.cpp)
             
-set(deps_pkg_config base-types)
+set(deps_pkg_config base-types boost_serialization)
 
 if(ENABLE_PLUGINS)
 
