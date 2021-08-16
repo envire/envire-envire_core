@@ -58,7 +58,7 @@ set(sources items/ItemBase.cpp
             
 set(deps_pkg_config base-types boost_serialization)
 
-if(ENABLE_PLUGINS)
+if(PLUGIN_LIBS_FOUND)
 
   set(headers ${headers}
               plugin/ClassLoader.hpp
