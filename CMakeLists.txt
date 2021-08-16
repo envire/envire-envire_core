@@ -1,15 +1,18 @@
 # CMakeLists.txt has to be located in the project folder and cmake has to be
 # executed from 'project/build' with 'cmake ../'.
 cmake_minimum_required(VERSION 2.6)
+project(envire_core)
+
 set(ROCK_USE_CXX11 TRUE)
 find_package(Rock)
 set(ROCK_TEST_ENABLED ON CACHE BOOL "set to ON to enable the unit tests")
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 option(COVERAGE "Enable code coverage. run 'make test && make coverage' to generate the coverage report. The report will be in ${CMAKE_BINARY_DIR}/cov" OFF)
-option(ENABLE_PLUGINS "Enable the plugin system. Disable this to get rid of the dependency to the class_loader" ON)
 
-if(ENABLE_PLUGINS)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(PLUGIN_LIBS plugin_manager class_loader)
+if(PLUGIN_LIBS_FOUND)
   #this definition is used in the source to include/exclude the plugin headers
   message(STATUS "Plugin system enabled")
   add_definitions(-DCMAKE_ENABLE_PLUGINS)
@@ -36,6 +39,6 @@ if(COVERAGE)
     endif()
 endif()
 
-rock_init(envire_core 0.1)
+rock_init()
 rock_standard_layout()
 
