@@ -1,5 +1,4 @@
-find_package(Boost COMPONENTS serialization filesystem system)
-
+find_package(Boost COMPONENTS serialization filesystem system thread)
 
 set(headers items/ItemBase.hpp
             items/Item.hpp
@@ -80,6 +79,7 @@ rock_library(envire_core
         Boost_FILESYSTEM
         Boost_SERIALIZATION
         Boost_SYSTEM
+	Boost_THREAD
 )
 
 
