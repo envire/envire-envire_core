@@ -79,7 +79,7 @@ rock_library(envire_core
         Boost_FILESYSTEM
         Boost_SERIALIZATION
         Boost_SYSTEM
-	Boost_THREAD
+        Boost_THREAD
 )
 
 
