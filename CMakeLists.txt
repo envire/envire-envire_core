@@ -1,8 +1,7 @@
 # CMakeLists.txt has to be located in the project folder and cmake has to be
 # executed from 'project/build' with 'cmake ../'.
-cmake_minimum_required(VERSION 2.6)
-project(envire_core)
-
+cmake_minimum_required(VERSION 3.9)
+project(envire_core VERSION 0.1 DESCRIPTION "blablablubb")
 set(ROCK_USE_CXX11 TRUE)
 find_package(Rock)
 set(ROCK_TEST_ENABLED ON CACHE BOOL "set to ON to enable the unit tests")
