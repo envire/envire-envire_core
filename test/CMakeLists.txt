@@ -1,6 +1,9 @@
 find_package(Boost COMPONENTS unit_test_framework system filesystem serialization thread)
 
-if(ENABLE_PLUGINS)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(PLUGIN_LIBS plugin_manager class_loader)
+
+if(PLUGIN_LIBS_FOUND)
     rock_library(envire_vector_plugin
         SOURCES vector_plugin.cpp
         DEPS envire_core
@@ -65,5 +68,3 @@ rock_testsuite(test_suite suite.cpp
 )
 
    
-
-

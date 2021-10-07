@@ -1,6 +1,5 @@
 find_package(Boost COMPONENTS serialization filesystem system thread)
 
-
 set(headers items/ItemBase.hpp
             items/Item.hpp
             items/Frame.hpp
