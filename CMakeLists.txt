@@ -39,6 +39,5 @@ if(COVERAGE)
 endif()
 
 rock_init()
-rock_find_qt4()
 rock_standard_layout()
 
