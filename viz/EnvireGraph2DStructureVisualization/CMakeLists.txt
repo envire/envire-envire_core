@@ -5,7 +5,8 @@ rock_library(envire_2D_structure_widget
                      QZoomableGraphicsView.hpp
              SOURCES EnvireGraph2DStructurWidget.cpp
                      QZoomableGraphicsView.cpp
-             DEPS_PKGCONFIG QtCore QtGui QtSvg libgvc
+             DEPS_PKGCONFIG libgvc
+             LIBS Qt::Core Qt::Gui Qt::Svg
              DEPS envire_core)    
 
 
@@ -14,6 +15,6 @@ rock_vizkit_widget(EnvireGraph2DStructureVisualization
     HEADERS EnvireGraph2DStructureVisualization.hpp
     MOC     EnvireGraph2DStructureVisualization.hpp
             EnvireGraph2DStructureVisualizationPlugin.hpp
-    DEPS_PKGCONFIG QtCore QtGui
+    LIBS Qt::Core Qt::Gui
     DEPS    envire_2D_structure_widget
 )
