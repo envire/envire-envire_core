@@ -2,7 +2,6 @@
 # executed from 'project/build' with 'cmake ../'.
 cmake_minimum_required(VERSION 3.9)
 project(envire_core VERSION 0.1 DESCRIPTION "Envire Graph Core Library")
-set(ROCK_USE_CXX11 TRUE)
 find_package(Rock)
 set(ROCK_TEST_ENABLED ON CACHE BOOL "set to ON to enable the unit tests")
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
