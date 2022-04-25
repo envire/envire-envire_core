@@ -32,6 +32,8 @@
 #include <envire_core/graph/GraphDrawing.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <gvc.h>
+#include <QVBoxLayout>
+#include <QCheckBox>
 
 
 using namespace envire::core;

@@ -33,7 +33,7 @@
 class EnvireGraph2DStructureVisualizationPlugin : public QObject, public QDesignerCustomWidgetInterface
 {
     Q_OBJECT
-    Q_INTERFACES(QDesignerCustomWidgetInterface)
+    Q_PLUGIN_METADATA(IID "org.qt-project.QDesignerCustomWidgetInterface")
 
 public:
     EnvireGraph2DStructureVisualizationPlugin(QObject *parent = 0);
