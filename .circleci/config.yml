@@ -12,11 +12,8 @@ jobs:
           command: "sed -i '/Libs:/c\\Libs:  -lclass_loader -lboost_filesystem -lboost_thread -lboost_system -lpthread -lPocoFoundation -ldl -lconsole_bridge' /usr/lib/x86_64-linux-gnu/pkgconfig/class_loader.pc"
       - checkout
       - run:
-          name: chmod install script
-          command: chmod +x install_dependencies.sh
-      - run:
-          name: run install script
-          command: ./install_dependencies.sh
+          name: run dependency install script
+          command: cd external_dependencies && bash ./build.bash /usr/local
       - run:
           name: compile
           command: mkdir build && cd build && cmake -DROCK_TEST_ENABLED=ON .. && make -j4 install
