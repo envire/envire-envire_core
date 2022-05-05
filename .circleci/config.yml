@@ -12,8 +12,11 @@ jobs:
           command: "sed -i '/Libs:/c\\Libs:  -lclass_loader -lboost_filesystem -lboost_thread -lboost_system -lpthread -lPocoFoundation -ldl -lconsole_bridge' /usr/lib/x86_64-linux-gnu/pkgconfig/class_loader.pc"
       - checkout
       - run:
-          name: compile
-          command: mkdir build && cd build && cmake -DINSTALL_DEPS=ON -DROCK_TEST_ENABLED=ON .. && make -j4 install
+          name: cmake and dep install
+          command: mkdir build && cd build && cmake -DINSTALL_DEPS=ON -DROCK_TEST_ENABLED=ON ..
+      - run:
+          name: compile lib
+          command: mkdir build && make -j install
       - run:
           name: test_suit
           command: ~/project/build/test/test_suite
