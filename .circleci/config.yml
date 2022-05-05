@@ -16,7 +16,7 @@ jobs:
           command: mkdir build && cd build && cmake -DINSTALL_DEPS=ON -DROCK_TEST_ENABLED=ON ..
       - run:
           name: compile lib
-          command: cd build && make -j install
+          command: cd build && make -j2 install
       - run:
           name: test_suit
           command: ~/project/build/test/test_suite
