@@ -70,3 +70,4 @@ ExternalProject_Add(tools-plugin_manager
 add_dependencies(tools-plugin_manager base-boost_serialization)
 
 configure_file(env.sh.in ${PROJECT_SOURCE_DIR}/env.sh)
+install(FILES ${PROJECT_SOURCE_DIR}/env.sh DESTINATION ${CMAKE_INSTALL_PREFIX})
