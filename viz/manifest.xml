@@ -28,5 +28,7 @@
   </description>
   <author>Sylvain Joyeux/sylvain.joyeux@dfki.de</author>
   <depend package="ogdf" />
+  <depend package="qt5" />
+  <depend package="qt5-svg" />
 </package>
 
