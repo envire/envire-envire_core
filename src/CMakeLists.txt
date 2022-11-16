@@ -38,7 +38,9 @@ set(headers items/ItemBase.hpp
             serialization/BinaryBufferHelper.hpp
             serialization/SerializableConcept.hpp
             util/Demangle.hpp
-            util/Exceptions.hpp)
+            util/Exceptions.hpp
+            util/ThreadSaveEnvireGraph.hpp
+            util/EnvireManager.hpp)
 
             
 set(sources items/ItemBase.cpp
@@ -53,7 +55,8 @@ set(sources items/ItemBase.cpp
             graph/TreeView.cpp
             graph/Path.cpp
             serialization/Serialization.cpp
-            util/Demangle.cpp)
+            util/Demangle.cpp
+            util/EnvireManager.cpp)
             
 set(deps_pkg_config base-types boost_serialization)
 
