@@ -11,8 +11,6 @@
 #include <map>
 #include "ThreadSaveEnvireGraph.hpp"
 
-#define WORLD_FRAME "world"
-
 namespace envire {
 namespace core {
 
