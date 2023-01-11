@@ -216,7 +216,3 @@ bool EnvireGraphStructureVisualization::areSame(const QStringList& a, const QStr
   return true;
 }
 
-
-//Macro that makes this plugin loadable in ruby, this is optional.
-VizkitQtPlugin(EnvireGraphStructureVisualization)
-

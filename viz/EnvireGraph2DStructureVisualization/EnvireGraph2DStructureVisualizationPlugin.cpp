@@ -27,8 +27,6 @@
 #include "EnvireGraph2DStructureVisualizationPlugin.hpp"
 #include "EnvireGraph2DStructureVisualization.hpp"
 
-Q_EXPORT_PLUGIN2(EnvireGraph2DStructureVisualization, EnvireGraph2DStructureVisualizationPlugin)
-
 EnvireGraph2DStructureVisualizationPlugin::EnvireGraph2DStructureVisualizationPlugin(QObject *parent)
     : QObject(parent)
 {
