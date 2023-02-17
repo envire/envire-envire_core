@@ -50,9 +50,9 @@ namespace envire { namespace core
     class ItemBase
     {
     public:
-        template<class T> 
+        template<class T>
         using PtrType = boost::shared_ptr<T>;
-        
+
         typedef PtrType<ItemBase> Ptr;
 
         ItemBase();
@@ -107,6 +107,10 @@ namespace envire { namespace core
         */
         virtual const std::string& getFrame() const = 0;
 
+        virtual void setTag(const std::string& tag) = 0;
+
+        virtual const std::string& getTag() const = 0;
+
         /**@brief getClassName
         *
         * Returns the class name of the item
@@ -121,45 +125,45 @@ namespace envire { namespace core
         {
           return std::type_index(*getTypeInfo());
         }
-        
+
         /**Returns the data type of the embedded data*/
         std::type_index getEmbeddedTypeIndex() const
         {
           return std::type_index(*getEmbeddedTypeInfo());
         }
 
-        /** Returns the typeinfo of the item. 
+        /** Returns the typeinfo of the item.
          * @note The lifetime of std::type_info is till the end of the program. Thus
          * storing and using pointers to std::type_info is safe*/
         virtual const std::type_info* getTypeInfo() const = 0;
-        
+
         /**Returns the data type of the embedded data*/
         virtual const std::type_info* getEmbeddedTypeInfo() const = 0;
 
         /** Returns a raw pointer to the data of an Item */
         virtual void* getRawData() { return NULL; }
-        
+
         /** Emits the itemContentsChanged event */
         void contentsChanged();
-        
+
         /**
          * registeres a changed callback function ponter
          * @warning to receive callbacks, the contentsChanged() method must be called manually to emit the signal
-         * 
+         *
          * @param callback the function to call on change compatible with boost signal (using lambda functions or boost::bind)
          * The signature of the callback function is (const ItemBase& item)
          * e.g.  connectContentsChangedCallback([&reactor](const ItemBase& item){reactor.frame=item.getFrame();reactor.called=true;});
          * connectContentsChangedCallback(boost::bind(&ItemContentReactor::cb, &reactor,  _1));
          * @warning Lambda functions cannot be disconnected.
-         * 
+         *
          */
         template<class CALLBACK> void connectContentsChangedCallback(const CALLBACK &callback){
             itemContentsChanged.connect(callback);
         }
-        
+
         /**
          * disconnects a connected callback
-         * 
+         *
          * @param callback the function to call on change compatible with boost signale (using functor objects or boost::bind)
          */
         template<class CALLBACK> void disconnectContentsChangedCallback(const CALLBACK &callback){
@@ -175,17 +179,17 @@ namespace envire { namespace core
         void serialize(Archive &ar, const unsigned int version)
         {
         }
-        
+
         /** This signal can be manually emitted to notify about the change */
         boost::signals2::signal<void (ItemBase& item)> itemContentsChanged;
-        
+
     };
 
     /**Mark this class as abstract class */
     BOOST_SERIALIZATION_ASSUME_ABSTRACT(envire::core::ItemBase);
-    
+
     template <class TARGET>
-    struct ItemBaseCaster 
+    struct ItemBaseCaster
     {
         TARGET& operator()(const ItemBase::Ptr p) const
         {

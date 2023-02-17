@@ -52,6 +52,7 @@ namespace envire { namespace core
 
     protected:
         SpatioTemporal<_ItemData> spatio_temporal_data;
+        std::string tag;
 
     public:
 
@@ -73,6 +74,7 @@ namespace envire { namespace core
             spatio_temporal_data.uuid = item.spatio_temporal_data.uuid;
             spatio_temporal_data.frame_id = item.spatio_temporal_data.frame_id;
             spatio_temporal_data.data = item.spatio_temporal_data.data;
+            tag = item.tag;
         }
 
         Item(Item<_ItemData>&& item) : ItemBase(std::move(item))
@@ -81,6 +83,7 @@ namespace envire { namespace core
             spatio_temporal_data.uuid = std::move(item.spatio_temporal_data.uuid);
             spatio_temporal_data.frame_id = std::move(item.spatio_temporal_data.frame_id);
             spatio_temporal_data.data = std::move(item.spatio_temporal_data.data);
+            tag = std::move(item.tag);
         }
 
         //https://stackoverflow.com/questions/12255546/c-deep-copying-a-base-class-pointer
@@ -90,6 +93,7 @@ namespace envire { namespace core
             ptr->setTime(this->getTime());
             ptr->setID(this->getID());
             ptr->setFrame(this->getFrame());
+            ptr->setTag(this->getTag());
             return ptr;
         }
 
@@ -102,6 +106,7 @@ namespace envire { namespace core
             spatio_temporal_data.uuid = item.spatio_temporal_data.uuid;
             spatio_temporal_data.frame_id = item.spatio_temporal_data.frame_id;
             spatio_temporal_data.data = item.spatio_temporal_data.data;
+            tag = item.tag;
             return *this;
         }
 
@@ -112,6 +117,7 @@ namespace envire { namespace core
             spatio_temporal_data.uuid = std::move(item.spatio_temporal_data.uuid);
             spatio_temporal_data.frame_id = std::move(item.spatio_temporal_data.frame_id);
             spatio_temporal_data.data = std::move(item.spatio_temporal_data.data);
+            tag = std::move(item.tag);
             return *this;
         }
 
@@ -157,6 +163,10 @@ namespace envire { namespace core
         */
         virtual const std::string& getFrame() const { return this->spatio_temporal_data.frame_id; }
 
+        virtual void setTag(const std::string& tag) { this->tag = tag; };
+
+        virtual const std::string& getTag() const { return this->tag; };
+
         /**@brief setData
         *
         * Sets the user data
@@ -197,11 +207,11 @@ namespace envire { namespace core
             return false;
         }
 
-        virtual const std::type_info* getTypeInfo() const 
+        virtual const std::type_info* getTypeInfo() const
         {
           return &typeid(envire::core::Item<_ItemData>);
         }
-        
+
         virtual const std::type_info* getEmbeddedTypeInfo() const
         {
           return &typeid(_ItemData);
