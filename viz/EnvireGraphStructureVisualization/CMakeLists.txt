@@ -1,4 +1,4 @@
-rock_vizkit_plugin(envire_core-viz
+rock_vizkit_plugin_qt5(envire_core-viz-qt5
     EnvireGraphStructureVisualization.cpp
     MOC EnvireGraphStructureVisualization.hpp
     HEADERS EnvireGraphStructureVisualization.hpp
