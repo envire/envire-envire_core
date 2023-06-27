@@ -46,11 +46,11 @@ EnvireGraph::EnvireGraph(const EnvireGraph &other) : TransformGraph<Frame>()
   //
   //      Therefore, we use copy_graph to copy the graph structure and add the
   //      labels manually
-  
+
     //copy structure from other into the base directed_graph
     boost::copy_graph(other, graph());
     //copy the labels
-    regenerateLabelMap();  
+    regenerateLabelMap();
 }
 
 
@@ -65,18 +65,18 @@ EnvireGraph::EnvireGraph(const EnvireGraph &other, std::unordered_set<std::type_
   //
   //      Therefore, we use copy_graph to copy the graph structure and add the
   //      labels manually
-  
+
     //copy structure from other into the base directed_graph
     boost::copy_graph(other, graph());
     //copy the labels
-    regenerateLabelMap();    
+    regenerateLabelMap();
 
     if (filter_list != NULL) {
         // parse through all vertexes (frames) in graph
         vertex_iterator vertex_it, vertex_end;
         std::tie(vertex_it, vertex_end) = getVertices();
         for(; vertex_it != vertex_end; ++vertex_it)
-        {   
+        {
             // vertex_iterator->vertex_descriptor
             Frame::ItemMap& items = graph()[*vertex_it].items;
 
@@ -86,7 +86,7 @@ EnvireGraph::EnvireGraph(const EnvireGraph &other, std::unordered_set<std::type_
             for(item_it = items.begin(); item_it != items.end();)
             {
                 const bool contains = filter_list->find(item_it->first) != filter_list->end();
-                
+
                 // white list, preserve the items of types from filter list
                 // delete that are not found
                 if (inclusive)
@@ -95,7 +95,7 @@ EnvireGraph::EnvireGraph(const EnvireGraph &other, std::unordered_set<std::type_
                        item_it = items.erase(item_it);
                     else
                         ++item_it;
-                } 
+                }
                 // black list, delete all objects of the types in the filter list
                 else
                 {
@@ -107,9 +107,9 @@ EnvireGraph::EnvireGraph(const EnvireGraph &other, std::unordered_set<std::type_
             }
         }
     }
-}   
+}
 
-  
+
 void EnvireGraph::addItem(ItemBase::Ptr item)
 {
     addItemToFrame(item->getFrame(), item);
@@ -128,7 +128,7 @@ void EnvireGraph::clearFrame(const FrameId& frame)
 {
     checkFrameValid(frame);
     auto& items = (*this)[frame].items;
-    
+
     for(Frame::ItemMap::iterator it = items.begin(); it != items.end();)
     {
         Frame::ItemList& list = it->second;
@@ -147,7 +147,7 @@ bool EnvireGraph::containsItems(const vertex_descriptor vertex, const std::type_
   const Frame& frame = graph()[vertex];
 
   auto mapEntry = frame.items.find(type);
-  return mapEntry != frame.items.end();     
+  return mapEntry != frame.items.end();
 }
 
 bool EnvireGraph::containsItems(const FrameId& frame, const std::type_index& type) const
@@ -191,12 +191,12 @@ const Frame::ItemList& EnvireGraph::getItems(const vertex_descriptor frame,
                                              const std::type_index& type) const
 {
     const Frame::ItemMap& items = graph()[frame].items;
-    
+
     if(items.find(type) == items.end())
     {
         throw NoItemsOfTypeInFrameException(getFrameId(frame), demangleTypeName(type));
     }
-    return items.at(type);   
+    return items.at(type);
 }
 
 const Frame::ItemList& EnvireGraph::getItems(const FrameId& frame,
@@ -206,33 +206,41 @@ const Frame::ItemList& EnvireGraph::getItems(const FrameId& frame,
     return getItems(frameDesc, type);
 }
 
-void EnvireGraph::removeFrame(const FrameId& frame) 
+void EnvireGraph::removeFrame(const FrameId& frame)
 {
     //explicitly remove all items from the frame to cause ItemRemovedEvents
     clearFrame(frame);
     Base::removeFrame(frame);
 }
- 
+
 
 void EnvireGraph::removeItemFromFrame(const ItemBase::Ptr item)
 {
     const FrameId frameId = item->getFrame();
-    const vertex_descriptor frame = getVertex(frameId); //may throw UnknownFrameException
+    const vertex_descriptor vertex = getVertex(frameId); //may throw UnknownFrameException
     //the const_cast is fine because we are inside the EnvireGraph and know what
     //we are doing. The method returns const because the user should not be
     //able to manipulate the ItemLists directly.
-    Frame::ItemList& items = const_cast<Frame::ItemList&>(getItems(frame, item->getTypeIndex()));
-    
+    Frame::ItemList& items = const_cast<Frame::ItemList&>(getItems(vertex, item->getTypeIndex()));
+
     Frame::ItemList::iterator itemIt = std::find(items.begin(), items.end(), item);
     if(itemIt == items.end())
     {
         throw UnknownItemException(frameId, item->getID());
     }
     items.erase(itemIt);
-    
-    item->setFrame("");
-    notify(ItemRemovedEvent(frameId, item));
 
+    item->setFrame("");
+
+    // if there is no more elements in item list
+    // than delete the whole entry of the item type from item map
+    if (items.size() == 0)
+    {
+        Frame& frame = (*this)[frameId];
+        frame.items.erase(item->getTypeIndex());
+    }
+
+    notify(ItemRemovedEvent(frameId, item));
 }
 
 void EnvireGraph::publishCurrentState(GraphEventSubscriber* pSubscriber)
@@ -290,7 +298,7 @@ void EnvireGraph::loadFromFile(const std::string& file)
 {
     std::ifstream myfile;
     myfile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    myfile.open(file); //may throw  
+    myfile.open(file); //may throw
     boost::archive::binary_iarchive ia(myfile);
     ia >> *this;
     myfile.close();
@@ -298,7 +306,7 @@ void EnvireGraph::loadFromFile(const std::string& file)
 
 void EnvireGraph::createStructuralCopy(EnvireGraph& destination) const
 {
-    //note: this is not very efficient but until someone complains there is 
+    //note: this is not very efficient but until someone complains there is
     //      no need to do some fancy stuff just to make it fast :-)
     vertex_iterator it, end;
     std::tie(it, end) = getVertices();
@@ -307,7 +315,7 @@ void EnvireGraph::createStructuralCopy(EnvireGraph& destination) const
         const FrameId id = getFrameId(*it);
         destination.addFrame(id);
     }
-    
+
     edge_iterator edgeIt, edgeEnd;
     std::tie(edgeIt, edgeEnd) = getEdges();
     for(; edgeIt != edgeEnd; ++ edgeIt)
@@ -317,13 +325,13 @@ void EnvireGraph::createStructuralCopy(EnvireGraph& destination) const
         const FrameId sourceId = getFrameId(src);
         const FrameId targetId = getFrameId(tar);
         const Transform tf(getTransform(src, tar));
-        try 
+        try
         {
             destination.addTransform(sourceId, targetId, tf);
         }
         catch(EdgeAlreadyExistsException&)
         {
-            //happens because addTransform internally already adds the 
+            //happens because addTransform internally already adds the
             //edge in the opposite direction. Can be ignored.
         }
     }
