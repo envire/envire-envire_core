@@ -42,8 +42,8 @@
   <depend package="external/ogdf" />
   <depend package="graphviz" />
   <depend package="poco" />
-  <depend package="qt5" />
-  <depend package="qt5-svg" />
+  <depend package="qt5" optional="1"/>
+  <depend package="qt5-svg" optional="1"/>
 
   <activity>active</activity>
 
