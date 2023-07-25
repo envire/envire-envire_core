@@ -44,7 +44,8 @@ namespace envire { namespace core
             ITEM_ADDED_TO_FRAME,
             ITEM_REMOVED_FROM_FRAME,
             FRAME_ADDED,
-            FRAME_REMOVED
+            FRAME_REMOVED,
+            USER_DEFINED
         };
 
         GraphEvent() = delete;
@@ -65,6 +66,8 @@ namespace envire { namespace core
          */
         Type getType() const { return type; }
 
+        std::string getUserDefinedType() const { return user_defined_type; }
+
         /**
          * This method can be overloaded to allow the event to be cloned.
          */
@@ -74,8 +77,11 @@ namespace envire { namespace core
 
     protected:
         explicit GraphEvent(const Type type) : type(type) {}
+        explicit GraphEvent(const std::string user_defined_type) : type(USER_DEFINED), user_defined_type(user_defined_type) {}
 
         Type type;
+
+        std::string user_defined_type;
     };
 
 }}
