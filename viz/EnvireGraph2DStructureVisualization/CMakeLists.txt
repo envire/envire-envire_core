@@ -1,5 +1,3 @@
-rock_find_qt4(OPTIONAL Svg)
-rock_find_qt5(OPTIONAL Svg)
 
 if(ROCK_QT_VERSION_4)
 rock_library(envire_2D_structure_widget
