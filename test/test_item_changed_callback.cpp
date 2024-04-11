@@ -66,14 +66,14 @@ struct ItemCallbackSubscriber : public GraphItemEventDispatcher<Item<string>>
     virtual void itemAdded(const TypedItemAddedEvent<Item<string>>& event)
     {
         if (event.item->getFrame() == targetFrame){
-            event.item->connectContentsChangedCallback(boost::bind(&ItemContentReactor::cb, &reactor,  _1));
+            event.item->connectContentsChangedCallback(boost::bind(&ItemContentReactor::cb, &reactor,  boost::placeholders::_1));
         }
     }
     
     virtual void itemRemoved(const TypedItemRemovedEvent<Item<string>>& event)
     {
         if (event.item->getFrame() == targetFrame){
-            event.item->disconnectContentsChangedCallback(boost::bind(&ItemContentReactor::cb, &reactor,  _1));
+            event.item->disconnectContentsChangedCallback(boost::bind(&ItemContentReactor::cb, &reactor, boost::placeholders:: _1));
         }
     }
 
@@ -147,14 +147,14 @@ BOOST_AUTO_TEST_CASE(item_changed_callback_bind)
      ItemContentReactor reactor;
      
      graph.addItemToFrame(frame, item);
-     item->connectContentsChangedCallback(boost::bind(&ItemContentReactor::cb, &reactor,  _1));
+     item->connectContentsChangedCallback(boost::bind(&ItemContentReactor::cb, &reactor, boost::placeholders::_1));
      item->contentsChanged();
      
      BOOST_CHECK(reactor.called == true);
      BOOST_CHECK(reactor.frame == frame);
      
      reactor.reset();
-     item->disconnectContentsChangedCallback(boost::bind(&ItemContentReactor::cb, &reactor,  _1));
+     item->disconnectContentsChangedCallback(boost::bind(&ItemContentReactor::cb, &reactor, boost::placeholders::_1));
      item->contentsChanged();
      
      BOOST_CHECK(reactor.called == false);
