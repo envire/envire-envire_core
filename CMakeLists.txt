@@ -2,11 +2,22 @@
 # executed from 'project/build' with 'cmake ../'.
 cmake_minimum_required(VERSION 3.9)
 project(envire_core VERSION 0.1 DESCRIPTION "Envire Graph Core Library")
+
+
+if(INSTALL_DEPS)
+  execute_process(COMMAND bash build.bash ${CMAKE_INSTALL_PREFIX}
+                  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/source_dependencies)
+  set(ENV{PKG_CONFIG_PATH} ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig/)
+  set(ENV{CMAKE_PREFIX_PATH} ${CMAKE_INSTALL_PREFIX}/share/rock/cmake/)
+endif()
+
+
 find_package(Rock)
 set(ROCK_TEST_ENABLED ON CACHE BOOL "set to ON to enable the unit tests")
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 option(COVERAGE "Enable code coverage. run 'make test && make coverage' to generate the coverage report. The report will be in ${CMAKE_BINARY_DIR}/cov" OFF)
+
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(PLUGIN_LIBS plugin_manager class_loader)
