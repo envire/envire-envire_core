@@ -38,7 +38,9 @@ set(headers items/ItemBase.hpp
             serialization/BinaryBufferHelper.hpp
             serialization/SerializableConcept.hpp
             util/Demangle.hpp
-            util/Exceptions.hpp)
+            util/Exceptions.hpp
+            util/ThreadSaveEnvireGraph.hpp
+            util/EnvireManager.hpp)
 
             
 set(sources items/ItemBase.cpp
@@ -53,7 +55,8 @@ set(sources items/ItemBase.cpp
             graph/TreeView.cpp
             graph/Path.cpp
             serialization/Serialization.cpp
-            util/Demangle.cpp)
+            util/Demangle.cpp
+            util/EnvireManager.cpp)
             
 set(deps_pkg_config base-types boost_serialization)
 
@@ -75,11 +78,11 @@ rock_library(envire_core
     SOURCES ${sources}
     DEPS_CMAKE Glog
     DEPS_PKGCONFIG ${deps_pkg_config}
-    DEPS_PLAIN
-        Boost_FILESYSTEM
-        Boost_SERIALIZATION
-        Boost_SYSTEM
-        Boost_THREAD
+    DEPS
+        Boost::filesystem
+        Boost::serialization
+        Boost::system
+        Boost::thread
 )
 
 
