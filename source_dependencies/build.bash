@@ -16,14 +16,16 @@ if [[ $1 != .* && $1 != /* ]]; then
 fi
 
 #download and build (in subshell to return to original folder)
-  
+
+INSTALLPATH=$(realpath $1)
+
 mkdir -p build
 cd build
-cmake -DCMAKE_INSTALL_PREFIX=$1 ..
-make -j
+cmake -DCMAKE_INSTALL_PREFIX=${INSTALLPATH} ..
+make -j install
 
 if [[ $1 = .* ]]; then
     echo
-    echo -e "\033[1;33m'source env.sh' in this folder before building the main library \033[1;0m"
+    echo -e "\033[1;33m'source ${INSTALLPATH}/env.sh' in this folder before building the main library \033[1;0m"
     echo
 fi
