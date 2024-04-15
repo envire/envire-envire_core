@@ -58,7 +58,7 @@ set(sources items/ItemBase.cpp
             util/Demangle.cpp
             util/EnvireManager.cpp)
             
-set(deps_pkg_config base-types boost_serialization)
+set(deps_pkg_config base-types)
 
 if(PLUGIN_LIBS_FOUND)
 
