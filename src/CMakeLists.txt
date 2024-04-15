@@ -58,7 +58,7 @@ set(sources items/ItemBase.cpp
             util/Demangle.cpp
             util/EnvireManager.cpp)
             
-set(deps_pkg_config base-types boost_serialization)
+set(deps_pkg_config base-types)
 
 if(PLUGIN_LIBS_FOUND)
 
@@ -78,11 +78,11 @@ rock_library(envire_core
     SOURCES ${sources}
     DEPS_CMAKE Glog
     DEPS_PKGCONFIG ${deps_pkg_config}
-    DEPS_PLAIN
-        Boost_FILESYSTEM
-        Boost_SERIALIZATION
-        Boost_SYSTEM
-        Boost_THREAD
+    DEPS
+        Boost::filesystem
+        Boost::serialization
+        Boost::system
+        Boost::thread
 )
 
 
