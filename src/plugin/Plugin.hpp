@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include <class_loader/class_loader_register_macro.h>
+#include <class_loader/register_macro.hpp>
 #include <envire_core/items/ItemMetadata.hpp>
 #include <envire_core/items/Item.hpp>
 #include <envire_core/serialization/SerializationRegistration.hpp>
@@ -66,7 +66,7 @@ static envire::core::MetadataInitializer _metadataInit(typeid(_classname), #_dat
 */
 #define ENVIRE_PLUGIN_HEADER( _classname ) \
     public: \
-    typedef boost::shared_ptr<_classname> Ptr; \
+    typedef std::shared_ptr<_classname> Ptr; \
     private: \
     ENVIRE_SERIALIZATION_HEADER(TemplateType)
 

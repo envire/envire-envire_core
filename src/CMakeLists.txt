@@ -61,7 +61,7 @@ set(sources items/ItemBase.cpp
 set(deps_pkg_config base-types boost_serialization)
 set(deps Boost::filesystem Boost::serialization Boost::system Boost::thread)
 
-if(PLUGIN_LIBS_FOUND)
+if(PLUGIN_MANAGER_FOUND)
 
   set(headers ${headers}
               plugin/ClassLoader.hpp
@@ -69,7 +69,6 @@ if(PLUGIN_LIBS_FOUND)
   set(sources ${sources}
               plugin/ClassLoader.cpp)
   set(deps_pkg_config ${deps_pkg_config} plugin_manager)
-  set(deps ${deps} class_loader::class_loader)
   
 endif()
 
