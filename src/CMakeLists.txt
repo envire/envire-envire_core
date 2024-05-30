@@ -59,15 +59,16 @@ set(sources items/ItemBase.cpp
             util/EnvireManager.cpp)
             
 set(deps_pkg_config base-types boost_serialization)
+set(deps Boost::filesystem Boost::serialization Boost::system Boost::thread)
 
-if(PLUGIN_LIBS_FOUND)
+if(PLUGIN_MANAGER_FOUND)
 
   set(headers ${headers}
               plugin/ClassLoader.hpp
               plugin/Plugin.hpp)
   set(sources ${sources}
               plugin/ClassLoader.cpp)
-  set(deps_pkg_config ${deps_pkg_config} class_loader plugin_manager)
+  set(deps_pkg_config ${deps_pkg_config} plugin_manager)
   
 endif()
 
@@ -78,11 +79,7 @@ rock_library(envire_core
     SOURCES ${sources}
     DEPS_CMAKE Glog
     DEPS_PKGCONFIG ${deps_pkg_config}
-    DEPS
-        Boost::filesystem
-        Boost::serialization
-        Boost::system
-        Boost::thread
+    DEPS ${deps}
 )
 
 
