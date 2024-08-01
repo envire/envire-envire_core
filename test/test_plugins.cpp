@@ -27,7 +27,7 @@
 #include <boost/test/unit_test.hpp>
 #include <envire_core/items/Item.hpp>
 #include <Eigen/Geometry>
-#include <class_loader/class_loader.h>
+#include <class_loader_melodic/class_loader.h>
 #include <envire_core/plugin/ClassLoader.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>

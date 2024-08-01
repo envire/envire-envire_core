@@ -37,7 +37,7 @@
   <depend package="base/types" />
   <depend package="base/boost_serialization" />
   <depend package="glog" />
-  <depend package="tools/class_loader" optional="1"/>
+  <depend package="tools/class_loader_melodic" optional="1"/>
   <depend package="tools/plugin_manager" optional="1"/>
   <depend package="graphviz" />
   <depend package="poco" />
