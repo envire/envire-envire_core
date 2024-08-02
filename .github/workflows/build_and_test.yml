@@ -1,0 +1,42 @@
+# This starter workflow is for a CMake project running on a single platform. There is a different starter workflow if you need cross-platform coverage.
+# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-multi-platform.yml
+name: CMake on a single platform
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
+    # You can convert this to a matrix build if you need cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: apt-get
+      run: apt update && apt install -y build-essential gcc g++ cmake git wget libgoogle-glog-dev libboost-test-dev libboost-filesystem-dev libboost-serialization-dev libboost-system-dev pkg-config libeigen3-dev libclass-loader-dev libtinyxml-dev librosconsole-bridge-dev
+
+    - name: fix-class-loader-pkg-config
+      run: "sed -i '/Libs:/c\\Libs:  -lclass_loader -lboost_filesystem -lboost_thread -lboost_system -lpthread -lPocoFoundation -ldl -lconsole_bridge' /usr/lib/x86_64-linux-gnu/pkgconfig/class_loader.pc"
+      
+    - name: cmake and dep install
+      run: mkdir build && cd build && cmake -DINSTALL_DEPS=ON -DROCK_TEST_ENABLED=ON ..
+         
+    - name: compile lib
+      run: cd build && make -j2 install
+
+    - name: test_suit
+      run: ~/project/build/test/test_suite
+         
+    - name: test_plugins
+      run: export LD_LIBRARY_PATH=/usr/local/lib &&  ~/project/build/test/test_plugins
+
