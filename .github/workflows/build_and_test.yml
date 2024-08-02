@@ -23,10 +23,10 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: apt-get
-      run: apt update && apt install -y build-essential gcc g++ cmake git wget libgoogle-glog-dev libboost-test-dev libboost-filesystem-dev libboost-serialization-dev libboost-system-dev pkg-config libeigen3-dev libclass-loader-dev libtinyxml-dev librosconsole-bridge-dev
+      run: sudo apt update && apt install -y build-essential gcc g++ cmake git wget libgoogle-glog-dev libboost-test-dev libboost-filesystem-dev libboost-serialization-dev libboost-system-dev pkg-config libeigen3-dev libclass-loader-dev libtinyxml-dev librosconsole-bridge-dev
 
     - name: fix-class-loader-pkg-config
-      run: "sed -i '/Libs:/c\\Libs:  -lclass_loader -lboost_filesystem -lboost_thread -lboost_system -lpthread -lPocoFoundation -ldl -lconsole_bridge' /usr/lib/x86_64-linux-gnu/pkgconfig/class_loader.pc"
+      run: "sudo sed -i '/Libs:/c\\Libs:  -lclass_loader -lboost_filesystem -lboost_thread -lboost_system -lpthread -lPocoFoundation -ldl -lconsole_bridge' /usr/lib/x86_64-linux-gnu/pkgconfig/class_loader.pc"
       
     - name: cmake and dep install
       run: mkdir build && cd build && cmake -DINSTALL_DEPS=ON -DROCK_TEST_ENABLED=ON ..
@@ -35,8 +35,8 @@ jobs:
       run: cd build && make -j2 install
 
     - name: test_suit
-      run: ~/project/build/test/test_suite
+      run: ./test/test_suite
          
     - name: test_plugins
-      run: export LD_LIBRARY_PATH=/usr/local/lib &&  ~/project/build/test/test_plugins
+      run: export LD_LIBRARY_PATH=/usr/local/lib &&  ./test/test_plugins
 
