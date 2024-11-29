@@ -27,7 +27,6 @@
 #pragma once
 
 #include <string>
-#include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
 #include <base-logging/Singleton.hpp>
 #include <plugin_manager/PluginLoader.hpp>
@@ -88,7 +87,7 @@ public:
      * @throws DownCastException if the cast from envire::core::ItemBase to InheritedClass isn't possible
      */
     template<class InheritedClass>
-    bool createEnvireItem(const std::string& item_name, boost::shared_ptr<InheritedClass>& item);
+    bool createEnvireItem(const std::string& item_name, std::shared_ptr<InheritedClass>& item);
 
     /**
      * @brief Creates an instance of the given class, which has to be inherited from envire::core::ItemBase
@@ -96,7 +95,7 @@ public:
      * @param base_item pointer to the envire item base class
      * @return True if an instance of the class could be created
      */
-    bool createEnvireItem(const std::string& item_name, envire::core::ItemBase::Ptr& base_item);
+    bool createEnvireItem(const std::string& item_name, std::shared_ptr<envire::core::ItemBase>& base_item);
 
     /**
      * @brief Creates an envire item for the given embedded type
@@ -104,7 +103,7 @@ public:
      * @param base_item pointer to the envire item base class
      * @return True if an instance of the class could be created
      */
-    bool createEnvireItemFor(const std::string& embedded_type, envire::core::ItemBase::Ptr& base_item);
+    bool createEnvireItemFor(const std::string& embedded_type, std::shared_ptr<envire::core::ItemBase>& base_item);
 
     /**
      * @brief Creates a collision object for the given class.
@@ -114,7 +113,7 @@ public:
      * @return True if an instance of the class could be created
      */
     template<class BaseClass>
-    bool createCollisionObjectFor(const std::string& class_name, boost::shared_ptr<BaseClass>& collision_object);
+    bool createCollisionObjectFor(const std::string& class_name, std::shared_ptr<BaseClass>& collision_object);
 
     /**
      * @brief Creates a collision object for the given class.
@@ -124,7 +123,7 @@ public:
      * @return True if an instance of the class could be created
      */
     template<class BaseClass>
-    bool createCollisionObjectFor(const envire::core::ItemBase& item, boost::shared_ptr<BaseClass>& collision_object);
+    bool createCollisionObjectFor(const envire::core::ItemBase& item, std::shared_ptr<BaseClass>& collision_object);
 
 protected:
     /**
@@ -158,13 +157,13 @@ private:
 };
 
 template<class InheritedClass>
-bool ClassLoader::createEnvireItem(const std::string& item_name, boost::shared_ptr<InheritedClass>& item)
+bool ClassLoader::createEnvireItem(const std::string& item_name, std::shared_ptr<InheritedClass>& item)
 {
     return createInstance<InheritedClass, envire::core::ItemBase>(item_name, item);
 }
 
 template<class BaseClass>
-bool ClassLoader::createCollisionObjectFor(const std::string& class_name, boost::shared_ptr<BaseClass>& collision_object)
+bool ClassLoader::createCollisionObjectFor(const std::string& class_name, std::shared_ptr<BaseClass>& collision_object)
 {
     std::string associated_class;
     if(getAssociatedClassOfType(class_name, envire_collision_base_class, associated_class))
@@ -175,7 +174,7 @@ bool ClassLoader::createCollisionObjectFor(const std::string& class_name, boost:
 }
 
 template<class BaseClass>
-bool ClassLoader::createCollisionObjectFor(const envire::core::ItemBase& item, boost::shared_ptr<BaseClass>& collision_object)
+bool ClassLoader::createCollisionObjectFor(const envire::core::ItemBase& item, std::shared_ptr<BaseClass>& collision_object)
 {
     std::string class_name;
     if (item.getClassName(class_name))

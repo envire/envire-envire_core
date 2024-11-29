@@ -63,12 +63,12 @@ bool ClassLoader::hasCollisionObject(const std::string& class_name) const
     return hasClassOfType(class_name, envire_collision_base_class);
 }
 
-bool ClassLoader::createEnvireItem(const std::string& item_name, envire::core::ItemBase::Ptr& base_item)
+bool ClassLoader::createEnvireItem(const std::string& item_name, std::shared_ptr<envire::core::ItemBase>& base_item)
 {
     return createInstance<envire::core::ItemBase>(item_name, base_item);
 }
 
-bool ClassLoader::createEnvireItemFor(const std::string& embedded_type, envire::core::ItemBase::Ptr& base_item)
+bool ClassLoader::createEnvireItemFor(const std::string& embedded_type, std::shared_ptr<envire::core::ItemBase>& base_item)
 {
     if(createEnvireItem(std::string(envire_item_class) + "<" + embedded_type + ">", base_item))
         return true;
