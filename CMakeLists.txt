@@ -20,7 +20,7 @@ option(COVERAGE "Enable code coverage. run 'make test && make coverage' to gener
 
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(PLUGIN_LIBS plugin_manager class_loader)
+pkg_check_modules(PLUGIN_LIBS plugin_manager class_loader_melodic)
 if(PLUGIN_LIBS_FOUND)
   #this definition is used in the source to include/exclude the plugin headers
   message(STATUS "Plugin system enabled")

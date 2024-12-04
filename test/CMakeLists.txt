@@ -1,18 +1,18 @@
 find_package(Boost COMPONENTS unit_test_framework system filesystem serialization thread)
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(PLUGIN_LIBS plugin_manager class_loader)
+pkg_check_modules(PLUGIN_LIBS plugin_manager class_loader_melodic)
 
 if(PLUGIN_LIBS_FOUND)
     rock_library(envire_vector_plugin
         SOURCES vector_plugin.cpp
         DEPS envire_core
-        DEPS_PKGCONFIG class_loader)
+        DEPS_PKGCONFIG class_loader_melodic)
 
     rock_library(envire_string_plugin
         SOURCES string_plugin.cpp
         DEPS envire_core
-        DEPS_PKGCONFIG class_loader)
+        DEPS_PKGCONFIG class_loader_melodic)
     
     # The plugin test suit cannot use the rock test macros because it needs to set
     # the library path before executing the test
@@ -24,12 +24,12 @@ if(PLUGIN_LIBS_FOUND)
         PathSingleton.cpp
         test_serialization.cpp)
         
-    pkg_check_modules(CLS_LOADER REQUIRED class_loader)
+    pkg_check_modules(CLS_LOADER REQUIRED class_loader_melodic)
         
     target_link_libraries(test_plugins 
                           envire_core
                           ${Boost_LIBRARIES}
-                          ${class_loader_PKGCONFIG_LIBRARIES})
+                          ${class_loader_melodic_PKGCONFIG_LIBRARIES})
     
     add_test(NAME test-plugins-cxx
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/test_plugins")
@@ -59,7 +59,7 @@ rock_testsuite(test_suite suite.cpp
     test_item_changed_callback.cpp
     test_graph_event_dispatcher.cpp
     PathSingleton.cpp
-    DEPS_PKGCONFIG class_loader plugin_manager
+    DEPS_PKGCONFIG plugin_manager 
     DEPS 
       envire_core
     DEPS_PLAIN
