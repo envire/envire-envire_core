@@ -67,7 +67,7 @@ if(PLUGIN_LIBS_FOUND)
               plugin/Plugin.hpp)
   set(sources ${sources}
               plugin/ClassLoader.cpp)
-  set(deps_pkg_config ${deps_pkg_config} class_loader plugin_manager)
+  set(deps_pkg_config ${deps_pkg_config} class_loader_melodic plugin_manager)
   
 endif()
 
