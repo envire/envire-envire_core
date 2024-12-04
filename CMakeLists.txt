@@ -9,7 +9,7 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 option(COVERAGE "Enable code coverage. run 'make test && make coverage' to generate the coverage report. The report will be in ${CMAKE_BINARY_DIR}/cov" OFF)
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(PLUGIN_LIBS plugin_manager class_loader)
+pkg_check_modules(PLUGIN_LIBS plugin_manager class_loader_melodic)
 if(PLUGIN_LIBS_FOUND)
   #this definition is used in the source to include/exclude the plugin headers
   message(STATUS "Plugin system enabled")
