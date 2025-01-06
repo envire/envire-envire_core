@@ -2,22 +2,24 @@ version: 2
 jobs:
   build:
     docker:
-      - image: ubuntu:latest
+      - image: ubuntu:18.04
     steps:
       - run:
           name: apt-get
-          command: apt update && apt install -y build-essential gcc g++ cmake git wget libgoogle-glog-dev libboost-test-dev libboost-filesystem-dev libboost-serialization-dev libboost-system-dev pkg-config libeigen3-dev libclass-loader-dev libtinyxml-dev librosconsole-bridge-dev
-      - run:
-          name: fix-class-loader-pkg-config
-          command: "sed -i '/Libs:/c\\Libs:  -lclass_loader -lboost_filesystem -lboost_thread -lboost_system -lpthread -lPocoFoundation -ldl -lconsole_bridge' /usr/lib/x86_64-linux-gnu/pkgconfig/class_loader.pc"
+          command: apt update && apt -y install build-essential gcc g++ cmake git wget libgoogle-glog-dev libboost-test-dev libboost-filesystem-dev libboost-serialization-dev libboost-system-dev pkg-config libeigen3-dev libtinyxml-dev librosconsole-bridge-dev
+    #   - run:
+    #       name: fix-class-loader-pkg-config
+    #       command: "sed -i '/Libs:/c\\Libs:  -lclass_loader -lboost_filesystem -lboost_thread -lboost_system -lpthread -lPocoFoundation -ldl -lconsole_bridge' /usr/lib/x86_64-linux-gnu/pkgconfig/class_loader.pc"
       - checkout
-
       - run:
-          name: cmake and dep install
-          command: mkdir build && cd build && cmake -DINSTALL_DEPS=ON -DROCK_TEST_ENABLED=ON ..
+          name: chmod install script
+          command: chmod +x install_dependencies.sh
       - run:
-          name: compile lib
-          command: cd build && make -j2 install
+          name: run install script
+          command: ./install_dependencies.sh
+      - run:
+          name: compile
+          command: mkdir build && cd build && cmake -DROCK_TEST_ENABLED=ON .. && make -j4 install
       - run:
           name: test_suit
           command: ~/project/build/test/test_suite
