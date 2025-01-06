@@ -43,6 +43,7 @@
   <depend package="graphviz" />
   <depend package="poco" />
   <depend package="qt5" />
+  <depend package="qt5svg" />
 
   <activity>active</activity>
 
