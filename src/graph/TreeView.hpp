@@ -29,6 +29,7 @@
 #include <envire_core/graph/GraphTypes.hpp>
 
 #include <glog/logging.h>
+#include <deque>
 
 namespace envire { namespace core
 {
