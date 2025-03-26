@@ -26,11 +26,12 @@ EnvireManager::~EnvireManager() {}
 
 EnvireGraphPtr EnvireManager::getInstance(std::string name, bool force_recreate) {
     EnvireGraphPtr graph = graphs[name];
-    if (!graph.get() || force_recreate){
+    if (!graph.get()){
         //create
         graph = EnvireGraphPtr(new ThreadSaveEnvireGraph());
         graphs[name] = graph;
-
+    } else if (force_recreate) {
+        graph.reset(new ThreadSaveEnvireGraph());
     }
     return graph;
 }
