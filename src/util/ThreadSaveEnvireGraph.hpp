@@ -84,6 +84,11 @@ class ThreadSaveEnvireGraph {
         graph->addFrame(name);
     }
 
+    void removeFrame(const envire::core::FrameId& name) {
+        std::lock_guard<std::recursive_mutex> lock(mutex);
+        graph->removeFrame(name);
+    }
+
     bool containsFrame(const envire::core::FrameId& name) {
         std::lock_guard<std::recursive_mutex> lock(mutex);
         return graph->containsFrame(name);
@@ -133,6 +138,10 @@ class ThreadSaveEnvireGraph {
     *   Items
     ***********/
 
+    void addItem(envire::core::ItemBase::Ptr item) {
+        std::lock_guard<std::recursive_mutex> lock(mutex);
+        graph->addItem(item);
+    }
 
     void addItemToFrame(const envire::core::FrameId& frameId, envire::core::ItemBase::Ptr item) {
         std::lock_guard<std::recursive_mutex> lock(mutex);
