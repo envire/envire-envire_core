@@ -163,6 +163,11 @@ class ThreadSaveEnvireGraph {
         return graph->getItems(frame, type);
     }
 
+    template <class T> void visitItems(const FrameId& frameId, T func) {
+        std::lock_guard<std::recursive_mutex> lock(mutex);
+        graph->visitItems(frameId, func);
+    }
+
     /**
      * @brief lock the protected variable manually to allow a reference access
      */
