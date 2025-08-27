@@ -16,6 +16,7 @@ rock_qt_library(
 rock_qt_vizkit_widget(
     TARGETPREFIX EnvireGraph2DStructureVisualization
     QT4_SUFFIX ""
+    MISSINGQTDEPS_NOBUILD
     SOURCES EnvireGraph2DStructureVisualizationPlugin.cpp
     HEADERS EnvireGraph2DStructureVisualization.hpp
     MOC     EnvireGraph2DStructureVisualization.hpp
