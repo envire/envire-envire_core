@@ -59,7 +59,7 @@ rock_testsuite(test_suite suite.cpp
     test_item_changed_callback.cpp
     test_graph_event_dispatcher.cpp
     PathSingleton.cpp
-    DEPS_PKGCONFIG class_loader_melodic
+    DEPS_PKGCONFIG plugin_manager
     DEPS 
       envire_core
     DEPS_PLAIN

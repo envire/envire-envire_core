@@ -76,9 +76,10 @@ namespace envire { namespace core
     {
     public:
         explicit UnknownFrameException(const FrameId& name) :
-          msg("Frame " + name + " doesn't exist") {}
+          msg("Frame " + name + " doesn't exist"),frame(name) {}
         virtual char const * what() const throw() { return msg.c_str(); }
         const std::string msg;
+        const FrameId frame;
     };
 
     class FoundFrameException : public std::exception

@@ -25,6 +25,8 @@
 //
 
 #pragma once
+#include <list>
+#include <string>
 #include <envire_core/events/GraphEventSubscriber.hpp>
 #include <list>
 #include <functional>
@@ -77,6 +79,19 @@ namespace envire { namespace core
         void addItemAddedEventCallback(std::function<void (const envire::core::ItemAddedEvent&)> cb);
         void addItemRemovedEventCallback(std::function<void (const envire::core::ItemRemovedEvent&)> cb);
 
+        /**
+         * @brief define a frame requirement, this GraphEventDispatcher stays disables until checkFramesAvailable() is successful
+         * @warning checkFramesAvailable() must be called manually by your application
+         * 
+         * @param frame 
+         */
+        void waitForFrame(const std::string &framename);
+
+        /**
+         * @brief return true and enable this Dispatcher if alle required frames are available
+         */
+        bool checkWaitingForFrames(const FrameAddedEvent& frameAddedEvent);
+
     protected:
         virtual void edgeAdded(const EdgeAddedEvent& e);
         virtual void edgeRemoved(const EdgeRemovedEvent& e);
@@ -97,5 +112,7 @@ namespace envire { namespace core
         std::list<std::function<void (const envire::core::ItemAddedEvent&)>> itemAddedCallbacks;
         std::list<std::function<void (const envire::core::ItemRemovedEvent&)>> itemRemovedCallbacks;
 
+        bool isWaitingForFrame;
+        std::list<std::string> waitingForFrames;
     };
 }}

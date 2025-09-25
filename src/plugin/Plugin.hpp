@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include <class_loader_melodic/register_macro.hpp>
+#include <class_loader_melodic/class_loader_register_macro.h>
 #include <envire_core/items/ItemMetadata.hpp>
 #include <envire_core/items/Item.hpp>
 #include <envire_core/serialization/SerializationRegistration.hpp>

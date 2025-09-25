@@ -35,7 +35,7 @@
 
 using namespace envire::core;
 
-GraphEventDispatcher::GraphEventDispatcher(GraphEventPublisher* pPublisher): GraphEventSubscriber(pPublisher),enabled(true)
+GraphEventDispatcher::GraphEventDispatcher(GraphEventPublisher* pPublisher): GraphEventSubscriber(pPublisher),enabled(true),isWaitingForFrame(false)
 {}
 
 GraphEventDispatcher::GraphEventDispatcher():enabled(true)
@@ -73,9 +73,36 @@ void GraphEventDispatcher::notifyGraphEvent(const GraphEvent& event)
         //no default case because we only handle basic event types here. Item events are handled
         //by a different class
         }
+    } else if (isWaitingForFrame)
+    {
+        //forwarding disabled
+        switch(event.getType())
+        {
+            case GraphEvent::EDGE_ADDED: break;
+            case GraphEvent::EDGE_MODIFIED: break;
+            case GraphEvent::EDGE_REMOVED: break;
+            case GraphEvent::FRAME_ADDED:
+                if (checkWaitingForFrames(dynamic_cast<const FrameAddedEvent&>(event)))
+                {
+                    enable(true);
+                }
+                break;
+            case GraphEvent::FRAME_REMOVED: break;
+            case GraphEvent::ITEM_ADDED_TO_FRAME: break;
+            case GraphEvent::ITEM_REMOVED_FROM_FRAME: break;
+            default: break;
+        }
+
+
     }
 }
 
+void GraphEventDispatcher::waitForFrame(const std::string &framename)
+{
+    enable(false);
+    isWaitingForFrame = true;
+    waitingForFrames.push_back(framename);
+}
 
 void GraphEventDispatcher::addEdgeAddedEventCallback(std::function<void (const envire::core::EdgeAddedEvent&)> cb) {
     edgeAddedCallbacks.push_back(cb);
@@ -136,3 +163,20 @@ void GraphEventDispatcher::itemRemoved(const envire::core::ItemRemovedEvent& e) 
     }
 }
 
+bool GraphEventDispatcher::checkWaitingForFrames(const FrameAddedEvent& frameAddedEvent)
+{
+    // check if all frames are available, delete entires if they are
+    for (std::list<std::string>::iterator it = waitingForFrames.begin(); it != waitingForFrames.end(); it++) {
+        if (*it == frameAddedEvent.frame) {
+            it = waitingForFrames.erase(it);
+            break;
+        }
+    }
+    // check if all frames were found
+    if (waitingForFrames.size() == 0) {
+        isWaitingForFrame = false;
+        return true;
+    }
+    //still waiting for other frames
+    return false;
+}
