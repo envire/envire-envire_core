@@ -32,6 +32,8 @@
 #include <envire_core/graph/GraphDrawing.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <gvc.h>
+#include <QVBoxLayout>
+#include <QCheckBox>
 
 
 using namespace envire::core;
@@ -41,7 +43,7 @@ namespace envire { namespace viz {
 EnvireGraph2DStructurWidget::EnvireGraph2DStructurWidget(int updateIntervalMs, 
                                                          QWidget *parent)
     : QWidget(parent), renderer(nullptr), item(nullptr), shared_renderer(nullptr), needRedraw(false),
-      pauseRedraw(false), updateInterval(updateIntervalMs), runLayoutThread(true), 
+      pauseRedraw(true), updateInterval(updateIntervalMs), runLayoutThread(true), 
       layoutThread(&EnvireGraph2DStructurWidget::layoutGraph, this)
     
 {
@@ -54,6 +56,7 @@ EnvireGraph2DStructurWidget::EnvireGraph2DStructurWidget(int updateIntervalMs,
     view->setDragMode(QGraphicsView::ScrollHandDrag);
     QVBoxLayout* vbox = new QVBoxLayout();
     QCheckBox* pauseUpdate = new QCheckBox("Pause 2D Update", this);
+    pauseUpdate->setChecked(pauseRedraw);
     vbox->addWidget(pauseUpdate);
     vbox->addWidget(view);
     setLayout(vbox);

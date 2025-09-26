@@ -78,7 +78,7 @@ rock_library(envire_core
     SOURCES ${sources}
     DEPS_CMAKE Glog
     DEPS_PKGCONFIG ${deps_pkg_config}
-    DEPS
+    DEPS_TARGET
         Boost::filesystem
         Boost::serialization
         Boost::system

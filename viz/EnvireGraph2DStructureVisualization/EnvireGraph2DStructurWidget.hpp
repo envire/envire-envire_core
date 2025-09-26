@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include <QtGui>
+#include <QWidget>
 
 #ifndef Q_MOC_RUN
 //workaround for qt bug ( 4.7.3, 4.7.4, 4.8.0, 4.8.1 ) with boost 1.48
@@ -41,6 +41,7 @@
 class QSvgRenderer;
 class QGraphicsSvgItem;
 class QZoomableGraphicsView;
+class QGraphicsScene;
 
 namespace envire { namespace viz {
 
