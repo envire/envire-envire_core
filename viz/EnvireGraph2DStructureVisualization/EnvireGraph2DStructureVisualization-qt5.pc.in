@@ -4,9 +4,9 @@ libdir=${prefix}/lib
 includedir=${prefix}/include
 
 Name: @TARGET_NAME@
-Description: envire 2D structure widget
-Requires: QtCore QtGui QtSvg envire_core libgvc @PKGCONFIG_DEPS@
+Description: @PROJECT_DESCRIPTION@
 Version: @PROJECT_VERSION@
-Libs: -L${libdir} -l@TARGET_NAME@
-Cflags: -I${includedir}
+Requires: @PKGCONFIG_REQUIRES@
+Libs: -L${libdir} -l@TARGET_NAME@ @PKGCONFIG_LIBS@
+Cflags: -I${includedir} @PKGCONFIG_CFLAGS@
 

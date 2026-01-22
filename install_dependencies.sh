@@ -52,6 +52,7 @@ build https://github.com/rock-core/base-logging.git master base-logging "$PREFIX
 build https://github.com/rock-core/base-types.git master base-types "-DBINDINGS_RUBY=OFF -DUSE_SISL=OFF -DROCK_VIZ_ENABLED=FALSE $PREFIX"
 build https://github.com/envire/base-numeric.git master base-numeric "$PREFIX"
 build https://github.com/envire/base-boost_serialization.git master base-boost_serialization "$PREFIX"
+build https://github.com/dfki-ric/class_loader melodic-devel class_loader_melodic "$PREFIX"
 
 #plugins
 build https://github.com/envire/tools-plugin_manager.git master tools-plugin_manager "$PREFIX"

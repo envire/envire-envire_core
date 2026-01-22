@@ -9,4 +9,9 @@ if (${USE_QT5})
     add_subdirectory(EnvireGraph2DStructureVisualization)
 endif (${USE_QT5})
 
+find_package(Boost COMPONENTS system thread REQUIRED)
+rock_find_qt4(OPTIONAL QtSvg)
+rock_find_qt5(OPTIONAL Svg)
+
+include(RockQt)
 

@@ -28,12 +28,20 @@
 #define ENVIREGRAPH2DSTRUCTUREVISUALIZATION2PLUGIN_HPP
 
 #include <QtGui>
+#if QT_VERSION >= 0x050000
+#include <QtUiPlugin/QDesignerCustomWidgetInterface>
+#else
 #include <QtDesigner/QDesignerCustomWidgetInterface>
+#endif
 
 class EnvireGraph2DStructureVisualizationPlugin : public QObject, public QDesignerCustomWidgetInterface
 {
     Q_OBJECT
+#if QT_VERSION >= 0x050000
     Q_PLUGIN_METADATA(IID "org.qt-project.QDesignerCustomWidgetInterface")
+#else
+    Q_INTERFACES(QDesignerCustomWidgetInterface)
+#endif
 
 public:
     EnvireGraph2DStructureVisualizationPlugin(QObject *parent = 0);
