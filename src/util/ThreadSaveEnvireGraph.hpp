@@ -94,6 +94,10 @@ class ThreadSaveEnvireGraph {
         return graph->containsFrame(name);
     }
 
+    bool containsEdge(const envire::core::FrameId& origin, const envire::core::FrameId& target) {
+        return graph->containsEdge(origin, target);
+    }
+
     void addTransform(const envire::core::FrameId& origin, const envire::core::FrameId& target, const envire::core::Transform& tf) {
         std::lock_guard<std::recursive_mutex> lock(mutex);
         graph->addTransform(origin, target, tf);
