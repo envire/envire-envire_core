@@ -40,3 +40,5 @@ endif()
 rock_init()
 rock_standard_layout()
 
+# Install find glog module files to rock cmake modules
+install(FILES cmake/FindGlog.cmake cmake/Findglog.cmake DESTINATION ${CMAKE_INSTALL_PREFIX}/share/rock/cmake)
