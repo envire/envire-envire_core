@@ -26,7 +26,7 @@ public:
 
     typedef std::map<std::string, EnvireGraphPtr> GraphMap;
 
-    static EnvireGraphPtr getInstance(std::string name);
+    static EnvireGraphPtr getInstance(std::string name, bool force_recreate = false);
 
 
     EnvireManager();
