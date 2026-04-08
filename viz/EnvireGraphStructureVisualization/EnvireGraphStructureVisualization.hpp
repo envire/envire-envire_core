@@ -90,7 +90,9 @@ namespace vizkit3d
     std::unique_ptr<Data> p;
   };
 
+#if QT_VERSION >= 0x050000
   VizkitQtPluginHeaderDecls(EnvireGraphStructureVisualization)
+#endif
 
 }
 #endif
