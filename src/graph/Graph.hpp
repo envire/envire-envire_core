@@ -641,8 +641,10 @@ void Graph<F,E>::add_edge(const vertex_descriptor origin,
     }
   
     EdgePair edge_pair =  boost::add_edge(origin, target, edgeProperty, *this);
+    #if DEBUG
     EdgePair edge_pair_inv =  boost::add_edge(target, origin, edgeProperty.inverse(), *this);
     assert(edge_pair_inv.second);//origin->target has already been checkd before
+    #endif
     
     //note: we only need to add one of the edges to the tree, because the tree
     //      does not care about the edge direction.
