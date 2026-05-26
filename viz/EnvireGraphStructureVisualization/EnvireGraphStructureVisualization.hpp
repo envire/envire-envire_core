@@ -90,7 +90,7 @@ namespace vizkit3d
     std::unique_ptr<Data> p;
   };
 
-  VizkitQtPluginHeaderDecls(EnvireGraphStructureVisualization)
+  VizkitQtPlugin(EnvireGraphStructureVisualization)
 
 }
 #endif

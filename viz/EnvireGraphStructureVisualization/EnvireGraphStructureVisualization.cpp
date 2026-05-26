@@ -216,7 +216,3 @@ bool EnvireGraphStructureVisualization::areSame(const QStringList& a, const QStr
   return true;
 }
 
-namespace vizkit3d
-{
-  VizkitQtPluginImpl(EnvireGraphStructureVisualization)
-}

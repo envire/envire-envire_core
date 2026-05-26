@@ -1,7 +1,4 @@
-
-rock_qt_library(
-             TARGETPREFIX envire_2D_structure_widget
-             QT4_SUFFIX ""
+rock_library(envire_2D_structure_widget 
              MOC     EnvireGraph2DStructurWidget.hpp
                      QZoomableGraphicsView.hpp
              HEADERS EnvireGraph2DStructurWidget.hpp
@@ -9,17 +6,15 @@ rock_qt_library(
              SOURCES EnvireGraph2DStructurWidget.cpp
                      QZoomableGraphicsView.cpp
              DEPS_PKGCONFIG libgvc
-             LIBS_QT4 Qt4::QtSvg
-             LIBS_QT5 Qt5::Svg
-             DEPS envire_core)
+             LIBS Qt5::Core Qt5::Gui Qt5::Svg
+             DEPS envire_core)    
 
-rock_qt_vizkit_widget(
-    TARGETPREFIX EnvireGraph2DStructureVisualization
-    QT4_SUFFIX ""
-    MISSINGQTDEPS_NOBUILD
+
+rock_vizkit_widget(EnvireGraph2DStructureVisualization
     SOURCES EnvireGraph2DStructureVisualizationPlugin.cpp
     HEADERS EnvireGraph2DStructureVisualization.hpp
     MOC     EnvireGraph2DStructureVisualization.hpp
             EnvireGraph2DStructureVisualizationPlugin.hpp
-    DEPS_QT envire_2D_structure_widget
+    LIBS Qt5::Core Qt5::Gui
+    DEPS    envire_2D_structure_widget
 )
