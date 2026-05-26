@@ -37,25 +37,44 @@ apt install build-essential gcc g++ cmake git wget libgoogle-glog-dev libboost-t
 ----
 
 Some dependencies need to be build from source. A script is provided to install those:
+
+==== Install Dependencies Automatically when building envire core
+
+Defining -DINSTALL_DEPS=ON for cmake builds and isntalls the source dependencies automatically.
+
 [source,bash]
 ----
-chmod +x install_dependencies.sh
-sudo ./install_dependencies.sh [path_to_prefix]
-----
-If no prefix is provided, the dependencies will be installed system-wide.
-The install script generates an `env.sh` file. Source this file before building. It exports all neccessary environment variables.
-
-----
-source env.sh
+mkdir build
+cd build
+cmake -DINSTALL_DEPS=ON ..
+make install
 ----
 
-After all dependencies have been installed, build and install like any other cmake project.
+When -DCMAKE_INSTALL_PREFIX is used, the dependencies are also installed there.
+
+The install script generates an `env.sh` file in the CMAKE_INSTALL_PREFIX folder. If you did not install system wide, source this file before building and running code. It exports all neccessary environment variables.
+
+==== Install Dependencies Manually
+
+[source,bash]
 ----
+cd source_dependencies
+sudo bash ./build.bash [path_to_prefix]
+----
+
+----
+source [path_to_prefix]/env.sh
+----
+
+After all dependencies have been installed, go to the main folder build and install like any other cmake project.
+----
+cd ..
 mkdir build
 cd build
 cmake ..
 make install
 ----
+
 
 
 === Test Coverage and API Documentation

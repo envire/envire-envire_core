@@ -1,6 +1,10 @@
-rock_vizkit_plugin(envire_core-viz
-    EnvireGraphStructureVisualization.cpp
+
+rock_qt_vizkit_plugin(
+    TARGETPREFIX envire_core-viz
+    QT4_SUFFIX ""
+    MISSINGQTDEPS_NOBUILD
+    SOURCES EnvireGraphStructureVisualization.cpp
     MOC EnvireGraphStructureVisualization.hpp
     HEADERS EnvireGraphStructureVisualization.hpp
-    DEPS envire_core
-    LIBS Qt5::Core Qt5::Gui Qt5::Widgets)
+    DEPS envire_core)
+

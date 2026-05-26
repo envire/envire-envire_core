@@ -3,10 +3,10 @@ exec_prefix=@CMAKE_INSTALL_PREFIX@
 libdir=${prefix}/lib
 includedir=${prefix}/include
 
-Name: @TARGET_NAME@
-Description: envire 2D structure widget
-Requires: QtCore QtGui QtSvg envire_core libgvc @PKGCONFIG_DEPS@
+Name: envire_core-viz-qt5
+Description: vizKit plugin for the envire_core library
+Requires: envire_core @PKGCONFIG_DEPS@
 Version: @PROJECT_VERSION@
-Libs: -L${libdir} -l@TARGET_NAME@
+Libs: -L${libdir} -lenvire_core-viz-qt5
 Cflags: -I${includedir}
 

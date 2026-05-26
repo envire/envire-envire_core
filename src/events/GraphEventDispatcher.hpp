@@ -28,6 +28,8 @@
 #include <list>
 #include <string>
 #include <envire_core/events/GraphEventSubscriber.hpp>
+#include <list>
+#include <functional>
 
 
 namespace envire { namespace core
@@ -69,6 +71,14 @@ namespace envire { namespace core
             return enabled;
         }
 
+        void addEdgeAddedEventCallback(std::function<void (const envire::core::EdgeAddedEvent&)> cb);
+        void addEdgeRemovedEventCallback(std::function<void (const envire::core::EdgeRemovedEvent&)> cb);
+        void addEdgeModifiedEventCallback(std::function<void (const envire::core::EdgeModifiedEvent&)> cb);
+        void addFrameAddedEventCallback(std::function<void (const envire::core::FrameAddedEvent&)> cb);
+        void addFrameRemovedEventCallback(std::function<void (const envire::core::FrameRemovedEvent&)> cb);
+        void addItemAddedEventCallback(std::function<void (const envire::core::ItemAddedEvent&)> cb);
+        void addItemRemovedEventCallback(std::function<void (const envire::core::ItemRemovedEvent&)> cb);
+
         /**
          * @brief define a frame requirement, this GraphEventDispatcher stays disables until checkFramesAvailable() is successful
          * @warning checkFramesAvailable() must be called manually by your application
@@ -83,16 +93,25 @@ namespace envire { namespace core
         bool checkWaitingForFrames(const FrameAddedEvent& frameAddedEvent);
 
     protected:
-        virtual void edgeAdded(const EdgeAddedEvent& e) {}
-        virtual void edgeRemoved(const EdgeRemovedEvent& e) {}
-        virtual void edgeModified(const EdgeModifiedEvent& e) {}
-        virtual void frameAdded(const FrameAddedEvent& e) {}
-        virtual void frameRemoved(const FrameRemovedEvent& e) {}
-        virtual void itemAdded(const ItemAddedEvent& e) {}
-        virtual void itemRemoved(const ItemRemovedEvent& e) {}
+        virtual void edgeAdded(const EdgeAddedEvent& e);
+        virtual void edgeRemoved(const EdgeRemovedEvent& e);
+        virtual void edgeModified(const EdgeModifiedEvent& e);
+        virtual void frameAdded(const FrameAddedEvent& e);
+        virtual void frameRemoved(const FrameRemovedEvent& e);
+        virtual void itemAdded(const ItemAddedEvent& e);
+        virtual void itemRemoved(const ItemRemovedEvent& e);
 
     private:
         bool enabled;
+
+        std::list<std::function<void (const envire::core::EdgeAddedEvent&)>> edgeAddedCallbacks;
+        std::list<std::function<void (const envire::core::EdgeRemovedEvent&)>> edgeRemovedCallbacks;
+        std::list<std::function<void (const envire::core::EdgeModifiedEvent&)>> edgeModifiedCallbacks;
+        std::list<std::function<void (const envire::core::FrameAddedEvent&)>> frameAddedCallbacks;
+        std::list<std::function<void (const envire::core::FrameRemovedEvent&)>> frameRemovedCallbacks;
+        std::list<std::function<void (const envire::core::ItemAddedEvent&)>> itemAddedCallbacks;
+        std::list<std::function<void (const envire::core::ItemRemovedEvent&)>> itemRemovedCallbacks;
+
         bool isWaitingForFrame;
         std::list<std::string> waitingForFrames;
     };

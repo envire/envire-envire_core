@@ -104,6 +104,65 @@ void GraphEventDispatcher::waitForFrame(const std::string &framename)
     waitingForFrames.push_back(framename);
 }
 
+void GraphEventDispatcher::addEdgeAddedEventCallback(std::function<void (const envire::core::EdgeAddedEvent&)> cb) {
+    edgeAddedCallbacks.push_back(cb);
+}
+void GraphEventDispatcher::addEdgeRemovedEventCallback(std::function<void (const envire::core::EdgeRemovedEvent&)> cb) {
+    edgeRemovedCallbacks.push_back(cb);
+}
+void GraphEventDispatcher::addEdgeModifiedEventCallback(std::function<void (const envire::core::EdgeModifiedEvent&)> cb) {
+    edgeModifiedCallbacks.push_back(cb);
+}
+void GraphEventDispatcher::addFrameAddedEventCallback(std::function<void (const envire::core::FrameAddedEvent&)> cb) {
+    frameAddedCallbacks.push_back(cb);
+}
+void GraphEventDispatcher::addFrameRemovedEventCallback(std::function<void (const envire::core::FrameRemovedEvent&)> cb) {
+    frameRemovedCallbacks.push_back(cb);
+}
+void GraphEventDispatcher::addItemAddedEventCallback(std::function<void (const envire::core::ItemAddedEvent&)> cb) {
+    itemAddedCallbacks.push_back(cb);
+}
+void GraphEventDispatcher::addItemRemovedEventCallback(std::function<void (const envire::core::ItemRemovedEvent&)> cb) {
+    itemRemovedCallbacks.push_back(cb);
+}
+
+
+void GraphEventDispatcher::edgeAdded(const envire::core::EdgeAddedEvent& e) {
+    for (const auto& cb : edgeAddedCallbacks){
+        cb(e);
+    }
+}
+void GraphEventDispatcher::edgeRemoved(const envire::core::EdgeRemovedEvent& e) {
+    for (const auto& cb : edgeRemovedCallbacks){
+        cb(e);
+    }
+}
+void GraphEventDispatcher::edgeModified(const envire::core::EdgeModifiedEvent& e) {
+    for (const auto& cb : edgeModifiedCallbacks){
+        cb(e);
+    }
+}
+void GraphEventDispatcher::frameAdded(const envire::core::FrameAddedEvent& e) {
+    for (const auto& cb : frameAddedCallbacks){
+        cb(e);
+    }
+}
+void GraphEventDispatcher::frameRemoved(const envire::core::FrameRemovedEvent& e) {
+    for (const auto& cb : frameRemovedCallbacks){
+        cb(e);
+    }
+}
+void GraphEventDispatcher::itemAdded(const envire::core::ItemAddedEvent& e) {
+    for (const auto& cb : itemAddedCallbacks){
+        cb(e);
+    }
+}
+void GraphEventDispatcher::itemRemoved(const envire::core::ItemRemovedEvent& e) {
+    for (const auto& cb : itemRemovedCallbacks){
+        cb(e);
+    }
+}
+
 bool GraphEventDispatcher::checkWaitingForFrames(const FrameAddedEvent& frameAddedEvent)
 {
     // check if all frames are available, delete entires if they are
