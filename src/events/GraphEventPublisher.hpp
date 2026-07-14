@@ -63,6 +63,10 @@ namespace envire { namespace core
         void subscribe(GraphEventSubscriber* pSubscriber, bool publish_current_state = false);
         void unsubscribe(GraphEventSubscriber* pSubscriber, bool unpublish_current_state = false);
 
+        void enableEvents(const bool &state = true) {
+            enabled = state;
+        }
+
     protected:
         /**Notify all subscribers about a certain graph event */
         void notify(const GraphEvent& e);
@@ -88,6 +92,9 @@ namespace envire { namespace core
         GraphEventPublisher();
         
         virtual ~GraphEventPublisher();
+
+
+        bool enabled;
 
     };
 }}

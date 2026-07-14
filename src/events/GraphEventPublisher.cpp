@@ -75,34 +75,38 @@ void GraphEventPublisher::unsubscribe(GraphEventSubscriber* pSubscriber, bool un
 
 void GraphEventPublisher::notify(const GraphEvent& e)
 {
-    insideNotify = true;
-    
-    for(GraphEventSubscriber* pSubscriber : subscribers)
-    {
-        pSubscriber->notifyGraphEvent(e);
+    if (enabled) {
+        insideNotify = true;
+        
+        for(GraphEventSubscriber* pSubscriber : subscribers)
+        {
+            pSubscriber->notifyGraphEvent(e);
+        }
+        
+        //update subscribers list (it might have been changed by event handlers)
+        //NOTE This is ***not*** meant to handle multithreading issues. It is only
+        //     meant to handle recursions in the same thread. This does ***not*** make
+        //     it thread-safe.
+        for(GraphEventSubscriber* pSubscriber : toBeSubscribed)
+        {
+            subscribers.push_back(pSubscriber);
+        }
+        toBeSubscribed.clear();
+        
+        for(GraphEventSubscriber* pSubscriber : toBeUnsubscribed)
+        {
+            unsubscribeInternal(pSubscriber);
+        }    
+        
+        insideNotify = false;
     }
-    
-    //update subscribers list (it might have been changed by event handlers)
-    //NOTE This is ***not*** meant to handle multithreading issues. It is only
-    //     meant to handle recursions in the same thread. This does ***not*** make
-    //     it thread-safe.
-    for(GraphEventSubscriber* pSubscriber : toBeSubscribed)
-    {
-        subscribers.push_back(pSubscriber);
-    }
-    toBeSubscribed.clear();
-    
-    for(GraphEventSubscriber* pSubscriber : toBeUnsubscribed)
-    {
-        unsubscribeInternal(pSubscriber);
-    }    
-    
-    insideNotify = false;
 }
 
 void GraphEventPublisher::notifySubscriber(GraphEventSubscriber* pSubscriber, const GraphEvent& e)
 {
-    pSubscriber->notifyGraphEvent(e);
+    if (enabled) {
+        pSubscriber->notifyGraphEvent(e);
+    }
 }
 
 GraphEventPublisher::~GraphEventPublisher()
