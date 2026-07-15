@@ -89,6 +89,11 @@ class ThreadSaveEnvireGraph {
         graph->removeFrame(name);
     }
 
+    void clear() {
+        std::lock_guard<std::recursive_mutex> lock(mutex);
+        graph->clear();
+    }
+
     bool containsFrame(const envire::core::FrameId& name) {
         std::lock_guard<std::recursive_mutex> lock(mutex);
         return graph->containsFrame(name);

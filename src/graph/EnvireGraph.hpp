@@ -116,6 +116,15 @@ public:
     * @throw UnknownFrameException if the frame does not exist.*/
     void clearFrame(const FrameId& frame);
 
+    /**Removes all frames, edges and items from the graph, leaving it empty.
+    * The graph object itself (and thus any shared_ptr/raw pointer held by
+    * subscribers such as reactors or visualizers) stays valid, so this is the
+    * preferred way to reset a graph without invalidating cached references.
+    *
+    * Causes ItemRemovedEvent for each item, an EdgeRemovedEvent for each edge
+    * and a FrameRemovedEvent for each frame.*/
+    void clear();
+
     /** Adds @p item to the item list of the specified frame 
     *  Causes ItemAddedEvent.
     *  @throw UnknownFrameException if the frame id is invalid

@@ -213,6 +213,33 @@ void EnvireGraph::removeFrame(const FrameId& frame)
     Base::removeFrame(frame);
 }
 
+void EnvireGraph::clear()
+{
+    //collect all frame ids up front: removing frames invalidates the vertex
+    //iterators, so we must not iterate and remove at the same time.
+    std::vector<FrameId> frames;
+    vertex_iterator vertex_it, vertex_end;
+    std::tie(vertex_it, vertex_end) = getVertices();
+    for(; vertex_it != vertex_end; ++vertex_it)
+    {
+        frames.push_back(getFrameId(*vertex_it));
+    }
+
+    //disconnect all edges first, otherwise removeFrame() would throw
+    //FrameStillConnectedException. This emits an EdgeRemovedEvent per edge.
+    for(const FrameId& frame : frames)
+    {
+        disconnectFrame(frame);
+    }
+
+    //removeFrame() clears all items (ItemRemovedEvent) and emits a
+    //FrameRemovedEvent for each frame.
+    for(const FrameId& frame : frames)
+    {
+        removeFrame(frame);
+    }
+}
+
 
 void EnvireGraph::removeItemFromFrame(const ItemBase::Ptr item)
 {
