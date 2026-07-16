@@ -39,7 +39,7 @@ using namespace envire::core;
 using namespace std;
 
 
-GraphEventPublisher::GraphEventPublisher() : insideNotify(false)
+GraphEventPublisher::GraphEventPublisher() : insideNotify(false), enabled(true)
 {
     subscribers.reserve(10000);
 }
